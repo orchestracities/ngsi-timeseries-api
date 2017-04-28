@@ -1,7 +1,6 @@
 import pytest
 from influxdb import InfluxDBClient
-import random
-import string
+from benchmark.common import *
 
 
 # These defaults are to be used with the influx run by the benchmark/docker-compose.yml file.
@@ -18,56 +17,11 @@ def db_client():
     client.drop_database(DB_NAME)
 
 
-# for testing only
-attr_to_type = {
-    "attr_str": "string",
-    "attr_float": "number",
-    "attr_bool": "boolean",
-}
-
-def iter_random_entities(num_types=10, num_ids_per_type=10, use_string=True, use_number=True, use_boolean=True,
-                         use_geo=False):
-    """
-    :param num_types:
-    :param num_ids_per_type:
-    :param string:
-    :param number:
-    :param boolean:
-    :param geo:
-    :return: Iter NGSI entities in JSON representation format.
-    """
-    for nt in range(num_types):
-        for ni in range(num_ids_per_type):
-            entity = {
-                "type": "{}".format(nt),
-                "id": "{}-{}".format(nt, ni),
-            }
-            if use_string:
-                entity["attr_str"] = {
-                    "value": ''.join(random.choices(string.ascii_uppercase + string.digits, k=10)),
-                    "type": attr_to_type["attr_str"],
-                }
-            if use_number:
-                entity["attr_float"] = {
-                    "value": random.uniform(0,1),
-                    "type": attr_to_type["attr_float"],
-                }
-            if use_boolean:
-                entity["attr_bool"] = {
-                    "value": bool(random.choice((0, 1))),
-                    "type": attr_to_type["attr_bool"],
-                }
-            if use_geo:
-                raise NotImplementedError
-            yield entity
-
-
 def iter_influx_points(entities):
     """
     :param entities: iterable of NGSI Entity dicts
     :return: iterator on Influxdb Json representation of measurement points.
     """
-
     for ent in entities:
         for attr in ent:
             if attr in ("id", "type"):
@@ -83,19 +37,6 @@ def iter_influx_points(entities):
                 }
             }
             yield p
-
-
-def entity_pk(entity):
-    """
-    :param entity: NGSI Entity JSON representation
-    :return: unicode NGSI Entity "unique" identifier.
-    """
-    if 'type' not in entity and 'id' not in entity:
-        # Allowance for tsdb back-and-forth
-        t, i = entity['entity_type'], entity['entity_id']
-    else:
-        t, i = entity['type'], entity['id']
-    return "t:{}i:{}".format(t, i)
 
 
 def iter_entities(resultsets):
