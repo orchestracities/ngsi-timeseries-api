@@ -8,8 +8,8 @@ GeoSimple:
 GeoJSON:
     geo:json            geo_shape
 """
+from benchmark.common import iter_random_entities
 from crate import client
-from datetime import datetime
 import pytest
 
 
@@ -36,13 +36,27 @@ def cursor(connection):
 def create_table(cursor):
     cursor.execute("DROP TABLE IF EXISTS notifications")
     cursor.execute("create table notifications ( \
-                        time timestamp primary key, \
+                        attr_time timestamp, \
                         entity_type string, \
                         entity_id string, \
                         attr_bool boolean, \
                         attr_float float, \
-                        attr_str string )")
-                        # attr_geo geo_point)")
+                        attr_str string, \
+                        attr_geo geo_shape)")
+
+
+def iter_crate_entries(entities):
+    """
+    :param entities:
+    :return:
+    """
+    for entity in entities:
+        entry = {}
+        entry['entity_type'] = entity.pop('type')
+        entry['entity_id'] = entity.pop('id')
+        for k in sorted(entity):
+            entry[k] = entity[k]["value"]
+        yield tuple(entry[k] for k in sorted(entry))
 
 
 def test_insert(cursor):
@@ -51,16 +65,26 @@ def test_insert(cursor):
     """
     create_table(cursor)
 
-    time = datetime.now().isoformat()
-    cursor.execute("insert into notifications (time, entity_type, entity_id, attr_bool, attr_float, attr_str) "
-                         "values (?,?,?,?,?,?)", (time, "Room", "Room1", True, 3.14, "sala"))
+    entities = list(iter_random_entities(2, 2, use_time=True, use_geo=True))
+    entries = list(iter_crate_entries(entities))
 
-    assert cursor.rowcount == 1  # When insert fails cursor count is decreased by the amount of failed inserts.
+    cursor.executemany("insert into notifications values (?,?,?,?,?,?,?)", entries)
+    assert cursor.rowcount == len(entities)
+
+
+def test_list_entities(cursor):
+    create_table(cursor)
+
+    entities = list(iter_random_entities(2, 2, use_time=True, use_geo=True))
+    entries = list(iter_crate_entries(entities))
+
+    cursor.executemany("insert into notifications values (?,?,?,?,?,?,?)", entries)
+    assert cursor.rowcount == len(entities)
 
     # Due to eventual consistency, we must refresh after insert before querying right-away
     # https://crate.io/docs/reference/sql/refresh.html
     cursor.execute("refresh table notifications")
 
     cursor.execute("select * from notifications")
-    entities = cursor.fetchall()
-    assert len(entities) == 1
+    loaded_entities = cursor.fetchall()
+    assert len(entities) == len(loaded_entities)
