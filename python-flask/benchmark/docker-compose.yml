@@ -1,7 +1,14 @@
 version: '3'
+
 services:
-    influx:
-        image: influxdb
-        ports:
-            - "8086:8086"
-            - "8083:8083"
+  influx:
+    image: influxdb
+    ports:
+      - "8086:8086"
+      - "8083:8083"
+
+  cratedb:
+    image: crate
+    ports:
+      - "4200:4200"
+      - "4300:4300"
