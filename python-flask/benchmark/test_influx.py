@@ -19,8 +19,8 @@ def db_client():
 
 def iter_influx_points(entities):
     """
-    :param entities: iterable of NGSI Entity dicts
-    :return: iterator on Influxdb Json representation of measurement points.
+    :param entities: iterable of dicts (NGSI JSON Entity Representation)
+    :return: iterator on Influxdb JSON representation of measurement points. I.e, NGSI to InfluxDB.
     """
     for ent in entities:
         for attr in ent:
@@ -42,7 +42,7 @@ def iter_influx_points(entities):
 def iter_entities(resultsets):
     """
     :param resultsets: list(ResultSet)
-    :return: list(dict)
+    :return: list(dict). I.e, InfluxDB results to NGSI entities (in JSON Entity Representation).
     """
     entities = {}
     for rs in resultsets:
@@ -51,7 +51,7 @@ def iter_entities(resultsets):
             for p in seriepoints:  # This level of for evidences why this is just for small testing purposes
                 e = {"type": p['entity_type'], "id": p['entity_id']}
                 e = entities.setdefault(entity_pk(e), e)
-                e[attr] = {"type": attr_to_type[attr], "value": p['value']}
+                e[attr] = {"type": ATTR_TO_TYPE[attr], "value": p['value']}
     return entities.values()
 
 
