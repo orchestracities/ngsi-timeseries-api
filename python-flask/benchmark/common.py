@@ -48,7 +48,7 @@ def entity_pk(entity):
     return "t:{}i:{}".format(t, i)
 
 
-def iter_random_entities(num_types=10, num_ids_per_type=10, use_string=True, use_number=True, use_boolean=True,
+def iter_random_entities(num_types=2, num_ids_per_type=2, use_string=True, use_number=True, use_boolean=True,
                          use_time=False, use_geo=False):
     """
     :param num_types:

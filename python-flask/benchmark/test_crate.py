@@ -20,6 +20,7 @@ def connection():
 @pytest.fixture()
 def cursor(connection):
     cur = connection.cursor()
+    create_table(cur)
     yield cur
     cur.close()
 
@@ -86,9 +87,7 @@ def test_insert(cursor):
     """
     https://crate.io/docs/reference/sql/dml.html#inserting-data
     """
-    create_table(cursor)
-
-    entities = list(iter_random_entities(2, 2, use_time=True, use_geo=True))
+    entities = list(iter_random_entities(use_time=True, use_geo=True))
     entries = list(iter_crate_entries(entities))
 
     cursor.executemany("insert into notifications values (?,?,?,?,?,?,?)", entries)
@@ -96,9 +95,7 @@ def test_insert(cursor):
 
 
 def test_list_entities(cursor):
-    create_table(cursor)
-
-    entities = list(iter_random_entities(2, 2, use_time=True, use_geo=True))
+    entities = list(iter_random_entities(use_time=True, use_geo=True))
     entries = list(iter_crate_entries(entities))
 
     cursor.executemany("insert into notifications values (?,?,?,?,?,?,?)", entries)
@@ -115,3 +112,28 @@ def test_list_entities(cursor):
 
     for e, le in zip(sorted(entities, key=entity_pk), sorted(loaded_entities, key=entity_pk)):
         assert_ngsi_entity_equals(e, le)
+
+
+def update_entities(cursor, num_updates=10, **kwargs):
+    """
+    This method will create N updates of all the attributes and write them to disk.
+    Later, this could be fine-grained to only update specific attributes and/or for specific entities instead of all.
+
+    In CrateDB, attr update means a new table entry. (In InfluxDB it will be a matter of sending a new measurement).
+    """
+    for up in range(num_updates):
+        for entity in iter_crate_entries(iter_random_entities(**kwargs)):
+            cursor.execute("insert into notifications values (?,?,?,?,?,?,?)", entity)
+
+
+def test_updates(cursor):
+    num_types = 2
+    num_ids_per_type = 2
+    num_updates = 10
+
+    update_entities(cursor, num_updates, num_types=num_types, num_ids_per_type=num_ids_per_type, use_time=True,
+                    use_geo=True)
+    cursor.execute("refresh table notifications")
+
+    cursor.execute("select * from notifications")
+    assert cursor.rowcount == num_types * num_ids_per_type * num_updates

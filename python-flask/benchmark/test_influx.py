@@ -56,29 +56,19 @@ def iter_entities(resultsets):
 
 
 def test_insert(db_client):
-    points = list(iter_influx_points(list(iter_random_entities(2, 2))))
+    """
+    https://docs.influxdata.com/influxdb/v1.2/guides/writing_data/
+    """
+    points = list(iter_influx_points(list(iter_random_entities())))
     result = db_client.write_points(points, database=DB_NAME)
     assert result
 
 
-def test_list_entities(db_client):
+def query_all(db_client, db_name):
     """
-    When querying InfluxDB, remember that there must be at least one field in the select to get results, using only
-    time/tags will not return data.
+    Helper to query all entity data from InfluxDB, "gathering" data from all measurements.
     """
-    # Write points
-    entities = list(iter_random_entities(num_types=10, num_ids_per_type=10, use_string=True, use_number=True,
-                                         use_boolean=True, use_geo=False))
-    points = list(iter_influx_points(entities))
-    result = db_client.write_points(points, database=DB_NAME)
-    assert result
-
-    # Queries in Influx are done first by measurement, then of course you can filter.
-    # More info: https://docs.influxdata.com/influxdb/v1.2/query_language/data_exploration/
-
-    # For testing purposes, let's get all entities back (querying accross multiple measurements). Of course, in practice
-    # this is not the right approach.
-    rs = db_client.query("SHOW MEASUREMENTS", database=DB_NAME)
+    rs = db_client.query("SHOW MEASUREMENTS", database=db_name)
     measurements = [m[0] for m in rs.raw['series'][0]['values']]
 
     # Be careful when selecting multiple measurements in the same query. If fields names are the same, influxdb will not
@@ -87,9 +77,50 @@ def test_list_entities(db_client):
     for m in measurements:
         query += "select * from {};".format(m)
 
-    # TODO: Test with DataFrameClient
-    result = db_client.query(query, database=DB_NAME)
-    assert len(result) == 3
-    loaded_entities = list(iter_entities(result))
+    # TODO: Test with DataFrameClient?
+    result = db_client.query(query, database=db_name)
+    return result
 
+
+def test_list_entities(db_client):
+    """
+    When querying InfluxDB, remember that there must be at least one field in the select to get results, using only
+    time/tags will not return data.
+
+    Queries in Influx are done first by measurement, then of course you can filter.
+
+    More info: https://docs.influxdata.com/influxdb/v1.2/query_language/data_exploration/
+    """
+    entities = list(iter_random_entities())
+    points = list(iter_influx_points(entities))
+    result = db_client.write_points(points, database=DB_NAME)
+    assert result
+
+    # For testing purposes, let's get all entities back (querying accross multiple measurements). Of course, in practice
+    # this is not the right approach.
+    result = query_all(db_client, DB_NAME)
+    assert len(result) == 3
+
+    loaded_entities = list(iter_entities(result))
     assert sorted(loaded_entities, key=entity_pk) == sorted(entities, key=entity_pk)
+
+
+def update_entities(db_client, num_updates=10, **kwargs):
+    for up in range(num_updates):
+        points = list(iter_influx_points(iter_random_entities(**kwargs)))
+        result = db_client.write_points(points, database=DB_NAME)
+        assert result
+
+
+def test_updates(db_client):
+    num_types = 2
+    num_ids_per_type = 2
+    num_updates = 10
+
+    update_entities(db_client, num_updates, num_types=num_types, num_ids_per_type=num_ids_per_type)
+
+    result = query_all(db_client, DB_NAME)
+    assert len(result) == 3, "3 measurements for now"
+    for r in result:
+        points = list(r.get_points())
+        assert len(points) == num_types * num_ids_per_type * num_updates
