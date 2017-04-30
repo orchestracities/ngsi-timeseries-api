@@ -1,15 +1,6 @@
-"""
-NGSI:                   Crate:
-GeoSimple:
-    geo:point,          geo_point
-    geo:line,           geo_shape
-    geo:box             geo_shape
-    geo:polygon         geo_shape
-GeoJSON:
-    geo:json            geo_shape
-"""
-from benchmark.common import iter_random_entities
+from benchmark.common import iter_random_entities, ATTR_TO_TYPE, entity_pk, assert_ngsi_entity_equals
 from crate import client
+from datetime import datetime, timedelta
 import pytest
 
 
@@ -47,16 +38,48 @@ def create_table(cursor):
 
 def iter_crate_entries(entities):
     """
-    :param entities:
-    :return:
+    :param entities: iterable of dicts (NGSI JSON Entity Representation)
+    :return: iterator on crate table entries to be inserted. I.e, NGSI to CrateDB.
     """
     for entity in entities:
         entry = {}
-        entry['entity_type'] = entity.pop('type')
-        entry['entity_id'] = entity.pop('id')
         for k in sorted(entity):
-            entry[k] = entity[k]["value"]
+            if k == 'type':
+                entry['entity_type'] = entity[k]
+            elif k == 'id':
+                entry['entity_id'] = entity[k]
+            else:
+                entry[k] = entity[k]["value"]
         yield tuple(entry[k] for k in sorted(entry))
+
+
+def iter_entities(results, keys):
+    """
+    :param results: list(results). The results of a CrateDB fetchall query.
+    :param keys: list(unicode). The column names of the results so that NGSI entities can be properly reconstructed.
+    :return: Iterator on the list of NGSI entities represented by the given results. I.e, CrateDB results to NGSI
+    JSON Entity Representation.
+    """
+    for r in results:
+        entity = {}
+        for k, v in zip(keys, r):
+            if k == 'entity_type':
+                entity['type'] = v
+            elif k == 'entity_id':
+                entity['id'] = v
+            else:
+                t = ATTR_TO_TYPE[k]
+                entity[k] = {'value': v, 'type': t}
+
+                # From CrateDB docs: Timestamps are always returned as long values
+                if t == 'DateTime':
+                    utc = datetime(1970, 1, 1, 0, 0, 0, 0) + timedelta(milliseconds=entity[k]['value'])
+                    # chopping last 3 digits of microseconds to avoid annoying diffs in testing
+                    entity[k]['value'] = utc.isoformat()[:-3]
+
+        assert 'id' in entity
+        assert 'type' in entity
+        yield entity
 
 
 def test_insert(cursor):
@@ -84,7 +107,11 @@ def test_list_entities(cursor):
     # Due to eventual consistency, we must refresh after insert before querying right-away
     # https://crate.io/docs/reference/sql/refresh.html
     cursor.execute("refresh table notifications")
-
     cursor.execute("select * from notifications")
-    loaded_entities = cursor.fetchall()
-    assert len(entities) == len(loaded_entities)
+
+    loaded_entries = cursor.fetchall()
+    col_names = [x[0] for x in cursor.description]
+    loaded_entities = list(iter_entities(loaded_entries, col_names))
+
+    for e, le in zip(sorted(entities, key=entity_pk), sorted(loaded_entities, key=entity_pk)):
+        assert_ngsi_entity_equals(e, le)
