@@ -64,7 +64,7 @@ def test_insert(db_client):
     assert result
 
 
-def query_all(db_client, db_name):
+def query_all(db_client, db_name, where_clause=""):
     """
     Helper to query all entity data from InfluxDB, "gathering" data from all measurements.
     """
@@ -75,7 +75,7 @@ def query_all(db_client, db_name):
     # automatically rename those columns, it will preserve only one.
     query = ""
     for m in measurements:
-        query += "select * from {};".format(m)
+        query += "select * from {} {};".format(m, where_clause)
 
     # TODO: Test with DataFrameClient?
     result = db_client.query(query, database=db_name)
@@ -124,3 +124,14 @@ def test_updates(db_client):
     for r in result:
         points = list(r.get_points())
         assert len(points) == num_types * num_ids_per_type * num_updates
+
+
+def test_attrs_by_entity_id(db_client):
+    num_updates = 10
+    update_entities(db_client, num_updates)
+
+    entity_id = '1-1'
+    result = query_all(db_client, DB_NAME, "WHERE entity_id = '{}'".format(entity_id))
+    loaded_entities = list(iter_entities(result))
+    assert len(loaded_entities) == 1
+    assert all(map(lambda e:e['id']==entity_id, loaded_entities))

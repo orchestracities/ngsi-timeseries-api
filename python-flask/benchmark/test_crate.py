@@ -83,27 +83,26 @@ def iter_entities(results, keys):
         yield entity
 
 
-def test_insert(cursor):
+def insert(cursor, entities):
     """
     https://crate.io/docs/reference/sql/dml.html#inserting-data
     """
-    entities = list(iter_random_entities(use_time=True, use_geo=True))
     entries = list(iter_crate_entries(entities))
-
     cursor.executemany("insert into notifications values (?,?,?,?,?,?,?)", entries)
+    return
+
+
+def test_insert(cursor):
+    entities = list(iter_random_entities(use_time=True, use_geo=True))
+    insert(cursor, entities)
     assert cursor.rowcount == len(entities)
 
 
 def test_list_entities(cursor):
     entities = list(iter_random_entities(use_time=True, use_geo=True))
-    entries = list(iter_crate_entries(entities))
-
-    cursor.executemany("insert into notifications values (?,?,?,?,?,?,?)", entries)
+    insert(cursor, entities)
     assert cursor.rowcount == len(entities)
 
-    # Due to eventual consistency, we must refresh after insert before querying right-away
-    # https://crate.io/docs/reference/sql/refresh.html
-    cursor.execute("refresh table notifications")
     cursor.execute("select * from notifications")
 
     loaded_entries = cursor.fetchall()
@@ -124,6 +123,7 @@ def update_entities(cursor, num_updates=10, **kwargs):
     for up in range(num_updates):
         for entity in iter_crate_entries(iter_random_entities(**kwargs)):
             cursor.execute("insert into notifications values (?,?,?,?,?,?,?)", entity)
+    cursor.execute("refresh table notifications")
 
 
 def test_updates(cursor):
@@ -133,7 +133,23 @@ def test_updates(cursor):
 
     update_entities(cursor, num_updates, num_types=num_types, num_ids_per_type=num_ids_per_type, use_time=True,
                     use_geo=True)
-    cursor.execute("refresh table notifications")
 
     cursor.execute("select * from notifications")
     assert cursor.rowcount == num_types * num_ids_per_type * num_updates
+
+
+def test_attrs_by_entity_id(cursor):
+    # First insert some data
+    num_updates = 10
+    update_entities(cursor, num_updates, use_time=True, use_geo=True)
+
+    # Now query by entity id
+    entity_id = '1-1'
+    cursor.execute("select * from notifications where entity_id = '{}'".format(entity_id))
+
+    assert cursor.rowcount == num_updates
+    col_names = [x[0] for x in cursor.description]
+    entities = list(iter_entities(cursor.fetchall(), col_names))
+    assert len(entities) == 10
+    for e in entities:
+        assert e['id'] == entity_id
