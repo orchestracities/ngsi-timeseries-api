@@ -3,6 +3,7 @@ from benchmark.test_influx import db_client as influx_client
 from benchmark.test_influx import test_benchmark as influx_benchmark
 from benchmark.test_crate import connection as crate_connection, cursor as crate_cursor, test_benchmark as \
     crate_benchmark
+from benchmark.test_rethink import connection as rethink_connection, test_benchmark as rethink_benchmark
 import numpy as np
 import json
 
@@ -77,7 +78,16 @@ if __name__ == '__main__':
     results["CrateDB"] = crate_res
 
     # RethinkDB
-    # results["RethinkDB"] = results["InfluxDB"]
+    if USE_CACHE:
+        rethink_res = None
+        with open("cache_rethink.json", 'r') as f:
+            rethink_res = json.load(f)
+    else:
+        conn = next(rethink_connection())
+        rethink_res = rethink_benchmark(conn)
+        with open("cache_rethink.json", 'w') as f:
+            json.dump(rethink_res, f)
+    results["RethinkDB"] = rethink_res
 
     plot_insert(results, title='Inserts', labels=('Insert 1', 'Insert N'), metrics=[BM_INSERT_1E, BM_INSERT_NE])
 

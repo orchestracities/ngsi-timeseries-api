@@ -4,6 +4,7 @@ import string
 
 
 # For testing only, Attr name to NGSI type (are these NGSI types?)
+# TODO: Change this to proper attr type mapping
 ATTR_TO_TYPE = {
     "attr_str": "Text",
     "attr_float": "Number",
