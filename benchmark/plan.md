@@ -22,6 +22,17 @@
         [ ] - Rest of aggregation functions -> TODO later
 
 
+[ ] - Support time index on a particular entity attribute (i.e, DateModified is not necesarilly the time index). 
+    In this case, it could be good to have, within the notification, the name of the DateTime attribute that is to be used as the index. 
+    Moreover, in that case the support would be restricted to one notification per entity change (avoid complexity of batched notifications).
+    That attribute could be specified in the "notification url" when creating the subscription.
+    Or, investigate HttpCustom notifications (ngsi v2)
+    
+    When using the proper subscriptions/notifications, checkout the notification attributes format (attrsFormat), maybe this way we can simplify the translation step.
+    
+    Recall Fede's point: and the problem cygnus has now, we want to write as fast as possible, but also batch a bit to avoid single-row writes.
+    Using a queue in the middle could be helpful in this regard (a proper one, like rabbit)
+    
 [ ] - Use Grafana to plot some metrics examples and maybe derive new test cases.
 
 [ ] - Dynamically create the tables based on the incoming entities. I.e, stop assuming form of entities. One table per entity type.
@@ -31,12 +42,11 @@
 [ ] - Integrate developed endpoints back into swagger definition to complement/extend NGSI API.
 
 Extras:
+[ ] - Consider using Pandas for all time-series in python if Quantumleap gets smarter
 [ ] - Compare results with what it's already available in FIWARE (orion walk-through, comet, etc)
 [ ] - Complete adapter cornercases (Fully support Simple Query Language, or pattern-defined notifications)
-[ ] - Authentication?
-[ ] - Consider using Pandas for all time-series in python if Quantumleap gets smarter
+[ ] - Authentication? Maybe simple use api of key.
 [ ] - Integrate tests with docker into CI (http://blog.terranillius.com/post/docker_testing/)
-
 
 Extra info:
     https://www.theregister.co.uk/2016/12/14/crateio_unboxes_cratedb_10/
