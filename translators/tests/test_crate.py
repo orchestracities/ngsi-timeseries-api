@@ -1,7 +1,7 @@
-from benchmark.benchmark import benchmark
-from benchmark.common import *
-from benchmark.fixtures import crate_translator as translator
 from datetime import datetime
+from translators.benchmark import benchmark
+from translators.fixtures import crate_translator as translator
+from utils.common import *
 import pytest
 import statistics
 
@@ -87,5 +87,5 @@ def test_benchmark(translator):
     benchmark(translator, num_types=2, num_ids_per_type=2, num_updates=10, use_geo=False, use_time=False)
 
 
-def test_2benchmark_extended(translator):
+def test_benchmark_extended(translator):
     benchmark(translator, num_types=2, num_ids_per_type=2, num_updates=10, use_geo=True, use_time=True)

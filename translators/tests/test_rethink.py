@@ -1,9 +1,9 @@
-from benchmark.base_translator import BaseTranslator
-from benchmark.benchmark import benchmark
-from benchmark.common import create_random_entities, assert_ngsi_entity_equals
-from benchmark.fixtures import rethink_translator as translator
-import statistics
+from translators.base_translator import BaseTranslator
+from translators.benchmark import benchmark
+from translators.fixtures import rethink_translator as translator
+from utils.common import create_random_entities, assert_ngsi_entity_equals
 import pytest
+import statistics
 
 
 def test_insert(translator):

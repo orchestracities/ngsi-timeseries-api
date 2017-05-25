@@ -2,7 +2,6 @@ from functools import partial
 import timeit
 
 # Benchmarking metrics. A:Attribute, E:Entity
-
 BM_INSERT_1E = "insert_1E"
 BM_INSERT_NE = "insert_NE"
 BM_QUERY_1A1E = "query_1A1E"
@@ -14,7 +13,7 @@ BM_AGGREGATE_1ANE = "aggregate_1ANE"
 
 
 def benchmark(translator, num_types=10, num_ids_per_type=10, num_updates=10, use_time=False, use_geo=False):
-    from benchmark.common import create_random_entities, pick_random_entity_id
+    from utils.common import create_random_entities, pick_random_entity_id
 
     results = {}
     entities = create_random_entities(num_types, num_ids_per_type, num_updates, use_time=use_time, use_geo=use_geo)
@@ -25,7 +24,6 @@ def benchmark(translator, num_types=10, num_ids_per_type=10, num_updates=10, use
 
     # Insert N entities
     n = min(1000, num_types * num_ids_per_type * num_updates//10)
-    print("n = %s" % n)
     res = timeit.timeit(partial(translator.insert, entities=entities[1:n]), number=1, globals=globals())
     results[BM_INSERT_NE] = res
 

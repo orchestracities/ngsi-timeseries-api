@@ -1,7 +1,11 @@
 
 
-
 class BaseTranslator(object):
+    """
+    Base class, trying to capture an interface, to be used for all the translators (NGSI to specific TSDBs).
+
+    The usage after instantiation assumes setup is called first and dispose at last.
+    """
 
     # Note: Some databases will restrict the possible names for tables and columns.
     TIME_INDEX_NAME = 'time_index'

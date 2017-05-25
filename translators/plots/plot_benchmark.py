@@ -1,14 +1,13 @@
+from translators.benchmark import *
+from translators.crate import CrateTranslator
+from translators.influx import InfluxTranslator
+from translators.rethink import RethinkTranslator
 import json
-import os
 import matplotlib.pyplot as plt
 import numpy as np
-import random
-from benchmark.benchmark import *
-from benchmark.crate import CrateTranslator
-from benchmark.influx import InfluxTranslator
-from benchmark.rethink import RethinkTranslator
+import os
 
-PLOTS_DIR = os.path.join("benchmark", "plots")
+PLOTS_DIR = "."
 
 
 def plot_results(results, title, labels, metrics):
@@ -67,20 +66,20 @@ if __name__ == '__main__':
                 influx_res = json.load(f)
         else:
             trans.setup()
-            res = benchmark(trans, num_types=10, num_ids_per_type=10, num_updates=1000)
-            trans.dispose()
             with open(filename, 'w') as f:
+                res = benchmark(trans, num_types=10, num_ids_per_type=10, num_updates=1000)
                 json.dump(res, f)
+                trans.dispose()
         results[name] = res
 
-    # plot_results(results, title='Inserts', labels=('Insert 1', 'Insert N'), metrics=[BM_INSERT_1E, BM_INSERT_NE])
+    plot_results(results, title='Inserts', labels=('Insert 1', 'Insert N'), metrics=[BM_INSERT_1E, BM_INSERT_NE])
 
     plot_results(results,
                  title='Queries',
                  labels=('Query 1A 1E', 'Query NA 1E', 'QUERY 1A NE', 'QUERY NA NE'),
                  metrics=[BM_QUERY_1A1E, BM_QUERY_NA1E, BM_QUERY_1ANE, BM_QUERY_NANE])
 
-    # plot_results(results,
-    #              title='Aggregates',
-    #              labels=('Aggregate 1 Entity', 'Aggregate N Entities'),
-    #              metrics=[BM_AGGREGATE_1A1E, BM_AGGREGATE_1ANE])
+    plot_results(results,
+                 title='Aggregates',
+                 labels=('Aggregate 1 Entity', 'Aggregate N Entities'),
+                 metrics=[BM_AGGREGATE_1A1E, BM_AGGREGATE_1ANE])

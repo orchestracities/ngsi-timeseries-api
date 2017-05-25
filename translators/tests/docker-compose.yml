@@ -2,7 +2,7 @@ version: '3'
 
 services:
   influx:
-    image: influxdb
+    image: influxdb:1.2.2
     ports:
       # client-server comm over InfluxDB’s HTTP API
       - "8086:8086"
@@ -12,7 +12,7 @@ services:
       - "8088:8088"
 
   cratedb:
-    image: crate
+    image: crate:1.0.5
     ports:
       # Admin UI
       - "4200:4200"
@@ -20,7 +20,7 @@ services:
       - "4300:4300"
 
   rethinkdb:
-    image: rethinkdb
+    image: rethinkdb:2.3.5
     ports:
       # process
       - "28015:28015"

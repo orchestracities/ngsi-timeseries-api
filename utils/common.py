@@ -1,4 +1,4 @@
-from benchmark.base_translator import BaseTranslator
+from translators.base_translator import BaseTranslator
 from datetime import datetime
 import pytest
 import random
@@ -7,7 +7,6 @@ import string
 
 # For testing only, Attr name to NGSI type (are these NGSI types?)
 # TODO: Change this to proper attr type mapping
-
 ATTR_TO_TYPE = {
     "attr_str": "Text",
     "attr_float": "Number",
@@ -96,6 +95,7 @@ def create_random_entities(num_types, num_ids_per_type, num_updates, use_time=Fa
 
                 if use_time:
                     dt = datetime(1970, round(random.uniform(1, 12)), round(random.uniform(1, 28)), 0, 0, 0, 0)
+                    # dt = datetime.now()
                     # chopping last 3 digits of microseconds to avoid annoying diffs in testing
                     add_attr(entity, "attr_time", dt.isoformat()[:-3])
 

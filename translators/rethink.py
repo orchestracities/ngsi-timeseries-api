@@ -1,6 +1,5 @@
-from benchmark.base_translator import BaseTranslator
-from benchmark.common import ATTR_TO_TYPE
-from datetime import datetime, timedelta
+from translators.base_translator import BaseTranslator
+from utils.common import ATTR_TO_TYPE
 import rethinkdb as rt
 
 
@@ -8,7 +7,6 @@ class RethinkTranslator(BaseTranslator):
 
     TABLE_NAME = "notifications"
 
-    # These defaults are to be used with the influx run by the benchmark/docker-compose.yml file.
     def __init__(self, host="0.0.0.0", port=28015, db_name="test"):
         super(RethinkTranslator, self).__init__(host, port, db_name)
         self.conn = None

@@ -1,14 +1,13 @@
-from benchmark.base_translator import BaseTranslator
-from benchmark.common import ATTR_TO_TYPE
 from crate import client
 from datetime import datetime, timedelta
+from translators.base_translator import BaseTranslator
+from utils.common import ATTR_TO_TYPE
 
 
 class CrateTranslator(BaseTranslator):
 
     TABLE_NAME = "notifications"
 
-    # These defaults are to be used with the influx run by the benchmark/docker-compose.yml file.
     def __init__(self, host="0.0.0.0", port=4200, db_name="ngsi-tsdb"):
         super(CrateTranslator, self).__init__(host, port, db_name)
 
@@ -95,7 +94,8 @@ class CrateTranslator(BaseTranslator):
     def query(self, attr_names=None, entity_id=None, where_clause=None):
         select_clause = "{}".format(attr_names[0]) if attr_names else "*"  # TODO: support some attrs
         if not where_clause:
-            where_clause = "where entity_id = '{}'".format(entity_id) if entity_id else ""  # TODO: support entity_id filter with custom where clause
+            # TODO: support entity_id filter with custom where clause
+            where_clause = "where entity_id = '{}'".format(entity_id) if entity_id else ""
         self.cursor.execute("select {} from {} {}".format(select_clause, self.TABLE_NAME, where_clause))
 
         res = self.cursor.fetchall()

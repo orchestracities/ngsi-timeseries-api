@@ -1,8 +1,8 @@
-from benchmark.benchmark import benchmark
-from benchmark.common import *
+from translators.benchmark import benchmark
+from translators.fixtures import influx_translator as translator
+from utils.common import *
 import pytest
 import statistics
-from benchmark.fixtures import influx_translator as translator
 
 
 def test_insert(translator):
@@ -68,5 +68,5 @@ def test_average(translator):
 
 
 def test_benchmark(translator):
-    # If benchmark breaks, we want to know.
+    # If translators breaks, we want to know.
     benchmark(translator, num_types=2, num_ids_per_type=2, num_updates=10, use_geo=False, use_time=False)

@@ -1,11 +1,10 @@
-from benchmark.base_translator import BaseTranslator
-from benchmark.common import ATTR_TO_TYPE
 from influxdb import InfluxDBClient
+from translators.base_translator import BaseTranslator
+from utils.common import ATTR_TO_TYPE
 
 
 class InfluxTranslator(BaseTranslator):
 
-    # These defaults are to be used with the influx run by the benchmark/docker-compose.yml file.
     def __init__(self, host="localhost", port=8086, db_name="ngsi-tsdb"):
         super(InfluxTranslator, self).__init__(host, port, db_name)
         self.client = InfluxDBClient(host, port, 'root', 'root')

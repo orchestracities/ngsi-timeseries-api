@@ -1,6 +1,6 @@
-from benchmark.crate import CrateTranslator
-from benchmark.influx import InfluxTranslator
-from benchmark.rethink import RethinkTranslator
+from translators.crate import CrateTranslator
+from translators.influx import InfluxTranslator
+from translators.rethink import RethinkTranslator
 import pytest
 
 
