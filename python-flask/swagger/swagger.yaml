@@ -26,7 +26,7 @@ paths:
         \ is recommended to follow the “url” link values, [Link](https://tools.ietf.org/html/rfc5988)\
         \ or Location headers where applicable to retrieve resources. Instead of constructing\
         \ your own URLs, to keep your client decoupled from implementation details."
-      operationId: "controllers.API Entry Point_controller.retrieve_api_resources"
+      operationId: "controllers.api_entry_point_controller.retrieve_api_resources"
       consumes: []
       produces:
       - "application/json"
@@ -64,7 +64,7 @@ paths:
         \ Representation\" section).\n\nResponse code:\n* Successful operation uses\
         \ 200 OK\n* Errors use a non-2xx and (optionally) an error payload. See subsection\
         \ on \"Error Responses\" for\n  more details."
-      operationId: "controllers.Entities_controller.list_entities"
+      operationId: "controllers.entities_controller.list_entities"
       produces:
       - "application/json"
       parameters:
@@ -182,7 +182,7 @@ paths:
         \ uses 201 Created. Reponse includes a `Location` header with the URL of the\n\
         \  created entity.\n* Errors use a non-2xx and (optionally) an error payload.\
         \ See subsection on \"Error Responses\" for\n  more details."
-      operationId: "controllers.Entities_controller.create_entity"
+      operationId: "controllers.entities_controller.create_entity"
       consumes:
       - "application/json"
       produces:
@@ -223,7 +223,7 @@ paths:
         Response:\n* Successful operation uses 200 OK\n* Errors use a non-2xx and\
         \ (optionally) an error payload. See subsection on \"Error Responses\" for\
         \ more details."
-      operationId: "controllers.Entities_controller.retrieve_entity"
+      operationId: "controllers.entities_controller.retrieve_entity"
       produces:
       - "application/json"
       parameters:
@@ -279,7 +279,7 @@ paths:
       description: "Delete the entity.\nResponse:\n* Successful operation uses 204\
         \ No Content\n* Errors use a non-2xx and (optionally) an error payload. See\
         \ subsection on \"Error Responses\" for\n  more details."
-      operationId: "controllers.Entities_controller.remove_entity"
+      operationId: "controllers.entities_controller.remove_entity"
       produces:
       - "application/json"
       parameters:
@@ -321,7 +321,7 @@ paths:
         \ HTTP status code set to\n409 Conflict.\nResponse:\n* Successful operation\
         \ uses 200 OK\n* Errors use a non-2xx and (optionally) an error payload. See\
         \ subsection on \"Error Responses\" for\n  more details."
-      operationId: "controllers.Entities_controller.retrieve_entity_attributes"
+      operationId: "controllers.entities_controller.retrieve_entity_attributes"
       produces:
       - "application/json"
       parameters:
@@ -382,7 +382,7 @@ paths:
         Response:\n* Successful operation uses 204 No Content\n* Errors use a non-2xx\
         \ and (optionally) an error payload. See subsection on \"Error Responses\"\
         \ for\n  more details."
-      operationId: "controllers.Entities_controller.update_or_append_entity_attributes"
+      operationId: "controllers.entities_controller.update_or_append_entity_attributes"
       consumes:
       - "application/json"
       produces:
@@ -432,7 +432,7 @@ paths:
         \ and replaced by the ones in the\nrequest.\nResponse:\n* Successful operation\
         \ uses 204 No Content\n* Errors use a non-2xx and (optionally) an error payload.\
         \ See subsection on \"Error Responses\" for\n  more details."
-      operationId: "controllers.Entities_controller.replace_all_entity_attributes"
+      operationId: "controllers.entities_controller.replace_all_entity_attributes"
       consumes:
       - "application/json"
       produces:
@@ -482,7 +482,7 @@ paths:
         \ doesn't exist in the entity, an error is returned.\nResponse:\n* Successful\
         \ operation uses 204 No Content\n* Errors use a non-2xx and (optionally) an\
         \ error payload. See subsection on \"Error Responses\" for\n  more details."
-      operationId: "controllers.Entities_controller.update_existing_entity_attributes"
+      operationId: "controllers.entities_controller.update_existing_entity_attributes"
       consumes:
       - "application/json"
       produces:
@@ -530,7 +530,7 @@ paths:
         \ \"JSON Attribute Representation\" section).\nResponse:\n* Successful operation\
         \ uses 200 OK.\n* Errors use a non-2xx and (optionally) an error payload.\
         \ See subsection on \"Error Responses\" for\n  more details."
-      operationId: "controllers.Attributes_controller.get_attribute_data"
+      operationId: "controllers.attributes_controller.get_attribute_data"
       produces:
       - "application/json"
       parameters:
@@ -570,7 +570,7 @@ paths:
         JSON Attribute Representation\" section).\nResponse:\n* Successful operation\
         \ uses 204 No Content\n* Errors use a non-2xx and (optionally) an error payload.\
         \ See subsection on \"Error Responses\" for\n  more details."
-      operationId: "controllers.Attributes_controller.update_attribute_data"
+      operationId: "controllers.attributes_controller.update_attribute_data"
       consumes:
       - "application/json"
       produces:
@@ -613,7 +613,7 @@ paths:
       description: "Removes an entity attribute.\nResponse:\n* Successful operation\
         \ uses 204 No Content\n* Errors use a non-2xx and (optionally) an error payload.\
         \ See subsection on \"Error Responses\" for\n  more details."
-      operationId: "controllers.Attributes_controller.remove_a_single_attribute"
+      operationId: "controllers.attributes_controller.remove_a_single_attribute"
       produces:
       - "application/json"
       parameters:
@@ -659,7 +659,7 @@ paths:
         \ \"406 Not Acceptable: accepted MIME types: text/plain\"\nResponse:\n* Successful\
         \ operation uses 200 OK.\n* Errors use a non-2xx and (optionally) an error\
         \ payload. See subsection on \"Error Responses\" for\n  more details."
-      operationId: "controllers.Attribute Value_controller.get_attribute_value"
+      operationId: "controllers.attribute_value_controller.get_attribute_value"
       produces:
       - "application/json"
       - "plain/text"
@@ -716,7 +716,7 @@ paths:
         \ the `Content-Type` HTTP header.\nResponse:\n* Successful operation uses\
         \ 204 No Content\n* Errors use a non-2xx and (optionally) an error payload.\
         \ See subsection on \"Error Responses\" for\n  more details."
-      operationId: "controllers.Attribute Value_controller.update_attribute_value"
+      operationId: "controllers.attribute_value_controller.update_attribute_value"
       consumes:
       - "application/json"
       - "plain/text"
@@ -771,7 +771,7 @@ paths:
         \nResponse code:\n* Successful operation uses 200 OK\n* Errors use a non-2xx\
         \ and (optionally) an error payload. See subsection on \"Error Responses\"\
         \ for\n  more details."
-      operationId: "controllers.Types_controller.retrieve_entity_types"
+      operationId: "controllers.types_controller.retrieve_entity_types"
       produces:
       - "application/json"
       parameters:
@@ -821,7 +821,7 @@ paths:
         \nResponse code:\n* Successful operation uses 200 OK\n* Errors use a non-2xx\
         \ and (optionally) an error payload. See subsection on \"Error Responses\"\
         \ for\n  more details."
-      operationId: "controllers.Types_controller.retrieve_entity_type"
+      operationId: "controllers.types_controller.retrieve_entity_type"
       produces:
       - "application/json"
       parameters:
@@ -849,7 +849,7 @@ paths:
         Response:\n* Successful operation uses 200 OK\n* Errors use a non-2xx and\
         \ (optionally) an error payload. See subsection on \"Error Responses\" for\n\
         \  more details."
-      operationId: "controllers.Subscriptions_controller.retrieve_subscriptions"
+      operationId: "controllers.subscriptions_controller.retrieve_subscriptions"
       produces:
       - "application/json"
       parameters:
@@ -892,7 +892,7 @@ paths:
         \ a JSON object as described at the beginning of this section.\nResponse:\n\
         * Successful operation uses 201 Created\n* Errors use a non-2xx and (optionally)\
         \ an error payload. See subsection on \"Error Responses\" for\n  more details."
-      operationId: "controllers.Subscriptions_controller.create_a_new_subscription"
+      operationId: "controllers.subscriptions_controller.create_a_new_subscription"
       consumes:
       - "application/json"
       produces:
@@ -920,7 +920,7 @@ paths:
         \ as described at the beginning of this\nsection.\nResponse:\n* Successful\
         \ operation uses 200 OK\n* Errors use a non-2xx and (optionally) an error\
         \ payload. See subsection on \"Error Responses\" for\n  more details."
-      operationId: "controllers.Subscriptions_controller.retrieve_subscription"
+      operationId: "controllers.subscriptions_controller.retrieve_subscription"
       produces:
       - "application/json"
       parameters:
@@ -946,7 +946,7 @@ paths:
       description: "Cancels subscription.\nResponse:\n* Successful operation uses\
         \ 204 No Content\n* Errors use a non-2xx and (optionally) an error payload.\
         \ See subsection on \"Error Responses\" for\n  more details."
-      operationId: "controllers.Subscriptions_controller.delete_subscription"
+      operationId: "controllers.subscriptions_controller.delete_subscription"
       produces:
       - "application/json"
       parameters:
@@ -971,7 +971,7 @@ paths:
         Response:\n* Successful operation uses 204 No Content\n* Errors use a non-2xx\
         \ and (optionally) an error payload. See subsection on \"Error Responses\"\
         \ for\n  more details."
-      operationId: "controllers.Subscriptions_controller.update_subscription"
+      operationId: "controllers.subscriptions_controller.update_subscription"
       consumes:
       - "application/json"
       produces:
@@ -1008,7 +1008,7 @@ paths:
         \  (described in the section \"JSON Entity Representation\").\nResponse:\n\
         * Successful operation uses 204 No Content.\n* Errors use a non-2xx and (optionally)\
         \ an error payload. See subsection on \"Error Responses\" for\n  more details."
-      operationId: "controllers.Batch Operations_controller.update"
+      operationId: "controllers.batch_operations_controller.update"
       consumes:
       - "application/json"
       produces:
@@ -1053,7 +1053,7 @@ paths:
         \ names to search for. If omitted, it means \"all attributes\".\n\nResponse\
         \ code:\n* Successful operation uses 200 OK\n* Errors use a non-2xx and (optionally)\
         \ an error payload. See subsection on \"Error Responses\" for\n  more details."
-      operationId: "controllers.Batch Operations_controller.query"
+      operationId: "controllers.batch_operations_controller.query"
       consumes:
       - "application/json"
       produces:
