@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  influx:
+    image: influxdb:1.2.2
+    ports:
+      # client-server comm over InfluxDB’s HTTP API
+      - "8086:8086"
+      # Admin UI
+      - "8083:8083"
+      # RPC service for backup and restore
+      - "8088:8088"
+
+  cratedb:
+    image: crate:1.0.5
+    ports:
+      # Admin UI
+      - "4200:4200"
+      # Transport protocol
+      - "4300:4300"
+
+  rethinkdb:
+    image: rethinkdb:2.3.5
+    ports:
+      # process
+      - "28015:28015"
+      # cluster
+      - "29015:29015"
+      # Admin UI
+      - "8080:8080"
