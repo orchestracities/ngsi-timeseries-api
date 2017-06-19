@@ -1,4 +1,4 @@
-from client.fixtures import orion_client as orion, fresh_db
+from client.fixtures import orion_client as orion, fresh_db, entity
 from random import random
 from utils.hosts import LOCAL
 import json
@@ -83,25 +83,6 @@ def test_subscribe_v1(orion, fresh_db):
 
     subs = json.loads(r.text)
     assert len(subs) == 1
-
-
-@pytest.fixture
-def entity():
-    entity = {
-        'id': 'Room1',
-        'type': 'Room',
-        'temperature': {
-            'value': 23,
-            'type': 'Float',
-            'metadata': {}
-        },
-        'pressure': {
-            'value': 720,
-            'type': 'Integer',
-            'metadata': {}
-        }
-    }
-    return entity
 
 
 def test_insert(orion, fresh_db, entity):

@@ -2,13 +2,14 @@ from crate import client
 from datetime import datetime, timedelta
 from translators.base_translator import BaseTranslator
 from utils.common import ATTR_TO_TYPE
+from utils.hosts import LOCAL
 
 
 class CrateTranslator(BaseTranslator):
 
     TABLE_NAME = "notifications"
 
-    def __init__(self, host="0.0.0.0", port=4200, db_name="ngsi-tsdb"):
+    def __init__(self, host=LOCAL, port=4200, db_name="ngsi-tsdb"):
         super(CrateTranslator, self).__init__(host, port, db_name)
 
 

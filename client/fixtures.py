@@ -20,3 +20,22 @@ def fresh_db():
 def orion_client():
     client = OrionClient(ORION_HOST, ORION_PORT)
     yield client
+
+
+@pytest.fixture
+def entity():
+    entity = {
+        'id': 'Room1',
+        'type': 'Room',
+        'temperature': {
+            'value': 24.2,
+            'type': 'Float',
+            'metadata': {}
+        },
+        'pressure': {
+            'value': 720,
+            'type': 'Integer',
+            'metadata': {}
+        }
+    }
+    return entity

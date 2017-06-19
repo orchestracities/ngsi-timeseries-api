@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+
+  orion:
+    image: fiware/orion:1.7.0
+    ports:
+      - "1026:1026"
+    command: -logLevel DEBUG -dbhost orion-mongo
+    depends_on:
+      - orion-mongo
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:1026/version"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+
+
+  orion-mongo:
+    image: mongo:3.2
+    ports:
+      - "27017:27017"
+
+
+  cratedb:
+    image: crate:1.0.5
+    ports:
+      # Admin UI
+      - "4200:4200"
+      # Transport protocol
+      - "4300:4300"
