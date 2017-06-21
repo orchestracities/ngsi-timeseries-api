@@ -86,17 +86,21 @@ def create_random_entities(num_types, num_ids_per_type, num_updates, use_time=Fa
                 entity = {
                     "type": "{}".format(nt),
                     "id": "{}-{}".format(nt, ni),
-                    BaseTranslator.TIME_INDEX_NAME: datetime.now().isoformat(),
+                    # This column is the one added by reporter with notification timestamp
+                    # chopping last 3 digits of microseconds to avoid annoying diffs in testing
+                    BaseTranslator.TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
                 }
+                # This is to guarantee significant differences among entities for the TIME_INDEX_NAME attribute.
+                import time; time.sleep(0.001)
 
                 add_attr(entity, "attr_str", ''.join(random.choices(string.ascii_uppercase + string.digits, k=10)),)
                 add_attr(entity, "attr_float", random.uniform(0, 1))
                 add_attr(entity, "attr_bool", bool(random.choice((0, 1))))
 
                 if use_time:
-                    dt = datetime(1970, round(random.uniform(1, 12)), round(random.uniform(1, 28)), 0, 0, 0, 0)
                     # dt = datetime.now()
                     # chopping last 3 digits of microseconds to avoid annoying diffs in testing
+                    dt = datetime(1970, round(random.uniform(1, 12)), round(random.uniform(1, 28)), 0, 0, 0, 0)
                     add_attr(entity, "attr_time", dt.isoformat()[:-3])
 
                 if use_geo:

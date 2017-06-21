@@ -36,6 +36,8 @@ def _validate_payload(payload):
     if 'id' not in payload:
         return 'Entity id is required in notifications'
 
+    # TODO: State that pattern-based ids or types are not yet supported.
+
     attrs = payload.keys() - set(['type', 'id'])
     for at in attrs:
         if 'dateModified' not in payload[at]['metadata']:

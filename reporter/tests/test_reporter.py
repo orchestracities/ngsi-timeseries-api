@@ -94,6 +94,7 @@ def test_with_orion(entity):
             ],
             "metadata": ["dateCreated", "dateModified"]
         },
+        "throttling": 5
     }
     orion.subscribe(subscription)
 

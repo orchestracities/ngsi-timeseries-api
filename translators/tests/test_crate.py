@@ -7,32 +7,37 @@ import statistics
 
 
 def test_insert(translator):
-    entities = create_random_entities(2, 2, 10, use_time=True, use_geo=True)
+    entities = create_random_entities(1, 2, 10, use_time=True, use_geo=True)
     result = translator.insert(entities)
     assert result.rowcount == len(entities)
 
 
 def test_query_all(translator):
-    entities = create_random_entities(2, 2, 10, use_time=True, use_geo=True)
+    entities = create_random_entities(1, 2, 2, use_time=True, use_geo=True)
     result = translator.insert(entities)
     assert result.rowcount == len(entities)
 
+    translator.refresh()
+
     loaded_entities = translator.query()
 
+    assert len(loaded_entities) == len(entities)
     key = lambda e: e[BaseTranslator.TIME_INDEX_NAME]
-    for e, le in zip(sorted(entities, key=key), sorted(loaded_entities, key=key)):
+    a = sorted(entities, key=key)
+    b = sorted(loaded_entities, key=key)
+    for e, le in zip(a, b):
         assert_ngsi_entity_equals(e, le)
 
 
 def test_attrs_by_entity_id(translator):
     # First insert some data
     num_updates = 10
-    entities = create_random_entities(2, 2, num_updates, use_time=True, use_geo=True)
+    entities = create_random_entities(1, 2, num_updates, use_time=True, use_geo=True)
     translator.insert(entities)
     translator.refresh()
 
     # Now query by entity id
-    entity_id = '1-1'
+    entity_id = '0-1'
     loaded_entities = translator.query(entity_id=entity_id)
 
     assert len(loaded_entities) == num_updates
@@ -49,7 +54,7 @@ WITHIN_EAST_EMISPHERE = "within(attr_geo, 'POLYGON ((0 -90, 180 -90, 180 90, 0 9
     (WITHIN_EAST_EMISPHERE, "", lambda e: e["attr_geo"]["value"]["coordinates"][0] > 0),
 ])
 def test_query_per_attribute(translator, attr_name, clause, tester):
-    num_types = 2
+    num_types = 1
     num_ids_per_type = 2
     num_updates = 10
 
@@ -67,7 +72,7 @@ def test_query_per_attribute(translator, attr_name, clause, tester):
 
 def test_average(translator):
     num_updates = 10
-    entities = create_random_entities(2, 2, num_updates, use_time=True, use_geo=True)
+    entities = create_random_entities(1, 2, num_updates, use_time=True, use_geo=True)
     translator.insert(entities)
     translator.refresh()
 
@@ -84,8 +89,8 @@ def test_average(translator):
 
 
 def test_benchmark(translator):
-    benchmark(translator, num_types=2, num_ids_per_type=2, num_updates=10, use_geo=False, use_time=False)
+    benchmark(translator, num_types=1, num_ids_per_type=2, num_updates=10, use_geo=False, use_time=False)
 
 
 def test_benchmark_extended(translator):
-    benchmark(translator, num_types=2, num_ids_per_type=2, num_updates=10, use_geo=True, use_time=True)
+    benchmark(translator, num_types=1, num_ids_per_type=2, num_updates=10, use_geo=True, use_time=True)

@@ -15,6 +15,12 @@ class BaseTranslator(object):
         self.port = port
         self.db_name = db_name
 
+    def __enter__(self):
+        self.setup()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.dispose()
+
     def setup(self):
         raise NotImplementedError
 

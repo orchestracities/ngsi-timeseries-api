@@ -7,6 +7,12 @@ services:
     ports:
       - "1026:1026"
     command: -dbhost mongo
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:1026/version"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+
 
   mongo:
     image: mongo:3.2
@@ -14,7 +20,7 @@ services:
       - "27017:27017"
 
   cratedb:
-    image: crate:1.0.5
+    image: crate #:1.0.5
     ports:
       # Admin UI
       - "4200:4200"
@@ -25,8 +31,17 @@ services:
           - ./:/scripts/
 
   grafana:
-      image: grafana/grafana
-      ports:
-        - "3000:3000"
-      environment:
-        - GF_INSTALL_PLUGINS=crate-datasource,grafana-clock-panel
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_INSTALL_PLUGINS=crate-datasource,grafana-clock-panel,grafana-worldmap-panel
+
+
+  iotagent-ul:
+    image: telefonicaiot/iotagent-ul
+    ports:
+      - "7896:7896"  # HTTP binding
+      - "4041:4041"  # Northbound API
+    depends_on:
+      - mongo
