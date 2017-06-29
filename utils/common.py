@@ -6,7 +6,7 @@ import string
 
 
 # For testing only, Attr name to NGSI type (are these NGSI types?)
-# TODO: Change this to proper attr type mapping
+# TODO: Stop using this in Influx and Rethink translators
 ATTR_TO_TYPE = {
     "attr_str": "Text",
     "attr_float": "Number",
@@ -120,3 +120,57 @@ def iter_entity_attrs(entity):
     for attr in entity:
         if attr not in ['type', 'id']:
             yield attr
+
+
+def create_simple_subscription(notify_url):
+    subscription = {
+        "description": "Test subscription",
+        "subject": {
+            "entities": [
+              {
+                "id": "Room1",
+                "type": "Room"
+              }
+            ],
+            "condition": {
+              "attrs": [
+                "pressure",
+                "temperature"
+              ]
+            }
+          },
+        "notification": {
+            "http": {
+              "url": notify_url
+            },
+            "attrs": [
+                "pressure",
+                "temperature"
+            ]
+        },
+    }
+    return subscription
+
+
+def create_simple_subscription_v1(notify_url):
+    subscription = {
+        "entities": [
+            {
+                "type": "Room",
+                "id": "Room1"
+            }
+        ],
+        "attributes": [
+            "temperature",
+        ],
+        "reference": notify_url,
+        "notifyConditions": [
+            {
+                "type": "ONCHANGE",
+                "condValues": [
+                    "temperature",
+                ]
+            }
+        ],
+    }
+    return subscription

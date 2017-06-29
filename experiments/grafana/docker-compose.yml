@@ -6,12 +6,29 @@ services:
     image: fiware/orion:1.7.0
     ports:
       - "1026:1026"
-    command: -dbhost mongo
+    command: -logLevel DEBUG -dbhost mongo
+    depends_on:
+      - mongo
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:1026/version"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
 
   mongo:
     image: mongo:3.2
     ports:
       - "27017:27017"
+
+  quantumleap:
+    build: ../../
+    image: quantumleap
+    ports:
+      - "8668:8668"
+    depends_on:
+      - mongo
+      - orion
+      - cratedb
 
   cratedb:
     image: crate

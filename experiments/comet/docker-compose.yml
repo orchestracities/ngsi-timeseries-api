@@ -6,16 +6,16 @@ services:
     image: fiware/orion:1.7.0
     ports:
       - "1026:1026"
-    command: -logLevel DEBUG -dbhost demo_orion-mongo
+    command: -logLevel DEBUG -dbhost mongo
     depends_on:
-      - orion-mongo
+      - mongo
     healthcheck:
       test: ["CMD", "curl", "-f", "http://0.0.0.0:1026/version"]
       interval: 1m
       timeout: 10s
       retries: 3
 
-  orion-mongo:
+  mongo:
     image: mongo:3.2
     ports:
       - "27017:27017"
@@ -25,17 +25,14 @@ services:
     ports:
       - "8666:8666"
     environment:
-      - DB_URI=demo_comet-mongo
+      - STH_HOST=0.0.0.0
+      - DB_URI=mongo:27017
       - LOGOPS_LEVEL=DEBUG
     depends_on:
-      - comet-mongo
+      - orion
+      - mongo
     healthcheck:
       test: ["CMD", "curl", "-f", "http://0.0.0.0:8666/version"]
       interval: 2m
       timeout: 10s
       retries: 3
-
-  comet-mongo:
-    image: mongo:3.2
-    ports:
-      - "27018:27017"
