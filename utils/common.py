@@ -23,8 +23,6 @@ def assert_ngsi_entity_equals(entity, other):
     :return:
         Asserts that two NGSI entities are equal. All types are asserted for exact equality, but for float and datetime,
         which are compared using pytest.approx with the given rel and abs params.
-
-    NOTE: Metadata not yet supported?
     """
     assert entity.keys() == other.keys()
     for ek, ev in entity.items():
@@ -34,7 +32,14 @@ def assert_ngsi_entity_equals(entity, other):
             if isinstance(ev, float):
                 assert ev == pytest.approx(other[ek])
             else:
-                assert ev == other[ek]
+                if ek == 'time_index':
+                    d0 = datetime.strptime(ev, "%Y-%m-%dT%H:%M:%S.%f")
+                    d1 = datetime.strptime(other[ek], "%Y-%m-%dT%H:%M:%S.%f")
+                    assert d0 == d1
+                else:
+                    if ev != other[ek]:
+                        print('Debug!')
+                    assert ev == other[ek]
 
 
 def entity_pk(entity):
@@ -87,7 +92,7 @@ def create_random_entities(num_types, num_ids_per_type, num_updates, use_time=Fa
                     "type": "{}".format(nt),
                     "id": "{}-{}".format(nt, ni),
                     # This column is the one added by reporter with notification timestamp
-                    # chopping last 3 digits of microseconds to avoid annoying diffs in testing
+                    # zeroing last 3 digits of microseconds to avoid annoying diffs in testing
                     BaseTranslator.TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
                 }
                 # This is to guarantee significant differences among entities for the TIME_INDEX_NAME attribute.
@@ -99,9 +104,8 @@ def create_random_entities(num_types, num_ids_per_type, num_updates, use_time=Fa
 
                 if use_time:
                     # dt = datetime.now()
-                    # chopping last 3 digits of microseconds to avoid annoying diffs in testing
                     dt = datetime(1970, round(random.uniform(1, 12)), round(random.uniform(1, 28)), 0, 0, 0, 0)
-                    add_attr(entity, "attr_time", dt.isoformat()[:-3])
+                    add_attr(entity, "attr_time", dt.isoformat())
 
                 if use_geo:
                     long, lat = random.uniform(-180, 180), random.uniform(-90, 90)
@@ -110,3 +114,9 @@ def create_random_entities(num_types, num_ids_per_type, num_updates, use_time=Fa
 
                 entities.append(entity)
     return entities
+
+
+def iter_entity_attrs(entity):
+    for attr in entity:
+        if attr not in ['type', 'id']:
+            yield attr

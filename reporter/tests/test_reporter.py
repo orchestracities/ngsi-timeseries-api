@@ -1,17 +1,20 @@
-from client.client import OrionClient, HEADERS_PUT
-from client.fixtures import entity
-from reporter.reporter import PORT as REPORTER_PORT
+from client.client import HEADERS, HEADERS_PUT
+from client.fixtures import entity, fresh_db, orion_client
+from flask import url_for
 from translators.crate import CrateTranslator
+from translators.fixtures import crate_translator
+from unittest.mock import patch
+from utils.common import assert_ngsi_entity_equals
+from utils.hosts import LOCAL
 import json
 import pytest
 import requests
 
-# Loop-back alias, to ease local dev until having custom docker image.
-# Required so that containerized orion can send notification to server running in local host.
-LOCAL = '192.0.0.1'
 
-# TODO: use pytest-flask for server instance of reporter (with CrateTranslator)
-notify_url = "http://{}:{}/notify".format(LOCAL, REPORTER_PORT)
+# TODO: Decide if tests will be run in a docker container or not.
+QL_URL = "http://{}:8668".format(LOCAL)
+notify_url = "{}/notify".format(QL_URL)
+version_url = "{}/version".format(QL_URL)
 
 
 @pytest.fixture
@@ -31,10 +34,10 @@ def notification():
     }
 
 
-def test_valid_notification(notification):
-    r = requests.post('{}'.format(notify_url), data=json.dumps(notification), headers=HEADERS_PUT)
-    assert r.status_code == 200
-    assert r.text == 'Notification successfully processed'
+def test_version():
+    r = requests.get('{}'.format(version_url), headers=HEADERS)
+    assert r.status_code == 200, r.text
+    assert r.text == '0.0.1'
 
 
 def test_invalid_no_type(notification):
@@ -66,10 +69,26 @@ def test_invalid_no_modified(notification):
                      'Include "metadata": [ "dateModified" ] in your notification params.'
 
 
-def test_with_orion(entity):
-    orion = OrionClient(host=LOCAL)
+def test_invalid_no_value(notification):
+    notification['data'][0]['temperature'].pop('value')
+    r = requests.post('{}'.format(notify_url), data=json.dumps(notification), headers=HEADERS_PUT)
+    assert r.status_code == 400
+    assert r.text == 'Payload is missing value for temperature'
 
-    entity_id = "Room1"
+
+@patch('translators.crate.CrateTranslator')
+def test_valid_notification(MockTranslator, live_server, notification):
+    live_server.start()
+    notify_url = url_for('notify', _external=True)
+
+    r = requests.post('{}'.format(notify_url), data=json.dumps(notification), headers=HEADERS_PUT)
+
+    assert r.status_code == 200
+    assert r.text == 'Notification successfully processed'
+
+
+def do_integration(entity, notify_url, orion_client, crate_translator):
+    entity_id = entity['id']
     subscription = {
         "description": "Test subscription",
         "subject": {
@@ -81,7 +100,7 @@ def test_with_orion(entity):
             ],
             "condition": {
               "attrs": [
-                "temperature"
+                "temperature",
               ]
             }
           },
@@ -96,21 +115,36 @@ def test_with_orion(entity):
         },
         "throttling": 5
     }
-    orion.subscribe(subscription)
-
-    orion.insert(entity)
+    orion_client.subscribe(subscription)
+    orion_client.insert(entity)
 
     import time;time.sleep(3)  # Give time for notification to be processed.
 
-    orion.unsubscribe(subscription)
+    entities = crate_translator.query()
 
-    assert 0, 'TODO: Finish this test after adapting Translator'
-    # crate = CrateTranslator()
-    # crate.setup()
-    # entities = crate.query()
-    #
-    # crate.dispose()
-    # orion.delete(entity_id)
-    #
-    # assert len(entities) == 1
-    # assert entities[0] == entity
+    assert len(entities) > 0
+
+    # Note: How Quantumleap will return entities is still not well defined. This will change.
+    entities[0].pop(CrateTranslator.TIME_INDEX_NAME)
+    entity.pop('pressure')
+    entity['temperature'].pop('metadata')
+
+    assert_ngsi_entity_equals(entities[0], entity)
+
+
+def test_integration(entity, orion_client, fresh_db, crate_translator):
+    """
+    Test Reporter using input directly from an Orion notification and output directly to Cratedb.
+    """
+    not_url = notify_url.replace(LOCAL, "quantumleap")
+    do_integration(entity, not_url, orion_client, crate_translator)
+
+
+# def test_dev_integration(entity, orion_client, fresh_db, crate_translator):
+#     """
+#     Leave this for easier debugging.
+#     """
+#     # Remember to sudo ifconfig lo0 alias 192.0.0.1 to get notification from containerized orion!
+#     # And to setup DB_HOST in reporter.py to LOCAL
+#     notify_url = 'http://192.0.0.1:8668/notify'
+#     do_integration(entity, notify_url, orion_client, crate_translator)

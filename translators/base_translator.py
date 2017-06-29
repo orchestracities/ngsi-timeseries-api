@@ -17,6 +17,7 @@ class BaseTranslator(object):
 
     def __enter__(self):
         self.setup()
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.dispose()
@@ -34,6 +35,12 @@ class BaseTranslator(object):
         raise NotImplementedError
 
     def insert(self, entities):
+        """
+        :param entities:
+            List of NGSI entities in JSON representation format.
+            One of the attributes is expected to be TIME_INDEX_NAME, which will be used as the time index for the
+            notifications.
+        """
         raise NotImplementedError
 
     def query(self, attr_name=None, entity_id=None):

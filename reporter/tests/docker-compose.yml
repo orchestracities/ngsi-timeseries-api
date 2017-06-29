@@ -6,9 +6,9 @@ services:
     image: fiware/orion:1.7.0
     ports:
       - "1026:1026"
-    command: -logLevel DEBUG -dbhost orion-mongo
+    command: -logLevel DEBUG -dbhost mongo
     depends_on:
-      - orion-mongo
+      - mongo
     healthcheck:
       test: ["CMD", "curl", "-f", "http://0.0.0.0:1026/version"]
       interval: 1m
@@ -16,10 +16,17 @@ services:
       retries: 3
 
 
-  orion-mongo:
+  mongo:
     image: mongo:3.2
     ports:
       - "27017:27017"
+
+
+  quantumleap:
+    build: ../../
+    image: quantumleap
+    ports:
+      - "8668:8668"
 
 
   cratedb:

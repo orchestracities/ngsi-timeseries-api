@@ -1,3 +1,6 @@
+# Docker-compose file for an End-to-End demo
+# Missing here: the device connecting to iotagent-ul.
+
 version: '3'
 
 services:
@@ -5,19 +8,7 @@ services:
   orion:
     image: fiware/orion:1.7.0
     ports:
-      - "1026:1026"
-    command: -dbhost mongo
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://0.0.0.0:1026/version"]
-      interval: 1m
-      timeout: 10s
-      retries: 3
-
-
-  mongo:
-    image: mongo:3.2
-    ports:
-      - "27017:27017"
+      - "8668:8668"
 
   cratedb:
     image: crate #:1.0.5
@@ -36,12 +27,5 @@ services:
       - "3000:3000"
     environment:
       - GF_INSTALL_PLUGINS=crate-datasource,grafana-clock-panel,grafana-worldmap-panel
-
-
-  iotagent-ul:
-    image: telefonicaiot/iotagent-ul
-    ports:
-      - "7896:7896"  # HTTP binding
-      - "4041:4041"  # Northbound API
     depends_on:
-      - mongo
+      - cratedb

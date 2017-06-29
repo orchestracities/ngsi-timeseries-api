@@ -1,7 +1,6 @@
 from crate import client
 from datetime import datetime, timedelta
 from translators.base_translator import BaseTranslator
-from utils.common import ATTR_TO_TYPE
 from utils.hosts import LOCAL
 
 
@@ -10,6 +9,7 @@ from utils.hosts import LOCAL
 NGSI_TO_CRATE = {
     "Text": 'string',
     "Number": 'float',
+    "Integer": 'long',
     "Boolean": 'boolean',
     "DateTime": 'timestamp',
     "json:geo": 'geo_shape',
@@ -32,6 +32,7 @@ class CrateTranslator(BaseTranslator):
 
 
     def dispose(self, testing=False):
+        # TODO: Remove this flag
         if testing:
             self.cursor.execute("DROP TABLE IF EXISTS {}".format(self.table_name))
 
@@ -47,6 +48,10 @@ class CrateTranslator(BaseTranslator):
         :param entity: Entity used to derive table name (entity_type) and columns (all attrs of entity)
         :return: str. The name of the created table
         """
+        if self.TIME_INDEX_NAME not in entity:
+            import warnings
+            warnings.warn("Translating entity without TIME_INDEX. {}".format(entity))
+
         name_type = {}
         e = entity.copy()
         e['entity_type'] = e.pop('type')
@@ -97,7 +102,7 @@ class CrateTranslator(BaseTranslator):
             raise ValueError
         # Chopping last 3 digits of microseconds to avoid annoying diffs in testing.
         utc = datetime(1970, 1, 1, 0, 0, 0, 0) + timedelta(milliseconds=ms_since_epoch)
-        return utc.isoformat()[:-3]
+        return utc.isoformat()
 
 
     def translate_to_ngsi(self, resultset, keys):
@@ -130,6 +135,9 @@ class CrateTranslator(BaseTranslator):
 
 
     def insert(self, entities):
+        if not isinstance(entities, list):
+            raise TypeError("Entities expected to be of type list, but got {}".format(type(entities)))
+
         types = set([e['type'] for e in entities])
         if len(types) > 1:
             # TODO: verify if a notification can arrive with multiple entity types or not.
