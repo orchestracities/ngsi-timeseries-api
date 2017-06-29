@@ -100,7 +100,6 @@ class CrateTranslator(BaseTranslator):
     def _get_isoformat(self, ms_since_epoch):
         if ms_since_epoch is None:
             raise ValueError
-        # Chopping last 3 digits of microseconds to avoid annoying diffs in testing.
         utc = datetime(1970, 1, 1, 0, 0, 0, 0) + timedelta(milliseconds=ms_since_epoch)
         return utc.isoformat()
 

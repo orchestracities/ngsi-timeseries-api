@@ -12,7 +12,7 @@ ORION_PORT = 1026
 @pytest.fixture
 def fresh_db():
     yield
-    db_client = pm.MongoClient(MONGO_HOST, MONGO_PORT)
+    db_client = pm.MongoClient(MONGO_HOST, 27017)
     db_client.drop_database("orion")
     db_client.drop_database("orion-default")
 
