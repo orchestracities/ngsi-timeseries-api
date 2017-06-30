@@ -26,7 +26,7 @@ def notification():
                 'id': 'Room1',
                 'type': 'Room',
                 'temperature': {
-                    'type': 'Float',
+                    'type': 'Number',
                     'value': 25.4,
                     'metadata': {'dateModified': {'type': 'DateTime', 'value': '2017-06-19T11:46:45.00Z'}}}
             }

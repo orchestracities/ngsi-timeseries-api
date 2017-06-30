@@ -32,7 +32,6 @@ class CrateTranslator(BaseTranslator):
 
 
     def dispose(self, testing=False):
-        # TODO: Remove this flag
         if testing:
             self.cursor.execute("DROP TABLE IF EXISTS {}".format(self.table_name))
 
@@ -98,6 +97,12 @@ class CrateTranslator(BaseTranslator):
 
 
     def _get_isoformat(self, ms_since_epoch):
+        """
+        :param ms_since_epoch:
+            As stated in CrateDB docs: Timestamps are always returned as long values (ms from epoch).
+        :return: str
+            The equivalent datetime in ISO 8601.
+        """
         if ms_since_epoch is None:
             raise ValueError
         utc = datetime(1970, 1, 1, 0, 0, 0, 0) + timedelta(milliseconds=ms_since_epoch)
@@ -115,7 +120,6 @@ class CrateTranslator(BaseTranslator):
             entity = {}
             for k, v in zip(keys, r):
                 if k == self.TIME_INDEX_NAME:
-                    # From CrateDB docs: Timestamps are always returned as long values (ms from epoch)
                     # TODO: This might not be valid NGSI. Should we include this? if so, shouldn't it have metadata?
                     entity[self.TIME_INDEX_NAME] = self._get_isoformat(v)
                 else:
@@ -125,7 +129,6 @@ class CrateTranslator(BaseTranslator):
                         t = CRATE_TO_NGSI[self.table_columns[k]]
                         entity[k] = {'value': v, 'type': t}
                         if t == 'DateTime' and entity[k]['value']:
-                            # From CrateDB docs: Timestamps are always returned as long values (ms from epoch)
                             entity[k]['value'] = self._get_isoformat(entity[k]['value'])
 
             entity['type'] = entity.pop('entity_type')
@@ -140,7 +143,7 @@ class CrateTranslator(BaseTranslator):
         types = set([e['type'] for e in entities])
         if len(types) > 1:
             # TODO: verify if a notification can arrive with multiple entity types or not.
-            # I.e, verify if supporting this case is worth.
+            # I.e, verify if this case is worth supporting.
             raise ValueError('Inserting multiple types at once not yet supported')
 
         col_names = self.create_table(entities[0])

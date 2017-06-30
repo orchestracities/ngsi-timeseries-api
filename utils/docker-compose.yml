@@ -1,6 +1,3 @@
-# Docker-compose file for an End-to-End demo
-# Missing here: the device connecting to iotagent-ul.
-
 version: '3'
 
 services:

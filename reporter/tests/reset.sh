@@ -1,5 +1,5 @@
 #!/bin/sh
 
 docker-compose down
-sleep 5
+sleep 2
 docker-compose up --build -d

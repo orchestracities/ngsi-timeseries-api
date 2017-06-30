@@ -15,19 +15,16 @@ services:
       timeout: 10s
       retries: 3
 
-
   mongo:
     image: mongo:3.2
     ports:
       - "27017:27017"
-
 
   quantumleap:
     build: ../../
     image: quantumleap
     ports:
       - "8668:8668"
-
 
   cratedb:
     image: crate:1.0.5
