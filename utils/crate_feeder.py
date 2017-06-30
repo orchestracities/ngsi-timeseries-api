@@ -10,7 +10,7 @@ def feed():
 
     try:
         while 1:
-            entities = create_random_entities(2, 2, 1, use_time=True, use_geo=True)
+            entities = create_random_entities(1, 2, 1, use_time=True, use_geo=True)
             client.insert(entities)
             time.sleep(60)
     finally:

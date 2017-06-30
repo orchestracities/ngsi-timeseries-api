@@ -11,6 +11,7 @@ ORION_PORT = 1026
 
 @pytest.fixture
 def fresh_db():
+    yield
     db_client = pm.MongoClient(MONGO_HOST, 27017)
     db_client.drop_database("orion")
     db_client.drop_database("orion-default")
@@ -20,3 +21,22 @@ def fresh_db():
 def orion_client():
     client = OrionClient(ORION_HOST, ORION_PORT)
     yield client
+
+
+@pytest.fixture
+def entity():
+    entity = {
+        'id': 'Room1',
+        'type': 'Room',
+        'temperature': {
+            'value': 24.2,
+            'type': 'Number',
+            'metadata': {}
+        },
+        'pressure': {
+            'value': 720,
+            'type': 'Number',
+            'metadata': {}
+        }
+    }
+    return entity

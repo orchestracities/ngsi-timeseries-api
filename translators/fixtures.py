@@ -21,7 +21,7 @@ def crate_translator():
 
     yield trans
 
-    trans.dispose()
+    trans.dispose(testing=True)
 
 
 @pytest.fixture()
