@@ -1,5 +1,6 @@
 from client.fixtures import orion_client as orion, fresh_db, entity
 from random import random
+from utils.common import create_simple_subscription, create_simple_subscription_v1
 from utils.hosts import LOCAL
 import json
 import pytest
@@ -12,35 +13,11 @@ def test_version(orion):
 
 
 def test_subscribe(orion, fresh_db):
-    subscription = {
-        "description": "Test subscription",
-        "subject": {
-            "entities": [
-              {
-                "id": "Room1",
-                "type": "Room"
-              }
-            ],
-            "condition": {
-              "attrs": [
-                "pressure",
-                "temperature"
-              ]
-            }
-          },
-        "notification": {
-            "http": {
-              "url": "http://{}/notify".format(LOCAL)
-            },
-            "attrs": [
-                "pressure",
-                "temperature"
-            ]
-        },
-    }
+    notify_url = "http://{}/notify".format(LOCAL)
+    subscription = create_simple_subscription(notify_url)
 
     r = orion.subscribe(subscription)
-    assert r.ok
+    assert r.ok, r.text
     assert r.status_code == 201
 
     r = orion.get('subscriptions')
@@ -52,27 +29,8 @@ def test_subscribe(orion, fresh_db):
 
 
 def test_subscribe_v1(orion, fresh_db):
-    subscription = {
-        "entities": [
-            {
-                "type": "Room",
-                "id": "Room1"
-            }
-        ],
-        "attributes": [
-            "temperature",
-        ],
-        "reference": "http://{}/notify".format(LOCAL),
-        "notifyConditions": [
-            {
-                "type": "ONCHANGE",
-                "condValues": [
-                    "temperature",
-                ]
-            }
-        ],
-    }
-
+    notify_url = "http://{}/notify".format(LOCAL)
+    subscription = create_simple_subscription_v1(notify_url)
     r = orion.subscribe_v1(subscription)
     assert r.ok
     assert r.status_code == 200
