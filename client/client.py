@@ -1,9 +1,5 @@
 import requests
 import json
-from utils.hosts import *
-
-ORION_PORT = 1026
-ORION_URL = 'http://{}:{}'.format(LOCAL, ORION_PORT)
 
 
 HEADERS = {

@@ -1,0 +1,19 @@
+sudo: required
+
+language: python
+python:
+  - 3.5
+
+services:
+  - docker
+
+install:
+  - docker --version
+  - docker build -t quantumleap .
+
+script:
+  # Translators
+  - docker-compose -f client/tests/docker-compose.yml up -d
+  - sleep 5
+  - docker run -ti --rm --network tests_clienttests quantumleap /bin/sh -c "pytest client/tests"
+  - docker-compose -f client/tests/docker-compose.yml down
