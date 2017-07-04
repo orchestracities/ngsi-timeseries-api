@@ -5,7 +5,7 @@ from utils.common import ATTR_TO_TYPE
 
 class InfluxTranslator(BaseTranslator):
 
-    def __init__(self, host="localhost", port=8086, db_name="ngsi-tsdb"):
+    def __init__(self, host, port=8086, db_name="ngsi-tsdb"):
         super(InfluxTranslator, self).__init__(host, port, db_name)
         self.client = InfluxDBClient(host, port, 'root', 'root')
 

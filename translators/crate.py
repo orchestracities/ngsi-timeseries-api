@@ -1,7 +1,6 @@
 from crate import client
 from datetime import datetime, timedelta
 from translators.base_translator import BaseTranslator
-from utils.hosts import LOCAL
 
 
 # NGSI TYPES: Not properly documented so this might change. Based on experimenting with Orion.
@@ -19,7 +18,7 @@ CRATE_TO_NGSI = dict((v, k) for (k,v) in NGSI_TO_CRATE.items())
 
 class CrateTranslator(BaseTranslator):
 
-    def __init__(self, host=LOCAL, port=4200, db_name="ngsi-tsdb"):
+    def __init__(self, host, port=4200, db_name="ngsi-tsdb"):
         super(CrateTranslator, self).__init__(host, port, db_name)
 
         self.table_name = 'notifications'

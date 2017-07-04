@@ -12,8 +12,13 @@ install:
   - docker build -t quantumleap .
 
 script:
-  # Translators
+  # Client
   - docker-compose -f client/tests/docker-compose.yml up -d
   - sleep 5
   - docker run -ti --rm --network tests_clienttests quantumleap /bin/sh -c "pytest client/tests"
   - docker-compose -f client/tests/docker-compose.yml down
+  # Translators
+  - docker-compose -f translators/tests/docker-compose.yml up -d
+  - sleep 5
+  - docker run -ti --rm --network tests_translatorstests quantumleap /bin/sh -c "pytest translators/tests"
+  - docker-compose -f translators/tests/docker-compose.yml down

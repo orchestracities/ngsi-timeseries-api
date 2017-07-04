@@ -10,16 +10,20 @@ services:
       - "8083:8083"
       # RPC service for backup and restore
       - "8088:8088"
+    networks:
+        - translatorstests
 
-  cratedb:
+  crate:
     image: crate:1.0.5
     ports:
       # Admin UI
       - "4200:4200"
       # Transport protocol
       - "4300:4300"
+    networks:
+        - translatorstests
 
-  rethinkdb:
+  rethink:
     image: rethinkdb:2.3.5
     ports:
       # process
@@ -28,3 +32,9 @@ services:
       - "29015:29015"
       # Admin UI
       - "8080:8080"
+    networks:
+        - translatorstests
+
+networks:
+    translatorstests:
+        driver: bridge
