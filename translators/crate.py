@@ -22,7 +22,6 @@ class CrateTranslator(BaseTranslator):
         super(CrateTranslator, self).__init__(host, port, db_name)
 
         self.table_name = 'notifications'
-        self.table_created = False
         self.table_columns = None  # name:type of columns for correct querying
 
 
@@ -32,8 +31,8 @@ class CrateTranslator(BaseTranslator):
 
 
     def dispose(self, testing=False):
-        if testing and self.table_created:
-            self.cursor.execute("DROP TABLE {}".format(self.table_name))
+        if testing:
+            self.cursor.execute("DROP TABLE IF EXISTS {}".format(self.table_name))
 
         self.table_name = None
         self.table_columns = None
@@ -73,12 +72,7 @@ class CrateTranslator(BaseTranslator):
         cmd = "create table if not exists {} ( \
                         {})".format(self.table_name, columns)
 
-        try:
-            self.cursor.execute(cmd)
-        except Exception:
-            raise
-        else:
-            self.table_created = True
+        self.cursor.execute(cmd)
         return ','.join(str(c) for c in sorted(name_type.keys()))
 
 

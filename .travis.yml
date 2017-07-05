@@ -12,6 +12,7 @@ install:
   - docker build -t quantumleap .
 
 script:
+  # Move these to 3 reusable scripts
   # Client
   - docker-compose -f client/tests/docker-compose.yml up -d
   - sleep 5
@@ -27,3 +28,6 @@ script:
   - sleep 8
   - docker run -ti --rm --network tests_reportertests quantumleap /bin/sh -c "pytest reporter/tests"
   - docker-compose -f reporter/tests/docker-compose.yml down
+
+notifications:
+  email: false

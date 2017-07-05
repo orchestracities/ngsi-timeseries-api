@@ -15,7 +15,9 @@ For now, we have adopted approach 2.
 from flask import Flask, request
 from utils.common import iter_entity_attrs
 from utils.hosts import LOCAL
+from datetime import datetime
 import os
+import warnings
 
 app = Flask('reporter')
 
@@ -47,12 +49,11 @@ def _validate_payload(payload):
 
     # Attributes must have a value and the modification time
     for attr in attrs:
-        if 'dateModified' not in payload[attr]['metadata']:
-            return 'Modified attributes must come with dateModified metadata. ' \
-                   'Include "metadata": [ "dateModified" ] in your notification params.'
+        if 'value' not in payload[attr] or payload[attr]['value'] == '':
+            return 'Payload is missing value for attribute {}'.format(attr)
 
-        if 'value' not in payload[attr] or not payload[attr]['value']:
-            return 'Payload is missing value for {}'.format(attr)
+        if 'dateModified' not in payload[attr]['metadata']:
+            warnings.warn("Attribute '{}' did not include a dateModified. Assuming notification arrival time.".format(attr))
 
 
 def _get_time_index(payload):
@@ -64,7 +65,8 @@ def _get_time_index(payload):
         The notification time index. E.g: '2017-06-29T14:47:50.844'
 
     The strategy for now is simple. Received notifications are expected to have the dateModified field
-    (http://docs.orioncontextbroker.apiary.io/#introduction/specification/virtual-attributes).
+    (http://docs.orioncontextbroker.apiary.io/#introduction/specification/virtual-attributes). If the notification lacks
+    this attribute, the received time will be assumed.
 
     In future, this could be enhanced with customs notifications where user specifies which attribute is to be used as
     "time index".
@@ -76,7 +78,8 @@ def _get_time_index(payload):
         if 'metadata' in payload[attr] and 'dateModified' in payload[attr]['metadata']:
             return payload[attr]['metadata']['dateModified']['value']
 
-    assert 0, "Invalid payload, missing 'dateModified'. _validate_payload should have caught this."
+    # Assume current timestamp as dateModified
+    return datetime.now().isoformat()
 
 
 @app.route('/notify', methods=['POST', 'GET'])
@@ -95,7 +98,7 @@ def notify():
     payload[CrateTranslator.TIME_INDEX_NAME] = _get_time_index(payload)
 
     # Send valid entity to translator
-    DB_HOST = os.environ.get('DB_HOST', 'crate')
+    DB_HOST = os.environ.get('CRATE_HOST', 'crate')
     DB_PORT = 4200
     DB_NAME = "ngsi-tsdb"
     with CrateTranslator(DB_HOST, DB_PORT, DB_NAME) as trans:
