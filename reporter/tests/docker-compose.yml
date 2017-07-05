@@ -14,22 +14,36 @@ services:
       interval: 1m
       timeout: 10s
       retries: 3
+    networks:
+        - reportertests
 
   mongo:
     image: mongo:3.2
     ports:
       - "27017:27017"
+    networks:
+        - reportertests
 
   quantumleap:
     build: ../../
     image: quantumleap
     ports:
       - "8668:8668"
+    depends_on:
+      - orion
+    networks:
+        - reportertests
 
-  cratedb:
+  crate:
     image: crate:1.0.5
     ports:
       # Admin UI
       - "4200:4200"
       # Transport protocol
       - "4300:4300"
+    networks:
+        - reportertests
+
+networks:
+    reportertests:
+        driver: bridge

@@ -15,16 +15,9 @@ For now, we have adopted approach 2.
 from flask import Flask, request
 from utils.common import iter_entity_attrs
 from utils.hosts import LOCAL
+import os
 
 app = Flask('reporter')
-
-QL_HOST = LOCAL
-QL_PORT = 8668
-
-# DB_HOST = LOCAL
-DB_HOST = "cratedb"
-DB_PORT = 4200
-DB_NAME = "ngsi-tsdb"
 
 
 @app.route('/version')
@@ -102,6 +95,9 @@ def notify():
     payload[CrateTranslator.TIME_INDEX_NAME] = _get_time_index(payload)
 
     # Send valid entity to translator
+    DB_HOST = os.environ.get('DB_HOST', 'crate')
+    DB_PORT = 4200
+    DB_NAME = "ngsi-tsdb"
     with CrateTranslator(DB_HOST, DB_PORT, DB_NAME) as trans:
         trans.insert([payload])
 
@@ -109,7 +105,7 @@ def notify():
 
 
 if __name__ == '__main__':
-    app.run(host=QL_HOST, port=QL_PORT)
+    app.run(host=LOCAL, port=8668)
 
 # TODO: Consider offering an API endpoint to receive just the user's entities of interest and make QL actually perform
 # the corresponding subscription to orion. I.e, QL must be told where orion is.
