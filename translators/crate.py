@@ -70,7 +70,7 @@ class CrateTranslator(BaseTranslator):
             name_type[k] = crate_t
 
         columns = ','.join('{} {}'.format(n, t) for n, t in name_type.items())
-        cmd = "create table {} ( \
+        cmd = "create table if not exists {} ( \
                         {})".format(self.table_name, columns)
 
         try:
@@ -163,8 +163,6 @@ class CrateTranslator(BaseTranslator):
 
 
     def query(self, attr_names=None, entity_id=None, where_clause=None):
-        assert self.table_created
-
         select_clause = "{}".format(attr_names[0]) if attr_names else "*"  # TODO: support some attrs
         if not where_clause:
             # TODO: support entity_id filter with custom where clause
@@ -179,8 +177,6 @@ class CrateTranslator(BaseTranslator):
 
 
     def average(self, attr_name, entity_id=None):
-        assert self.table_created
-
         select_clause = "avg({})".format(attr_name)
         where_clause = "where entity_id = '{}'".format(entity_id) if entity_id else ""
         self.cursor.execute("select {} from {} {}".format(select_clause, self.table_name, where_clause))
