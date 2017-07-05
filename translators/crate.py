@@ -22,6 +22,7 @@ class CrateTranslator(BaseTranslator):
         super(CrateTranslator, self).__init__(host, port, db_name)
 
         self.table_name = 'notifications'
+        self.table_created = False
         self.table_columns = None  # name:type of columns for correct querying
 
 
@@ -31,8 +32,8 @@ class CrateTranslator(BaseTranslator):
 
 
     def dispose(self, testing=False):
-        if testing:
-            self.cursor.execute("DROP TABLE IF EXISTS {}".format(self.table_name))
+        if testing and self.table_created:
+            self.cursor.execute("DROP TABLE {}".format(self.table_name))
 
         self.table_name = None
         self.table_columns = None
@@ -69,9 +70,15 @@ class CrateTranslator(BaseTranslator):
             name_type[k] = crate_t
 
         columns = ','.join('{} {}'.format(n, t) for n, t in name_type.items())
-        cmd = "create table if not exists {} ( \
+        cmd = "create table {} ( \
                         {})".format(self.table_name, columns)
-        self.cursor.execute(cmd)
+
+        try:
+            self.cursor.execute(cmd)
+        except Exception:
+            raise
+        else:
+            self.table_created = True
         return ','.join(str(c) for c in sorted(name_type.keys()))
 
 
@@ -145,6 +152,7 @@ class CrateTranslator(BaseTranslator):
             # I.e, verify if this case is worth supporting.
             raise ValueError('Inserting multiple types at once not yet supported')
 
+        # TODO: Support multiple tables one per entity type
         col_names = self.create_table(entities[0])
 
         entries = list(self.translate_from_ngsi(entities))
@@ -155,7 +163,7 @@ class CrateTranslator(BaseTranslator):
 
 
     def query(self, attr_names=None, entity_id=None, where_clause=None):
-        assert self.table_name is not None
+        assert self.table_created
 
         select_clause = "{}".format(attr_names[0]) if attr_names else "*"  # TODO: support some attrs
         if not where_clause:
@@ -171,7 +179,7 @@ class CrateTranslator(BaseTranslator):
 
 
     def average(self, attr_name, entity_id=None):
-        assert self.table_name is not None
+        assert self.table_created
 
         select_clause = "avg({})".format(attr_name)
         where_clause = "where entity_id = '{}'".format(entity_id) if entity_id else ""
