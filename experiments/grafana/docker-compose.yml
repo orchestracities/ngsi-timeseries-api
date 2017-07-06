@@ -31,7 +31,7 @@ services:
       - cratedb
 
   cratedb:
-    image: crate
+    image: crate:1.0.5
     ports:
       # Admin UI
       - "4200:4200"

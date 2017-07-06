@@ -3,12 +3,13 @@ Simple script to experiment with QuantumLeap (QL).
 
 It will make the proper subscription in Orion and then create/update entities to generate the notifications for QL.
 """
-import json
-
 from client.client import OrionClient
+from client.fixtures import do_clean_mongo
+from conftest import do_clean_crate
 from experiments.comet.crazy_sensor import create_entity, update_args, sense
 from translators.crate import CrateTranslator
 from utils.hosts import LOCAL
+import json
 
 SLEEP = 5
 
@@ -26,9 +27,9 @@ def subscribe(orion, subscription):
 
 
 def get_subscription():
+    from conftest import QL_URL
     entity_id = '.*'
-    notify_url = 'http://quantumleap:8668/notify'
-    # notify_url = 'http://192.0.0.1:8668/notify'
+    notify_url = '{}/notify'.format(QL_URL)
     subscription = {
         "description": "Test subscription",
         "subject": {
@@ -66,12 +67,13 @@ if __name__ == '__main__':
     subscription_id = subscribe(orion, subscription)
     try:
         sense(orion, entity, update_args, SLEEP)
+        pass
     finally:
         r = orion.unsubscribe(subscription_id)
         assert r.ok, r.text
 
-        # Cleanup CrateDB
-        client = CrateTranslator(LOCAL)
-        client.setup()
-        client.dispose(testing=True)
+        # Cleanup Orion
+        do_clean_mongo()
 
+        # Cleanup CrateDB
+        do_clean_crate()

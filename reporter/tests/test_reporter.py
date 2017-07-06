@@ -1,5 +1,6 @@
 from client.client import HEADERS, HEADERS_PUT
-from client.fixtures import entity, fresh_db, orion_client
+from client.fixtures import entity, clean_mongo, orion_client
+from conftest import QL_URL
 from flask import url_for
 from translators.crate import CrateTranslator
 from translators.fixtures import crate_translator
@@ -7,12 +8,10 @@ from unittest.mock import patch
 from utils.common import assert_ngsi_entity_equals
 from utils.hosts import LOCAL
 import json
-import os
 import pytest
 import requests
 
 
-QL_URL = "http://{}:8668".format(os.environ.get('QL_URL', "quantumleap"))
 notify_url = "{}/notify".format(QL_URL)
 version_url = "{}/version".format(QL_URL)
 
@@ -79,7 +78,7 @@ def test_valid_notification(MockTranslator, live_server, notification):
     assert r.text == 'Notification successfully processed'
 
 
-def test_valid_no_modified(notification, crate_translator):
+def test_valid_no_modified(notification, clean_crate):
     notification['data'][0]['temperature']['metadata'].pop('dateModified')
     r = requests.post('{}'.format(notify_url), data=json.dumps(notification), headers=HEADERS_PUT)
     assert r.status_code == 200
@@ -133,7 +132,7 @@ def do_integration(entity, notify_url, orion_client, crate_translator):
     assert_ngsi_entity_equals(entities[0], entity)
 
 
-def test_integration(entity, orion_client, fresh_db, crate_translator):
+def test_integration(entity, orion_client, clean_mongo, crate_translator):
     """
     Test Reporter using input directly from an Orion notification and output directly to Cratedb.
     """

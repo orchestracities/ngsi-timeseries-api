@@ -1,39 +1,28 @@
+from conftest import CRATE_HOST, CRATE_PORT
 from translators.crate import CrateTranslator
 from translators.influx import InfluxTranslator
 from translators.rethink import RethinkTranslator
 import os
 import pytest
 
-CRATE_HOST = os.environ.get('CRATE_HOST', 'crate')
+
 INFLUX_HOST = os.environ.get('INFLUX_HOST', 'influx')
 RETHINK_HOST = os.environ.get('RETHINK_HOST', 'rethink')
 
 
 @pytest.fixture
 def influx_translator():
-    trans = InfluxTranslator(INFLUX_HOST)
-    trans.setup()
-
-    yield trans
-
-    trans.dispose()
+    with InfluxTranslator(INFLUX_HOST) as trans:
+        yield trans
 
 
 @pytest.fixture()
-def crate_translator():
-    trans = CrateTranslator(CRATE_HOST)
-    trans.setup()
-
-    yield trans
-
-    trans.dispose(testing=True)
+def crate_translator(clean_crate):
+    with CrateTranslator(host=CRATE_HOST, port=CRATE_PORT) as trans:
+        yield trans
 
 
 @pytest.fixture()
 def rethink_translator():
-    trans = RethinkTranslator(RETHINK_HOST)
-    trans.setup()
-
-    yield trans
-
-    trans.dispose()
+    with RethinkTranslator(RETHINK_HOST) as trans:
+        yield trans

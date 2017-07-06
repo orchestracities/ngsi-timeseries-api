@@ -18,10 +18,12 @@ CRATE_TO_NGSI = dict((v, k) for (k,v) in NGSI_TO_CRATE.items())
 
 class CrateTranslator(BaseTranslator):
 
+    TABLE_NAME = 'notifications'
+
     def __init__(self, host, port=4200, db_name="ngsi-tsdb"):
         super(CrateTranslator, self).__init__(host, port, db_name)
 
-        self.table_name = 'notifications'
+        self.table_name = self.TABLE_NAME
         self.table_columns = None  # name:type of columns for correct querying
 
 

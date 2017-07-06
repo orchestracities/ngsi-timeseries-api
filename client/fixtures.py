@@ -10,12 +10,16 @@ ORION_HOST = os.environ.get('ORION_HOST', 'orion')
 ORION_PORT = os.environ.get('ORION_PORT', 1026)
 
 
-@pytest.fixture
-def fresh_db():
-    yield
+def do_clean_mongo():
     db_client = pm.MongoClient(MONGO_HOST, MONGO_PORT)
     db_client.drop_database("orion")
     db_client.drop_database("orion-default")
+
+
+@pytest.fixture
+def clean_mongo():
+    yield
+    do_clean_mongo()
 
 
 @pytest.fixture
