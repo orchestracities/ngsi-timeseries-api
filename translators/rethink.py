@@ -7,7 +7,7 @@ class RethinkTranslator(BaseTranslator):
 
     TABLE_NAME = "notifications"
 
-    def __init__(self, host="0.0.0.0", port=28015, db_name="test"):
+    def __init__(self, host, port=28015, db_name="test"):
         super(RethinkTranslator, self).__init__(host, port, db_name)
         self.conn = None
 

@@ -54,9 +54,9 @@ if __name__ == '__main__':
     results = {}
 
     dbs = {
-        "InfluxDB": InfluxTranslator(),
-        "CrateDB": CrateTranslator(),
-        "RethinkDB": RethinkTranslator(),
+        "InfluxDB": InfluxTranslator(LOCAL),
+        "CrateDB": CrateTranslator(LOCAL),
+        "RethinkDB": RethinkTranslator(LOCAL),
     }
 
     for name, trans in dbs.items():

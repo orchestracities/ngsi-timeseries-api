@@ -1,7 +1,6 @@
 from client.fixtures import orion_client as orion, fresh_db, entity
 from random import random
 from utils.common import create_simple_subscription, create_simple_subscription_v1
-from utils.hosts import LOCAL
 import json
 import pytest
 
@@ -13,7 +12,7 @@ def test_version(orion):
 
 
 def test_subscribe(orion, fresh_db):
-    notify_url = "http://{}/notify".format(LOCAL)
+    notify_url = "http://somewhere/notify"
     subscription = create_simple_subscription(notify_url)
 
     r = orion.subscribe(subscription)
@@ -29,7 +28,7 @@ def test_subscribe(orion, fresh_db):
 
 
 def test_subscribe_v1(orion, fresh_db):
-    notify_url = "http://{}/notify".format(LOCAL)
+    notify_url = "http://somewhere/notify"
     subscription = create_simple_subscription_v1(notify_url)
     r = orion.subscribe_v1(subscription)
     assert r.ok

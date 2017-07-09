@@ -1,12 +1,17 @@
 from translators.crate import CrateTranslator
 from translators.influx import InfluxTranslator
 from translators.rethink import RethinkTranslator
+import os
 import pytest
+
+CRATE_HOST = os.environ.get('CRATE_HOST', 'crate')
+INFLUX_HOST = os.environ.get('INFLUX_HOST', 'influx')
+RETHINK_HOST = os.environ.get('RETHINK_HOST', 'rethink')
 
 
 @pytest.fixture
 def influx_translator():
-    trans = InfluxTranslator()
+    trans = InfluxTranslator(INFLUX_HOST)
     trans.setup()
 
     yield trans
@@ -16,7 +21,7 @@ def influx_translator():
 
 @pytest.fixture()
 def crate_translator():
-    trans = CrateTranslator()
+    trans = CrateTranslator(CRATE_HOST)
     trans.setup()
 
     yield trans
@@ -26,7 +31,7 @@ def crate_translator():
 
 @pytest.fixture()
 def rethink_translator():
-    trans = RethinkTranslator()
+    trans = RethinkTranslator(RETHINK_HOST)
     trans.setup()
 
     yield trans

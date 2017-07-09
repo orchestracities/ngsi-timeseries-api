@@ -7,12 +7,12 @@ from unittest.mock import patch
 from utils.common import assert_ngsi_entity_equals
 from utils.hosts import LOCAL
 import json
+import os
 import pytest
 import requests
 
 
-# TODO: Decide if tests will be run in a docker container or not.
-QL_URL = "http://{}:8668".format(LOCAL)
+QL_URL = "http://{}:8668".format(os.environ.get('QL_URL', "quantumleap"))
 notify_url = "{}/notify".format(QL_URL)
 version_url = "{}/version".format(QL_URL)
 
@@ -136,8 +136,7 @@ def test_integration(entity, orion_client, fresh_db, crate_translator):
     """
     Test Reporter using input directly from an Orion notification and output directly to Cratedb.
     """
-    not_url = notify_url.replace(LOCAL, "quantumleap")
-    do_integration(entity, not_url, orion_client, crate_translator)
+    do_integration(entity, notify_url, orion_client, crate_translator)
 
 
 # def test_dev_integration(entity, orion_client, fresh_db, crate_translator):
@@ -145,6 +144,6 @@ def test_integration(entity, orion_client, fresh_db, crate_translator):
 #     Leave this for easier debugging.
 #     """
 #     # Remember to sudo ifconfig lo0 alias 192.0.0.1 to get notification from containerized orion!
-#     # And to setup DB_HOST in reporter.py to LOCAL
 #     notify_url = 'http://192.0.0.1:8668/notify'
+#     os.environ['DB_HOST'] = "0.0.0.0"
 #     do_integration(entity, notify_url, orion_client, crate_translator)
