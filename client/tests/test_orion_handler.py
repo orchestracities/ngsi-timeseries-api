@@ -1,4 +1,4 @@
-from client.fixtures import orion_client as orion, fresh_db, entity
+from client.fixtures import orion_client as orion, clean_mongo, entity
 from random import random
 from utils.common import create_simple_subscription, create_simple_subscription_v1
 import json
@@ -11,7 +11,7 @@ def test_version(orion):
     assert '"version" : "1.7.0"' in r.text
 
 
-def test_subscribe(orion, fresh_db):
+def test_subscribe(orion, clean_mongo):
     notify_url = "http://somewhere/notify"
     subscription = create_simple_subscription(notify_url)
 
@@ -27,7 +27,7 @@ def test_subscribe(orion, fresh_db):
     assert len(subs) == 1
 
 
-def test_subscribe_v1(orion, fresh_db):
+def test_subscribe_v1(orion, clean_mongo):
     notify_url = "http://somewhere/notify"
     subscription = create_simple_subscription_v1(notify_url)
     r = orion.subscribe_v1(subscription)
@@ -42,12 +42,12 @@ def test_subscribe_v1(orion, fresh_db):
     assert len(subs) == 1
 
 
-def test_insert(orion, fresh_db, entity):
+def test_insert(orion, clean_mongo, entity):
     r = orion.insert(entity)
     assert r.ok, r.text
 
 
-def test_get(orion, fresh_db, entity):
+def test_get(orion, clean_mongo, entity):
     r = orion.insert(entity)
     assert r.ok
 
@@ -58,7 +58,7 @@ def test_get(orion, fresh_db, entity):
     assert loaded_entities[0] == entity
 
 
-def test_update(orion, fresh_db, entity):
+def test_update(orion, clean_mongo, entity):
     r = orion.insert(entity)
     assert r.ok
 
@@ -78,7 +78,7 @@ def test_update(orion, fresh_db, entity):
     assert loaded_v == pytest.approx(v)
 
 
-def test_delete(orion, fresh_db, entity):
+def test_delete(orion, clean_mongo, entity):
     r = orion.insert(entity)
     assert r.ok
 
