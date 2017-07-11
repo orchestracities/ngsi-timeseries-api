@@ -40,11 +40,13 @@ class BaseTranslator(object):
             List of NGSI entities in JSON representation format.
             One of the attributes is expected to be TIME_INDEX_NAME, which will be used as the time index for the
             notifications.
+
+            TODO: Define if TIME_INDEX_NAME attribute comes as a timestamp or dict with value = timestamp
         """
         raise NotImplementedError
 
-    def query(self, attr_name=None, entity_id=None):
+    def query(self, attr_name=None, entity_type=None, entity_id=None):
         raise NotImplementedError
 
-    def average(self, attr_name, entity_id=None):
+    def average(self, attr_name, entity_type=None, entity_id=None):
         raise NotImplementedError

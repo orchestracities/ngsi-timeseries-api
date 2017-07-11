@@ -1,8 +1,7 @@
+from client.client import OrionClient
 import os
 import pymongo as pm
 import pytest
-from client.client import OrionClient
-
 
 MONGO_HOST = os.environ.get('MONGO_HOST', 'mongo')
 MONGO_PORT = os.environ.get('MONGO_PORT', 27017)
@@ -28,20 +27,3 @@ def orion_client():
     yield client
 
 
-@pytest.fixture
-def entity():
-    entity = {
-        'id': 'Room1',
-        'type': 'Room',
-        'temperature': {
-            'value': 24.2,
-            'type': 'Number',
-            'metadata': {}
-        },
-        'pressure': {
-            'value': 720,
-            'type': 'Number',
-            'metadata': {}
-        }
-    }
-    return entity

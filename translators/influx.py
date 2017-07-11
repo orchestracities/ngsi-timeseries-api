@@ -96,7 +96,7 @@ class InfluxTranslator(BaseTranslator):
         return self.client.query(query, database=self.db_name)
 
 
-    def query(self, attr_names=None, entity_id=None):
+    def query(self, attr_names=None, entity_type=None, entity_id=None):
         """
         Helper to query entity data from InfluxDB, "gathering" data from given measurements.
 
@@ -124,7 +124,7 @@ class InfluxTranslator(BaseTranslator):
         return entities
 
 
-    def average(self, attr_name, entity_id=None):
+    def average(self, attr_name, entity_type=None, entity_id=None):
         """
         There are many types of averages:
             - historical for 1 entity

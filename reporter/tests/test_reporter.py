@@ -1,12 +1,11 @@
 from client.client import HEADERS, HEADERS_PUT
-from client.fixtures import entity, clean_mongo, orion_client
-from conftest import QL_URL
+from client.fixtures import clean_mongo, orion_client
+from conftest import QL_URL, entity
 from flask import url_for
 from translators.crate import CrateTranslator
 from translators.fixtures import crate_translator
 from unittest.mock import patch
 from utils.common import assert_ngsi_entity_equals
-from utils.hosts import LOCAL
 import json
 import pytest
 import requests
