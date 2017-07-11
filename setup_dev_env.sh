@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-# Script to simplify local development and debugging.
+# Script to simplify local development and debugging. 
+# Usage: 
+#      $ source setup_dev_env.sh
 
 export PYTHONPATH=$PWD:$PYTHONPATH
+
+source env/bin/activate
 
 # Aliasing so that notifications from orion container reach dev localhost
 LH=192.0.0.1
