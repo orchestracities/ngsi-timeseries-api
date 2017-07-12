@@ -21,16 +21,17 @@ services:
       - "27017:27017"
 
   quantumleap:
-    build: ../../
-    image: quantumleap
+    image: smartsdk/quantumleap
     ports:
       - "8668:8668"
     depends_on:
       - mongo
       - orion
-      - cratedb
+      - crate
+    environment:
+      - CRATE_HOST=crate
 
-  cratedb:
+  crate:
     image: crate:1.0.5
     ports:
       # Admin UI
@@ -46,4 +47,4 @@ services:
     environment:
       - GF_INSTALL_PLUGINS=crate-datasource,grafana-clock-panel,grafana-worldmap-panel
     depends_on:
-      - cratedb
+      - crate

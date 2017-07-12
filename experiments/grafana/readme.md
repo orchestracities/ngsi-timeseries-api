@@ -3,30 +3,29 @@
 Assuming you are in the root of this project:
 
         
-1. Activate the venv
+1. Activate dev environment
 
-        source env/bin/activate
+        source setup_dev_env.sh
     
-2. Make sure to have this project in PYTHONPATH
-
-        export PYTHONPATH=$PWD:$PYTHONPATH 
-
-3. Move to experiment folder
+2. Move to experiment folder
 
         cd experiments/grafana
         
-4. Launch docker containers
+3. Launch docker containers
 
         docker-compose up -d
-        
 
-5. If you want to test Cratedb + Grafana
+4. If you want to test Cratedb + Grafana
 
         python crate_feeder.py
         
-6. If you want to test QuantumLeap + Crate + Grafana
+    But, if you want to test QuantumLeap + Cratedb + Grafana
 
         python ql_feeder.py
+
+5. When you've finished, remember to run
+
+        docker-compose down
 
 Manage Cratedb cluster at [http://0.0.0.0:4200](http://0.0.0.0:4200).
 

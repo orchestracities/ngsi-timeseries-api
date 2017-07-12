@@ -5,6 +5,7 @@ Simple script that every SLEEP seconds:
     - Prints the Avg and the Response time of the requests
 """
 from client.client import HEADERS
+from experiments.comet.crazy_sensor import ENTITY_ID
 from utils.hosts import LOCAL
 import json
 import requests
@@ -13,7 +14,6 @@ import timeit
 
 
 SLEEP = 5
-ENTITY_ID = 'Room1'
 LAST_N = 10
 STH_URL = 'http://{}:{}'.format(LOCAL, 8666)
 

@@ -61,6 +61,13 @@ The overall picture of the main pieces is shown below.
 
 ![Alt text](https://g.gravizo.com/svg?@startuml;skinparam%20componentStyle%20uml2;!define%20ICONURL%20https://raw.githubusercontent.com/smartsdk/architecture-diagrams/smartsdk-template/dist;!includeurl%20ICONURL/common.puml;!includeurl%20ICONURL/fiware.puml;!includeurl%20ICONURL/smartsdk.puml;interface%20NGSI;FIWARE%28cb,%22Context%20Broker%20\n%20-%20Orion%22,component%29;[Sensor%20@%20IoT%20Layer]%20-right-%20NGSI;NGSI%20-right-%20cb;package%20%22Quantumleap%22%20{;SMARTSDK%28api,%22API%22,component%29;SMARTSDK%28reporter,%22Reporter%22,component%29;SMARTSDK%28translator,%22Translator%22,component%29;api%20-up-%20NGSI;api%20%3C-down-%3E%20translator;api%20%22/notify%22%20-down-%3E%20reporter;reporter%20-right-%3E%20translator;};[CrateDB]%20%3C-left-%20translator;[Grafana]%20-down-%20CrateDB;@enduml;)
 
+## Important things to keep in mind
+
+- Quantumleap needs to know where CrateDB is deployed. You can set this with the variable ```CRATE_HOST```. e.g ```CRATE_HOST=http://0.0.0.0:4200``` 
+
+- Notifications must come in complete [NGSI JSON Entity Representation](http://docs.orioncontextbroker.apiary.io/#introduction/specification/json-attribute-representation) form. Other forms, such as simplified entity representation, are not supported by QL because they lack information on attribute types, required by QL to make proper translations.
+
+
 ## Development Setup and Structure
 
 The development is mostly python3 based for now, and really in the early stages so things will change for sure. For now, you can start with:
@@ -70,12 +77,12 @@ The development is mostly python3 based for now, and really in the early stages 
     python3 -m venv env
     pip install -r requirements.txt
 
-    # if you want to test everything locally
+    # if you want to test everything locally, you'll need to...
     source setup_dev_env.sh
 
-The ```requirements.txt``` still needs to be split between testing and production, that's why the docker image is massive for now.
-
 Pytest is used as the testing framework, but since most of QL's functionality is integration of components, you'll find ```docker-compose.yml``` files in the test folders to be run as a setup for tests. If you see ```.travis.yml``` file you'll see how they are running today, but probably at some point it's worth exploring pytest-docker plugins.
+
+The ```requirements.txt``` still needs to be split between testing and production, that's why the docker image is massive for now.
 
 In the file tree structure you can find:
 
