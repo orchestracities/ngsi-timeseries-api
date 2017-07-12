@@ -78,7 +78,7 @@ class RethinkTranslator(BaseTranslator):
         return res
 
 
-    def query(self, attr_names=None, entity_id=None):
+    def query(self, attr_names=None, entity_type=None, entity_id=None):
         op = rt.table(self.TABLE_NAME)
         if attr_names:
             op = op.pluck(attr_names)
@@ -88,7 +88,7 @@ class RethinkTranslator(BaseTranslator):
         return self.translate_to_ngsi(res)
 
 
-    def average(self, attr_name, entity_id=None):
+    def average(self, attr_name, entity_type=None, entity_id=None):
         if entity_id:
             op = rt.table(self.TABLE_NAME).filter({'entity_id': entity_id}).avg(attr_name)
         else:

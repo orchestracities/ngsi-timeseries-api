@@ -1,4 +1,5 @@
 from functools import partial
+import time
 import timeit
 
 # Benchmarking metrics. A:Attribute, E:Entity
@@ -30,15 +31,18 @@ def benchmark(translator, num_types=10, num_ids_per_type=10, num_updates=10, use
     # Insert the rest to have data to query
     translator.insert(entities=entities[n:])
 
+    time.sleep(1)
+
     random_id = pick_random_entity_id(num_types, num_ids_per_type)
+    entity_type = random_id[0]
 
     # Query 1 attr of 1 entity
-    res = timeit.timeit(partial(translator.query, attr_names=['attr_str'], entity_id=random_id),
+    res = timeit.timeit(partial(translator.query, attr_names=['attr_str'], entity_type=entity_type, entity_id=random_id),
                         number=1, globals=globals())
     results[BM_QUERY_1A1E] = res
 
     # Query all attrs of 1 entity
-    res = timeit.timeit(partial(translator.query, entity_id=random_id), number=1, globals=globals())
+    res = timeit.timeit(partial(translator.query, entity_type=entity_type, entity_id=random_id), number=1, globals=globals())
     results[BM_QUERY_NA1E] = res
 
     # Query 1 attr of N entities
@@ -50,7 +54,7 @@ def benchmark(translator, num_types=10, num_ids_per_type=10, num_updates=10, use
     results[BM_QUERY_NANE] = res
 
     # Query aggregate on 1 entity (Needs multiple inserts for the same entity)
-    res = timeit.timeit(partial(translator.average, attr_name="attr_float", entity_id=random_id),
+    res = timeit.timeit(partial(translator.average, attr_name="attr_float", entity_type=entity_type, entity_id=random_id),
                         number=1, globals=globals())
     results[BM_AGGREGATE_1A1E] = res
 

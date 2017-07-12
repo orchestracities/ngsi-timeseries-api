@@ -1,4 +1,5 @@
-from client.fixtures import orion_client as orion, clean_mongo, entity
+from client.fixtures import orion_client as orion, clean_mongo
+from conftest import entity
 from random import random
 from utils.common import create_simple_subscription, create_simple_subscription_v1
 import json

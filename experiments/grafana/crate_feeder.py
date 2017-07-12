@@ -1,6 +1,7 @@
 """
 Simple script to feed CrateDB with random entities every SLEEP seconds.
 """
+from conftest import do_clean_crate
 from translators.crate import CrateTranslator
 from utils.common import create_random_entities
 from utils.hosts import LOCAL
@@ -20,7 +21,8 @@ def feed():
             print('Inserted: {}'.format(entities[0]))
             time.sleep(SLEEP)
     finally:
-        client.dispose(testing=True)
+        client.dispose()
+        do_clean_crate()
 
 
 if __name__ == '__main__':
