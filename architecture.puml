@@ -1,0 +1,27 @@
+@startuml;
+skinparam componentStyle uml2
+
+!define ICONURL https://raw.githubusercontent.com/smartsdk/architecture-diagrams/smartsdk-template/dist
+!includeurl ICONURL/common.puml
+!includeurl ICONURL/fiware.puml
+!includeurl ICONURL/smartsdk.puml
+
+
+interface NGSI
+
+FIWARE(cb,"Context Broker \n - Orion",component)
+
+[Sensor @ IoT Layer] -right- NGSI
+NGSI -right- cb
+
+package "Quantumleap" {
+	SMARTSDK(api,"API",component)
+	SMARTSDK(translator,"Translator",component)
+	api -up- NGSI
+	api -down- translator
+}
+
+[CrateDB] -left- translator
+[Grafana] -down- CrateDB
+
+@enduml
