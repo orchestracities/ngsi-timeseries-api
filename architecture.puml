@@ -16,12 +16,15 @@ NGSI -right- cb
 
 package "Quantumleap" {
 	SMARTSDK(api,"API",component)
+	SMARTSDK(reporter,"Reporter",component)
 	SMARTSDK(translator,"Translator",component)
 	api -up- NGSI
-	api -down- translator
+	api <-down-> translator
+	api "/notify" -down-> reporter
+	reporter -right-> translator
 }
 
-[CrateDB] -left- translator
+[CrateDB] <-left- translator
 [Grafana] -down- CrateDB
 
 @enduml

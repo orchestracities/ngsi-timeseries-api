@@ -11,11 +11,11 @@ Quantumleap is an adapter aimed to bring NGSIv2 Historical Data on top of TimeSe
 In the end, its goal is similar to those of [FIWARE's Comet STH](https://fiware-sth-comet.readthedocs.io/en/latest/
 ). However, Comet does not yet support NGSIv2, it's tied to MongoDB, and some of the conditions and constraints under which it was developed are no longer hold. There is nothing wrong with it, this is just an exploration on a new way to provide historical data for NGSI.
 
-We have decided to focus on the NGSIv2-CrateDB translator for now because we find in [CrateDB](www.crate.io) the following advantages:
+We have decided to focus on the NGSIv2-CrateDB translator for now because we find in [CrateDB](http://www.crate.io) the following advantages:
 - Easy scalability with containerized database cluster out of the box
 - Geo-queries support out of the box
 - Nice SQL-like querying language to work with
-- Supported integration with visualization tools like [Grafana](www.grafana.com)
+- Supported integration with visualization tools like [Grafana](http://www.grafana.com)
 
 ## How it works
 
@@ -59,7 +59,7 @@ In addition to the */notify* endpoint, the API will include endpoints for advanc
 
 The overall picture of the main pieces is shown below.
 
-![Alt text](https://g.gravizo.com/svg?@startuml;skinparam%20componentStyle%20uml2;!define%20ICONURL%20https://raw.githubusercontent.com/smartsdk/architecture-diagrams/smartsdk-template/dist;!includeurl%20ICONURL/common.puml;!includeurl%20ICONURL/fiware.puml;!includeurl%20ICONURL/smartsdk.puml;interface%20NGSI;FIWARE%28cb,%22Context%20Broker%20\n%20-%20Orion%22,component%29;[Sensor%20@%20IoT%20Layer]%20-right-%20NGSI;NGSI%20-right-%20cb;package%20%22Quantumleap%22%20{;SMARTSDK%28api,%22API%22,component%29;SMARTSDK%28translator,%22Translator%22,component%29;api%20-up-%20NGSI;api%20-down-%20translator;};[CrateDB]%20-left-%20translator;[Grafana]%20-down-%20CrateDB;@enduml;)
+![Alt text](https://g.gravizo.com/svg?@startuml;skinparam%20componentStyle%20uml2;!define%20ICONURL%20https://raw.githubusercontent.com/smartsdk/architecture-diagrams/smartsdk-template/dist;!includeurl%20ICONURL/common.puml;!includeurl%20ICONURL/fiware.puml;!includeurl%20ICONURL/smartsdk.puml;interface%20NGSI;FIWARE%28cb,%22Context%20Broker%20\n%20-%20Orion%22,component%29;[Sensor%20@%20IoT%20Layer]%20-right-%20NGSI;NGSI%20-right-%20cb;package%20%22Quantumleap%22%20{;SMARTSDK%28api,%22API%22,component%29;SMARTSDK%28reporter,%22Reporter%22,component%29;SMARTSDK%28translator,%22Translator%22,component%29;api%20-up-%20NGSI;api%20%3C-down-%3E%20translator;api%20%22/notify%22%20-down-%3E%20reporter;reporter%20-right-%3E%20translator;};[CrateDB]%20%3C-left-%20translator;[Grafana]%20-down-%20CrateDB;@enduml;)
 
 ## Development Setup and Structure
 
