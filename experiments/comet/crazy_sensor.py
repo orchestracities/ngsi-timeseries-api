@@ -7,19 +7,23 @@ Simple script that:
 Notifications are sent to NOTIFY_URL
 """
 from client.client import OrionClient
+from experiments.common import sense
 from random import random
 from utils.common import create_simple_subscription_v1
 from utils.hosts import LOCAL
 import json
-import time
-
 
 SLEEP = 5
 ENTITY_ID = 'Room1'
 NOTIFY_URL = 'http://comet:8666/notify'
 
 
-def subscribe(orion, subscription):
+def subscribe_v1(orion, subscription):
+    """
+    :param OrionClient orion:
+    :param dict subscription: The subscription to be done, v1 format
+    :return:
+    """
     # v2 subscriptions are not returning the generated subscription id :s
     r = orion.subscribe_v1(subscription)
     assert r.ok, r.text
@@ -47,32 +51,14 @@ def update_args():
     return res
 
 
-def sense(orion, entity, update_callback, sleep):
-    r = orion.insert(entity)
-    assert r.ok, r.text
-    print('Inserted: {}'.format(entity))
-
-    try:
-        while True:
-            time.sleep(sleep)
-            args = update_callback()
-            r = orion.update(entity['id'], args)
-            assert r.ok, r.text
-            print('Updated: {}'.format(args))
-
-    finally:
-        r = orion.delete(entity['id'])
-        assert r.ok, r.text
-
-
 if __name__ == '__main__':
     entity = create_entity(ENTITY_ID)
     subscription = create_simple_subscription_v1(NOTIFY_URL)
 
     orion = OrionClient(host=LOCAL)
-    subscription_id = subscribe(orion, subscription)
+    subscription_id = subscribe_v1(orion, subscription)
     try:
-        sense(entity, update_args, SLEEP)
+        sense(orion, entity, update_args, SLEEP)
     finally:
         r = orion.unsubscribe(subscription_id)
         assert r.ok, r.text

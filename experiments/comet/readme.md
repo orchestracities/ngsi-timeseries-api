@@ -3,31 +3,30 @@
 Assuming you are in the root of this project:
 
         
-1. Activate the venv
+1. Activate the dev env
 
-        source env/bin/activate
-    
-2. Make sure to have this project in PYTHONPATH
+        source setup_dev_env.sh
 
-        export PYTHONPATH=$PWD:$PYTHONPATH 
 
-3. Move to experiment folder
+2. Launch docker containers
 
-        cd experiments/comet
+        docker-compose -f experiments/comet/docker-compose.yml up -d
         
-4. Launch docker containers
-
-        docker-compose up -d
-        
-    If comet fails, try ```docker-compose restart comet```
-
-5. Open new terminal (T2) and repeat steps 1, 2 and 3.
+    If comet fails, try ```docker-compose -f experiments/comet/docker-compose.yml restart comet```
 
 
-6. Run sensor in T2
+3. Open new terminal (T2) and repeat step 1.
 
-        python crazy_sensor.py
-        
-7. Run reader (in T1)
 
-        python paranoid_reader.py
+4. Run sensor in T2
+
+        python experiments/comet/crazy_sensor.py
+
+
+5. Run reader (in T1)
+
+        python experiments/comet/paranoid_reader.py
+
+6. When you've finished run
+
+        docker-compose -f experiments/comet/docker-compose.yml down
