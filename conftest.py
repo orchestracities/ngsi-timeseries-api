@@ -1,6 +1,7 @@
 import os
 import pytest
 
+
 QL_HOST = os.environ.get('QL_HOST', "quantumleap")
 QL_PORT = 8668
 QL_URL = "http://{}:{}".format(QL_HOST, QL_PORT)
@@ -45,3 +46,77 @@ def entity():
         }
     }
     return entity
+
+
+@pytest.fixture
+def air_quality_observed():
+    """
+    :return: dict
+        The model as received within an Orion notification.
+    """
+    return {
+        "id": "CDMX-AmbientObserved-prueba3",
+        "type": "AirQualityObserved",
+        "address": {
+            "type": "StructuredValue",
+            "value": {
+                "addressCountry": "MX",
+                "addressLocality": "Ciudad de México",
+                "streetAddress": "Acolman"
+            }
+        },
+        "dateObserved": {
+            "type": "DateTime",
+            "value": "2016-03-14T17:00:00-05:00"
+        },
+        "location": {
+            "value": {
+                "type": "Point",
+                "coordinates": [-99.122984, 19.431768]
+            },
+            "type": "geo:json"
+        },
+        "source": {
+            "type": "Text",
+            "value": "http://www.aire.cdmx.gob.mx/"
+        },
+        "temperature": {
+            "type": "Text",
+            "value": "12.2"
+        },
+        "relativeHumidity": {
+            "type": "Text",
+            "value": "0.54"
+        },
+        "measurand": {
+            "type": "Array",
+            "value": [
+                "CO, nr, PPM, Carbon Monoxide",
+                "03, 45, PPB, Nitrogen Monoxide",
+                "NO2, 69, PPB, Nitrogen Dioxide",
+                "SO2, 11, PPB, Sulfur Dioxide",
+                "PM10, 139, GQ, Particle Pollution"
+            ]
+        },
+        "CO": {
+            "type": "Text",
+            "value": "nr"
+        },
+        "O3": {
+            "type": "Text",
+            "value": "45"
+        },
+        "NO2": {
+            "type": "Text",
+            "value": "69"
+        },
+        "SO2": {
+            "type": "Text",
+            "value": "11"
+        },
+        "PM10": {
+            "type": "Text",
+            "value": "139"
+        }
+    }
+

@@ -7,14 +7,17 @@ import statistics
 # NGSI TYPES: Not properly documented so this might change. Based on experimenting with Orion.
 # CRATE TYPES: https://crate.io/docs/reference/sql/data_types.html
 NGSI_TO_CRATE = {
-    "Text": 'string',
-    "Number": 'float',
-    "Integer": 'long',
+    "Array": 'array(string)',  # TODO: Support numeric arrays
     "Boolean": 'boolean',
     "DateTime": 'timestamp',
-    "json:geo": 'geo_shape',
+    "Integer": 'long',
+    "geo:json": 'geo_shape',
+    "Number": 'float',
+    "Text": 'string',
+    "StructuredValue": 'object'
 }
 CRATE_TO_NGSI = dict((v, k) for (k,v) in NGSI_TO_CRATE.items())
+CRATE_TO_NGSI['string_array'] = 'Array'
 
 
 class CrateTranslator(BaseTranslator):
@@ -36,7 +39,7 @@ class CrateTranslator(BaseTranslator):
     def _refresh(self, entity_types):
         """
         Used for testing purposes only!
-        :param tables: str (comma separated list of table names)
+        :param entity_types: list(str) list of entity types whose tables will be refreshed
         """
         table_names = ','.join([self._et2tn(et) for et in entity_types])
         self.cursor.execute("refresh table {}".format(table_names))
