@@ -136,3 +136,39 @@ def test_integration(entity, orion_client, clean_mongo, crate_translator):
     Test Reporter using input directly from an Orion notification and output directly to Cratedb.
     """
     do_integration(entity, notify_url, orion_client, crate_translator)
+
+
+def test_air_quality_observed(air_quality_observed, orion_client, clean_mongo, crate_translator):
+    entity = air_quality_observed
+    subscription = {
+        "description": "Test subscription",
+        "subject": {
+            "entities": [
+              {
+                "id": entity['id'],
+                "type": entity['type']
+              }
+            ],
+            "condition": {
+              "attrs": []  # all attributes
+            }
+          },
+        "notification": {
+            "http": {
+              "url": notify_url
+            },
+            "attrs": [],  # all attributes
+            "metadata": ["dateCreated", "dateModified"]
+        },
+        "throttling": 5
+    }
+    orion_client.subscribe(subscription)
+    orion_client.insert(entity)
+
+    import time;time.sleep(3)  # Give time for notification to be processed.
+
+    entities = crate_translator.query()
+
+    # Not exactly one because first insert generates 2 notifications, as explained in
+    # https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions
+    assert len(entities) > 0

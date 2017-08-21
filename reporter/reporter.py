@@ -16,6 +16,7 @@ from flask import Flask, request
 from utils.common import iter_entity_attrs
 from utils.hosts import LOCAL
 from datetime import datetime
+import logging
 import os
 import warnings
 
@@ -88,6 +89,10 @@ def notify():
     assert len(payload) == 1, 'Multiple data elements in notifications not supported yet'
     payload = payload[0]
 
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+    logger.info('Received payload: {}'.format(payload))
+
     # Validate notification
     error = _validate_payload(payload)
     if error:
@@ -104,7 +109,9 @@ def notify():
     with CrateTranslator(DB_HOST, DB_PORT, DB_NAME) as trans:
         trans.insert([payload])
 
-    return "Notification successfully processed"
+    msg = "Notification successfully processed"
+    logger.info(msg)
+    return msg
 
 
 if __name__ == '__main__':

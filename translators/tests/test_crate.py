@@ -1,5 +1,6 @@
 from conftest import entity
 from datetime import datetime
+from translators.base_translator import BaseTranslator
 from translators.benchmark import benchmark
 from translators.fixtures import crate_translator as translator
 from utils.common import *
@@ -117,3 +118,16 @@ def test_benchmark(translator):
 
 def test_benchmark_extended(translator):
     benchmark(translator, num_types=2, num_ids_per_type=2, num_updates=10, use_geo=True, use_time=True)
+
+
+# FIWARE DATA MODELS
+
+def test_air_quality_observed(translator, air_quality_observed):
+    # Add TIME_INDEX as Reporter would
+    air_quality_observed[TIME_INDEX_NAME] = datetime.now().isoformat()
+
+    result = translator.insert([air_quality_observed])
+    assert result.rowcount > 0
+    translator._refresh([air_quality_observed['type']])
+    loaded = translator.query()
+    assert len(loaded) > 0

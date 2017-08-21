@@ -1,9 +1,10 @@
-from translators.base_translator import BaseTranslator
 from datetime import datetime
 import pytest
 import random
 import string
 
+
+TIME_INDEX_NAME = 'time_index'
 
 # For testing only, Attr name to NGSI type (are these NGSI types?)
 # TODO: Stop using this in Influx and Rethink translators
@@ -12,7 +13,7 @@ ATTR_TO_TYPE = {
     "attr_float": "Number",
     "attr_bool": "Boolean",
     "attr_time": "DateTime",
-    "attr_geo": "json:geo",
+    "attr_geo": "geo:json",
 }
 
 
@@ -93,7 +94,7 @@ def create_random_entities(num_types, num_ids_per_type, num_updates, use_time=Fa
                     "id": "{}-{}".format(nt, ni),
                     # This column is the one added by reporter with notification timestamp
                     # zeroing last 3 digits of microseconds to avoid annoying diffs in testing
-                    BaseTranslator.TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
+                    TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
                 }
                 # This is to guarantee significant differences among entities for the TIME_INDEX_NAME attribute.
                 import time; time.sleep(0.001)
