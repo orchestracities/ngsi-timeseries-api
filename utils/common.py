@@ -25,6 +25,13 @@ def assert_ngsi_entity_equals(entity, other):
         Asserts that two NGSI entities are equal. All types are asserted for exact equality, but for float and datetime,
         which are compared using pytest.approx with the given rel and abs params.
     """
+    # NGSI Array Attribute? (i.e, python list)
+    if isinstance(entity, list) or isinstance(other, list):
+        assert isinstance(entity, list) and isinstance(other, list)
+        assert entity == other
+        return
+
+    # Else, the rest can be treated as a dict
     assert entity.keys() == other.keys()
     for ek, ev in entity.items():
         if isinstance(ev, dict):

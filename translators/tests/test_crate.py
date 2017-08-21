@@ -131,3 +131,5 @@ def test_air_quality_observed(translator, air_quality_observed):
     translator._refresh([air_quality_observed['type']])
     loaded = translator.query()
     assert len(loaded) > 0
+
+    assert_ngsi_entity_equals(air_quality_observed, loaded[0])
