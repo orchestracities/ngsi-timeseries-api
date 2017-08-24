@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Introduction - Quantumleap</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link href="https://fiware.org/style/fiware_readthedocs.css" rel="stylesheet">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Introduction";
+    var mkdocs_page_input_path = "admin/index.md";
+    var mkdocs_page_url = "/admin/";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js"></script>
+  <script src="../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../js/highlight.pack.js"></script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Quantumleap</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="..">Home</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>User & Programmers Manual</span></li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../user/">Introduction</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../user/troubleshooting/">Troubleshooting</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../user/contributing/">Contributing</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>Installation & Administration Manual</span></li>
+
+        
+            
+    <li class="toctree-l1 current">
+        <a class="current" href="./">Introduction</a>
+        
+            <ul>
+            
+                <li class="toctree-l3"><a href="#installing">Installing</a></li>
+                
+                    <li><a class="toctree-l4" href="#all-in-one">All-in-one</a></li>
+                
+                    <li><a class="toctree-l4" href="#reuse-external-orion-instance">Reuse External Orion Instance</a></li>
+                
+                    <li><a class="toctree-l4" href="#reuse-external-orion-and-cratedb">Reuse External Orion and CrateDB</a></li>
+                
+            
+            </ul>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="ports/">Ports</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="crate/">Crate</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="grafana/">Grafana</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Quantumleap</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Installation & Administration Manual &raquo;</li>
+        
+      
+    
+    <li>Introduction</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/smartsdk/ngsi-timeseries-api/edit/master/docs/admin/index.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="installing">Installing</h1>
+<p>At the moment, the only supported way of using Quantumleap is through Docker, so there's no actual "installation" of Quantumleap.</p>
+<p>If you need to install Docker, refer to <a href="https://docs.docker.com/engine/installation/">Docker Installation</a>.</p>
+<p>The Quantumleap Docker Image is hosted at <a href="https://hub.docker.com/r/smartsdk/quantumleap/">https://hub.docker.com/r/smartsdk/quantumleap/</a>.</p>
+<p>Now, depending on your scenario, you might have different needs. See from the sections below which fits yours.</p>
+<h2 id="all-in-one">All-in-one</h2>
+<p>If you want to quickly deploy all the components of the <a href="..">typical scenario</a> at once to start experimenting with Quantumleap ASAP, do the following.</p>
+<p>Download (or create locally) a copy of <a href="https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/experiments/grafana/docker-compose.yml">this docker-compose.yml</a> file.</p>
+<p>Then start it up:</p>
+<pre><code># same path were you have placed the docker-compose.yml
+$ docker-compose up -d
+</code></pre>
+<p>After a while, check that all containers are running (up):</p>
+<pre><code>$ docker ps
+CONTAINER ID        IMAGE                  COMMAND                  CREATED              STATUS                        PORTS                                                           NAMES
+2ef89b11dd7f        smartsdk/quantumleap   "/bin/sh -c 'pytho..."   About a minute ago   Up About a minute             0.0.0.0:8668-&gt;8668/tcp                                          grafana_quantumleap_1
+f435868ea042        grafana/grafana        "/run.sh"                About a minute ago   Up About a minute             0.0.0.0:3000-&gt;3000/tcp                                          grafana_grafana_1
+7bea4ea0b8b4        fiware/orion:1.7.0     "/usr/bin/contextB..."   About a minute ago   Up About a minute (healthy)   0.0.0.0:1026-&gt;1026/tcp                                          grafana_orion_1
+337cd5b38b82        crate:1.0.5            "/docker-entrypoin..."   About a minute ago   Up About a minute             0.0.0.0:4200-&gt;4200/tcp, 0.0.0.0:4300-&gt;4300/tcp, 5432-5532/tcp   grafana_crate_1
+be4a72523e69        mongo:3.2              "docker-entrypoint..."   About a minute ago   Up About a minute             0.0.0.0:27017-&gt;27017/tcp                                        grafana_mongo_1
+</code></pre>
+<p>Now you're ready to use Quantumleap as instructed in the <a href="../user/">User Manual</a>.</p>
+<p>When you are done experimenting, remember to teardown the compose.</p>
+<pre><code>$ docker-compose down -v
+</code></pre>
+<h2 id="reuse-external-orion-instance">Reuse External Orion Instance</h2>
+<p>If you have already Orion running somewhere else and you just want to deploy Quantumleap, you can proceed as explained in <em>All-in-one</em> section, but before running <code>docker-compose up</code> remove from the <em>docker-compose.yml</em> file the complete definition of the <code>orion:</code> and <code>mongo:</code> services. You will also need to remove the references to them in the <code>depends_on:</code> section of the other services.</p>
+<p>Similarly, if you don't want to use <em>grafana</em>, you can remove that service definition as well.</p>
+<p>This way, your <em>docker-compose.yml</em> file ends up more or less with the following sections only</p>
+<pre><code>version: '3'
+
+services:
+    quantumleap:
+        ...
+    crate:
+        ...
+
+networks:
+    ...
+</code></pre>
+<h2 id="reuse-external-orion-and-cratedb">Reuse External Orion and CrateDB</h2>
+<p>If you only need to run Quantumleap to complete your setup, you can simply run</p>
+<pre><code>docker run -d -p 8668:8668 -e "CRATE_HOST=http://your_crate_location" smartsdk/quantumleap
+</code></pre>
+<p>The environment variable <em>CRATE_HOST</em> will tell Quantumleap where to reach Crate, so you need to provide a reachable hostname where CrateDB is running. By default QL will append the port (4200) to the hostname.</p>
+<p>For more options see <a href="https://docs.docker.com/engine/reference/run/">docker run reference</a>.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="ports/" class="btn btn-neutral float-right" title="Ports">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../user/contributing/" class="btn btn-neutral" title="Contributing"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+    
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/smartsdk/ngsi-timeseries-api" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../user/contributing/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="ports/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script src="../js/theme.js"></script>
+
+</body>
+</html>

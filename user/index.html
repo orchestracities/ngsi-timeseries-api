@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Introduction - Quantumleap</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link href="https://fiware.org/style/fiware_readthedocs.css" rel="stylesheet">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Introduction";
+    var mkdocs_page_input_path = "user/index.md";
+    var mkdocs_page_url = "/user/";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js"></script>
+  <script src="../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../js/highlight.pack.js"></script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Quantumleap</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="..">Home</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>User & Programmers Manual</span></li>
+
+        
+            
+    <li class="toctree-l1 current">
+        <a class="current" href="./">Introduction</a>
+        
+            <ul>
+            
+                <li class="toctree-l3"><a href="#usage-overview">Usage Overview</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#orion-subscription">Orion Subscription</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#data-insertion">Data Insertion</a></li>
+                
+                    <li><a class="toctree-l4" href="#attributes-datatype-translation">Attributes DataType Translation</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#data-retrieval">Data Retrieval</a></li>
+                
+                    <li><a class="toctree-l4" href="#the-time-index">The Time Index</a></li>
+                
+            
+            </ul>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="troubleshooting/">Troubleshooting</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="contributing/">Contributing</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>Installation & Administration Manual</span></li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../admin/">Introduction</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../admin/ports/">Ports</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../admin/crate/">Crate</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../admin/grafana/">Grafana</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Quantumleap</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>User & Programmers Manual &raquo;</li>
+        
+      
+    
+    <li>Introduction</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/smartsdk/ngsi-timeseries-api/edit/master/docs/user/index.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="usage-overview">Usage Overview</h1>
+<p>First you need to have Quantumleap runnning (of course). Refer to the <a href="../admin/">Installation Manual</a> for instructions.</p>
+<p>Then, you need to connect Orion Context Broker to Quantumleap through a subscription for each Entity Type whose historical data you are interested in. Historical data for each entity type will be persisted as long as the subscription is active.</p>
+<p>The flow is therefore the following</p>
+<ul>
+<li>Create an Orion subscription for each entity type of your interest once</li>
+<li>Insert and update your data to Orion as usual</li>
+<li>Done, your historical data will be persisted in Quantumleap's database.</li>
+</ul>
+<p>Let's have a look in more detail of each step.</p>
+<h1 id="orion-subscription">Orion Subscription</h1>
+<p>As stated before, the link between Orion and Quantumleap is established through a subscription you need to create. It is therefore important that you understand well how the NGSIv2 Subscription mechanism works. This is carefully explained in the corresponding section of <a href="https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions">Orion docs</a>.</p>
+<p>Here's an example of the payload of the subscription you need to create in Orion to establish the link Orion-Quantumleap.</p>
+<pre><code>{
+    "description": "Test subscription",
+    "subject": {
+        "entities": [
+        {
+            "idPattern": ".*",
+            "type": "Room"
+        }
+        ],
+        "condition": {
+            "attrs": [  # Here the list of attrs whose change will trigger notifications. Empty array means track any change.
+            "temperature",
+            ]
+        }
+    },
+    "notification": {
+        "http": {
+            "url": http://quantumleap:8668/notify
+        },
+        "attrs": [  # Here the list of attrs to be persisted in time. Empty array means save all entity attributes.
+        "temperature",
+        ],
+        "metadata": ["dateCreated", "dateModified"]
+    },
+    "throttling": 5
+}
+</code></pre>
+<p>Important things to notice from the example.</p>
+<ul>
+<li>
+<p>You can create any valid NGSI subscription for your entities.</p>
+</li>
+<li>
+<p>Though not compulsory, it is highly recommended to include the <code>"metadata": ["dateCreated", "dateModified"]</code> part in the <em>"notification"</em> part of the subscription. This instructs Orion to include the modification time of the attributes in the notification. This timestamp will be used as the time index in the database. If this is somehow missing, Quantumleap will use its current system time at which the notification arrived, which might not be exactly what you want.</p>
+</li>
+<li>
+<p>Notifications must come in complete <a href="http://docs.orioncontextbroker.apiary.io/#introduction/specification/json-attribute-representation">NGSI JSON Entity Representation</a> form. Other forms, such as the <a href="http://docs.orioncontextbroker.apiary.io/#introduction/specification/simplified-entity-representation">simplified entity representation</a> are not supported by QL because they lack information on attribute types, required by QL to make proper translations. This means, don't use options like <code>"attrsFormat": "keyValues"</code></p>
+</li>
+<li>
+<p>The <code>"url"</code> field of the subscription specifies where Orion will send the notifications. I.e, this must be Quantumleap's <em>/notify</em> endpoint. By default, Quantumleap listens at port 8668.</p>
+</li>
+</ul>
+<h1 id="data-insertion">Data Insertion</h1>
+<p>Now you are ready to insert (or keep updating) your entities as you've always done in Orion Context Broker. Refer to the <a href="http://fiware-orion.readthedocs.io/en/latest/user/walkthrough_apiv2/index.html#issuing-commands-to-the-broker">docs</a> for more instructions.</p>
+<p>It's not a problem if the first insert was done before you created the subscription. Of course, you will get historical records of the updates happening after the subscription was created.</p>
+<p>Here's an example of an insert payload that will generate a notification based on the subscription example shown before.</p>
+<pre><code>{
+    'id': 'Room1',
+    'type': 'Room',
+    'temperature': {
+        'value': 24.2,
+        'type': 'Number',
+        'metadata': {}
+    },
+    'pressure': {
+        'value': 720,
+        'type': 'Number',
+        'metadata': {}
+    }
+}
+</code></pre>
+<h3 id="attributes-datatype-translation">Attributes DataType Translation</h3>
+<p>The table below shows which attribute types will be translated to which <a href="https://crate.io/docs/crate/reference/sql/data_types.html">Crate Data Types</a>.</p>
+<table>
+<thead>
+<tr>
+<th>NGSI Type</th>
+<th align="center">Crate Datatype</th>
+<th align="left">Observation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Array</td>
+<td align="center"><a href="https://crate.io/docs/crate/reference/sql/data_types.html#array">array(string)</a></td>
+<td align="left">TODO: Support arrays of other types.</td>
+</tr>
+<tr>
+<td>Boolean</td>
+<td align="center"><a href="https://crate.io/docs/crate/reference/sql/data_types.html#boolean">boolean</a></td>
+<td align="left">-</td>
+</tr>
+<tr>
+<td>DateTime</td>
+<td align="center"><a href="https://crate.io/docs/crate/reference/sql/data_types.html#timestamp">timestamp</a></td>
+<td align="left">-</td>
+</tr>
+<tr>
+<td>Integer</td>
+<td align="center"><a href="https://crate.io/docs/crate/reference/sql/data_types.html#numeric-types">long</a></td>
+<td align="left">TODO: Fix this inconsistency ASAP!</td>
+</tr>
+<tr>
+<td>geo:json</td>
+<td align="center"><a href="https://crate.io/docs/crate/reference/sql/data_types.html#geo-shape">geo_shape</a></td>
+<td align="left">NGSI Simple Location Format is not yet supported. Use GeoJSON instead. Read more <a href="http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities">here</a>.</td>
+</tr>
+<tr>
+<td>Number</td>
+<td align="center"><a href="https://crate.io/docs/crate/reference/sql/data_types.html#numeric-types">float</a></td>
+<td align="left">-</td>
+</tr>
+<tr>
+<td>Text</td>
+<td align="center"><a href="https://crate.io/docs/crate/reference/sql/data_types.html#string">string</a></td>
+<td align="left">-</td>
+</tr>
+<tr>
+<td>StructuredValue</td>
+<td align="center"><a href="https://crate.io/docs/crate/reference/sql/data_types.html#object">object</a></td>
+<td align="left">-</td>
+</tr>
+</tbody>
+</table>
+<p>NOTE: Attributes metadata is still not being persisted.</p>
+<h1 id="data-retrieval">Data Retrieval</h1>
+<p>The Quantumleap endpoints to retrieve data are still to be developed.</p>
+<p>However, you can already query the persisted data either directly interacting with the Crate database, or through the use of Grafana. Further details are explained in the <a href="../admin/crate/">Crate</a> and <a href="../admin/grafana/">Grafana</a> sections, respectively.</p>
+<p>What you need to know in the mean time is that Quantumleap will create one table per each entity type. Table names are formed with the "et" prefix plus the lowercase version of the entity type. I.e, if your entity type is <em>AirQualityObserved</em>, the corresponding table name will be <em>etairqualityobserved</em>. All created tables for now belong to the default "doc" schema.</p>
+<h3 id="the-time-index">The Time Index</h3>
+<p>A fundamental index in the timeseries database is the time index. You may be wondering... where is it stored?</p>
+<p>Quantumleap will persist the time index for each notification in a special column called <code>time_index</code>.  If you payed attention in the <em>Orion Subscription</em> section, you know at least which value is used as the time index. This is, the <code>"dateModified"</code> value notified by Orion or, if you missed that option in the subscription, the notification arrival time.</p>
+<p>In the future, this could be more flexible and allow users to define any Datetime attribute to be used as the time index.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="troubleshooting/" class="btn btn-neutral float-right" title="Troubleshooting">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href=".." class="btn btn-neutral" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+    
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/smartsdk/ngsi-timeseries-api" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href=".." style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="troubleshooting/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script src="../js/theme.js"></script>
+
+</body>
+</html>
