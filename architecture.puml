@@ -1,7 +1,7 @@
 @startuml;
 skinparam componentStyle uml2
 
-!define ICONURL https://raw.githubusercontent.com/smartsdk/architecture-diagrams/smartsdk-template/dist
+!define ICONURL https://raw.githubusercontent.com/smartsdk/architecture-diagrams/master/dist
 !includeurl ICONURL/common.puml
 !includeurl ICONURL/fiware.puml
 !includeurl ICONURL/smartsdk.puml
