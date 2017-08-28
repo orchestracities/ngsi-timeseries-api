@@ -1,23 +1,23 @@
 # Usage Overview
 
-First you need to have Quantumleap runnning (of course). Refer to the [Installation Manual](../admin/index.md) for instructions.
+First you need to have QuantumLeap runnning (of course). Refer to the [Installation Manual](../admin/index.md) for instructions.
 
-Then, you need to connect Orion Context Broker to Quantumleap through a subscription for each Entity Type whose historical data you are interested in. Historical data for each entity type will be persisted as long as the subscription is active.
+Then, you need to connect Orion Context Broker to QuantumLeap through a subscription for each Entity Type whose historical data you are interested in. Historical data for each entity type will be persisted as long as the subscription is active.
 
 The flow is therefore the following
 
 - Create an Orion subscription for each entity type of your interest once
 - Insert and update your data to Orion as usual
-- Done, your historical data will be persisted in Quantumleap's database.
+- Done, your historical data will be persisted in QuantumLeap's database.
 
 Let's have a look in more detail of each step.
 
 
 # Orion Subscription
 
-As stated before, the link between Orion and Quantumleap is established through a subscription you need to create. It is therefore important that you understand well how the NGSIv2 Subscription mechanism works. This is carefully explained in the corresponding section of [Orion docs](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions).
+As stated before, the link between Orion and QuantumLeap is established through a subscription you need to create. It is therefore important that you understand well how the NGSIv2 Subscription mechanism works. This is carefully explained in the corresponding section of [Orion docs](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions).
 
-Here's an example of the payload of the subscription you need to create in Orion to establish the link Orion-Quantumleap.
+Here's an example of the payload of the subscription you need to create in Orion to establish the link Orion-QuantumLeap.
 
     {
         "description": "Test subscription",
@@ -50,11 +50,11 @@ Important things to notice from the example.
 
 - You can create any valid NGSI subscription for your entities.
 
-- Though not compulsory, it is highly recommended to include the ```"metadata": ["dateCreated", "dateModified"]``` part in the *"notification"* part of the subscription. This instructs Orion to include the modification time of the attributes in the notification. This timestamp will be used as the time index in the database. If this is somehow missing, Quantumleap will use its current system time at which the notification arrived, which might not be exactly what you want.
+- Though not compulsory, it is highly recommended to include the ```"metadata": ["dateCreated", "dateModified"]``` part in the *"notification"* part of the subscription. This instructs Orion to include the modification time of the attributes in the notification. This timestamp will be used as the time index in the database. If this is somehow missing, QuantumLeap will use its current system time at which the notification arrived, which might not be exactly what you want.
 
 - Notifications must come in complete [NGSI JSON Entity Representation](http://docs.orioncontextbroker.apiary.io/#introduction/specification/json-attribute-representation) form. Other forms, such as the [simplified entity representation](http://docs.orioncontextbroker.apiary.io/#introduction/specification/simplified-entity-representation) are not supported by QL because they lack information on attribute types, required by QL to make proper translations. This means, don't use options like ```"attrsFormat": "keyValues"```
 
-- The ```"url"``` field of the subscription specifies where Orion will send the notifications. I.e, this must be Quantumleap's */notify* endpoint. By default, Quantumleap listens at port 8668.
+- The ```"url"``` field of the subscription specifies where Orion will send the notifications. I.e, this must be QuantumLeap's */notify* endpoint. By default, QuantumLeap listens at port 8668.
 
 
 # Data Insertion
@@ -102,17 +102,17 @@ NOTE: Attributes metadata is still not being persisted.
 
 # Data Retrieval
 
-The Quantumleap endpoints to retrieve data are still to be developed.
+The QuantumLeap endpoints to retrieve data are still to be developed.
 
 However, you can already query the persisted data either directly interacting with the Crate database, or through the use of Grafana. Further details are explained in the [Crate](../admin/crate.md) and [Grafana](../admin/grafana.md) sections, respectively.
 
-What you need to know in the mean time is that Quantumleap will create one table per each entity type. Table names are formed with the "et" prefix plus the lowercase version of the entity type. I.e, if your entity type is *AirQualityObserved*, the corresponding table name will be *etairqualityobserved*. All created tables for now belong to the default "doc" schema.
+What you need to know in the mean time is that QuantumLeap will create one table per each entity type. Table names are formed with the "et" prefix plus the lowercase version of the entity type. I.e, if your entity type is *AirQualityObserved*, the corresponding table name will be *etairqualityobserved*. All created tables for now belong to the default "doc" schema.
 
 
 ### The Time Index
 
 A fundamental index in the timeseries database is the time index. You may be wondering... where is it stored?
 
-Quantumleap will persist the time index for each notification in a special column called ```time_index```.  If you payed attention in the *Orion Subscription* section, you know at least which value is used as the time index. This is, the ```"dateModified"``` value notified by Orion or, if you missed that option in the subscription, the notification arrival time.
+QuantumLeap will persist the time index for each notification in a special column called ```time_index```.  If you payed attention in the *Orion Subscription* section, you know at least which value is used as the time index. This is, the ```"dateModified"``` value notified by Orion or, if you missed that option in the subscription, the notification arrival time.
 
 In the future, this could be more flexible and allow users to define any Datetime attribute to be used as the time index.

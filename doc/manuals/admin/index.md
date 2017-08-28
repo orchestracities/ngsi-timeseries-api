@@ -1,17 +1,17 @@
 # Installing
 
-At the moment, the only supported way of using Quantumleap is through Docker, so there's no actual "installation" of Quantumleap.
+At the moment, the only supported way of using QuantumLeap is through Docker, so there's no actual "installation" of QuantumLeap.
 
 If you need to install Docker, refer to [Docker Installation](https://docs.docker.com/engine/installation/).
 
-The Quantumleap Docker Image is hosted at [https://hub.docker.com/r/smartsdk/quantumleap/](https://hub.docker.com/r/smartsdk/quantumleap/).
+The QuantumLeap Docker Image is hosted at [https://hub.docker.com/r/smartsdk/quantumleap/](https://hub.docker.com/r/smartsdk/quantumleap/).
 
 Now, depending on your scenario, you might have different needs. See from the sections below which fits yours.
 
 
 ## All-in-one
 
-If you want to quickly deploy all the components of the [typical scenario](../index.md) at once to start experimenting with Quantumleap ASAP, do the following.
+If you want to quickly deploy all the components of the [typical scenario](../index.md) at once to start experimenting with QuantumLeap ASAP, do the following.
 
 Download (or create locally) a copy of [this docker-compose.yml](https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/experiments/grafana/docker-compose.yml) file.
 
@@ -30,7 +30,7 @@ After a while, check that all containers are running (up):
     337cd5b38b82        crate:1.0.5            "/docker-entrypoin..."   About a minute ago   Up About a minute             0.0.0.0:4200->4200/tcp, 0.0.0.0:4300->4300/tcp, 5432-5532/tcp   grafana_crate_1
     be4a72523e69        mongo:3.2              "docker-entrypoint..."   About a minute ago   Up About a minute             0.0.0.0:27017->27017/tcp                                        grafana_mongo_1
 
-Now you're ready to use Quantumleap as instructed in the [User Manual](../user/index.md).
+Now you're ready to use QuantumLeap as instructed in the [User Manual](../user/index.md).
 
 When you are done experimenting, remember to teardown the compose.
 
@@ -39,7 +39,7 @@ When you are done experimenting, remember to teardown the compose.
 
 ## Reuse External Orion Instance
 
-If you have already Orion running somewhere else and you just want to deploy Quantumleap, you can proceed as explained in *All-in-one* section, but before running ```docker-compose up``` remove from the *docker-compose.yml* file the complete definition of the ```orion:``` and ```mongo:``` services. You will also need to remove the references to them in the ```depends_on:``` section of the other services.
+If you have already Orion running somewhere else and you just want to deploy QuantumLeap, you can proceed as explained in *All-in-one* section, but before running ```docker-compose up``` remove from the *docker-compose.yml* file the complete definition of the ```orion:``` and ```mongo:``` services. You will also need to remove the references to them in the ```depends_on:``` section of the other services.
 
 Similarly, if you don't want to use *grafana*, you can remove that service definition as well.
 
@@ -58,10 +58,10 @@ This way, your *docker-compose.yml* file ends up more or less with the following
 
 ## Reuse External Orion and CrateDB
 
-If you only need to run Quantumleap to complete your setup, you can simply run
+If you only need to run QuantumLeap to complete your setup, you can simply run
 
     docker run -d -p 8668:8668 -e "CRATE_HOST=http://your_crate_location" smartsdk/quantumleap
 
-The environment variable *CRATE_HOST* will tell Quantumleap where to reach Crate, so you need to provide a reachable hostname where CrateDB is running. By default QL will append the port (4200) to the hostname.
+The environment variable *CRATE_HOST* will tell QuantumLeap where to reach Crate, so you need to provide a reachable hostname where CrateDB is running. By default QL will append the port (4200) to the hostname.
 
 For more options see [docker run reference](https://docs.docker.com/engine/reference/run/).

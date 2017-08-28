@@ -1,6 +1,6 @@
 # Crate
 
-[**Crate**](https://crate.io) is Quantumleap's default backend where NGSI data will be persisted. Until Quantumleap implements its querying API, you can interact directly with Crate to query all the data QL has saved from the received notifications.
+[**Crate**](https://crate.io) is QuantumLeap's default backend where NGSI data will be persisted. Until QuantumLeap implements its querying API, you can interact directly with Crate to query all the data QL has saved from the received notifications.
 
 If you followed the [Installation Guide](./index.md), you have already Crate running in a Docker container, ready to be used.
 

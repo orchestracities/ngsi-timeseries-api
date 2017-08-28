@@ -36,6 +36,6 @@ Include as much context info as possible, also ideally the following things:
         }
 
 - The payload of the subscription(s) that you created.
-- The logs of the Quantumleap container.
+- The logs of the QuantumLeap container.
 
     The logs can be retrieved with the *[docker logs command](https://docs.docker.com/engine/reference/commandline/logs/#options)* or *[docker service logs](https://docs.docker.com/engine/reference/commandline/service_logs/)* if you deployed QL as a service on Swarm. In the first case, you can discover the container id with *[docker ps -a]()*.
