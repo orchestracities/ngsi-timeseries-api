@@ -14,7 +14,7 @@ FIWARE(cb,"Context Broker \n - Orion",component)
 [Sensor @ IoT Layer] -right- NGSI
 NGSI -right- cb
 
-package "Quantumleap" {
+package "QuantumLeap" {
 	SMARTSDK(api,"API",component)
 	SMARTSDK(reporter,"Reporter",component)
 	SMARTSDK(translator,"Translator",component)

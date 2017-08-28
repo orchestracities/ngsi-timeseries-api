@@ -1,4 +1,4 @@
-# Quantumleap
+# QuantumLeap
 
 [![License badge](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Documentation badge](https://img.shields.io/badge/docs-latest-yellow.svg)](https://smartsdk.github.io/ngsi-timeseries-api/)
