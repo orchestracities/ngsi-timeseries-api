@@ -4,6 +4,20 @@ Contributions are more than welcome in the form of pull requests.
 
 You can either pick one of the open issues to work on, or provide enhancements according to your own needs. In any case, we suggest getting in touch beforehand to make sure the contribution will be aligned with the current development status.
 
+To contribute:
+
+1. Fork the repository and clone the fork to your local development environment
+1. Identify a modular contribution to the code (avoid too large contributions to simplify review)
+1. Create a branch in your repository where you tackle the "modular contributions"
+   - For multiple contributions tackling different functionalities, create different branches
+   - For all the new functionalities provide tests (see `setup_dev_env.sh` and `run.sh` in the root to understand how tests can be run locally)
+1. When done, verify that all tests are passing
+1. If so, create a pull request against our repository (we cannot review pull requests with failing tests)
+1. Wait for the review
+   - Implement required changes
+   - repeat until approval
+1. Done :) You can delete the branch in your repository.
+
 ## Development Setup and Structure
 
 The development is mostly python3 based for now, and really in the early stages so things will change for sure. For now, you can start with:
