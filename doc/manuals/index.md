@@ -1,6 +1,6 @@
 # QuantumLeap
 
-QuantumLeap is an adapter aimed to bring [FIWARE NGSIv2](http://docs.orioncontextbroker.apiary.io/#) Historical Data on top of TimeSeries Databases.
+QuantumLeap is an API that support the storage of NGSI [FIWARE NGSIv2](http://docs.orioncontextbroker.apiary.io/#) data into a [time series database](https://en.wikipedia.org/wiki/Time_series_database).
 
 In the end, its goals are similar to those of [FIWARE's Comet STH](https://fiware-sth-comet.readthedocs.io/en/latest/
 ). However, Comet does not yet support NGSIv2, it's tied to MongoDB, and some of the conditions and constraints under which it was developed are no longer hold. That being said, there is nothing wrong with it; this is just an exploration on a new way to provide historical data for FIWARE NGSIv2 with different timeseries databases as backend.

@@ -1,6 +1,6 @@
 # Installing
 
-At the moment, the only supported way of using QuantumLeap is through Docker, so there's no actual "installation" of QuantumLeap.
+At the moment, the only actively supported distribution of QuantumLeap is Docker. Though, you can build and install it from sources, but no guidance is provided for such installation at the moment.
 
 If you need to install Docker, refer to [Docker Installation](https://docs.docker.com/engine/installation/).
 

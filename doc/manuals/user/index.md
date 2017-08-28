@@ -30,7 +30,7 @@ Here's an example of the payload of the subscription you need to create in Orion
             ],
             "condition": {
                 "attrs": [  # Here the list of attrs whose change will trigger notifications. Empty array means track any change.
-                "temperature",
+                "temperature"
                 ]
             }
         },
@@ -39,7 +39,7 @@ Here's an example of the payload of the subscription you need to create in Orion
                 "url": http://quantumleap:8668/notify
             },
             "attrs": [  # Here the list of attrs to be persisted in time. Empty array means save all entity attributes.
-            "temperature",
+            "temperature"
             ],
             "metadata": ["dateCreated", "dateModified"]
         },
