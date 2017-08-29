@@ -6,7 +6,7 @@ services:
     image: fiware/orion:1.7.0
     ports:
       - "1026:1026"
-    command: -logLevel DEBUG -dbhost mongo
+    command: -logLevel DEBUG -noCache -dbhost mongo
     depends_on:
       - mongo
     healthcheck:
