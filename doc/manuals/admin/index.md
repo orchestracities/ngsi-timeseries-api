@@ -9,7 +9,12 @@ The QuantumLeap Docker Image is hosted at [https://hub.docker.com/r/smartsdk/qua
 Now, depending on your scenario, you might have different needs. See from the sections below which fits yours.
 
 
-## All-in-one
+## All-in-one (as a Docker Swarm service)
+
+Coming soon...
+
+
+## All-in-one (via docker-compose)
 
 If you want to quickly deploy all the components of the [typical scenario](../index.md) at once to start experimenting with QuantumLeap ASAP, do the following.
 
