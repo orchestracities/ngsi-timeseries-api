@@ -8,6 +8,7 @@ services:
   - docker
 
 install:
+  - pip install mkdocs
   - docker --version
   - docker build -t quantumleap .
 
@@ -15,6 +16,9 @@ script:
   - cd client/tests && sh run_tests.sh && cd -
   - cd translators/tests && sh run_tests.sh && cd -
   - cd reporter/tests && sh run_tests.sh && cd -
+
+after_success:
+    - mkdocs gh-deploy
 
 notifications:
   email: false
