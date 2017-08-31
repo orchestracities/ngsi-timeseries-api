@@ -13,16 +13,16 @@ Want to know more? Head to the [docs](https://smartsdk.github.io/ngsi-timeseries
 
 ## Installation and Configuration
 
-Refer to the [Installation Guide]().
+Refer to the [Installation Guide](https://smartsdk.github.io/ngsi-timeseries-api/admin/).
 
 ## Getting started
 
-Refer to the [User Manual]().
+Refer to the [User Manual](https://smartsdk.github.io/ngsi-timeseries-api/user/).
 
 ## Troubleshooting
 
-Refer to the [Troubleshooting]() section.
+Refer to the [Troubleshooting](https://smartsdk.github.io/ngsi-timeseries-api/user/troubleshooting/) section.
 
 ## Contributing
 
-Refer to the [Contributing]() section.
+Refer to the [Contributing](https://smartsdk.github.io/ngsi-timeseries-api/user/contributing/) section.
