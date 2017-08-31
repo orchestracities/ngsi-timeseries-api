@@ -22,7 +22,7 @@ The typical usage scenario for QuantumLeap would be the following:
 To begin with, you have an **IoT layer** pushing data in NGSI format to the **[Orion Context Broker](https://fiware-orion.readthedocs.io
 )**.
 
-The idea of **QuantumLeap** is pretty straightforward. By leveraging on the [notifications mechanism](http://fiware-orion.readthedocs.io/en/latest/user/walkthrough_apiv2/index.html#subscriptions), you instruct Orion to notify QuantumLeap of the changes in the entities you care about. Details of this process are explained in [this section](user/ngsi_notification.md). Notifications will arrive to QuantumLeap's API *'/notify'* endpoint. Its **Reporter** submodule will parse and validate the notification and eventually feed it to the configured **Translator**. The Translator is ultimately responsible for persisting the NGSI information to the configured times-series database.
+The idea of **QuantumLeap** is pretty straightforward. By leveraging on the [notifications mechanism](http://fiware-orion.readthedocs.io/en/latest/user/walkthrough_apiv2/index.html#subscriptions), you instruct Orion to notify QuantumLeap of the changes in the entities you care about. Details of this process are explained in the [Orion Subscription part of the User Manual](user/index.md#orion-subscription). Notifications will arrive to QuantumLeap's API *'/notify'* endpoint. Its **Reporter** submodule will parse and validate the notification and eventually feed it to the configured **Translator**. The Translator is ultimately responsible for persisting the NGSI information to the configured times-series database.
 
 In addition to the *'/notify'* endpoint, the API is planned to include NGSI endpoints for advanced raw and aggregated data retrieval.
 
