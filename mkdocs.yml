@@ -15,5 +15,5 @@ pages:
 theme: readthedocs
 markdown_extensions: [toc,fenced_code]
 extra_css: ["https://fiware.org/style/fiware_readthedocs.css"]
-repo_url: https://github.com/smartsdk/ngsi-timeseries-api
+repo_url: https://github.com/smartsdk/ngsi-timeseries-api.git
 edit_uri: 'edit/master/docs/'

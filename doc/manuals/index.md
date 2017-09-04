@@ -1,6 +1,6 @@
 # QuantumLeap
 
-QuantumLeap is an API that support the storage of NGSI [FIWARE NGSIv2](http://docs.orioncontextbroker.apiary.io/#) data into a [time series database](https://en.wikipedia.org/wiki/Time_series_database).
+QuantumLeap is an API that supports the storage of NGSI [FIWARE NGSIv2](http://docs.orioncontextbroker.apiary.io/#) data into a [time series database](https://en.wikipedia.org/wiki/Time_series_database).
 
 In the end, its goals are similar to those of [FIWARE's Comet STH](https://fiware-sth-comet.readthedocs.io/en/latest/
 ). However, Comet does not yet support NGSIv2, it's tied to MongoDB, and some of the conditions and constraints under which it was developed are no longer hold. That being said, there is nothing wrong with it; this is just an exploration on a new way to provide historical data for FIWARE NGSIv2 with different timeseries databases as backend.
@@ -22,7 +22,7 @@ The typical usage scenario for QuantumLeap would be the following:
 To begin with, you have an **IoT layer** pushing data in NGSI format to the **[Orion Context Broker](https://fiware-orion.readthedocs.io
 )**.
 
-The idea of **QuantumLeap** is pretty straightforward. By leveraging on the [notifications mechanism](http://fiware-orion.readthedocs.io/en/latest/user/walkthrough_apiv2/index.html#subscriptions), you instruct Orion to notify QuantumLeap of the changes in the entities you care about. Details of this process are explained in the [Orion Subscription part of the User Manual](user/index.md#orion-subscription). Notifications will arrive to QuantumLeap's API *'/notify'* endpoint. Its **Reporter** submodule will parse and validate the notification and eventually feed it to the configured **Translator**. The Translator is ultimately responsible for persisting the NGSI information to the configured times-series database.
+The idea of **QuantumLeap** is pretty straightforward. By leveraging on the [notifications mechanism](http://fiware-orion.readthedocs.io/en/latest/user/walkthrough_apiv2/index.html#subscriptions), you instruct Orion to notify QuantumLeap of the changes in the entities you care about. Details of this process are explained in the [Orion Subscription part of the User Manual](user/index.md#orion-subscription). Notifications will arrive to QuantumLeap's API *'/notify'* endpoint. Its **Reporter** submodule will parse and validate the notification and eventually feed it to the configured **Translator**. The Translator is ultimately the responsible for persisting the NGSI information to the configured times-series database.
 
 In addition to the *'/notify'* endpoint, the API is planned to include NGSI endpoints for advanced raw and aggregated data retrieval.
 

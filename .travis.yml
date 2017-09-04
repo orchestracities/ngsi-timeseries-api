@@ -18,7 +18,7 @@ script:
   - cd reporter/tests && sh run_tests.sh && cd -
 
 after_success:
-    - mkdocs gh-deploy
+    - sh ./deploy_docs.sh
 
 notifications:
   email: false
