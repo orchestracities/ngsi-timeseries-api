@@ -46,87 +46,66 @@
 
       <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
 	<ul class="current">
+	  
           
-            <li>
-    <li class="toctree-l1 current">
-        <a class="current" href=".">Home</a>
-        
-            <ul>
-            
-                <li class="toctree-l3"><a href="#quantumleap">QuantumLeap</a></li>
-                
-                    <li><a class="toctree-l4" href="#typical-usage-and-how-it-works">Typical Usage and How it works</a></li>
-                
-            
-            </ul>
-        
-    </li>
-<li>
-          
-            <li>
+            <li class="toctree-l1 current">
+		
+    <a class="current" href=".">Home</a>
     <ul class="subnav">
-    <li><span>User & Programmers Manual</span></li>
-
-        
             
-    <li class="toctree-l1 ">
-        <a class="" href="user/">Introduction</a>
+    <li class="toctree-l2"><a href="#quantumleap">QuantumLeap</a></li>
+    
+        <ul>
         
-    </li>
+            <li><a class="toctree-l3" href="#typical-usage-and-how-it-works">Typical Usage and How it works</a></li>
+        
+        </ul>
+    
 
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="user/troubleshooting/">Troubleshooting</a>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="user/contributing/">Contributing</a>
-        
-    </li>
-
-        
     </ul>
-<li>
+	    </li>
           
-            <li>
+            <li class="toctree-l1">
+		
+    <span class="caption-text">User & Programmers Manual</span>
     <ul class="subnav">
-    <li><span>Installation & Administration Manual</span></li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="admin/">Introduction</a>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="admin/ports/">Ports</a>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="admin/crate/">Crate</a>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="admin/grafana/">Grafana</a>
-        
-    </li>
-
-        
+                <li class="">
+                    
+    <a class="" href="user/">Introduction</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="user/troubleshooting/">Troubleshooting</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="user/contributing/">Contributing</a>
+                </li>
     </ul>
-<li>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Installation & Administration Manual</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="admin/">Introduction</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="admin/ports/">Ports</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="admin/crate/">Crate</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="admin/grafana/">Grafana</a>
+                </li>
+    </ul>
+	    </li>
           
         </ul>
       </div>
@@ -177,7 +156,7 @@
 <p>The typical usage scenario for QuantumLeap would be the following:</p>
 <p><img alt="Alt text" src="https://g.gravizo.com/svg?@startuml;skinparam%20componentStyle%20uml2;!define%20ICONURL%20https://raw.githubusercontent.com/smartsdk/architecture-diagrams/master/dist;!includeurl%20ICONURL/common.puml;!includeurl%20ICONURL/fiware.puml;!includeurl%20ICONURL/smartsdk.puml;interface%20NGSI;FIWARE%28cb,%22Context%20Broker%20\n%20-%20Orion%22,component%29;[Sensor%20@%20IoT%20Layer]%20-right-%20NGSI;NGSI%20-right-%20cb;package%20%22QuantumLeap%22%20{;SMARTSDK%28api,%22API%22,component%29;SMARTSDK%28reporter,%22Reporter%22,component%29;SMARTSDK%28translator,%22Translator%22,component%29;api%20-up-%20NGSI;api%20%3C-down-%3E%20translator;api%20%22/notify%22%20-down-%3E%20reporter;reporter%20-right-%3E%20translator;};[CrateDB]%20%3C-left-%20translator;[Grafana]%20-down-%20CrateDB;@enduml;" /></p>
 <p>To begin with, you have an <strong>IoT layer</strong> pushing data in NGSI format to the <strong><a href="https://fiware-orion.readthedocs.io">Orion Context Broker</a></strong>.</p>
-<p>The idea of <strong>QuantumLeap</strong> is pretty straightforward. By leveraging on the <a href="http://fiware-orion.readthedocs.io/en/latest/user/walkthrough_apiv2/index.html#subscriptions">notifications mechanism</a>, you instruct Orion to notify QuantumLeap of the changes in the entities you care about. Details of this process are explained in the <a href="user/#orion-subscription">Orion Subscription part of the User Manual</a>. Notifications will arrive to QuantumLeap's API <em>'/notify'</em> endpoint. Its <strong>Reporter</strong> submodule will parse and validate the notification and eventually feed it to the configured <strong>Translator</strong>. The Translator is ultimately responsible for persisting the NGSI information to the configured times-series database.</p>
+<p>The idea of <strong>QuantumLeap</strong> is pretty straightforward. By leveraging on the <a href="http://fiware-orion.readthedocs.io/en/latest/user/walkthrough_apiv2/index.html#subscriptions">notifications mechanism</a>, you instruct Orion to notify QuantumLeap of the changes in the entities you care about. Details of this process are explained in the <a href="user/#orion-subscription">Orion Subscription part of the User Manual</a>. Notifications will arrive to QuantumLeap's API <em>'/notify'</em> endpoint. Its <strong>Reporter</strong> submodule will parse and validate the notification and eventually feed it to the configured <strong>Translator</strong>. The Translator is ultimately the responsible for persisting the NGSI information to the configured times-series database.</p>
 <p>In addition to the <em>'/notify'</em> endpoint, the API is planned to include NGSI endpoints for advanced raw and aggregated data retrieval.</p>
 <h3 id="more-information">More information</h3>
 <ul>
@@ -217,7 +196,7 @@
   <div class="rst-versions" role="note" style="cursor: pointer">
     <span class="rst-current-version" data-toggle="rst-current-version">
       
-          <a href="https://github.com/smartsdk/ngsi-timeseries-api.git" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
+          <a href="https://github.com/smartsdk/ngsi-timeseries-api.git" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
       
@@ -231,6 +210,6 @@
 </html>
 
 <!--
-MkDocs version : 0.16.1
-Build Date UTC : 2017-09-04 13:50:29
+MkDocs version : 0.16.3
+Build Date UTC : 2017-09-04 14:20:52
 -->
