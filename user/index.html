@@ -8,7 +8,7 @@
   
   
   <link rel="shortcut icon" href="../img/favicon.ico">
-  <title>Introduction - Quantumleap</title>
+  <title>Introduction - QuantumLeap</title>
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="../css/theme.css" type="text/css" />
@@ -36,7 +36,7 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
       <div class="wy-side-nav-search">
-        <a href=".." class="icon icon-home"> Quantumleap</a>
+        <a href=".." class="icon icon-home"> QuantumLeap</a>
         <div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -149,7 +149,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="..">Quantumleap</a>
+        <a href="..">QuantumLeap</a>
       </nav>
 
       
@@ -168,7 +168,7 @@
     <li>Introduction</li>
     <li class="wy-breadcrumbs-aside">
       
-        <a href="https://github.com/smartsdk/ngsi-timeseries-api/edit/master/docs/user/index.md"
+        <a href="https://github.com/smartsdk/ngsi-timeseries-api.git/edit/master/docs/user/index.md"
           class="icon icon-github"> Edit on GitHub</a>
       
     </li>
@@ -179,18 +179,18 @@
             <div class="section">
               
                 <h1 id="usage-overview">Usage Overview</h1>
-<p>First you need to have Quantumleap runnning (of course). Refer to the <a href="../admin/">Installation Manual</a> for instructions.</p>
-<p>Then, you need to connect Orion Context Broker to Quantumleap through a subscription for each Entity Type whose historical data you are interested in. Historical data for each entity type will be persisted as long as the subscription is active.</p>
+<p>First you need to have QuantumLeap runnning (of course). Refer to the <a href="../admin/">Installation Manual</a> for instructions.</p>
+<p>Then, you need to connect Orion Context Broker to QuantumLeap through a subscription for each Entity Type whose historical data you are interested in. Historical data for each entity type will be persisted as long as the subscription is active.</p>
 <p>The flow is therefore the following</p>
 <ul>
 <li>Create an Orion subscription for each entity type of your interest once</li>
 <li>Insert and update your data to Orion as usual</li>
-<li>Done, your historical data will be persisted in Quantumleap's database.</li>
+<li>Done, your historical data will be persisted in QuantumLeap's database.</li>
 </ul>
 <p>Let's have a look in more detail of each step.</p>
 <h1 id="orion-subscription">Orion Subscription</h1>
-<p>As stated before, the link between Orion and Quantumleap is established through a subscription you need to create. It is therefore important that you understand well how the NGSIv2 Subscription mechanism works. This is carefully explained in the corresponding section of <a href="https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions">Orion docs</a>.</p>
-<p>Here's an example of the payload of the subscription you need to create in Orion to establish the link Orion-Quantumleap.</p>
+<p>As stated before, the link between Orion and QuantumLeap is established through a subscription you need to create. It is therefore important that you understand well how the NGSIv2 Subscription mechanism works. This is carefully explained in the corresponding section of <a href="https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions">Orion docs</a>.</p>
+<p>Here's an example of the payload of the subscription you need to create in Orion to establish the link Orion-QuantumLeap.</p>
 <pre><code>{
     "description": "Test subscription",
     "subject": {
@@ -202,7 +202,7 @@
         ],
         "condition": {
             "attrs": [  # Here the list of attrs whose change will trigger notifications. Empty array means track any change.
-            "temperature",
+            "temperature"
             ]
         }
     },
@@ -211,7 +211,7 @@
             "url": http://quantumleap:8668/notify
         },
         "attrs": [  # Here the list of attrs to be persisted in time. Empty array means save all entity attributes.
-        "temperature",
+        "temperature"
         ],
         "metadata": ["dateCreated", "dateModified"]
     },
@@ -224,13 +224,13 @@
 <p>You can create any valid NGSI subscription for your entities.</p>
 </li>
 <li>
-<p>Though not compulsory, it is highly recommended to include the <code>"metadata": ["dateCreated", "dateModified"]</code> part in the <em>"notification"</em> part of the subscription. This instructs Orion to include the modification time of the attributes in the notification. This timestamp will be used as the time index in the database. If this is somehow missing, Quantumleap will use its current system time at which the notification arrived, which might not be exactly what you want.</p>
+<p>Though not compulsory, it is highly recommended to include the <code>"metadata": ["dateCreated", "dateModified"]</code> part in the <em>"notification"</em> part of the subscription. This instructs Orion to include the modification time of the attributes in the notification. This timestamp will be used as the time index in the database. If this is somehow missing, QuantumLeap will use its current system time at which the notification arrived, which might not be exactly what you want.</p>
 </li>
 <li>
 <p>Notifications must come in complete <a href="http://docs.orioncontextbroker.apiary.io/#introduction/specification/json-attribute-representation">NGSI JSON Entity Representation</a> form. Other forms, such as the <a href="http://docs.orioncontextbroker.apiary.io/#introduction/specification/simplified-entity-representation">simplified entity representation</a> are not supported by QL because they lack information on attribute types, required by QL to make proper translations. This means, don't use options like <code>"attrsFormat": "keyValues"</code></p>
 </li>
 <li>
-<p>The <code>"url"</code> field of the subscription specifies where Orion will send the notifications. I.e, this must be Quantumleap's <em>/notify</em> endpoint. By default, Quantumleap listens at port 8668.</p>
+<p>The <code>"url"</code> field of the subscription specifies where Orion will send the notifications. I.e, this must be QuantumLeap's <em>/notify</em> endpoint. By default, QuantumLeap listens at port 8668.</p>
 </li>
 </ul>
 <h1 id="data-insertion">Data Insertion</h1>
@@ -307,12 +307,12 @@
 </table>
 <p>NOTE: Attributes metadata is still not being persisted.</p>
 <h1 id="data-retrieval">Data Retrieval</h1>
-<p>The Quantumleap endpoints to retrieve data are still to be developed.</p>
+<p>The QuantumLeap endpoints to retrieve data are still to be developed.</p>
 <p>However, you can already query the persisted data either directly interacting with the Crate database, or through the use of Grafana. Further details are explained in the <a href="../admin/crate/">Crate</a> and <a href="../admin/grafana/">Grafana</a> sections, respectively.</p>
-<p>What you need to know in the mean time is that Quantumleap will create one table per each entity type. Table names are formed with the "et" prefix plus the lowercase version of the entity type. I.e, if your entity type is <em>AirQualityObserved</em>, the corresponding table name will be <em>etairqualityobserved</em>. All created tables for now belong to the default "doc" schema.</p>
+<p>What you need to know in the mean time is that QuantumLeap will create one table per each entity type. Table names are formed with the "et" prefix plus the lowercase version of the entity type. I.e, if your entity type is <em>AirQualityObserved</em>, the corresponding table name will be <em>etairqualityobserved</em>. All created tables for now belong to the default "doc" schema.</p>
 <h3 id="the-time-index">The Time Index</h3>
 <p>A fundamental index in the timeseries database is the time index. You may be wondering... where is it stored?</p>
-<p>Quantumleap will persist the time index for each notification in a special column called <code>time_index</code>.  If you payed attention in the <em>Orion Subscription</em> section, you know at least which value is used as the time index. This is, the <code>"dateModified"</code> value notified by Orion or, if you missed that option in the subscription, the notification arrival time.</p>
+<p>QuantumLeap will persist the time index for each notification in a special column called <code>time_index</code>.  If you payed attention in the <em>Orion Subscription</em> section, you know at least which value is used as the time index. This is, the <code>"dateModified"</code> value notified by Orion or, if you missed that option in the subscription, the notification arrival time.</p>
 <p>In the future, this could be more flexible and allow users to define any Datetime attribute to be used as the time index.</p>
               
             </div>
@@ -349,7 +349,7 @@
   <div class="rst-versions" role="note" style="cursor: pointer">
     <span class="rst-current-version" data-toggle="rst-current-version">
       
-          <a href="https://github.com/smartsdk/ngsi-timeseries-api" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
+          <a href="https://github.com/smartsdk/ngsi-timeseries-api.git" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
         <span><a href=".." style="color: #fcfcfc;">&laquo; Previous</a></span>

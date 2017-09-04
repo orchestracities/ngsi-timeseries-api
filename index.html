@@ -8,7 +8,7 @@
   <meta name="description" content="An NGSI to TSDB Adapter to allow processing of Historical Data.">
   
   <link rel="shortcut icon" href="./img/favicon.ico">
-  <title>Home - Quantumleap</title>
+  <title>Home - QuantumLeap</title>
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="./css/theme.css" type="text/css" />
@@ -36,7 +36,7 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
       <div class="wy-side-nav-search">
-        <a href="." class="icon icon-home"> Quantumleap</a>
+        <a href="." class="icon icon-home"> QuantumLeap</a>
         <div role="search">
   <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -53,7 +53,7 @@
         
             <ul>
             
-                <li class="toctree-l3"><a href="#quantumleap">Quantumleap</a></li>
+                <li class="toctree-l3"><a href="#quantumleap">QuantumLeap</a></li>
                 
                     <li><a class="toctree-l4" href="#typical-usage-and-how-it-works">Typical Usage and How it works</a></li>
                 
@@ -138,7 +138,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href=".">Quantumleap</a>
+        <a href=".">QuantumLeap</a>
       </nav>
 
       
@@ -153,7 +153,7 @@
     <li>Home</li>
     <li class="wy-breadcrumbs-aside">
       
-        <a href="https://github.com/smartsdk/ngsi-timeseries-api/edit/master/docs/index.md"
+        <a href="https://github.com/smartsdk/ngsi-timeseries-api.git/edit/master/docs/index.md"
           class="icon icon-github"> Edit on GitHub</a>
       
     </li>
@@ -163,8 +163,8 @@
           <div role="main">
             <div class="section">
               
-                <h1 id="quantumleap">Quantumleap</h1>
-<p>Quantumleap is an adapter aimed to bring <a href="http://docs.orioncontextbroker.apiary.io/#">FIWARE NGSIv2</a> Historical Data on top of TimeSeries Databases.</p>
+                <h1 id="quantumleap">QuantumLeap</h1>
+<p>QuantumLeap is an API that supports the storage of NGSI <a href="http://docs.orioncontextbroker.apiary.io/#">FIWARE NGSIv2</a> data into a <a href="https://en.wikipedia.org/wiki/Time_series_database">time series database</a>.</p>
 <p>In the end, its goals are similar to those of <a href="https://fiware-sth-comet.readthedocs.io/en/latest/">FIWARE's Comet STH</a>. However, Comet does not yet support NGSIv2, it's tied to MongoDB, and some of the conditions and constraints under which it was developed are no longer hold. That being said, there is nothing wrong with it; this is just an exploration on a new way to provide historical data for FIWARE NGSIv2 with different timeseries databases as backend.</p>
 <p>The idea is to keep the translator phase swapable so as to look forward to having support for different timeseries databases. We started testing <a href="https://docs.influxdata.com/influxdb/">InfluxDB</a>, <a href="https://www.rethinkdb.com/docs/">RethinkDB</a> and <a href="http://www.crate.io">Crate</a>. However, we have decided for now to focus on the NGSIv2-CrateDB translator because we find in <a href="http://www.crate.io">Crate</a> the following advantages:</p>
 <ul>
@@ -174,14 +174,14 @@
 <li>Supported integration with visualization tools like <a href="http://www.grafana.com">Grafana</a></li>
 </ul>
 <h2 id="typical-usage-and-how-it-works">Typical Usage and How it works</h2>
-<p>The typical usage scenario for Quantumleap would be the following:</p>
-<p><img alt="Alt text" src="https://g.gravizo.com/svg?@startuml;skinparam%20componentStyle%20uml2;!define%20ICONURL%20https://raw.githubusercontent.com/smartsdk/architecture-diagrams/master/dist;!includeurl%20ICONURL/common.puml;!includeurl%20ICONURL/fiware.puml;!includeurl%20ICONURL/smartsdk.puml;interface%20NGSI;FIWARE%28cb,%22Context%20Broker%20\n%20-%20Orion%22,component%29;[Sensor%20@%20IoT%20Layer]%20-right-%20NGSI;NGSI%20-right-%20cb;package%20%22Quantumleap%22%20{;SMARTSDK%28api,%22API%22,component%29;SMARTSDK%28reporter,%22Reporter%22,component%29;SMARTSDK%28translator,%22Translator%22,component%29;api%20-up-%20NGSI;api%20%3C-down-%3E%20translator;api%20%22/notify%22%20-down-%3E%20reporter;reporter%20-right-%3E%20translator;};[CrateDB]%20%3C-left-%20translator;[Grafana]%20-down-%20CrateDB;@enduml;" /></p>
+<p>The typical usage scenario for QuantumLeap would be the following:</p>
+<p><img alt="Alt text" src="https://g.gravizo.com/svg?@startuml;skinparam%20componentStyle%20uml2;!define%20ICONURL%20https://raw.githubusercontent.com/smartsdk/architecture-diagrams/master/dist;!includeurl%20ICONURL/common.puml;!includeurl%20ICONURL/fiware.puml;!includeurl%20ICONURL/smartsdk.puml;interface%20NGSI;FIWARE%28cb,%22Context%20Broker%20\n%20-%20Orion%22,component%29;[Sensor%20@%20IoT%20Layer]%20-right-%20NGSI;NGSI%20-right-%20cb;package%20%22QuantumLeap%22%20{;SMARTSDK%28api,%22API%22,component%29;SMARTSDK%28reporter,%22Reporter%22,component%29;SMARTSDK%28translator,%22Translator%22,component%29;api%20-up-%20NGSI;api%20%3C-down-%3E%20translator;api%20%22/notify%22%20-down-%3E%20reporter;reporter%20-right-%3E%20translator;};[CrateDB]%20%3C-left-%20translator;[Grafana]%20-down-%20CrateDB;@enduml;" /></p>
 <p>To begin with, you have an <strong>IoT layer</strong> pushing data in NGSI format to the <strong><a href="https://fiware-orion.readthedocs.io">Orion Context Broker</a></strong>.</p>
-<p>The idea of <strong>Quantumleap</strong> is pretty straightforward. By leveraging on the <a href="http://fiware-orion.readthedocs.io/en/latest/user/walkthrough_apiv2/index.html#subscriptions">notifications mechanism</a>, you instruct Orion to notify Quantumleap of the changes in the entities you care about. Details of this process are explained in <a href="user/ngsi_notification.md">this section</a>. Notifications will arrive to Quantumleap's API <em>'/notify'</em> endpoint. Its <strong>Reporter</strong> submodule will parse and validate the notification and eventually feed it to the configured <strong>Translator</strong>. The Translator is ultimately responsible for persisting the NGSI information to the configured times-series database.</p>
+<p>The idea of <strong>QuantumLeap</strong> is pretty straightforward. By leveraging on the <a href="http://fiware-orion.readthedocs.io/en/latest/user/walkthrough_apiv2/index.html#subscriptions">notifications mechanism</a>, you instruct Orion to notify QuantumLeap of the changes in the entities you care about. Details of this process are explained in the <a href="user/#orion-subscription">Orion Subscription part of the User Manual</a>. Notifications will arrive to QuantumLeap's API <em>'/notify'</em> endpoint. Its <strong>Reporter</strong> submodule will parse and validate the notification and eventually feed it to the configured <strong>Translator</strong>. The Translator is ultimately responsible for persisting the NGSI information to the configured times-series database.</p>
 <p>In addition to the <em>'/notify'</em> endpoint, the API is planned to include NGSI endpoints for advanced raw and aggregated data retrieval.</p>
 <h3 id="more-information">More information</h3>
 <ul>
-<li>Refer to the <a href="admin/">Admin Guide</a> for info on how to install Quantumleap and get it running.</li>
+<li>Refer to the <a href="admin/">Admin Guide</a> for info on how to install QuantumLeap and get it running.</li>
 <li>Refer to the <a href="user/">User Manual</a> for more info on how to use it.</li>
 </ul>
               
@@ -217,7 +217,7 @@
   <div class="rst-versions" role="note" style="cursor: pointer">
     <span class="rst-current-version" data-toggle="rst-current-version">
       
-          <a href="https://github.com/smartsdk/ngsi-timeseries-api" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
+          <a href="https://github.com/smartsdk/ngsi-timeseries-api.git" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
       
@@ -232,5 +232,5 @@
 
 <!--
 MkDocs version : 0.16.1
-Build Date UTC : 2017-08-24 17:37:25
+Build Date UTC : 2017-09-04 13:50:29
 -->

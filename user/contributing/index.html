@@ -8,7 +8,7 @@
   
   
   <link rel="shortcut icon" href="../../img/favicon.ico">
-  <title>Contributing - Quantumleap</title>
+  <title>Contributing - QuantumLeap</title>
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="../../css/theme.css" type="text/css" />
@@ -36,7 +36,7 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
       <div class="wy-side-nav-search">
-        <a href="../.." class="icon icon-home"> Quantumleap</a>
+        <a href="../.." class="icon icon-home"> QuantumLeap</a>
         <div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -139,7 +139,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../..">Quantumleap</a>
+        <a href="../..">QuantumLeap</a>
       </nav>
 
       
@@ -158,7 +158,7 @@
     <li>Contributing</li>
     <li class="wy-breadcrumbs-aside">
       
-        <a href="https://github.com/smartsdk/ngsi-timeseries-api/edit/master/docs/user/contributing.md"
+        <a href="https://github.com/smartsdk/ngsi-timeseries-api.git/edit/master/docs/user/contributing.md"
           class="icon icon-github"> Edit on GitHub</a>
       
     </li>
@@ -171,6 +171,20 @@
                 <h2 id="contributions">Contributions</h2>
 <p>Contributions are more than welcome in the form of pull requests.</p>
 <p>You can either pick one of the open issues to work on, or provide enhancements according to your own needs. In any case, we suggest getting in touch beforehand to make sure the contribution will be aligned with the current development status.</p>
+<p>To contribute:</p>
+<ol>
+<li>Fork the repository and clone the fork to your local development environment</li>
+<li>Identify a modular contribution to the code (avoid too large contributions to simplify review)</li>
+<li>Create a branch in your repository where you tackle the "modular contributions"</li>
+<li>For multiple contributions tackling different functionalities, create different branches</li>
+<li>For all the new functionalities provide tests (see <code>setup_dev_env.sh</code> and <code>run.sh</code> in the root to understand how tests can be run locally)</li>
+<li>When done, verify that all tests are passing</li>
+<li>If so, create a pull request against our repository (we cannot review pull requests with failing tests)</li>
+<li>Wait for the review</li>
+<li>Implement required changes</li>
+<li>repeat until approval</li>
+<li>Done :) You can delete the branch in your repository.</li>
+</ol>
 <h2 id="development-setup-and-structure">Development Setup and Structure</h2>
 <p>The development is mostly python3 based for now, and really in the early stages so things will change for sure. For now, you can start with:</p>
 <pre><code>git clone https://github.com/smartsdk/ngsi-timeseries-api.git
@@ -230,7 +244,7 @@ source setup_dev_env.sh
   <div class="rst-versions" role="note" style="cursor: pointer">
     <span class="rst-current-version" data-toggle="rst-current-version">
       
-          <a href="https://github.com/smartsdk/ngsi-timeseries-api" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
+          <a href="https://github.com/smartsdk/ngsi-timeseries-api.git" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
         <span><a href="../troubleshooting/" style="color: #fcfcfc;">&laquo; Previous</a></span>

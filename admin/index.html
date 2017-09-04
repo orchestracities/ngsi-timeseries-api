@@ -8,7 +8,7 @@
   
   
   <link rel="shortcut icon" href="../img/favicon.ico">
-  <title>Introduction - Quantumleap</title>
+  <title>Introduction - QuantumLeap</title>
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="../css/theme.css" type="text/css" />
@@ -36,7 +36,7 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
       <div class="wy-side-nav-search">
-        <a href=".." class="icon icon-home"> Quantumleap</a>
+        <a href=".." class="icon icon-home"> QuantumLeap</a>
         <div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -96,7 +96,9 @@
             
                 <li class="toctree-l3"><a href="#installing">Installing</a></li>
                 
-                    <li><a class="toctree-l4" href="#all-in-one">All-in-one</a></li>
+                    <li><a class="toctree-l4" href="#all-in-one-as-a-docker-swarm-service">All-in-one (as a Docker Swarm service)</a></li>
+                
+                    <li><a class="toctree-l4" href="#all-in-one-via-docker-compose">All-in-one (via docker-compose)</a></li>
                 
                     <li><a class="toctree-l4" href="#reuse-external-orion-instance">Reuse External Orion Instance</a></li>
                 
@@ -142,7 +144,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="..">Quantumleap</a>
+        <a href="..">QuantumLeap</a>
       </nav>
 
       
@@ -161,7 +163,7 @@
     <li>Introduction</li>
     <li class="wy-breadcrumbs-aside">
       
-        <a href="https://github.com/smartsdk/ngsi-timeseries-api/edit/master/docs/admin/index.md"
+        <a href="https://github.com/smartsdk/ngsi-timeseries-api.git/edit/master/docs/admin/index.md"
           class="icon icon-github"> Edit on GitHub</a>
       
     </li>
@@ -172,12 +174,14 @@
             <div class="section">
               
                 <h1 id="installing">Installing</h1>
-<p>At the moment, the only supported way of using Quantumleap is through Docker, so there's no actual "installation" of Quantumleap.</p>
+<p>At the moment, the only actively supported distribution of QuantumLeap is Docker. Though, you can build and install it from sources, but no guidance is provided for such installation at the moment.</p>
 <p>If you need to install Docker, refer to <a href="https://docs.docker.com/engine/installation/">Docker Installation</a>.</p>
-<p>The Quantumleap Docker Image is hosted at <a href="https://hub.docker.com/r/smartsdk/quantumleap/">https://hub.docker.com/r/smartsdk/quantumleap/</a>.</p>
+<p>The QuantumLeap Docker Image is hosted at <a href="https://hub.docker.com/r/smartsdk/quantumleap/">https://hub.docker.com/r/smartsdk/quantumleap/</a>.</p>
 <p>Now, depending on your scenario, you might have different needs. See from the sections below which fits yours.</p>
-<h2 id="all-in-one">All-in-one</h2>
-<p>If you want to quickly deploy all the components of the <a href="..">typical scenario</a> at once to start experimenting with Quantumleap ASAP, do the following.</p>
+<h2 id="all-in-one-as-a-docker-swarm-service">All-in-one (as a Docker Swarm service)</h2>
+<p>Coming soon...</p>
+<h2 id="all-in-one-via-docker-compose">All-in-one (via docker-compose)</h2>
+<p>If you want to quickly deploy all the components of the <a href="..">typical scenario</a> at once to start experimenting with QuantumLeap ASAP, do the following.</p>
 <p>Download (or create locally) a copy of <a href="https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/experiments/grafana/docker-compose.yml">this docker-compose.yml</a> file.</p>
 <p>Then start it up:</p>
 <pre><code># same path were you have placed the docker-compose.yml
@@ -192,12 +196,12 @@ f435868ea042        grafana/grafana        "/run.sh"                About a minu
 337cd5b38b82        crate:1.0.5            "/docker-entrypoin..."   About a minute ago   Up About a minute             0.0.0.0:4200-&gt;4200/tcp, 0.0.0.0:4300-&gt;4300/tcp, 5432-5532/tcp   grafana_crate_1
 be4a72523e69        mongo:3.2              "docker-entrypoint..."   About a minute ago   Up About a minute             0.0.0.0:27017-&gt;27017/tcp                                        grafana_mongo_1
 </code></pre>
-<p>Now you're ready to use Quantumleap as instructed in the <a href="../user/">User Manual</a>.</p>
+<p>Now you're ready to use QuantumLeap as instructed in the <a href="../user/">User Manual</a>.</p>
 <p>When you are done experimenting, remember to teardown the compose.</p>
 <pre><code>$ docker-compose down -v
 </code></pre>
 <h2 id="reuse-external-orion-instance">Reuse External Orion Instance</h2>
-<p>If you have already Orion running somewhere else and you just want to deploy Quantumleap, you can proceed as explained in <em>All-in-one</em> section, but before running <code>docker-compose up</code> remove from the <em>docker-compose.yml</em> file the complete definition of the <code>orion:</code> and <code>mongo:</code> services. You will also need to remove the references to them in the <code>depends_on:</code> section of the other services.</p>
+<p>If you have already Orion running somewhere else and you just want to deploy QuantumLeap, you can proceed as explained in <em>All-in-one</em> section, but before running <code>docker-compose up</code> remove from the <em>docker-compose.yml</em> file the complete definition of the <code>orion:</code> and <code>mongo:</code> services. You will also need to remove the references to them in the <code>depends_on:</code> section of the other services.</p>
 <p>Similarly, if you don't want to use <em>grafana</em>, you can remove that service definition as well.</p>
 <p>This way, your <em>docker-compose.yml</em> file ends up more or less with the following sections only</p>
 <pre><code>version: '3'
@@ -212,10 +216,10 @@ networks:
     ...
 </code></pre>
 <h2 id="reuse-external-orion-and-cratedb">Reuse External Orion and CrateDB</h2>
-<p>If you only need to run Quantumleap to complete your setup, you can simply run</p>
+<p>If you only need to run QuantumLeap to complete your setup, you can simply run</p>
 <pre><code>docker run -d -p 8668:8668 -e "CRATE_HOST=http://your_crate_location" smartsdk/quantumleap
 </code></pre>
-<p>The environment variable <em>CRATE_HOST</em> will tell Quantumleap where to reach Crate, so you need to provide a reachable hostname where CrateDB is running. By default QL will append the port (4200) to the hostname.</p>
+<p>The environment variable <em>CRATE_HOST</em> will tell QuantumLeap where to reach Crate, so you need to provide a reachable hostname where CrateDB is running. By default QL will append the port (4200) to the hostname.</p>
 <p>For more options see <a href="https://docs.docker.com/engine/reference/run/">docker run reference</a>.</p>
               
             </div>
@@ -252,7 +256,7 @@ networks:
   <div class="rst-versions" role="note" style="cursor: pointer">
     <span class="rst-current-version" data-toggle="rst-current-version">
       
-          <a href="https://github.com/smartsdk/ngsi-timeseries-api" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
+          <a href="https://github.com/smartsdk/ngsi-timeseries-api.git" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
         <span><a href="../user/contributing/" style="color: #fcfcfc;">&laquo; Previous</a></span>
