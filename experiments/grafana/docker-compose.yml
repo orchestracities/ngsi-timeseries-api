@@ -48,3 +48,8 @@ services:
       - GF_INSTALL_PLUGINS=crate-datasource,grafana-clock-panel,grafana-worldmap-panel
     depends_on:
       - crate
+
+networks:
+    default:
+        driver_opts:
+            com.docker.network.driver.mtu: ${DOCKER_MTU:-1400}

@@ -1,0 +1,19 @@
+site_name: QuantumLeap
+site_description: An NGSI to TSDB Adapter to allow processing of Historical Data.
+docs_dir: doc/manuals
+pages:
+  - Home: index.md
+  - 'User & Programmers Manual':
+    - 'Introduction': 'user/index.md'
+    - 'Troubleshooting': 'user/troubleshooting.md'
+    - 'Contributing': 'user/contributing.md'
+  - 'Installation & Administration Manual':
+    - 'Introduction': 'admin/index.md'
+    - 'Ports': 'admin/ports.md'
+    - 'Crate': 'admin/crate.md'
+    - 'Grafana': 'admin/grafana.md'
+theme: readthedocs
+markdown_extensions: [toc,fenced_code]
+extra_css: ["https://fiware.org/style/fiware_readthedocs.css"]
+repo_url: https://github.com/smartsdk/ngsi-timeseries-api.git
+edit_uri: 'edit/master/docs/'
