@@ -36,7 +36,7 @@ Here's an example of the payload of the subscription you need to create in Orion
         },
         "notification": {
             "http": {
-                "url": http://quantumleap:8668/notify
+                "url": "http://quantumleap:8668/notify"
             },
             "attrs": [  # Here the list of attrs to be persisted in time. Empty array means save all entity attributes.
             "temperature"
@@ -66,17 +66,17 @@ It's not a problem if the first insert was done before you created the subscript
 Here's an example of an insert payload that will generate a notification based on the subscription example shown before.
 
     {
-        'id': 'Room1',
-        'type': 'Room',
-        'temperature': {
-            'value': 24.2,
-            'type': 'Number',
-            'metadata': {}
+        "id": "Room1",
+        "type": "Room",
+        "temperature": {
+            "value": 24.2,
+            "type": "Number",
+            "metadata": {}
         },
-        'pressure': {
-            'value': 720,
-            'type': 'Number',
-            'metadata': {}
+        "pressure": {
+            "value": 720,
+            "type": "Number",
+            "metadata": {}
         }
     }
 

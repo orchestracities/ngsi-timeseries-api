@@ -4,6 +4,14 @@ At the moment, the only actively supported distribution of QuantumLeap is Docker
 
 If you need to install Docker, refer to [Docker Installation](https://docs.docker.com/engine/installation/).
 
+You might also need docker-compose for some cases, which can be installed by running:
+
+    # Replace 1.16.0 with the version you want. We suggest the latest from https://github.com/docker/compose/releases
+    curl -L https://github.com/docker/compose/releases/download/1.16.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
+
+Alternatively, see the docker-compose [install docs](https://docs.docker.com/compose/install/) for more install options and instructions.
+
 The QuantumLeap Docker Image is hosted at [https://hub.docker.com/r/smartsdk/quantumleap/](https://hub.docker.com/r/smartsdk/quantumleap/).
 
 Now, depending on your scenario, you might have different needs. See from the sections below which fits yours.
