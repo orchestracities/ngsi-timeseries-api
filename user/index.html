@@ -191,7 +191,7 @@
     },
     "notification": {
         "http": {
-            "url": http://quantumleap:8668/notify
+            "url": "http://quantumleap:8668/notify"
         },
         "attrs": [  # Here the list of attrs to be persisted in time. Empty array means save all entity attributes.
         "temperature"
@@ -221,17 +221,17 @@
 <p>It's not a problem if the first insert was done before you created the subscription. Of course, you will get historical records of the updates happening after the subscription was created.</p>
 <p>Here's an example of an insert payload that will generate a notification based on the subscription example shown before.</p>
 <pre><code>{
-    'id': 'Room1',
-    'type': 'Room',
-    'temperature': {
-        'value': 24.2,
-        'type': 'Number',
-        'metadata': {}
+    "id": "Room1",
+    "type": "Room",
+    "temperature": {
+        "value": 24.2,
+        "type": "Number",
+        "metadata": {}
     },
-    'pressure': {
-        'value': 720,
-        'type': 'Number',
-        'metadata': {}
+    "pressure": {
+        "value": 720,
+        "type": "Number",
+        "metadata": {}
     }
 }
 </code></pre>
