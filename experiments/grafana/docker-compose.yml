@@ -19,13 +19,6 @@ services:
     image: mongo:3.2
     ports:
       - "27017:27017"
-    deploy:
-      mode: global
-      restart_policy:
-        condition: on-failure
-      update_config:
-        parallelism: 1
-        delay: 1m30s
     volumes:
       - mongodata:/data/db
 
@@ -48,13 +41,6 @@ services:
       # Transport protocol
       - "4300:4300"
     command: -Ccluster.name=democluster -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*"
-    deploy:
-      mode: global
-      restart_policy:
-        condition: on-failure
-      update_config:
-        parallelism: 1
-        delay: 1m30s
     volumes:
       - cratedata:/data
 
