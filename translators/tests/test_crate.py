@@ -2,6 +2,7 @@ from conftest import entity
 from datetime import datetime
 from translators.base_translator import BaseTranslator
 from translators.benchmark import benchmark
+from translators.crate import UnsupportedNGSIType
 from translators.fixtures import crate_translator as translator
 from utils.common import *
 import pytest
@@ -118,6 +119,38 @@ def test_benchmark(translator):
 
 def test_benchmark_extended(translator):
     benchmark(translator, num_types=2, num_ids_per_type=2, num_updates=10, use_geo=True, use_time=True)
+
+
+def test_unsupported_ngsi_type(translator):
+    e = {
+        "type": "SoMeWeIrDtYpE",
+        "id": "sOmEwEiRdId",
+        TIME_INDEX_NAME: datetime(1970, 6, 28, 1, 1, 1).isoformat()[:-3],
+        "foo": {
+            "type": "DefinitivelyNotAValidNGSIType",
+            "value": "BaR",
+        }
+    }
+    # Assert exception is raised with error message containing both unsupported given type and supported expected type.
+    with pytest.raises(UnsupportedNGSIType, match=r"DefinitivelyNotAValidNGSIType.* Text"):
+        translator.insert([e])
+
+
+def test_capitals(translator):
+    e = {
+        "type": "SoMeWeIrDtYpE",
+        "id": "sOmEwEiRdId",
+        TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
+        "foo": {
+            "type": "Text",
+            "value": "BaR",
+        }
+    }
+    translator.insert([e])
+    translator._refresh(["SoMeWeIrDtYpE"])
+    entities = translator.query()
+    assert len(entities) == 1
+    assert_ngsi_entity_equals(e, entities[0])
 
 
 # FIWARE DATA MODELS
