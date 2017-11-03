@@ -4,6 +4,7 @@ from translators.base_translator import BaseTranslator
 from utils.common import iter_entity_attrs
 import statistics
 
+
 # NGSI TYPES: Not properly documented so this might change. Based on experimenting with Orion.
 # CRATE TYPES: https://crate.io/docs/reference/sql/data_types.html
 NGSI_TO_CRATE = {
@@ -18,6 +19,23 @@ NGSI_TO_CRATE = {
 }
 CRATE_TO_NGSI = dict((v, k) for (k,v) in NGSI_TO_CRATE.items())
 CRATE_TO_NGSI['string_array'] = 'Array'
+
+
+
+class UnsupportedNGSIType(TypeError):
+    """
+    To make type conversion errors more user-friendly, this exception is raised with a message of supported 'NGSI types'
+    """
+    def __init__(self, unsupported_type):
+        """
+        :param string unsupported_type:
+            the unsupported type
+        """
+        msg = "'{}' is not a supported NGSI type. Please use any of the following: {}".format(
+            unsupported_type, ", ".join(NGSI_TO_CRATE.keys())
+        )
+        super(UnsupportedNGSIType, self).__init__(msg)
+
 
 
 class CrateTranslator(BaseTranslator):
@@ -116,6 +134,8 @@ class CrateTranslator(BaseTranslator):
                     table[self.TIME_INDEX_NAME] = NGSI_TO_CRATE['DateTime']
                 else:
                     ngsi_t = e[attr]['type']
+                    if ngsi_t not in NGSI_TO_CRATE:
+                        raise UnsupportedNGSIType(ngsi_t)
                     crate_t = NGSI_TO_CRATE[ngsi_t]
                     table[attr] = crate_t
 
