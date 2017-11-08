@@ -108,6 +108,9 @@ However, you can already query the persisted data either directly interacting wi
 
 What you need to know in the mean time is that QuantumLeap will create one table per each entity type. Table names are formed with the "et" prefix plus the lowercase version of the entity type. I.e, if your entity type is *AirQualityObserved*, the corresponding table name will be *etairqualityobserved*. All created tables for now belong to the default "doc" schema.
 
+### Restrictions
+
+- You cannot have two entity types with the same name but different capitalization. E.g: `Room` and `room`. The same applies for attribute names of a given entity. I.e, attributes `Temperature` and `temperature` will be treated as the same.
 
 ### The Time Index
 

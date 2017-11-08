@@ -67,7 +67,7 @@ def air_quality_observed():
         },
         "dateObserved": {
             "type": "DateTime",
-            "value": "2016-03-14T17:00:00-05:00"
+            "value": "2016-03-14T17:00:00"
         },
         "location": {
             "value": {
