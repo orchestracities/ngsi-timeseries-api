@@ -32,7 +32,7 @@ def assert_ngsi_entity_equals(entity, other):
         return
 
     # Else, the rest can be treated as a dict
-    assert entity.keys() == other.keys()
+    assert entity.keys() == other.keys(), entity.keys() ^ other.keys()
     for ek, ev in entity.items():
         if isinstance(ev, dict):
             assert_ngsi_entity_equals(ev, other[ek])

@@ -11,6 +11,12 @@ The reporter needs to know the form of the entity (i.e, name and types of its at
         corresponding table[s] in the database.
 
 For now, we have adopted approach 2.
+
+TODO:
+- Validate entity and attribute names against valid NGSI names and valid [Crate names](https://crate.io/docs/crate/reference/en/latest/sql/ddl/basics.html#naming-restrictions) 
+- Raise warning and act accordingly when receiving entity with equal lowercased attributes.
+- Consider offering an API endpoint to receive just the user's entities of
+interest and make QL actually perform the corresponding subscription to orion. I.e, QL must be told where orion is.
 """
 from flask import Flask, request
 from utils.common import iter_entity_attrs
@@ -116,6 +122,3 @@ def notify():
 
 if __name__ == '__main__':
     app.run(host=LOCAL, port=8668)
-
-# TODO: Consider offering an API endpoint to receive just the user's entities of interest and make QL actually perform
-# the corresponding subscription to orion. I.e, QL must be told where orion is.

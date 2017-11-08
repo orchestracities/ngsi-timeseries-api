@@ -36,6 +36,16 @@ def test_insert_multiple_types(translator):
     result = translator.insert(entities)
     assert result.rowcount > 0
 
+    # Again to check metadata handling works fine
+    entities = create_random_entities(num_types=3, num_ids_per_type=2, num_updates=1, use_time=True, use_geo=True)
+    result = translator.insert(entities)
+    assert result.rowcount > 0
+
+
+def test_query_all_before_insert(translator):
+    loaded_entities = translator.query()
+    assert len(loaded_entities) == 0
+
 
 def test_query_all(translator):
     entities = create_random_entities(2, 2, 2, use_time=True, use_geo=True)
@@ -137,19 +147,40 @@ def test_unsupported_ngsi_type(translator):
 
 
 def test_capitals(translator):
+    entity_type = "SoMeWeIrDtYpE"
     e = {
-        "type": "SoMeWeIrDtYpE",
+        "type": entity_type,
         "id": "sOmEwEiRdId",
         TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
-        "foo": {
+        "Foo": {
             "type": "Text",
-            "value": "BaR",
-        }
+            "value": "FoO",
+        },
+        "bAr": {
+            "type": "Text",
+            "value": "bAr",
+        },
     }
     translator.insert([e])
-    translator._refresh(["SoMeWeIrDtYpE"])
+    translator._refresh([entity_type])
     entities = translator.query()
     assert len(entities) == 1
+    assert_ngsi_entity_equals(e, entities[0])
+
+    # If a new attribute comes later, I want it translated as well.
+    e2 = e.copy()
+    e2['id'] = 'SOmEwEiRdId2'
+    e2['NewAttr'] = {"type": "Text", "value": "NewAttrValue!"}
+    e2[TIME_INDEX_NAME] = datetime.now().isoformat()[:-3]
+
+    translator.insert([e2])
+    translator._refresh([entity_type])
+    entities = translator.query()
+    assert len(entities) == 2
+
+    assert_ngsi_entity_equals(e2, entities[1])
+    # Note that old entity gets None for the new attribute
+    e['NewAttr'] = {'type': 'Text', 'value': None}
     assert_ngsi_entity_equals(e, entities[0])
 
 
@@ -157,7 +188,7 @@ def test_capitals(translator):
 
 def test_air_quality_observed(translator, air_quality_observed):
     # Add TIME_INDEX as Reporter would
-    air_quality_observed[TIME_INDEX_NAME] = datetime.now().isoformat()
+    air_quality_observed[TIME_INDEX_NAME] = datetime.now().isoformat()[:-3]
 
     result = translator.insert([air_quality_observed])
     assert result.rowcount > 0
