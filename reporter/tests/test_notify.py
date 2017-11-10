@@ -1,4 +1,4 @@
-from client.client import HEADERS, HEADERS_PUT
+from client.client import HEADERS_PUT
 from client.fixtures import clean_mongo, orion_client
 from conftest import QL_URL, entity
 from flask import url_for
@@ -11,9 +11,7 @@ import pytest
 import requests
 import time
 
-
 notify_url = "{}/notify".format(QL_URL)
-version_url = "{}/version".format(QL_URL)
 
 
 @pytest.fixture
@@ -30,7 +28,8 @@ def notification():
                     'metadata': {
                         'dateModified': {
                             'type': 'DateTime',
-                            'value': '2017-06-19T11:46:45.00Z'}
+                            'value': '2017-06-19T11:46:45.00Z'
+                        }
                     }
                 }
             }
@@ -42,9 +41,13 @@ def test_invalid_no_body():
     r = requests.post('{}'.format(notify_url),
                       data=json.dumps(None),
                       headers=HEADERS_PUT)
-    assert r.status_code == 400
-    assert r.text == 'Discarding notification due to lack of request body. ' \
-                     'Lost in a redirect maybe?'
+    assert r.status_code == 415
+    assert r.json() == {
+        'detail': 'Invalid Content-type (application/json), expected JSON data',
+        'status': 415,
+        'title': 'Unsupported Media Type',
+        'type': 'about:blank'
+    }
 
 
 def test_invalid_empty_body():
@@ -52,8 +55,7 @@ def test_invalid_empty_body():
                       data=json.dumps({}),
                       headers=HEADERS_PUT)
     assert r.status_code == 400
-    assert r.text == 'Discarding notification due to lack of request body ' \
-                     'content.'
+    assert r.json()['detail'] == "'data' is a required property"
 
 
 def test_invalid_no_type(notification):
@@ -62,7 +64,10 @@ def test_invalid_no_type(notification):
                       data=json.dumps(notification),
                       headers=HEADERS_PUT)
     assert r.status_code == 400
-    assert r.text == 'Entity type is required in notifications'
+    assert r.json() == {'detail': "'type' is a required property",
+                        'status': 400,
+                        'title': 'Bad Request',
+                        'type': 'about:blank'}
 
 
 def test_invalid_no_id(notification):
@@ -71,7 +76,10 @@ def test_invalid_no_id(notification):
                       data=json.dumps(notification),
                       headers=HEADERS_PUT)
     assert r.status_code == 400
-    assert r.text == 'Entity id is required in notifications'
+    assert r.json() == {'detail': "'id' is a required property",
+                        'status': 400,
+                        'title': 'Bad Request',
+                        'type': 'about:blank'}
 
 
 def test_invalid_no_attr(notification):
@@ -80,8 +88,8 @@ def test_invalid_no_attr(notification):
                       data=json.dumps(notification),
                       headers=HEADERS_PUT)
     assert r.status_code == 400
-    msg = 'Received notification without attributes other than "type" and "id"'
-    assert r.text == msg
+    msg = "Received notification without attributes other than 'type' and 'id'"
+    assert r.json() == msg
 
 
 def test_invalid_no_value(notification):
@@ -90,26 +98,16 @@ def test_invalid_no_value(notification):
                       data=json.dumps(notification),
                       headers=HEADERS_PUT)
     assert r.status_code == 400
-    assert r.text == 'Payload is missing value for attribute temperature'
+    assert r.json() == 'Payload is missing value for attribute temperature'
 
 
-def test_version():
-    r = requests.get('{}'.format(version_url), headers=HEADERS)
-    assert r.status_code == 200, r.text
-    assert r.text == '0.0.1'
-
-
-@patch('translators.crate.CrateTranslator')
-def test_valid_notification(MockTranslator, live_server, notification):
-    live_server.start()
-    notify_url = url_for('notify', _external=True)
-
+def test_valid_notification(notification, clean_crate):
     r = requests.post('{}'.format(notify_url),
                       data=json.dumps(notification),
                       headers=HEADERS_PUT)
 
     assert r.status_code == 200
-    assert r.text == 'Notification successfully processed'
+    assert r.json() == 'Notification successfully processed'
 
 
 def test_valid_no_modified(notification, clean_crate):
@@ -118,7 +116,7 @@ def test_valid_no_modified(notification, clean_crate):
                       data=json.dumps(notification),
                       headers=HEADERS_PUT)
     assert r.status_code == 200
-    assert r.text == 'Notification successfully processed'
+    assert r.json() == 'Notification successfully processed'
 
 
 def do_integration(entity, notify_url, orion_client, crate_translator):
@@ -152,7 +150,8 @@ def do_integration(entity, notify_url, orion_client, crate_translator):
     orion_client.subscribe(subscription)
     orion_client.insert(entity)
 
-    import time;time.sleep(3)  # Give time for notification to be processed.
+    import time
+    time.sleep(3)  # Give time for notification to be processed.
 
     entities = crate_translator.query()
 
@@ -160,7 +159,6 @@ def do_integration(entity, notify_url, orion_client, crate_translator):
     # https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions
     assert len(entities) > 0
 
-    # Note: How Quantumleap will return entities is still not well defined.
     entities[0].pop(CrateTranslator.TIME_INDEX_NAME)
     entity.pop('pressure')
     entity['temperature'].pop('metadata')
@@ -204,7 +202,8 @@ def test_air_quality_observed(air_quality_observed, orion_client, clean_mongo,
     orion_client.subscribe(subscription)
     orion_client.insert(entity)
 
-    import time;time.sleep(3)  # Give time for notification to be processed.
+    import time
+    time.sleep(3)  # Give time for notification to be processed.
 
     entities = crate_translator.query()
 
@@ -234,7 +233,7 @@ def test_geocoding(notification, crate_translator):
                       data=json.dumps(notification),
                       headers=HEADERS_PUT)
     assert r.status_code == 200
-    assert r.text == 'Notification successfully processed'
+    assert r.json() == 'Notification successfully processed'
 
     time.sleep(3)  # Give time for notification to be processed.
 
@@ -244,3 +243,27 @@ def test_geocoding(notification, crate_translator):
     assert 'location' in entities[0]
     assert entities[0]['location']['type'] == 'geo:point'
     assert entities[0]['location']['value'] == '60.1707129, 24.9412167'
+
+
+def test_no_multiple_data_elements(notification):
+    second_element = {
+                        'id': 'Room2',
+                        'type': 'Room',
+                        'temperature': {
+                            'type': 'Number',
+                            'value': 30,
+                            'metadata': {
+                                'dateModified': {
+                                    'type': 'DateTime',
+                                    'value': '2017-06-20T11:46:45.00Z'
+                                }
+                            }
+                        }
+                    }
+    notification['data'].append(second_element)
+    print(json.dumps(notification))
+    r = requests.post('{}'.format(notify_url), data=json.dumps(notification),
+                      headers=HEADERS_PUT)
+    assert r.status_code == 400
+    assert r.json() == 'Multiple data elements in notifications not ' \
+                       'supported yet'

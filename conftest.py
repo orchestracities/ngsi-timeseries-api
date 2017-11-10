@@ -4,7 +4,7 @@ import pytest
 
 QL_HOST = os.environ.get('QL_HOST', "quantumleap")
 QL_PORT = 8668
-QL_URL = "http://{}:{}".format(QL_HOST, QL_PORT)
+QL_URL = "http://{}:{}/v2".format(QL_HOST, QL_PORT)
 
 CRATE_HOST = os.environ.get('CRATE_HOST', 'crate')
 CRATE_PORT = 4200

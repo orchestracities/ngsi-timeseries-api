@@ -328,8 +328,12 @@ class CrateTranslator(BaseTranslator):
             msg = "For now you must specify entity_type when stating entity_id"
             raise NotImplementedError(msg)
 
-        select_clause = "{}".format(attr_names[0]) if attr_names else "*"
-        # TODO: support some attrs
+        if attr_names:
+            select = ",".join(str(a) for a in attr_names)
+        else:
+            select = '*'
+        select_clause = "{}".format(select)
+
         if not where_clause:
             # TODO: support entity_id filter with custom where clause
             if entity_id:
@@ -344,7 +348,7 @@ class CrateTranslator(BaseTranslator):
 
         result = []
         for tn in table_names:
-            op = "select {} from {} {} order by {}".format(
+            op = "select {} from {} {} order by {} ASC".format(
                 select_clause, tn, where_clause, self.TIME_INDEX_NAME)
             self.cursor.execute(op)
             res = self.cursor.fetchall()

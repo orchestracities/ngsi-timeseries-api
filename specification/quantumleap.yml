@@ -1,0 +1,1215 @@
+swagger: '2.0'  # For 3.0 see (https://github.com/zalando/connexion/issues/420)
+info:
+  title: "QuantumLeap API"
+  version: "0.1"
+host: "localhost:8668"  # it'll run in the same container, hence localhost.
+basePath: /v2
+produces:
+  - text/plain
+  - application/json
+
+################################################################################
+# DEFINITIONS
+################################################################################
+definitions:
+  # When having an official NGSI swagger, use external refs to avoid duplication
+  # (http://azimi.me/2015/07/16/split-swagger-into-smaller-files.html)
+  Entity:
+    type: object
+    required:
+    - "id"
+    - "type"
+    properties:
+      type:
+        type: string
+        example: Room
+        description: "The NGSI Entity Type."
+      id:
+        type: string
+        example: Kitchen
+        description: "The NGSI Entity Id."
+
+  Notification:
+    type: object
+    required:
+    - "data"
+    properties:
+      subscriptionId:
+        type: string
+        example: 5947d174793fe6f7eb5e3961
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/Entity"
+    example:
+      subscriptionId: 5947d174793fe6f7eb5e3961
+      data:
+        - id: Kitchen
+          type: Room
+          temperature:
+            value: 24.2
+            type: "Number"
+            metadata:
+              dateModified:
+                type: "DateTime"
+                value: 2017-06-19T11:46:45.00Z
+        - id: Bedroom1
+          type: Room
+          temperature:
+            value: 26.4
+            type: "Number"
+            metadata:
+              dateModified:
+                type: "DateTime"
+                value: 2017-06-19T11:46:45.00Z
+
+
+################################################################################
+# DEFINITIONS: Response objects
+################################################################################
+  IndexArray:
+    type: array
+    items:
+      type: string
+    description: "Array of the timestamps which are indexes of the response
+    for the requested data. It's a parallel array to 'values'. The timestamp
+    will be either in the ISO format or the milliseconds in UTC since epoch,
+    depending on the format the 'time_index' was created; always respecting
+    the original format in which data was inserted. When using aggregation
+    options, the format of this remains the same, only the semantics will
+    change. For example, if aggrPeriod is day, each index will be a valid
+    timestamp of a moment in the corresponding day."
+
+  ValuesArray:
+    type: array
+    items:
+      type: number
+    description: "Array of values of the selected attribute, in the same
+    corresponding order of the 'index' array. When using aggregation options,
+    the format of this remains the same, only the semantics will change. For
+    example, if aggrPeriod is day, each value of course may not correspond
+    to original measurements but rather the aggregate of measurements in
+    each day."
+
+
+  IndexedValues:
+    type: object
+    properties:
+      index:
+        $ref: '#/definitions/IndexArray'
+      values:
+        $ref: '#/definitions/ValuesArray'
+
+  AttributeValues:
+    type: object
+    properties:
+      attrName:
+        type: string
+      values:
+        $ref: '#/definitions/ValuesArray'
+
+  EntityIndexedValues:
+    type: object
+    properties:
+      entityId:
+        type: string
+      index:
+        $ref: '#/definitions/IndexArray'
+      values:
+        $ref: '#/definitions/ValuesArray'
+
+
+################################################################################
+# PARAMETERS: IN PATH
+################################################################################
+parameters:
+# Unfortunately Swagger 2.0 does not support examples for parameters :(
+  entityTypeInPath:
+    in: path
+    required: true
+    name: entityType
+    type: string
+    description: "The entity type in which the query is restricted on. Used to
+    constraint the search to entities of this type, specially useful when the
+    entity id is not enough to uniquely identify an entity."
+    # example: Room  # Only Valid in OAPI 3.0
+  entityIdInPath:
+    in: path
+    required: true
+    name: entityId
+    type: string
+    description: "The entity id in which the query is restricted on. If the id
+    is unique among all entity types, this could be used to uniquely identify
+    the entity instance. Otherwise, you will have to use the entityType
+    attribute to resolve ambiguity."
+    # example: Kitchen1  # Only Valid in OAPI 3.0
+  attrNameInPath:
+    in: path
+    required: true
+    name: attrName
+    type: string
+    description: "The name of the attribute the query is interested on. It must
+    be a valid attribute of all the entities covered by the query scope."
+    # example: temperature  # Only Valid in OAPI 3.0
+
+################################################################################
+# PARAMETERS: IN QUERY
+################################################################################
+  type:
+    in: query
+    name: type
+    type: string
+    description: "Comma-separated list of entity types whose data are to be
+    included in the response. Use only one (no comma) when required. If used to
+    resolve ambiguity for the given entityId, make sure the given entityId
+    exists for this entityType."
+  id:
+    in: query
+    name: id
+    type: string
+    description: "Optional. Comma-separated list of entity ids whose data are to
+     be included in the response."
+  idPattern:
+    in: query
+    name: idPattern
+    type: string
+    description: "A correctly formated regular expression. Retrieve entities
+    whose ID matches the regular expression. Incompatible with id."
+  attrs:
+    in: query
+    name: attrs
+    type: string
+    description: "Optional. Comma-separated list of attribute names whose data
+     are to be included in the response. The attributes are retrieved in the
+     order specified by this parameter. If not specified, all attributes are
+     included in the response in arbitrary order."
+  aggrMethod:
+    in: query
+    name: aggrMethod
+    type: string
+    enum: [count, sum, avg, min, max]  # These taken from ISO standard on SQL.
+    # Remember Crate supports many others https://crate.io/docs/crate/reference/en/latest/sql/aggregation.html
+    description: "Optional. The function to apply to the raw data filtered by
+    the query parameters. If not given, the returned data are the same raw
+    inserted data."
+  aggrPeriod:
+    in: query
+    name: aggrPeriod
+    type: string
+    enum: [year, month, day, hour, minute, second]
+    description: "Optional. In not defined, the aggregation will apply to all
+     the values contained in the search result. If defined, the aggregation
+     function will instead be applied N times, once for each period, and all
+     those results will be considered for the result. For example, a query
+     asking for the average temperature of an attribute will typically return
+     1 value. However, with an aggregationPeriod of day, you get the daily
+     average of the temperature instead (more than one value assuming you had
+      measurements across many days within the scope of your search result)"
+  aggrScope:
+    in: query
+    name: aggrScope
+    type: string
+    enum: [global, entity]
+    default: entity
+    description: "Optional. When the query results cover historical data for
+    multiple entities instances, you can define the aggregation method to be
+    applied for each entity instance [entity] or across them [global]."
+  options:
+    in: query
+    name: options
+    type: string
+    enum: [keyValues, values]
+    description: "Options dictionary to format output. See definition in
+    NGSIv2 for example here: https://orioncontextbroker.docs.apiary.io/#reference/entities/list-entities/list-entities"
+  fromDate:
+    in: query
+    name: fromDate
+    type: string
+    description: "Optional. The starting date and time from which the context
+    information is queried."
+  toDate:
+    in: query
+    name: toDate
+    type: string
+    description: "Optional. The final date and time from which the context
+    information is queried."
+  lastN:
+    in: query
+    name: lastN
+    type: integer
+    description: "Optional. Used to request only the last N values that satisfy
+    the request conditions."
+  limit:
+    in: query
+    name: limit
+    type: integer
+    default: 10000
+    description: "Optional. Maximum number of results to retrieve in a single
+    response."
+  offset:
+    in: query
+    name: offset
+    type: integer
+    description: "Optional. Offset to apply to the response results. For
+    example, if the query was to return 10 results and you use an offset of
+    1, the response will return 9 values."
+
+################################################################################
+# PATHS: META
+################################################################################
+paths:
+  /version:
+    get:
+      operationId: reporter.reporter.version
+      summary: "Returns the version of QuantumLeap."
+      tags:
+        - meta
+      responses:
+        200:
+          description: "Successful response."
+          schema:
+            type: object
+            properties:
+              version:
+                type: string
+          examples:
+            application/json:
+              {
+                "version": "0.0.1"
+              }
+
+  /config:
+    post:
+      operationId: reporter.reporter.config
+      summary: "Customize your persistance configuration to better suit your
+      needs."
+      description: ""
+      parameters:
+        - $ref: '#/parameters/type'
+        - in: query
+          name: replicas
+          type: number
+          description: "The number of replicas to use for the selected types."
+      tags:
+        - meta
+      responses:
+        201:
+          description: "Successfully created record."
+
+################################################################################
+# PATHS: INPUT
+################################################################################
+  /notify:
+    post:
+      operationId: reporter.reporter.notify
+      summary: "Notify QuantumLeap the arrival of a new NGSI notification."
+      description: ""
+      parameters:
+        - in: body
+          name: notification
+          required: true
+          schema:
+            type: object
+            $ref: "#/definitions/Notification"
+      tags:
+        - input
+      responses:
+        201:
+          description: "Successfully created record."
+        400:
+          description: "Received notification is not valid."
+        500:
+          description: "Internal server error."
+
+################################################################################
+# PATHS: OUTPUT
+################################################################################
+  /entities/{entityId}/attrs/{attrName}:
+    get:
+      operationId: reporter.reporter.query_1T1E1A
+      summary: "History of an attribute of a given entity instance."
+      description: "For example, query max water level of the central tank
+      throughout the last year. Queries can get more sophisticated with the use
+      of filters and query attributes."
+      tags:
+        - queries
+      parameters:
+        # In Path...
+        - $ref: '#/parameters/entityIdInPath'
+        - $ref: '#/parameters/attrNameInPath'
+        # In Query...
+        - $ref: '#/parameters/type'
+        - $ref: '#/parameters/aggrMethod'
+        - $ref: '#/parameters/aggrPeriod'
+        - $ref: '#/parameters/options'
+        - $ref: '#/parameters/fromDate'
+        - $ref: '#/parameters/toDate'
+        - $ref: '#/parameters/lastN'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  entityId:
+                    type: string
+                  attrName:
+                    type: string
+                  index:
+                    $ref: '#/definitions/IndexArray'
+                  values:
+                    $ref: '#/definitions/ValuesArray'
+          examples:
+            application/json:
+              {
+                "data": {
+                    "entityId": "Kitchen1",
+                    "attrName": "temperature",
+                    "index": ["2018-01-05T15:44:34", "2018-01-06T15:44:59",
+                    "2018-01-07T15:44:59"],
+                    # TODO: in NGSI orion would return the type+metadata of attr
+                    "values": [24.1, 25.3, 26.7]
+                  }
+              }
+
+  /entities/{entityId}/attrs/{attrName}/value:
+    get:
+      operationId: reporter.reporter.query_1T1E1A_value
+      summary: "History of an attribute (values only) of a given entity
+      instance."
+      description: "Similar to the previous, but focusing on the values
+      regardless of the metadata."
+      tags:
+        - queries
+      parameters:
+        # In Path...
+        - $ref: '#/parameters/entityIdInPath'
+        - $ref: '#/parameters/attrNameInPath'
+        # In Query...
+        - $ref: '#/parameters/type'
+        - $ref: '#/parameters/aggrMethod'
+        - $ref: '#/parameters/aggrPeriod'
+        - $ref: '#/parameters/options'
+        - $ref: '#/parameters/fromDate'
+        - $ref: '#/parameters/toDate'
+        - $ref: '#/parameters/lastN'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/definitions/IndexedValues'
+          examples:
+            application/json:
+              {
+                "data": {
+                    "index": ["2018-01-05T15:44:34", "2018-01-06T15:44:59",
+                    "2018-01-07T15:44:59"],
+                    "values": [24.1, 25.3, 26.7]
+                  }
+              }
+
+
+  /entities/{entityId}:
+    get:
+      operationId: reporter.reporter.query_1T1ENA
+      summary: "History of N attributes of a given entity instance."
+      description: "For example, query the average pressure, temperature and
+      humidity of this month in the weather station WS1."
+      tags:
+        - queries
+      parameters:
+        # In Path...
+        - $ref: '#/parameters/entityIdInPath'
+        # In Query...
+        - $ref: '#/parameters/type'
+        - $ref: '#/parameters/attrs'
+        - $ref: '#/parameters/aggrMethod'
+        - $ref: '#/parameters/aggrPeriod'
+        - $ref: '#/parameters/options'
+        - $ref: '#/parameters/fromDate'
+        - $ref: '#/parameters/toDate'
+        - $ref: '#/parameters/lastN'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  index:
+                    $ref: '#/definitions/IndexArray'
+                  attributes:
+                    type: array
+                    items:
+                      $ref: '#/definitions/AttributeValues'
+          examples:
+            application/json:
+              {
+                "data": {
+                  "id": "Kitchen1",
+                  "index": ["1510826981388", "1510826990438", "1510826999725"],
+                  "attributes": [
+                    {
+                      "attrName": "temperature",
+                      "values": [24.1, 25.3, 26.7]
+                    },
+                    {
+                      "attrName": "pressure",
+                      "values": [1.01, 0.9, 1.02]
+                    }
+                  ]
+                }
+              }
+
+  /entities/{entityId}/value:
+    get:
+      operationId: reporter.reporter.query_1T1ENA_value
+      summary: "History of N attributes (values only) of a given entity
+      instance."
+      description: "For example, query the average pressure, temperature and
+      humidity (values only, no metadata) of this month in the weather station
+      WS1."
+      tags:
+        - queries
+      parameters:
+        # In Path...
+        - $ref: '#/parameters/entityIdInPath'
+        # In Query...
+        - $ref: '#/parameters/type'
+        - $ref: '#/parameters/attrs'
+        - $ref: '#/parameters/aggrMethod'
+        - $ref: '#/parameters/aggrPeriod'
+        - $ref: '#/parameters/options'
+        - $ref: '#/parameters/fromDate'
+        - $ref: '#/parameters/toDate'
+        - $ref: '#/parameters/lastN'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  index:
+                    $ref: '#/definitions/IndexArray'
+                  values:
+                    type: array
+                    items:
+                      $ref: '#/definitions/AttributeValues'
+          examples:
+            application/json:
+              {
+                "data": {
+                  "index": ["1510826981388", "1510826990438", "1510826999725"],
+                  "values": [
+                    {
+                      "attrName": "temperature",
+                      "values": [24.1, 25.3, 26.7]
+                    },
+                    {
+                      "attrName": "pressure",
+                      "values": [1.01, 0.9, 1.02]
+                    }
+                  ]
+                }
+              }
+
+
+  /types/{entityType}/attrs/{attrName}:
+    get:
+      operationId: reporter.reporter.query_1TNE1A
+      summary: "History of an attribute of N entities of the same type."
+      description: "For example, query the average pressure of this month in
+      all the weather stations."
+      tags:
+        - queries
+      parameters:
+        # In Path...
+        - $ref: '#/parameters/entityTypeInPath'
+        - $ref: '#/parameters/attrNameInPath'
+        # In Query...
+        - $ref: '#/parameters/id'
+        - $ref: '#/parameters/aggrMethod'
+        - $ref: '#/parameters/aggrPeriod'
+        - $ref: '#/parameters/options'
+        - $ref: '#/parameters/fromDate'
+        - $ref: '#/parameters/toDate'
+        - $ref: '#/parameters/lastN'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  entityType:
+                    type: string
+                  attrName:
+                    type: string
+                  entities:
+                    type: array
+                    items:
+                      $ref: '#/definitions/EntityIndexedValues'
+          examples:
+            application/json:
+              {
+                "data": {
+                  "entityType": "Room",
+                  "attrName": "temperature",
+                  "entities": [
+                    {
+                      "entityId": "Kitchen1",
+                      "index": ["1510826981388", "1510826990438",
+                      "1510826999725"],
+                      "values": [24.1, 25.3, 26.7]
+                    },
+                    {
+                      "entityId": "Room2",
+                      "index": ["1510826981388", "1510826990438",
+                      "1510826999725"],
+                      "values": [21.01, 20.9, 21.02]
+                    }
+                  ]
+                }
+              }
+
+
+  /types/{entityType}/attrs/{attrName}/value:
+    get:
+      operationId: reporter.reporter.query_1TNE1A_value
+      summary: "History of an attribute (values only) of N entities of the
+      same type."
+      description: "For example, query the average pressure (values only,
+      no metadata) of this month in all the weather stations."
+      tags:
+        - queries
+      parameters:
+        # In Path...
+        - $ref: '#/parameters/entityTypeInPath'
+        - $ref: '#/parameters/attrNameInPath'
+        # In Query...
+        - $ref: '#/parameters/id'
+        - $ref: '#/parameters/aggrMethod'
+        - $ref: '#/parameters/aggrPeriod'
+        - $ref: '#/parameters/options'
+        - $ref: '#/parameters/fromDate'
+        - $ref: '#/parameters/toDate'
+        - $ref: '#/parameters/lastN'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  entities:
+                    type: array
+                    items:
+                      $ref: '#/definitions/EntityIndexedValues'
+          examples:
+            application/json:
+              {
+                "data": {
+                  "values": [
+                    {
+                      "entityId": "Kitchen1",
+                      "index": ["1510826981388", "1510826990438",
+                      "1510826999725"],
+                      "values": [24.1, 25.3, 26.7]
+                    },
+                    {
+                      "entityId": "Room2",
+                      "index": ["1510826981388", "1510826990438",
+                      "1510826999725"],
+                      "values": [21.01, 20.9, 21.02]
+                    }
+                  ]
+                }
+              }
+
+
+  /types/{entityType}:
+    get:
+      operationId: reporter.reporter.query_1TNENA
+      summary: "History of N attributes of N entities of the same type."
+      description: "For example, query the average pressure, temperature and
+      humidity of this month in all the weather stations."
+      tags:
+        - queries
+      parameters:
+        # In Path...
+        - $ref: '#/parameters/entityTypeInPath'
+        # In Query...
+        - $ref: '#/parameters/id'
+        - $ref: '#/parameters/attrs'
+        - $ref: '#/parameters/aggrMethod'
+        - $ref: '#/parameters/aggrPeriod'
+        - $ref: '#/parameters/aggrScope'
+        - $ref: '#/parameters/options'
+        - $ref: '#/parameters/fromDate'
+        - $ref: '#/parameters/toDate'
+        - $ref: '#/parameters/lastN'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  entityType:
+                    type: string
+                  entities:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        entityId:
+                          type: string
+                        index:
+                          $ref: '#/definitions/IndexArray'
+                        attributes:
+                          type: array
+                          items:
+                            $ref: '#/definitions/AttributeValues'
+          examples:
+            application/json:
+              {
+                "data": {
+                  "entityType": "Room",
+                  "entities": [
+                    {
+                      "entityId": "Room1",
+                      "index": ["1510826981388", "1510826990438",
+                      "1510826999725"],
+                      "attributes": [
+                        {
+                          # TODO: How about defining the attrs order once?
+                          "attrName": "temperature",
+                          "values": [24.1, 25.3, 26.7]
+                        },
+                        {
+                          "attrName": "pressure",
+                          "values": [1.1, 1.3, 0.7]
+                        }
+                      ]
+                    },
+                    {
+                      "entityId": "Room2",
+                      "index": ["1510826981388", "1510826990438",
+                      "1510826999725"],
+                      "attributes": [
+                        {
+                          "attrName": "temperature",
+                          "values": [24.1, 25.3, 26.7]
+                        },
+                        {
+                          "attrName": "pressure",
+                          "values": [1.1, 1.3, 0.7]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+
+
+  /types/{entityType}/value:
+    get:
+      operationId: reporter.reporter.query_1TNENA_value
+      summary: "History of N attributes (values only) of N entities of the same
+      type."
+      description: "For example, query the average pressure, temperature and
+      humidity (values only, no metadata) of this month in all the weather
+      stations."
+      tags:
+        - queries
+      parameters:
+        # In Path...
+        - $ref: '#/parameters/entityTypeInPath'
+        # In Query...
+        - $ref: '#/parameters/id'
+        - $ref: '#/parameters/attrs'
+        - $ref: '#/parameters/aggrMethod'
+        - $ref: '#/parameters/aggrPeriod'
+        - $ref: '#/parameters/aggrScope'
+        - $ref: '#/parameters/options'
+        - $ref: '#/parameters/fromDate'
+        - $ref: '#/parameters/toDate'
+        - $ref: '#/parameters/lastN'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  entityType:
+                    type: string
+                  entities:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        entityId:
+                          type: string
+                        index:
+                          $ref: '#/definitions/IndexArray'
+                        attributes:
+                          type: array
+                          items:
+                            $ref: '#/definitions/AttributeValues'
+          examples:
+            application/json:
+              {
+                "data": {
+                  "values": [
+                    {
+                      "entityId": "Room1",
+                      "index": ["1510826981388", "1510826990438",
+                      "1510826999725"],
+                      "attributes": [
+                        {
+                          # TODO: How about defining the attrs order once?
+                          "attrName": "temperature",
+                          "values": [24.1, 25.3, 26.7]
+                        },
+                        {
+                          "attrName": "pressure",
+                          "values": [1.1, 1.3, 0.7]
+                        }
+                      ]
+                    },
+                    {
+                      "entityId": "Room2",
+                      "index": ["1510826981388", "1510826990438",
+                      "1510826999725"],
+                      "attributes": [
+                        {
+                          "attrName": "temperature",
+                          "values": [24.1, 25.3, 26.7]
+                        },
+                        {
+                          "attrName": "pressure",
+                          "values": [1.1, 1.3, 0.7]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+
+
+  /attrs/{attrName}:
+    get:
+      operationId: reporter.reporter.query_NTNE1A
+      summary: "History of an attribute of N entities of N types."
+      description: "For example, query the average temperature of this month
+      in all the devices capable of measuring temperature. In this case, you
+      are responsible for providing entity types which contain the attrName."
+      tags:
+        - queries
+      parameters:
+        # In Path...
+        - $ref: '#/parameters/attrNameInPath'
+        # In Query...
+        - $ref: '#/parameters/type'
+        - $ref: '#/parameters/id'
+        - $ref: '#/parameters/aggrMethod'
+        - $ref: '#/parameters/aggrPeriod'
+        - $ref: '#/parameters/aggrScope'
+        - $ref: '#/parameters/options'
+        - $ref: '#/parameters/fromDate'
+        - $ref: '#/parameters/toDate'
+        - $ref: '#/parameters/lastN'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  attrName:
+                    type: string
+                  types:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        entityType:
+                          type: string
+                        entities:
+                          type: array
+                          items:
+                            $ref: '#/definitions/EntityIndexedValues'
+          examples:
+            application/json:
+              {
+                "data": {
+                  "attrName": "temperature",
+                  "types": [
+                    {
+                      "entityType": "Room",
+                      "entities": [
+                        {
+                          "entityId": "Room1",
+                          "index": ["1510826981388", "1510826990438",
+                          "1510826999725"],
+                          "values": [24.1, 25.3, 26.7]
+                        },
+                        {
+                          "entityId": "Room2",
+                          "index": ["1510826981388", "1510826990438",
+                          "1510826999725"],
+                          "values": [22.1, 23.3, 25.7]
+                        }
+                      ]
+                    },
+                    {
+                      "entityType": "Device",
+                      "entities": [
+                        {
+                          "entityId": "DeviceInRoom1",
+                          "index": ["1510826981388", "1510826990438",
+                          "1510826999725"],
+                          "values": [24.1, 25.3, 26.7]
+                        },
+                        {
+                          "entityId": "DeviceInRoom2",
+                          "index": ["1510826981388", "1510826990438",
+                          "1510826999725"],
+                          "values": [22.1, 23.3, 25.7]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+
+  /attrs/{attrName}/value:
+    get:
+      operationId: reporter.reporter.query_NTNE1A_value
+      summary: "History of an attribute (values only) of N entities of N types."
+      description: "For example, query the average temperature (values only, no
+      metadata) of this month in all the devices capable of measuring
+      temperature. In this case, you are reponsible for providing entity types
+      which contain the attrName."
+      tags:
+        - queries
+      parameters:
+        # In Path...
+        - $ref: '#/parameters/attrNameInPath'
+        # In Query...
+        - $ref: '#/parameters/type'
+        - $ref: '#/parameters/id'
+        - $ref: '#/parameters/aggrMethod'
+        - $ref: '#/parameters/aggrPeriod'
+        - $ref: '#/parameters/aggrScope'
+        - $ref: '#/parameters/options'
+        - $ref: '#/parameters/fromDate'
+        - $ref: '#/parameters/toDate'
+        - $ref: '#/parameters/lastN'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  attrName:
+                    type: string
+                  types:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        entityType:
+                          type: string
+                        entities:
+                          type: array
+                          items:
+                            $ref: '#/definitions/EntityIndexedValues'
+          examples:
+            application/json:
+              {
+                "data": {
+                  "values": [
+                    {
+                      "entityType": "Room",
+                      "entities": [
+                        {
+                          "entityId": "Room1",
+                          "index": ["1510826981388", "1510826990438",
+                          "1510826999725"],
+                          "values": [24.1, 25.3, 26.7]
+                        },
+                        {
+                          "entityId": "Room2",
+                          "index": ["1510826981388", "1510826990438",
+                          "1510826999725"],
+                          "values": [22.1, 23.3, 25.7]
+                        }
+                      ]
+                    },
+                    {
+                      "entityType": "Device",
+                      "entities": [
+                        {
+                          "entityId": "DeviceInRoom1",
+                          "index": ["1510826981388", "1510826990438",
+                          "1510826999725"],
+                          "values": [24.1, 25.3, 26.7]
+                        },
+                        {
+                          "entityId": "DeviceInRoom2",
+                          "index": ["1510826981388", "1510826990438",
+                          "1510826999725"],
+                          "values": [22.1, 23.3, 25.7]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+
+  /attrs:
+    get:
+      operationId: reporter.reporter.query_NTNENA
+      summary: "History of N attributes of N entities of N types."
+      description: "This is sort of a query all. The response will likely not
+      fit into a single response so an efficient paging mechanism and sensible
+      defaults will be required."
+      tags:
+        - queries
+      parameters:
+        # In Query...
+        - $ref: '#/parameters/type'
+        - $ref: '#/parameters/id'
+        - $ref: '#/parameters/attrs'
+        - $ref: '#/parameters/aggrMethod'
+        - $ref: '#/parameters/aggrPeriod'
+        - $ref: '#/parameters/aggrScope'
+        - $ref: '#/parameters/options'
+        - $ref: '#/parameters/fromDate'
+        - $ref: '#/parameters/toDate'
+        - $ref: '#/parameters/lastN'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  attrs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        attrName:
+                          type: string
+                        types:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              entityType:
+                                type: string
+                              entities:
+                                type: array
+                                items:
+                                  $ref: '#/definitions/EntityIndexedValues'
+          examples:
+            # TODO: Maybe for this 'query all' we cloud keep a global index.
+            application/json:
+              {
+                "data": {
+                  "attrs:": [
+                    {
+                      "attrName": "temperature",
+                      "types": [
+                        {
+                          "entityType": "Room",
+                          "entities": [
+                            {
+                              "entityId": "Room1",
+                              "index": ["1510826981388", "1510826990438",
+                              "1510826999725"],
+                              "values": [24.1, 25.3, 26.7]
+                            },
+                            {
+                              "entityId": "Room2",
+                              "index": ["1510826981388", "1510826990438",
+                              "1510826999725"],
+                              "values": [22.1, 23.3, 25.7]
+                            }
+                          ]
+                        },
+                        {
+                          "entityType": "Device",
+                          "entities": [
+                            {
+                              "entityId": "DeviceInRoom1",
+                              "index": ["1510826981388", "1510826990438",
+                              "1510826999725"],
+                              "values": [24.1, 25.3, 26.7]
+                            },
+                            {
+                              "entityId": "DeviceInRoom2",
+                              "index": ["1510826981388", "1510826990438",
+                              "1510826999725"],
+                              "values": [22.1, 23.3, 25.7]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+
+
+  /attrs/value:
+    get:
+      operationId: reporter.reporter.query_NTNENA_value
+      summary: "History of N attributes (values only) of N entities of N types."
+      description: "This is sort of a query all. The response will likely not
+      fit into a single response so an efficient paging mechanism and sensible
+      defaults will be required."
+      tags:
+        - queries
+      parameters:
+        # In Query...
+        - $ref: '#/parameters/type'
+        - $ref: '#/parameters/id'
+        - $ref: '#/parameters/attrs'
+        - $ref: '#/parameters/aggrMethod'
+        - $ref: '#/parameters/aggrPeriod'
+        - $ref: '#/parameters/aggrScope'
+        - $ref: '#/parameters/options'
+        - $ref: '#/parameters/fromDate'
+        - $ref: '#/parameters/toDate'
+        - $ref: '#/parameters/lastN'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  values:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        attrName:
+                          type: string
+                        types:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              entityType:
+                                type: string
+                              entities:
+                                type: array
+                                items:
+                                  $ref: '#/definitions/EntityIndexedValues'
+          examples:
+            # TODO: Maybe for this 'query all' we cloud keep a global index.
+            application/json:
+              {
+                "data": {
+                  "values:": [
+                    {
+                      "attrName": "temperature",
+                      "types": [
+                        {
+                          "entityType": "Room",
+                          "entities": [
+                            {
+                              "entityId": "Room1",
+                              "index": ["1510826981388", "1510826990438",
+                              "1510826999725"],
+                              "values": [24.1, 25.3, 26.7]
+                            },
+                            {
+                              "entityId": "Room2",
+                              "index": ["1510826981388", "1510826990438",
+                              "1510826999725"],
+                              "values": [22.1, 23.3, 25.7]
+                            }
+                          ]
+                        },
+                        {
+                          "entityType": "Device",
+                          "entities": [
+                            {
+                              "entityId": "DeviceInRoom1",
+                              "index": ["1510826981388", "1510826990438",
+                              "1510826999725"],
+                              "values": [24.1, 25.3, 26.7]
+                            },
+                            {
+                              "entityId": "DeviceInRoom2",
+                              "index": ["1510826981388", "1510826990438",
+                              "1510826999725"],
+                              "values": [22.1, 23.3, 25.7]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }

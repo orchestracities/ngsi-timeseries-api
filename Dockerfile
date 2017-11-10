@@ -12,4 +12,4 @@ WORKDIR /src/ngsi-timeseries-api/
 
 ENV PYTHONPATH=$PWD:$PYTHONPATH
 
-CMD python reporter/reporter.py
+CMD python app.py
