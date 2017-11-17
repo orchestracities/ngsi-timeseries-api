@@ -81,8 +81,6 @@
     
         <ul>
         
-            <li><a class="toctree-l4" href="#restrictions">Restrictions</a></li>
-        
             <li><a class="toctree-l4" href="#the-time-index">The Time Index</a></li>
         
         </ul>
@@ -295,10 +293,6 @@
 <p>The QuantumLeap endpoints to retrieve data are still to be developed.</p>
 <p>However, you can already query the persisted data either directly interacting with the Crate database, or through the use of Grafana. Further details are explained in the <a href="../admin/crate/">Crate</a> and <a href="../admin/grafana/">Grafana</a> sections, respectively.</p>
 <p>What you need to know in the mean time is that QuantumLeap will create one table per each entity type. Table names are formed with the "et" prefix plus the lowercase version of the entity type. I.e, if your entity type is <em>AirQualityObserved</em>, the corresponding table name will be <em>etairqualityobserved</em>. All created tables for now belong to the default "doc" schema.</p>
-<h3 id="restrictions">Restrictions</h3>
-<ul>
-<li>You cannot have two entity types with the same name but different capitalization. E.g: <code>Room</code> and <code>room</code>. The same applies for attribute names of a given entity. I.e, attributes <code>Temperature</code> and <code>temperature</code> will be treated as the same.</li>
-</ul>
 <h3 id="the-time-index">The Time Index</h3>
 <p>A fundamental index in the timeseries database is the time index. You may be wondering... where is it stored?</p>
 <p>QuantumLeap will persist the time index for each notification in a special column called <code>time_index</code>.  If you payed attention in the <em>Orion Subscription</em> section, you know at least which value is used as the time index. This is, the <code>"dateModified"</code> value notified by Orion or, if you missed that option in the subscription, the notification arrival time.</p>
