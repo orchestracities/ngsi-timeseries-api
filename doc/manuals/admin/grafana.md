@@ -15,10 +15,11 @@ Explore your deployed grafana instance (e.g http://localhost:3000). If you didn'
 
 Go to *Add data source* and fill in the required fields, with the following observations:
 
-- **Name**: This is the name you want for the Datasource. We recommend naming it after the entity type.
-- **Type**: Use *Crate*. If you don't see *Crate*, check your installation of the datasource plugin.
+- **Name**: This is the name you want for the Datasource. We recommend naming it after the entity type (i.e, the table you will connect to).
+- **Type**: Use `Crate`. If you don't see `Crate`, check your installation of the datasource plugin.
 - **Url**: The full url where cratedb was deployed.
-- **Schema**: The default is doc.
+- **Access**: Use `direct` if you're deploying everything locally. If you are deploying crate behind a proxy (as in the case of [HA deployment](./index.md)), choose the `proxy` option instead.
+- **Schema**: The schema where the table is defined. By default in crate use `doc`.
 - **Table**: The name of the table of the entity. See the [Data Retrieval](../user/index.md) section to know how table names are defined.
 - **Time column**: The name of the column used as time index. By default is 'time_index', as explained in the [The Time Index](../user/index.md) section.
 
