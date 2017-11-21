@@ -85,9 +85,13 @@
     
         <ul>
         
-            <li><a class="toctree-l4" href="#deploy-quantumleap-in-ha-on-a-docker-swarm-cluster">Deploy QuantumLeap in HA on a Docker Swarm cluster</a></li>
+            <li><a class="toctree-l4" href="#all-in-one-as-a-docker-swarm-service">All-in-one (as a Docker Swarm service)</a></li>
         
-            <li><a class="toctree-l4" href="#deploy-quantumleap-using-docker-compose-for-testing">Deploy QuantumLeap using docker-compose (for testing)</a></li>
+            <li><a class="toctree-l4" href="#all-in-one-via-docker-compose">All-in-one (via docker-compose)</a></li>
+        
+            <li><a class="toctree-l4" href="#reuse-external-orion-instance">Reuse External Orion Instance</a></li>
+        
+            <li><a class="toctree-l4" href="#reuse-external-orion-and-cratedb">Reuse External Orion and CrateDB</a></li>
         
         </ul>
     
@@ -159,11 +163,10 @@ chmod +x /usr/local/bin/docker-compose
 <p>Alternatively, see the docker-compose <a href="https://docs.docker.com/compose/install/">install docs</a> for more install options and instructions.</p>
 <p>The QuantumLeap Docker Image is hosted at <a href="https://hub.docker.com/r/smartsdk/quantumleap/">https://hub.docker.com/r/smartsdk/quantumleap/</a>.</p>
 <p>Now, depending on your scenario, you might have different needs. See from the sections below which fits yours.</p>
-<h2 id="deploy-quantumleap-in-ha-on-a-docker-swarm-cluster">Deploy QuantumLeap in HA on a Docker Swarm cluster</h2>
-<p>To deploy QuantumLeap services in HA as a service on a Docker Swarm Cluster, you can follow the instructions in <a href="https://smartsdk.github.io/smartsdk-recipes/data-management/quantumleap/readme/">this repository</a>.</p>
-<p>There you will find instructions on how to deploy not only QuantumLeap but also all the complementary services that typically form part of the deployment scenario.</p>
-<h2 id="deploy-quantumleap-using-docker-compose-for-testing">Deploy QuantumLeap using docker-compose (for testing)</h2>
-<p>If you want to quickly deploy all the components of the <a href="..">typical scenario</a> at once to start experimenting with QuantumLeap ASAP, do the following. <strong>Important</strong>: Do not follow this approach for production environments.</p>
+<h2 id="all-in-one-as-a-docker-swarm-service">All-in-one (as a Docker Swarm service)</h2>
+<p>Coming soon...</p>
+<h2 id="all-in-one-via-docker-compose">All-in-one (via docker-compose)</h2>
+<p>If you want to quickly deploy all the components of the <a href="..">typical scenario</a> at once to start experimenting with QuantumLeap ASAP, do the following.</p>
 <p>Download (or create locally) a copy of <a href="https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/experiments/grafana/docker-compose.yml">this docker-compose.yml</a> file.</p>
 <p>Then start it up:</p>
 <pre><code># same path were you have placed the docker-compose.yml
@@ -182,10 +185,10 @@ be4a72523e69        mongo:3.2              "docker-entrypoint..."   About a minu
 <p>When you are done experimenting, remember to teardown the compose.</p>
 <pre><code>$ docker-compose down -v
 </code></pre>
-<h3 id="reuse-external-orion-instance">Reuse External Orion Instance</h3>
-<p>If you have already Orion running somewhere else and you just want to deploy QuantumLeap, you can proceed as explained in the previous sections, but before running <code>docker-compose up</code> remove from the <code>docker-compose.yml</code> file the complete definition of the <code>orion:</code> and <code>mongo:</code> services. You will also need to remove the references to them in the <code>depends_on:</code> section of the other services.</p>
+<h2 id="reuse-external-orion-instance">Reuse External Orion Instance</h2>
+<p>If you have already Orion running somewhere else and you just want to deploy QuantumLeap, you can proceed as explained in <em>All-in-one</em> section, but before running <code>docker-compose up</code> remove from the <em>docker-compose.yml</em> file the complete definition of the <code>orion:</code> and <code>mongo:</code> services. You will also need to remove the references to them in the <code>depends_on:</code> section of the other services.</p>
 <p>Similarly, if you don't want to use <em>grafana</em>, you can remove that service definition as well.</p>
-<p>This way, your <code>docker-compose.yml</code> file ends up more or less with the following sections only</p>
+<p>This way, your <em>docker-compose.yml</em> file ends up more or less with the following sections only</p>
 <pre><code>version: '3'
 
 services:
@@ -197,11 +200,11 @@ services:
 networks:
     ...
 </code></pre>
-<h3 id="reuse-external-orion-and-cratedb">Reuse External Orion and CrateDB</h3>
+<h2 id="reuse-external-orion-and-cratedb">Reuse External Orion and CrateDB</h2>
 <p>If you only need to run QuantumLeap to complete your setup, you can simply run</p>
 <pre><code>docker run -d -p 8668:8668 -e "CRATE_HOST=http://your_crate_location" smartsdk/quantumleap
 </code></pre>
-<p>The environment variable <code>CRATE_HOST</code> will tell QuantumLeap where to reach <em>Crate</em>, so you need to provide a reachable hostname where Crate is running. By default QL will append the port <code>4200</code> to the hostname.</p>
+<p>The environment variable <em>CRATE_HOST</em> will tell QuantumLeap where to reach Crate, so you need to provide a reachable hostname where CrateDB is running. By default QL will append the port (4200) to the hostname.</p>
 <p>For more options see <a href="https://docs.docker.com/engine/reference/run/">docker run reference</a>.</p>
               
             </div>
