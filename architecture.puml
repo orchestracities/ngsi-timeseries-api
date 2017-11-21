@@ -1,3 +1,4 @@
+# Convert the following to png using http://www.gravizo.com/#converter.
 @startuml;
 skinparam componentStyle uml2
 
@@ -9,22 +10,33 @@ skinparam componentStyle uml2
 
 interface NGSI
 
-FIWARE(cb,"Context Broker \n - Orion",component)
+FIWARE(cb,"Orion \nContext Broker",component)
 
-[Sensor @ IoT Layer] -right- NGSI
-NGSI -right- cb
+package "IoT Layer" {
+    FIWARE(iota,"IoT Agent",component)
+}
+iota -up- NGSI
+[Client] -left- NGSI
+NGSI -up- cb
+
+[Client] "1" -up-> cb
+iota -up-> "2" cb
 
 package "QuantumLeap" {
 	SMARTSDK(api,"API",component)
 	SMARTSDK(reporter,"Reporter",component)
 	SMARTSDK(translator,"Translator",component)
 	api -up- NGSI
+    cb "3" -down-> api
+
 	api <-down-> translator
-	api "/notify" -down-> reporter
+	api -down-> reporter
 	reporter -right-> translator
+    [Client] "4" <-down-> api
 }
 
-[CrateDB] <-left- translator
-[Grafana] -down- CrateDB
+[DB Cluster] <-left- translator
+[Grafana] <-down- [DB Cluster]
+[Client] "5" <-down- [Grafana]
 
 @enduml
