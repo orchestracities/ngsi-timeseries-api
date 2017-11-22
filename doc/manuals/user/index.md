@@ -83,7 +83,7 @@ Here's an example of an insert payload that will generate a notification based o
 
 ### Attributes DataType Translation
 
-The table below shows which attribute types will be translated to which [Crate Data Types](https://crate.io/docs/crate/reference/sql/data_types.html).
+NGSI Attribute types typically used can be seen in the *Specification* section of the [NGSI API](http://telefonicaid.github.io/fiware-orion/api/v2/latest/). The table below shows which attribute types will be translated to which [Crate Data Types](https://crate.io/docs/crate/reference/sql/data_types.html).
 
 | NGSI Type          | Crate Datatype          | Observation |
 | ------------- |:-------------:| :-----|
@@ -96,8 +96,7 @@ The table below shows which attribute types will be translated to which [Crate D
 |Text                | [string](https://crate.io/docs/crate/reference/sql/data_types.html#string)                  |-|
 |StructuredValue     | [object](https://crate.io/docs/crate/reference/sql/data_types.html#object)                  |-|
 
-
-NOTE: Attributes metadata is still not being persisted.
+NOTE: Attributes metadata are still not being persisted.
 
 
 # Data Retrieval
