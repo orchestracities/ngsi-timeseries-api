@@ -109,7 +109,7 @@ What you need to know in the mean time is that QuantumLeap will create one table
 
 ### Restrictions
 
-- You cannot have two entity types with the same name but different capitalization. E.g: `Room` and `room`. The same applies for attribute names of a given entity. I.e, attributes `Temperature` and `temperature` will be treated as the same.
+- You cannot have two entity types with the same name but different capitalization. E.g: `Preprocessor` and `Processor`. The same applies for attribute names of a given entity. I.e, attributes `hotSpot` and `hotspot` will be treated as the same. These are rare corner-cases, but it is worth keeping in mind this. Ultimately, the correct naming of types and attributes should respect the naming guidelines explained [here](http://fiware-datamodels.readthedocs.io/en/latest/guidelines/index.html).
 
 ### The Time Index
 
