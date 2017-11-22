@@ -297,7 +297,7 @@
 <p>What you need to know in the mean time is that QuantumLeap will create one table per each entity type. Table names are formed with the "et" prefix plus the lowercase version of the entity type. I.e, if your entity type is <em>AirQualityObserved</em>, the corresponding table name will be <em>etairqualityobserved</em>. All created tables for now belong to the default "doc" schema.</p>
 <h3 id="restrictions">Restrictions</h3>
 <ul>
-<li>You cannot have two entity types with the same name but different capitalization. E.g: <code>Room</code> and <code>room</code>. The same applies for attribute names of a given entity. I.e, attributes <code>Temperature</code> and <code>temperature</code> will be treated as the same.</li>
+<li>You cannot have two entity types with the same name but different capitalization. E.g: <code>Preprocessor</code> and <code>Processor</code>. The same applies for attribute names of a given entity. I.e, attributes <code>hotSpot</code> and <code>hotspot</code> will be treated as the same. These are rare corner-cases, but it is worth keeping in mind this. Ultimately, the correct naming of types and attributes should respect the naming guidelines explained <a href="http://fiware-datamodels.readthedocs.io/en/latest/guidelines/index.html">here</a>.</li>
 </ul>
 <h3 id="the-time-index">The Time Index</h3>
 <p>A fundamental index in the timeseries database is the time index. You may be wondering... where is it stored?</p>
