@@ -157,10 +157,11 @@
 <p>Explore your deployed grafana instance (e.g http://localhost:3000). If you didn't change the defaults, <em>admin/admin</em> are the default credentials.</p>
 <p>Go to <em>Add data source</em> and fill in the required fields, with the following observations:</p>
 <ul>
-<li><strong>Name</strong>: This is the name you want for the Datasource. We recommend naming it after the entity type.</li>
-<li><strong>Type</strong>: Use <em>Crate</em>. If you don't see <em>Crate</em>, check your installation of the datasource plugin.</li>
+<li><strong>Name</strong>: This is the name you want for the Datasource. We recommend naming it after the entity type (i.e, the table you will connect to).</li>
+<li><strong>Type</strong>: Use <code>Crate</code>. If you don't see <code>Crate</code>, check your installation of the datasource plugin.</li>
 <li><strong>Url</strong>: The full url where cratedb was deployed.</li>
-<li><strong>Schema</strong>: The default is doc.</li>
+<li><strong>Access</strong>: Use <code>direct</code> if you're deploying everything locally. If you are deploying crate behind a proxy (as in the case of <a href="../">HA deployment</a>), choose the <code>proxy</code> option instead.</li>
+<li><strong>Schema</strong>: The schema where the table is defined. By default in crate use <code>doc</code>.</li>
 <li><strong>Table</strong>: The name of the table of the entity. See the <a href="../../user/">Data Retrieval</a> section to know how table names are defined.</li>
 <li><strong>Time column</strong>: The name of the column used as time index. By default is 'time_index', as explained in the <a href="../../user/">The Time Index</a> section.</li>
 </ul>
