@@ -24,7 +24,7 @@ def test_insert_entity(translator, entity):
 
     loaded_entity = translator.query()
 
-    # These 2 can be ignored when empty. TODO: Support attribute metadata
+    # These 2 can be ignored when empty. TODO: #12 Support attribute metadata
     entity['temperature'].pop('metadata')
     entity['pressure'].pop('metadata')
 
@@ -197,3 +197,16 @@ def test_air_quality_observed(translator, air_quality_observed):
     assert len(loaded) > 0
 
     assert_ngsi_entity_equals(air_quality_observed, loaded[0])
+
+
+def test_traffic_flow_observed(translator, traffic_flow_observed):
+    # Add TIME_INDEX as Reporter would
+    traffic_flow_observed[TIME_INDEX_NAME] = datetime.now().isoformat()[:-3]
+
+    result = translator.insert([traffic_flow_observed])
+    assert result.rowcount > 0
+    translator._refresh([traffic_flow_observed['type']])
+    loaded = translator.query()
+    assert len(loaded) > 0
+
+    assert_ngsi_entity_equals(traffic_flow_observed, loaded[0])

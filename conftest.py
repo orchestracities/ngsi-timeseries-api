@@ -52,7 +52,7 @@ def entity():
 def air_quality_observed():
     """
     :return: dict
-        The model as received within an Orion notification.
+        The AirQualityObserved model as received within an Orion notification.
     """
     return {
         "id": "CDMX-AmbientObserved-prueba3",
@@ -120,3 +120,67 @@ def air_quality_observed():
         }
     }
 
+
+@pytest.fixture
+def traffic_flow_observed():
+    """
+    :return: dict
+        The TrafficFlowObserved model as received within an Orion notification.
+        Data inserted to orion using traffic_observer script.
+    """
+    entity = {
+        'id': '100',
+        'type': 'TrafficFlowObserved',
+        'laneDirection': {
+            'type': 'Text',
+            'value': 'forward',
+        },
+        'dateObservedFrom': {
+            'type': 'Text',
+            'value': '2017-11-22T17:17:30.352635',
+        },
+        'averageVehicleLength': {
+            'type': 'Number',
+            'value': 5.87,
+        },
+        'averageHeadwayTime': {
+            'type': 'Number',
+            'value': 1,
+        },
+        'reversedLane': {
+            'type': 'Boolean',
+            'value': False,
+        },
+        'intensity': {
+            'type': 'Number',
+            'value': 10,
+        },
+        'laneId': {
+            'type': 'Number',
+            'value': 0,
+        },
+        'address': {
+            'type': 'StructuredValue',
+            'value': {
+                'addressLocality': 'Antwerpen',
+                'addressCountry': 'BE',
+                'streetAddress': 'streetname'
+            },
+        },
+        'dateObservedTo': {
+            'type': 'Text',
+            'value': '2017-11-22T17:17:40.352652'
+        },
+        'location': {
+            'type': 'StructuredValue',
+            'value': {
+                'type': 'LineString',
+                'coordinates': [51.23517, 4.421283]
+            }
+        },
+        'averageVehicleSpeed': {
+            'type': 'Number',
+            'value': 52.6,
+        }
+    }
+    return entity
