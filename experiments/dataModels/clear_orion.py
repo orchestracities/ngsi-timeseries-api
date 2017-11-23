@@ -7,16 +7,9 @@ ORION_HOST = os.environ.get('ORION_HOST', '0.0.0.0')
 ORION_PORT = os.environ.get('ORION_PORT', '1026')
 ORION_URL = 'http://{}:{}'.format(ORION_HOST, ORION_PORT)
 
-# INTERNAL
-HEADERS = {
-    'Fiware-Service': 'default',
-    'Fiware-ServicePath': '/',
-}
-HEADERS_PUT = HEADERS.copy()
-HEADERS_PUT['Content-Type'] = 'application/json'
-
 
 if __name__ == '__main__':
+    from utils import HEADERS
     # Confirm deletion
     msg = "Remove all subscriptions and entities in ORION {}? [y/N] "
     print(msg.format(ORION_URL))

@@ -9,59 +9,63 @@ script.
 """
 from __future__ import print_function
 from datetime import datetime, timedelta
-from experiments.dataModels.utils import insert_entities, COORDS, update_entity
 import os
 import random
-import time
 
 
 # INPUT
 SLEEP = int(os.environ.get('SLEEP', 3))
 ORION_URL = os.environ.get('ORION_URL', 'http://0.0.0.0:1026')
-N_ENTITIES = int(os.environ.get('N_ENTITIES', 3))
+N_ENTITIES = int(os.environ.get('N_ENTITIES', 9))
 
 
-def iter_entities():
-    date_from = (datetime.now() - timedelta(seconds=SLEEP)).isoformat()
+def create_entity(entity_id):
+    from utils import COORDS
+    pivot = 10
+    date_from = (datetime.now() - timedelta(seconds=pivot)).isoformat()
     date_to = datetime.now().isoformat()
-
-    for n in range(N_ENTITIES):
-        max_intensity = max(SLEEP, 1)
-        entity = {
-            "id": 'traffic_flow_observer_{}'.format(n),
-            "type": "TrafficFlowObserved",
-            "laneId": n % 2,
-            "address": {
-                "streetAddress": "streetname",
-                "addressLocality": "Antwerpen",
-                "addressCountry": "BE"
-            },
-            "location": {
-                "type": "LineString",
-                "coordinates": COORDS[n % len(COORDS)],
-            },
-            # Not supported by orion
-            # "dateObserved": "2016-12-07T11:10:00/2016-12-07T11:15:00"
-            "dateObservedFrom": date_from,
-            "dateObservedTo": date_to,
-            # avg time between two consecutive vehicles
-            "averageHeadwayTime": max_intensity / SLEEP,
-            "intensity": max_intensity,   # Total number of vehicles detected
-            # "capacity": 0.76,           # Not in spec, only in example :/
-            "averageVehicleSpeed": 52.6,  # km/h
-            "averageVehicleLength": 5.87, # meters
-            "reversedLane": False,
-            "laneDirection": "forward",
-        }
-        yield entity
-
-
-def get_attrs_to_update(date_from, date_to):
+    intensity = random.randint(0, pivot)
+    avg_hw_time = 0 if intensity == 0 else float(pivot/intensity)
+    avg_speed = 1 + random.random() * 250
     avg_length = 2 + random.random() * 8
+
+    entity = {
+        "id": entity_id,
+        "type": "TrafficFlowObserved",
+        "laneId": random.randint(0, 1),
+        "address": {
+            "streetAddress": "streetname",
+            "addressLocality": "Antwerpen",
+            "addressCountry": "BE"
+        },
+        "location": {
+            "type": "LineString",
+            "coordinates": random.choice(COORDS),
+        },
+        # Not supported by orion
+        # "dateObserved": "2016-12-07T11:10:00/2016-12-07T11:15:00"
+        "dateObservedFrom": date_from,
+        "dateObservedTo": date_to,
+        # avg time between two consecutive vehicles
+        "averageHeadwayTime": avg_hw_time,
+        "intensity": intensity,        # Total number of vehicles detected
+        # "capacity": 0.76,            # Not in spec, only in example :/
+        "averageVehicleSpeed": avg_speed,    # km/h
+        "averageVehicleLength": avg_length,  # meters
+        "reversedLane": False,
+        "laneDirection": "forward",
+    }
+    return entity
+
+
+def get_attrs_to_update():
+    pivot = 10
+    date_from = (datetime.now() - timedelta(seconds=pivot)).isoformat()
+    date_to = datetime.now().isoformat()
+    intensity = random.randint(0, pivot)
+    avg_hw_time = 0 if intensity == 0 else float(pivot/intensity)
     avg_speed = 10 + random.random() * 90
-    max_intensity = max(SLEEP, 1)
-    intensity = random.randint(0, max_intensity)
-    avg_hw_time = 0 if intensity == 0 else float(SLEEP/intensity)
+    avg_length = 2 + random.random() * 8
 
     attrs_to_update = {
         'dateObservedFrom': {'type': 'DateTime', 'value': date_from},
@@ -75,21 +79,8 @@ def get_attrs_to_update(date_from, date_to):
 
 
 if __name__ == '__main__':
-    print("Starting {} with options:".format(__file__))
-    print("SLEEP: {}".format(SLEEP))
-    print("ORION_URL: {}".format(ORION_URL))
-    print("N_ENTITIES: {}".format(N_ENTITIES))
-
-    entities = list(iter_entities())
-    insert_entities(entities, SLEEP, ORION_URL)
-
-    date_from = entities[0]['dateObservedTo']
-    while True:
-        date_to = datetime.now().isoformat()
-
-        for e in entities:
-            time.sleep(SLEEP)
-            attrs_to_update = get_attrs_to_update(date_from, date_to)
-            update_entity(e, attrs_to_update, ORION_URL)
-
-        date_from = date_to
+    from utils import main
+    id_prefix = 'traffic_flow_observer'
+    main(
+        __file__, SLEEP, ORION_URL, N_ENTITIES,
+        id_prefix, create_entity, get_attrs_to_update)
