@@ -45,7 +45,6 @@ def get_entities():
         entity = {
             "id": 'air_quality_observer_{}'.format(n),
             "type": "AirQualityObserved",
-            "laneId": n % 2,
             "address": {
                 "streetAddress": "streetname",
                 "addressLocality": "Antwerpen",
