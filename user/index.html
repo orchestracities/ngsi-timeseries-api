@@ -281,7 +281,7 @@
 <tr>
 <td>Text</td>
 <td align="center"><a href="https://crate.io/docs/crate/reference/sql/data_types.html#string">string</a></td>
-<td align="left">-</td>
+<td align="left">This is the default type if the provided type is unknown.</td>
 </tr>
 <tr>
 <td>StructuredValue</td>
@@ -290,6 +290,7 @@
 </tr>
 </tbody>
 </table>
+<p>If the type of any of the received attributes is not present in the column <em>NGSI Type</em> of the previous table, the value of such attribute will be treated internally as a string.</p>
 <p>NOTE: Attributes metadata are still not being persisted.</p>
 <h1 id="data-retrieval">Data Retrieval</h1>
 <p>The QuantumLeap endpoints to retrieve data are still to be developed.</p>
