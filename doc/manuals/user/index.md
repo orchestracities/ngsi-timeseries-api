@@ -93,8 +93,10 @@ NGSI Attribute types typically used can be seen in the *Specification* section o
 |Integer             | [long](https://crate.io/docs/crate/reference/sql/data_types.html#numeric-types)                    | TODO: Fix this inconsistency ASAP! |
 |geo:json            | [geo_shape](https://crate.io/docs/crate/reference/sql/data_types.html#geo-shape)               | NGSI Simple Location Format is not yet supported. Use GeoJSON instead. Read more [here](http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities).|
 |Number              | [float](https://crate.io/docs/crate/reference/sql/data_types.html#numeric-types)                   |-|
-|Text                | [string](https://crate.io/docs/crate/reference/sql/data_types.html#string)                  |-|
+|Text                | [string](https://crate.io/docs/crate/reference/sql/data_types.html#string)                  | This is the default type if the provided type is unknown. |
 |StructuredValue     | [object](https://crate.io/docs/crate/reference/sql/data_types.html#object)                  |-|
+
+If the type of any of the received attributes is not present in the column *NGSI Type* of the previous table, the value of such attribute will be treated internally as a string.
 
 NOTE: Attributes metadata are still not being persisted.
 

@@ -14,7 +14,7 @@ NGSI_DATETIME = 'DateTime'
 
 # CRATE TYPES: https://crate.io/docs/reference/sql/data_types.html
 NGSI_TO_CRATE = {
-    "Array": 'array(string)',  # TODO: Support numeric arrays
+    "Array": 'array(string)',  # TODO #36: Support numeric arrays
     "Boolean": 'boolean',
     NGSI_DATETIME: 'timestamp',
     "Integer": 'long',
@@ -28,23 +28,6 @@ CRATE_TO_NGSI['string_array'] = 'Array'
 
 # A table to store the configuration and metadata associated with each entity type.
 METADATA_TABLE_NAME = "md_ets_metadata"
-
-
-
-class UnsupportedNGSIType(TypeError):
-    """
-    To make type conversion errors more user-friendly, this exception is raised with a message of supported 'NGSI types'
-    """
-    def __init__(self, unsupported_type):
-        """
-        :param string unsupported_type:
-            the unsupported type
-        """
-        msg = "'{}' is not a supported NGSI type. Please use any of the following: {}".format(
-            unsupported_type, ", ".join(NGSI_TO_CRATE.keys())
-        )
-        super(UnsupportedNGSIType, self).__init__(msg)
-
 
 
 class CrateTranslator(BaseTranslator):
@@ -152,11 +135,17 @@ class CrateTranslator(BaseTranslator):
                 if attr == self.TIME_INDEX_NAME:
                     table[self.TIME_INDEX_NAME] = NGSI_TO_CRATE['DateTime']
                 else:
-                    ngsi_t = e[attr]['type']
+                    ngsi_t = e[attr]['type'] if 'type' in e[attr] else NGSI_TEXT
                     if ngsi_t not in NGSI_TO_CRATE:
-                        raise UnsupportedNGSIType(ngsi_t)
-                    crate_t = NGSI_TO_CRATE[ngsi_t]
-                    table[attr] = crate_t
+                        msg = "'{}' is not a supported NGSI type. " \
+                              "Please use any of the following: {}. " \
+                              "Falling back to {}.".format(ngsi_t, ", ".join(NGSI_TO_CRATE.keys()), NGSI_TEXT)
+                        self.logger.warning(msg)
+                        # Keep the original type to be saved in the metadata table, but switch to TEXT for crate column.
+                        table[attr] = ngsi_t
+                    else:
+                        crate_t = NGSI_TO_CRATE[ngsi_t]
+                        table[attr] = crate_t
 
         persisted_metadata = self._process_metadata_table(tables.keys())
         new_metadata = {}
@@ -164,9 +153,18 @@ class CrateTranslator(BaseTranslator):
         # Create data tables
         for tn, table in tables.items():
             # Preserve original attr names and types
-            original_attrs = dict({attr.lower(): (attr, CRATE_TO_NGSI[t]) for attr, t in table.items()})
-            original_attrs['entity_type'] = (NGSI_TYPE, NGSI_TEXT)
-            original_attrs['entity_id'] = (NGSI_ID, NGSI_TEXT)
+            original_attrs = {
+                'entity_type': (NGSI_TYPE, NGSI_TEXT),
+                'entity_id': (NGSI_ID, NGSI_TEXT),
+            }
+            for attr, t in table.items():
+                if t not in CRATE_TO_NGSI:
+                    original_attrs[attr.lower()] = (attr, t)
+                    # Having persisted original types in metadata, weird types fall back to string for crate.
+                    table[attr] = NGSI_TO_CRATE[NGSI_TEXT]
+                else:
+                    if attr not in ('entity_type', 'entity_id'):
+                        original_attrs[attr.lower()] = (attr, CRATE_TO_NGSI[t])
             new_metadata[tn] = original_attrs
 
             # Now create data table

@@ -2,7 +2,7 @@ from conftest import entity
 from datetime import datetime
 from translators.base_translator import BaseTranslator
 from translators.benchmark import benchmark
-from translators.crate import UnsupportedNGSIType
+from translators.crate import NGSI_TEXT
 from translators.fixtures import crate_translator as translator
 from utils.common import *
 import pytest
@@ -135,15 +135,35 @@ def test_unsupported_ngsi_type(translator):
     e = {
         "type": "SoMeWeIrDtYpE",
         "id": "sOmEwEiRdId",
-        TIME_INDEX_NAME: datetime(1970, 6, 28, 1, 1, 1).isoformat()[:-3],
+        TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
         "foo": {
             "type": "DefinitivelyNotAValidNGSIType",
             "value": "BaR",
-        }
+        },
     }
-    # Assert exception is raised with error message containing both unsupported given type and supported expected type.
-    with pytest.raises(UnsupportedNGSIType, match=r"DefinitivelyNotAValidNGSIType.* Text"):
-        translator.insert([e])
+    translator.insert([e])
+    translator._refresh([e['type']])
+    entities = translator.query()
+    assert len(entities) == 1
+    assert_ngsi_entity_equals(e, entities[0])
+
+
+def test_missing_type_defaults_string(translator):
+    e = {
+        "type": "SoMeWeIrDtYpE",
+        "id": "sOmEwEiRdId",
+        TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
+        "foo": {
+            "value": "BaR",
+        },
+    }
+    translator.insert([e])
+    translator._refresh([e['type']])
+    entities = translator.query()
+    assert len(entities) == 1
+    # Response will include the type
+    e["foo"]["type"] = NGSI_TEXT
+    assert_ngsi_entity_equals(e, entities[0])
 
 
 def test_capitals(translator):
