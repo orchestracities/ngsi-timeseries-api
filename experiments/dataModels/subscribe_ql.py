@@ -3,7 +3,7 @@ Script to create subscriptions for changes in entities of type
 AirQualityObserved and TrafficFlowObserved to be sent to Quantumleap.
 """
 from __future__ import print_function
-from experiments.dataModels.utils import HEADERS_PUT
+from utils import HEADERS_PUT
 import json
 import os
 import requests

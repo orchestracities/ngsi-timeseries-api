@@ -9,51 +9,49 @@ script.
 """
 from __future__ import print_function
 from datetime import datetime
-from experiments.dataModels.utils import insert_entities, COORDS, update_entity
 import os
 import random
-import time
 
 
 # INPUT
 SLEEP = int(os.environ.get('SLEEP', 3))
 ORION_URL = os.environ.get('ORION_URL', 'http://0.0.0.0:1026')
-N_ENTITIES = int(os.environ.get('N_ENTITIES', 3))
+N_ENTITIES = int(os.environ.get('N_ENTITIES', 9))
 
 
-def iter_entities():
-    for n in range(N_ENTITIES):
-        entity = {
-            "id": 'air_quality_observer_{}'.format(n),
-            "type": "AirQualityObserved",
-            "address": {
-                "streetAddress": "streetname",
-                "addressLocality": "Antwerpen",
-                "addressCountry": "BE"
-            },
-            "dateObserved": datetime.now().isoformat(),
-            "location": {
-                "type": "Point",
-                "coordinates": COORDS[n % len(COORDS)],
-            },
-            "source": "http://random.data.from.quantumleap",
-            "precipitation": 0,
-            "relativeHumidity": 0.54,
-            "temperature": 12.2,
-            "windDirection": 186,
-            "windSpeed": 0.64,
-            "airQualityLevel": "moderate",
-            "airQualityIndex": 65,
-            "reliability": 0.7,
-            "CO": 500,
-            "NO": 45,
-            "NO2": 69,
-            "NOx": 139,
-            "SO2": 11,
-            "CO_Level": "moderate",
-            "refPointOfInterest": "28079004-Pza.deEspanya"
-        }
-        yield entity
+def create_entity(entity_id):
+    from utils import COORDS
+    entity = {
+        "id": entity_id,
+        "type": "AirQualityObserved",
+        "address": {
+            "streetAddress": "streetname",
+            "addressLocality": "Antwerpen",
+            "addressCountry": "BE"
+        },
+        "dateObserved": datetime.now().isoformat(),
+        "location": {
+            "type": "Point",
+            "coordinates": random.choice(COORDS),
+        },
+        "source": "http://random.data.from.quantumleap",
+        "precipitation": 0,
+        "relativeHumidity": 0.54,
+        "temperature": 12.2,
+        "windDirection": 186,
+        "windSpeed": 0.64,
+        "airQualityLevel": "moderate",
+        "airQualityIndex": 65,
+        "reliability": 0.7,
+        "CO": 500,
+        "NO": 45,
+        "NO2": 69,
+        "NOx": 139,
+        "SO2": 11,
+        "CO_Level": "moderate",
+        "refPointOfInterest": "28079004-Pza.deEspanya"
+    }
+    return entity
 
 
 def get_attrs_to_update():
@@ -84,16 +82,8 @@ def get_attrs_to_update():
 
 
 if __name__ == '__main__':
-    print("Starting {} with options:".format(__file__))
-    print("SLEEP: {}".format(SLEEP))
-    print("ORION_URL: {}".format(ORION_URL))
-    print("N_ENTITIES: {}".format(N_ENTITIES))
-
-    entities = list(iter_entities())
-    insert_entities(entities, SLEEP, ORION_URL)
-
-    while True:
-        for e in entities:
-            time.sleep(SLEEP)
-            attrs_to_update = get_attrs_to_update()
-            update_entity(e, attrs_to_update, ORION_URL)
+    from utils import main
+    id_prefix = 'air_quality_observer'
+    main(
+        __file__, SLEEP, ORION_URL, N_ENTITIES,
+        id_prefix, create_entity, get_attrs_to_update,)
