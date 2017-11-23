@@ -1,8 +1,10 @@
 """
-Script to create subscriptions for changes in entities of type AirQualityObserved and TrafficFlowObserved to be sent
+Script to create subscriptions for changes in entities of type
+AirQualityObserved and TrafficFlowObserved to be sent
 to Quantumleap.
 """
 from __future__ import print_function
+from experiments.dataModels.utils import HEADERS_PUT
 import json
 import os
 import requests
@@ -12,18 +14,9 @@ import pprint
 QL_URL = os.environ.get('QL_URL', 'http://quantumleap:8668')
 ORION_URL = os.environ.get('ORION_URL', 'http://0.0.0.0:1026')
 
-# INTERNAL
-HEADERS = {
-    'Fiware-Service': 'default',
-    'Fiware-ServicePath': '/',
-}
-HEADERS_PUT = HEADERS.copy()
-HEADERS_PUT['Content-Type'] = 'application/json'
 
-
-def subscribe(entity_type):
-    notify_url = '{}/notify'.format(QL_URL)
-    subscription = {
+def create_subscription(entity_type, notify_url):
+    s = {
         "description": "traffic_flow_observed",
         "subject": {
             "entities": [
@@ -46,11 +39,20 @@ def subscribe(entity_type):
             "metadata": ["dateCreated", "dateModified"]
         },
     }
-    orion_url = '{}/v2/subscriptions'.format(ORION_URL)
+    return s
 
-    print("Subscribing at '{}', to notify to '{}' about any changes of '{}'".format(ORION_URL, notify_url, entity_type))
+
+def subscribe(entity_type):
+    msg = "Subscribing at '{}', to notify to '{}' about any changes of '{}'"
+    notify_url = '{}/notify'.format(QL_URL)
+    orion_url = '{}/v2/subscriptions'.format(ORION_URL)
+    print(msg.format(ORION_URL, notify_url, entity_type))
+
+    subscription = create_subscription(entity_type, notify_url)
     pprint.pprint(subscription)
-    r = requests.post(orion_url, data=json.dumps(subscription), headers=HEADERS_PUT)
+
+    r = requests.post(orion_url, data=json.dumps(subscription),
+                      headers=HEADERS_PUT)
     assert r.ok, r.text
     print("Subscription successfully created".format(ORION_URL, QL_URL))
 

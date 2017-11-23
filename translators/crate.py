@@ -6,11 +6,13 @@ import logging
 import statistics
 
 
-# NGSI TYPES: Not properly documented so this might change. Based on experimenting with Orion.
+# NGSI TYPES: Not properly documented so this might change. Based on Orion
+# output.
 NGSI_ID = 'id'
 NGSI_TYPE = 'type'
 NGSI_TEXT = 'Text'
 NGSI_DATETIME = 'DateTime'
+
 
 # CRATE TYPES: https://crate.io/docs/reference/sql/data_types.html
 NGSI_TO_CRATE = {
@@ -26,7 +28,8 @@ NGSI_TO_CRATE = {
 CRATE_TO_NGSI = dict((v, k) for (k,v) in NGSI_TO_CRATE.items())
 CRATE_TO_NGSI['string_array'] = 'Array'
 
-# A table to store the configuration and metadata associated with each entity type.
+
+# A table to store the configuration and metadata of each entity type.
 METADATA_TABLE_NAME = "md_ets_metadata"
 
 
@@ -38,7 +41,8 @@ class CrateTranslator(BaseTranslator):
 
 
     def setup(self):
-        self.conn = client.connect(["{}:{}".format(self.host, self.port)], error_trace=True)
+        url = "{}:{}".format(self.host, self.port)
+        self.conn = client.connect([url], error_trace=True)
         self.cursor = self.conn.cursor()
 
 
@@ -50,7 +54,8 @@ class CrateTranslator(BaseTranslator):
     def _refresh(self, entity_types):
         """
         Used for testing purposes only!
-        :param entity_types: list(str) list of entity types whose tables will be refreshed
+        :param entity_types: list(str) list of entity types whose tables will be
+         refreshed
         """
         table_names = [self._et2tn(et) for et in entity_types]
         table_names.append(METADATA_TABLE_NAME)
@@ -60,13 +65,15 @@ class CrateTranslator(BaseTranslator):
     def _get_isoformat(self, ms_since_epoch):
         """
         :param ms_since_epoch:
-            As stated in CrateDB docs: Timestamps are always returned as long values (ms from epoch).
+            As stated in CrateDB docs: Timestamps are always returned as long
+            values (ms from epoch).
         :return: str
             The equivalent datetime in ISO 8601.
         """
         if ms_since_epoch is None:
             raise ValueError
-        utc = datetime(1970, 1, 1, 0, 0, 0, 0) + timedelta(milliseconds=ms_since_epoch)
+        utc = datetime(1970, 1, 1, 0, 0, 0, 0) + timedelta(milliseconds=
+                                                           ms_since_epoch)
         return utc.isoformat()
 
 
@@ -78,12 +85,14 @@ class CrateTranslator(BaseTranslator):
         :return: iterable(NGSI Entity)
             Iterable over the translated NGSI entities.
         """
-        stmt = "select entity_attrs from {} where table_name = '{}'".format(METADATA_TABLE_NAME, table_name)
+        stmt = "select entity_attrs from {} where table_name = '{}'".format(
+            METADATA_TABLE_NAME, table_name)
         self.cursor.execute(stmt)
         res = self.cursor.fetchall()
 
         if len(res) != 1:
-            msg = "Cannot have {} entries in table '{}' for PK '{}'".format(len(res), METADATA_TABLE_NAME, table_name)
+            msg = "Cannot have {} entries in table '{}' for PK '{}'".format(
+                len(res), METADATA_TABLE_NAME, table_name)
             self.logger.error(msg)
         entity_attrs = res[0][0]
 
@@ -96,7 +105,8 @@ class CrateTranslator(BaseTranslator):
                     entity[original_name] = v
 
                 elif original_name == self.TIME_INDEX_NAME:
-                    # TODO: This might not be valid NGSI. Should we include this time_index in the reply?.
+                    # TODO: This might not be valid NGSI.
+                    # Should we include this time_index in the reply?.
                     entity[original_name] = self._get_isoformat(v)
 
                 else:
@@ -112,9 +122,10 @@ class CrateTranslator(BaseTranslator):
 
     def insert(self, entities):
         if not isinstance(entities, list):
-            raise TypeError("Entities expected to be of type list, but got {}".format(type(entities)))
+            msg = "Entities expected to be of type list, but got {}"
+            raise TypeError(msg.format(type(entities)))
 
-        tables = {}          # {table_name -> {column_name -> crate_column_type}}
+        tables = {}         # {table_name -> {column_name -> crate_column_type}}
         entities_by_tn = {}  # {table_name -> list(entities)}
 
         # Collect tables info
@@ -125,23 +136,29 @@ class CrateTranslator(BaseTranslator):
             entities_by_tn.setdefault(tn, []).append(e)
 
             if self.TIME_INDEX_NAME not in e:
-                # Recall it's the reporter's job to ensure each entity comes with a TIME_INDEX attribute.
+                # Recall it's the reporter's job to ensure each entity comes
+                # with a TIME_INDEX attribute.
                 import warnings
-                warnings.warn("Translating entity without TIME_INDEX. {}".format(e))
+                mgs = "Translating entity without TIME_INDEX. {}"
+                warnings.warn(msg.format(e))
 
-            table['entity_id'] = NGSI_TO_CRATE['Text']  # We intentionally avoid using id as a column name.
-            table['entity_type'] = NGSI_TO_CRATE['Text']  # We intentionally avoid using type as a column name.
+            # Intentionally avoid using 'id' and 'type' as a column names.
+            # It's problematic for some dbs.
+            table['entity_id'] = NGSI_TO_CRATE['Text']
+            table['entity_type'] = NGSI_TO_CRATE['Text']
             for attr in iter_entity_attrs(e):
                 if attr == self.TIME_INDEX_NAME:
                     table[self.TIME_INDEX_NAME] = NGSI_TO_CRATE['DateTime']
                 else:
                     ngsi_t = e[attr]['type'] if 'type' in e[attr] else NGSI_TEXT
                     if ngsi_t not in NGSI_TO_CRATE:
-                        msg = "'{}' is not a supported NGSI type. " \
-                              "Please use any of the following: {}. " \
-                              "Falling back to {}.".format(ngsi_t, ", ".join(NGSI_TO_CRATE.keys()), NGSI_TEXT)
+                        msg = ("'{}' is not a supported NGSI type. "
+                               "Please use any of the following: {}. "
+                               "Falling back to {}.").format(
+                            ngsi_t, ", ".join(NGSI_TO_CRATE.keys()), NGSI_TEXT)
                         self.logger.warning(msg)
-                        # Keep the original type to be saved in the metadata table, but switch to TEXT for crate column.
+                        # Keep the original type to be saved in the metadata
+                        # table, but switch to TEXT for crate column.
                         table[attr] = ngsi_t
                     else:
                         crate_t = NGSI_TO_CRATE[ngsi_t]
@@ -160,7 +177,8 @@ class CrateTranslator(BaseTranslator):
             for attr, t in table.items():
                 if t not in CRATE_TO_NGSI:
                     original_attrs[attr.lower()] = (attr, t)
-                    # Having persisted original types in metadata, weird types fall back to string for crate.
+                    # Having persisted original types in metadata, weird types
+                    # fall back to string for crate.
                     table[attr] = NGSI_TO_CRATE[NGSI_TEXT]
                 else:
                     if attr not in ('entity_type', 'entity_id'):
@@ -173,13 +191,14 @@ class CrateTranslator(BaseTranslator):
             self.cursor.execute(stmt)
 
         # Update metadata if necessary
-        self._update_metadata_table(tables.keys(), persisted_metadata, new_metadata)
+        self._update_metadata_table(
+            tables.keys(), persisted_metadata, new_metadata)
 
         # Populate data tables
         for tn, entities in entities_by_tn.items():
             col_names = sorted(tables[tn].keys())
 
-            entries = []    # raw values in same order as column names for all entities
+            entries = []  # raw values in same order as column names
             for e in entities:
                 temp = e.copy()
                 temp['entity_type'] = {'value': temp.pop('type')}
@@ -188,11 +207,13 @@ class CrateTranslator(BaseTranslator):
                 try:
                     values = tuple(temp[x]['value'] for x in col_names)
                 except KeyError as e:
-                    msg = "Seems like not all entities of same type came with the same set of attributes. {}".format(e)
+                    msg = ("Seems like not all entities of same type came "
+                           "with the same set of attributes. {}").format(e)
                     raise NotImplementedError(msg)
                 entries.append(values)
 
-            stmt = "insert into {} ({}) values ({})".format(tn, ', '.join(col_names), ('?,' * len(col_names))[:-1])
+            stmt = "insert into {} ({}) values ({})".format(
+                tn, ', '.join(col_names), ('?,' * len(col_names))[:-1])
             self.cursor.executemany(stmt, entries)
 
         return self.cursor
@@ -200,9 +221,10 @@ class CrateTranslator(BaseTranslator):
 
     def _process_metadata_table(self, table_names):
         """
-        This method creates the METADATA_TABLE_NAME (if not exists). This table maps, for each table_name (entity type),
-        a translation table (dict) mapping the column names (entity attributes) to the corresponding attributes metadata
-        such as original attribute names and NGSI types.
+        This method creates the METADATA_TABLE_NAME (if not exists). This table
+        maps, for each table_name (entity type), a translation table (dict)
+        mapping the column names (entity attributes) to the corresponding
+        attributes metadata such as original attribute names and NGSI types.
 
         :param table_names: iterable(unicode)
             The names of the tables whose metadata you are interested in.
@@ -210,10 +232,9 @@ class CrateTranslator(BaseTranslator):
         :return: dict
             The content of METADATA_TABLE_NAME.
         """
-        stmt = "create table if not exists {} (table_name string primary key, entity_attrs object)".format(
-            METADATA_TABLE_NAME
-        )
-        self.cursor.execute(stmt)
+        stmt = ("create table if not exists {} "
+                "(table_name string primary key, entity_attrs object)")
+        self.cursor.execute(stmt.format(METADATA_TABLE_NAME))
         if self.cursor.rowcount:  # i.e, table just created
             return {}
 
@@ -226,12 +247,14 @@ class CrateTranslator(BaseTranslator):
         return persisted_metadata
 
 
-    def _update_metadata_table(self, table_names, persisted_metadata, new_metadata):
+    def _update_metadata_table(self, table_names, persisted_metadata,
+                               new_metadata):
         """
-        Update the metadata (attributes translation table) of each table_name in table_names if required.
+        Update the metadata (attributes translation table) of each table_name
+        in table_names if required.
 
-        Required means, either there was no metadata for that table_name or the new_metadata has new entries not present
-         in persisted_metadata.
+        Required means, either there was no metadata for that table_name or the
+        new_metadata has new entries not present in persisted_metadata.
         """
         for tn in table_names:
             if tn not in persisted_metadata or new_metadata[tn].keys() - persisted_metadata[tn].keys():
@@ -247,22 +270,30 @@ class CrateTranslator(BaseTranslator):
         :return: list(unicode)
         """
         try:
-            self.cursor.execute("select distinct table_name from {}".format(METADATA_TABLE_NAME))
+            self.cursor.execute("select distinct table_name from {}".format(
+                METADATA_TABLE_NAME))
         except client.exceptions.ProgrammingError as e:
             # Metadata table still not created
-            logging.debug("Could not retrieve METADATA_TABLE. Empty database maybe?. {}".format(e))
+            mssg = "Could not retrieve METADATA_TABLE. Empty database maybe?. {}"
+            logging.debug(msg.format(e))
             return []
         return [r[0] for r in self.cursor.rows]
 
 
-    def query(self, attr_names=None, entity_type=None, entity_id=None, where_clause=None):
+    def query(self, attr_names=None, entity_type=None, entity_id=None,
+              where_clause=None):
         if entity_id and not entity_type:
-            raise NotImplementedError("For now you must specify entity_type when stating entity_id")
+            msg = "For now you must specify entity_type when stating entity_id"
+            raise NotImplementedError(msg)
 
-        select_clause = "{}".format(attr_names[0]) if attr_names else "*"  # TODO: support some attrs
+        select_clause = "{}".format(attr_names[0]) if attr_names else "*"
+        # TODO: support some attrs
         if not where_clause:
             # TODO: support entity_id filter with custom where clause
-            where_clause = "where entity_id = '{}'".format(entity_id) if entity_id else ''
+            if entity_id:
+                where_clause = "where entity_id = '{}'".format(entity_id)
+            else:
+                where_clause = ''
 
         if entity_type:
             table_names = [self._et2tn(entity_type)]
@@ -271,7 +302,8 @@ class CrateTranslator(BaseTranslator):
 
         result = []
         for tn in table_names:
-            op = "select {} from {} {} order by {}".format(select_clause, tn, where_clause, self.TIME_INDEX_NAME)
+            op = "select {} from {} {} order by {}".format(
+                select_clause, tn, where_clause, self.TIME_INDEX_NAME)
             self.cursor.execute(op)
             res = self.cursor.fetchall()
             col_names = [x[0] for x in self.cursor.description]
@@ -283,7 +315,8 @@ class CrateTranslator(BaseTranslator):
 
     def average(self, attr_name, entity_type=None, entity_id=None):
         if entity_id and not entity_type:
-            raise NotImplementedError("For now you must specify entity_type when stating entity_id")
+            msg = "For now you must specify entity_type when stating entity_id"
+            raise NotImplementedError(msg)
 
         if entity_type:
             table_names = [self._et2tn(entity_type)]
@@ -294,7 +327,10 @@ class CrateTranslator(BaseTranslator):
         values = []
         for tn in table_names:
             select_clause = "avg({})".format(attr_name)
-            where_clause = ("where entity_id = '%s'" % entity_id) if entity_id else ""
+            if entity_id:
+                where_clause = ("where entity_id = '%s'" % entity_id)
+            else:
+                where_clause = ''
             stmt = "select {} from {} {}".format(select_clause, tn, where_clause)
             self.cursor.execute(stmt)
             avg = self.cursor.fetchone()[0]
