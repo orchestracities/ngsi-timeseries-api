@@ -72,8 +72,8 @@ class CrateTranslator(BaseTranslator):
         """
         if ms_since_epoch is None:
             raise ValueError
-        utc = datetime(1970, 1, 1, 0, 0, 0, 0) + timedelta(milliseconds=
-                                                           ms_since_epoch)
+        d = timedelta(milliseconds=ms_since_epoch)
+        utc = datetime(1970,1,1,0,0,0,0) + d
         return utc.isoformat()
 
 

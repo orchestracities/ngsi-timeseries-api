@@ -59,7 +59,7 @@ Important things to notice from the example.
 - You can create any valid NGSI subscription for your entities.
 
 - Though not compulsory, it is highly recommended to include the
-```"metadata": ["dateCreated", "dateModified"]``` part in the `notification`
+`"metadata": ["dateCreated", "dateModified"]` part in the `notification`
 part of the subscription. This instructs Orion to include the modification time
 of the attributes in the notification. This timestamp will be used as the time
 index in the database. If this is somehow missing, QuantumLeap will use its

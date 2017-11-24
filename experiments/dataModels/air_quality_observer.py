@@ -58,15 +58,17 @@ def iter_entities():
 
 def get_attrs_to_update():
     attrs_to_update = {
-        'dateObserved': {'type': 'DateTime', 'value': datetime.now().isoformat()},
+        'dateObserved': {
+            'type': 'DateTime',
+            'value': datetime.now().isoformat()},
         "precipitation": {'type': 'Number', 'value': random.randint(0, 200)},
         "relativeHumidity": {'type': 'Number', 'value': random.random()},
         "temperature": {'type': 'Number', 'value': -20 + random.random() * 50},
-        "windDirection": {'type': 'Number', 'value':random.random() * 200},
+        "windDirection": {'type': 'Number', 'value': random.random() * 200},
         "windSpeed": {'type': 'Number', 'value': random.random()},
         "airQualityLevel": {
             'type': 'Text',
-            'value': random.choice(["poor","moderate", "good"])},
+            'value': random.choice(["poor", "moderate", "good"])},
         "airQualityIndex": {'type': 'Number', 'value': random.random() * 100},
         "reliability": {'type': 'Number', 'value': random.random()},
         "CO": {'type': 'Number', 'value': random.random() * 500},
