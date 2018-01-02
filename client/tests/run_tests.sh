@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
 docker-compose up -d
-sleep 5
-docker run -ti --rm --network tests_clienttests quantumleap /bin/sh -c "pytest client/tests"
+sleep 10
+
+docker run -ti --rm --network tests_clienttests quantumleap pytest client/tests
+r=$?
+
 docker-compose down
+exit $r
