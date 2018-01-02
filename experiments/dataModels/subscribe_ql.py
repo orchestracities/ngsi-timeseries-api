@@ -15,8 +15,15 @@ ORION_URL = os.environ.get('ORION_URL', 'http://0.0.0.0:1026')
 
 
 def create_subscription(entity_type, notify_url):
+    if entity_type.startswith('Traffic'):
+        description = "traffic_flow_observed"
+    elif entity_type.startswith('Air'):
+        description = "air_quality_observed"
+    else:
+        description = "description"
+
     s = {
-        "description": "traffic_flow_observed",
+        "description": description,
         "subject": {
             "entities": [
               {
