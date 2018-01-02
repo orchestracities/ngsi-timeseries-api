@@ -9,7 +9,7 @@ ORION_URL = 'http://{}:{}'.format(ORION_HOST, ORION_PORT)
 
 # INTERNAL
 HEADERS = {
-    'Fiware-Service': 'default',
+    'Fiware-Service': '',
     'Fiware-ServicePath': '/',
 }
 HEADERS_PUT = HEADERS.copy()
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     print("removed {} subscriptions.".format(len(subs)))
 
     # Clean entities
-    entities = requests.get('{}/v2/entities'.format(ORION_URL),
+    entities = requests.get('{}/v2/entities?attrs=null'.format(ORION_URL),
                             headers=HEADERS).json()
     for e in entities:
         url = '{}/v2/entities/{}?type={}'
