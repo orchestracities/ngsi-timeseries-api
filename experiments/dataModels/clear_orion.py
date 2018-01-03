@@ -9,7 +9,7 @@ ORION_URL = 'http://{}:{}'.format(ORION_HOST, ORION_PORT)
 
 # INTERNAL
 HEADERS = {
-    'Fiware-Service': '',
+    'Fiware-Service': 'default',
     'Fiware-ServicePath': '/',
 }
 HEADERS_PUT = HEADERS.copy()
