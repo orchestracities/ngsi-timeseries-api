@@ -3,7 +3,8 @@
 docker build -t quantumleap .
 
 cd client/tests
-tot=$(sh run_tests.sh)
+sh run_tests.sh
+tot=$?
 cd -
 
 cd translators/tests
