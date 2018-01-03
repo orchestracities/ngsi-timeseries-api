@@ -274,7 +274,7 @@ class CrateTranslator(BaseTranslator):
                 METADATA_TABLE_NAME))
         except client.exceptions.ProgrammingError as e:
             # Metadata table still not created
-            mssg = "Could not retrieve METADATA_TABLE. Empty database maybe?. {}"
+            msg = "Could not retrieve METADATA_TABLE. Empty database maybe?. {}"
             logging.debug(msg.format(e))
             return []
         return [r[0] for r in self.cursor.rows]
