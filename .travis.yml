@@ -13,9 +13,7 @@ install:
   - docker build -t quantumleap .
 
 script:
-  - cd client/tests && sh run_tests.sh && cd -
-  - cd translators/tests && sh run_tests.sh && cd -
-  - cd reporter/tests && sh run_tests.sh && cd -
+  - sh run_tests.sh
 
 after_success:
     - sh ./deploy_docs.sh
