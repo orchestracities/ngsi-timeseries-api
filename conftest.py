@@ -9,6 +9,9 @@ QL_URL = "http://{}:{}".format(QL_HOST, QL_PORT)
 CRATE_HOST = os.environ.get('CRATE_HOST', 'crate')
 CRATE_PORT = 4200
 
+REDIS_HOST = os.environ.get('REDIS_HOST', 'redis')
+REDIS_PORT = 6379
+
 
 def do_clean_crate():
     from crate import client
@@ -62,7 +65,8 @@ def air_quality_observed():
             "value": {
                 "addressCountry": "MX",
                 "addressLocality": "Ciudad de México",
-                "streetAddress": "Acolman"
+                "streetAddress": "Acolman",
+                "postOfficeBoxNumber": "22"
             }
         },
         "dateObserved": {
@@ -72,7 +76,7 @@ def air_quality_observed():
         "location": {
             "value": {
                 "type": "Point",
-                "coordinates": [-99.122984, 19.431768]
+                "coordinates": [-98.9109537, 19.6389474]
             },
             "type": "geo:json"
         },
