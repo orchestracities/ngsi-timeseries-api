@@ -204,6 +204,42 @@ def test_capitals(translator):
     assert_ngsi_entity_equals(e, entities[0])
 
 
+def test_no_time_index(translator):
+    """
+    The Reporter is responsible for injecting the 'time_index' attribute to the
+    entity, but even if for some reason the attribute is not there, there
+    should be no problem with the insertion.
+    """
+    e = {
+        'id': 'entityId1',
+        'type': 'type1',
+        'foo': {'type': 'Text', 'value': "SomeText"}
+    }
+    translator.insert([e])
+    translator._refresh([e['type']])
+    assert len(translator.query()) == 1
+
+
+def test_long_json(translator):
+    # Github issue 44
+    big_entity = {
+        'id': 'entityId1',
+        'type': 'type1',
+        TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
+        'foo': {
+            'type': 'Text',
+            'value': "SomeTextThatWillGetLong" * 2000
+        }
+    }
+    translator.insert([big_entity])
+    translator._refresh([big_entity['type']])
+
+    r = translator.query()
+    assert len(r) == 1
+
+    assert_ngsi_entity_equals(big_entity, r[0])
+
+
 # FIWARE DATA MODELS
 
 def test_air_quality_observed(translator, air_quality_observed):

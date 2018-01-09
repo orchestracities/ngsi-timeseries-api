@@ -127,6 +127,7 @@ class CrateTranslator(BaseTranslator):
 
         tables = {}         # {table_name -> {column_name -> crate_column_type}}
         entities_by_tn = {}  # {table_name -> list(entities)}
+        custom_columns = {}  # {table_name -> attr_name -> custom_column}
 
         # Collect tables info
         for e in entities:
@@ -136,11 +137,11 @@ class CrateTranslator(BaseTranslator):
             entities_by_tn.setdefault(tn, []).append(e)
 
             if self.TIME_INDEX_NAME not in e:
-                # Recall it's the reporter's job to ensure each entity comes
-                # with a TIME_INDEX attribute.
                 import warnings
-                mgs = "Translating entity without TIME_INDEX. {}"
+                msg = "Translating entity without TIME_INDEX. It should have " \
+                      "been inserted by the 'Reporter'. {}"
                 warnings.warn(msg.format(e))
+                e[self.TIME_INDEX_NAME] = datetime.now().isoformat()
 
             # Intentionally avoid using 'id' and 'type' as a column names.
             # It's problematic for some dbs.
@@ -162,6 +163,11 @@ class CrateTranslator(BaseTranslator):
                         table[attr] = ngsi_t
                     else:
                         crate_t = NGSI_TO_CRATE[ngsi_t]
+                        # Github issue 44: Disable indexing for long string
+                        if ngsi_t == NGSI_TEXT and \
+                           len(e[attr]['value']) > 32765:
+                            custom_columns.setdefault(tn, {})[attr] = crate_t \
+                              + ' INDEX OFF'
                         table[attr] = crate_t
 
         persisted_metadata = self._process_metadata_table(tables.keys())
@@ -184,6 +190,10 @@ class CrateTranslator(BaseTranslator):
                     if attr not in ('entity_type', 'entity_id'):
                         original_attrs[attr.lower()] = (attr, CRATE_TO_NGSI[t])
             new_metadata[tn] = original_attrs
+
+            # Apply custom column modifiers
+            for _attr_name, cc in custom_columns.setdefault(tn, {}).items():
+                table[_attr_name] = cc
 
             # Now create data table
             columns = ', '.join('{} {}'.format(cn, ct) for cn, ct in table.items())
