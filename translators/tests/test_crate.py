@@ -236,7 +236,6 @@ def test_long_json(translator):
 
     r = translator.query()
     assert len(r) == 1
-
     assert_ngsi_entity_equals(big_entity, r[0])
 
 
