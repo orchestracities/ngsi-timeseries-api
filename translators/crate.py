@@ -138,8 +138,8 @@ class CrateTranslator(BaseTranslator):
 
             if self.TIME_INDEX_NAME not in e:
                 import warnings
-                msg = "Translating entity without TIME_INDEX. It should have " \
-                      "been inserted by the 'Reporter'. {}"
+                msg = "Translating entity without TIME_INDEX. " \
+                      "It should have been inserted by the 'Reporter'. {}"
                 warnings.warn(msg.format(e))
                 e[self.TIME_INDEX_NAME] = datetime.now().isoformat()
 
