@@ -113,13 +113,14 @@ of the [NGSI API](http://telefonicaid.github.io/fiware-orion/api/v2/latest/).
 The table below shows which attribute types will be translated to which
 [Crate Data Types](https://crate.io/docs/crate/reference/sql/data_types.html).
 
-| NGSI Type          | Crate Datatype          | Observation |
+| NGSI Type          | Crate Type          | Observation |
 | ------------------ |:-----------------------:| :-----------|
 |Array               | [array(string)](https://crate.io/docs/crate/reference/sql/data_types.html#array)           | TODO: Support arrays of other types. |
 |Boolean             | [boolean](https://crate.io/docs/crate/reference/sql/data_types.html#boolean)                 | - |
 |DateTime            | [timestamp](https://crate.io/docs/crate/reference/sql/data_types.html#timestamp)                 | - |
 |Integer             | [long](https://crate.io/docs/crate/reference/sql/data_types.html#numeric-types)                    | TODO: Fix this inconsistency ASAP! |
-|geo:json            | [geo_shape](https://crate.io/docs/crate/reference/sql/data_types.html#geo-shape)               | NGSI Simple Location Format is not yet supported. Use GeoJSON instead. Read more [here](http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities).|
+|[geo:point](http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities)            | [geo_point](https://crate.io/docs/crate/reference/sql/data_types.html#geo-point)               | **Attention!** NGSI uses "lat, long" order whereas Crate stores points in [long, lat] order.|
+|[geo:json](http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities)            | [geo_shape](https://crate.io/docs/crate/reference/sql/data_types.html#geo-shape)               | - |
 |Number              | [float](https://crate.io/docs/crate/reference/sql/data_types.html#numeric-types)                   |-|
 |Text                | [string](https://crate.io/docs/crate/reference/sql/data_types.html#string)                  | This is the default type if the provided type is unknown. |
 |StructuredValue     | [object](https://crate.io/docs/crate/reference/sql/data_types.html#object)                  |-|
