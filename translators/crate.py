@@ -21,6 +21,7 @@ NGSI_TO_CRATE = {
     NGSI_DATETIME: 'timestamp',
     "Integer": 'long',
     "geo:json": 'geo_shape',
+    "geo:point": 'geo_point',
     "Number": 'float',
     NGSI_TEXT: 'string',
     "StructuredValue": 'object'
@@ -113,6 +114,8 @@ class CrateTranslator(BaseTranslator):
                     entity[original_name] = {'value': v, 'type': original_type}
                     if original_type == NGSI_DATETIME and v:
                         entity[original_name]['value'] = self._get_isoformat(v)
+
+            self._postprocess_values(entity)
             yield entity
 
 
@@ -210,16 +213,7 @@ class CrateTranslator(BaseTranslator):
 
             entries = []  # raw values in same order as column names
             for e in entities:
-                temp = e.copy()
-                temp['entity_type'] = {'value': temp.pop('type')}
-                temp['entity_id'] = {'value': temp.pop('id')}
-                temp[self.TIME_INDEX_NAME] = {'value': temp[self.TIME_INDEX_NAME]}
-                try:
-                    values = tuple(temp[x]['value'] for x in col_names)
-                except KeyError as e:
-                    msg = ("Seems like not all entities of same type came "
-                           "with the same set of attributes. {}").format(e)
-                    raise NotImplementedError(msg)
+                values = self._preprocess_values(e, col_names)
                 entries.append(values)
 
             stmt = "insert into {} ({}) values ({})".format(
@@ -227,6 +221,36 @@ class CrateTranslator(BaseTranslator):
             self.cursor.executemany(stmt, entries)
 
         return self.cursor
+
+    def _preprocess_values(self, e, col_names):
+        values = []
+        for cn in col_names:
+            if cn == 'entity_type':
+                values.append(e['type'])
+            elif cn == 'entity_id':
+                values.append(e['id'])
+            elif cn == self.TIME_INDEX_NAME:
+                values.append(e[self.TIME_INDEX_NAME])
+            else:
+                # Normal attributes
+                try:
+                    if 'type' in e[cn] and e[cn]['type'] == 'geo:point':
+                        lat, lon = e[cn]['value'].split(',')
+                        values.append([float(lon), float(lat)])
+                    else:
+                        values.append(e[cn]['value'])
+                except KeyError as e:
+                    msg = ("Seems like not all entities of same type came "
+                           "with the same set of attributes. {}").format(e)
+                    raise NotImplementedError(msg)
+        return values
+
+    def _postprocess_values(self, e):
+        for attr in iter_entity_attrs(e):
+            if 'type' in e[attr] and e[attr]['type'] == 'geo:point':
+                lon, lat = e[attr]['value']
+                e[attr]['value'] = "{}, {}".format(lat, lon)
+        return e
 
 
     def _process_metadata_table(self, table_names):
