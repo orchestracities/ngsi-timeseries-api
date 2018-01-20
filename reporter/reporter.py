@@ -89,8 +89,16 @@ def _get_time_index(payload):
     return datetime.now().isoformat()
 
 
-@app.route('/notify', methods=['POST', 'GET'])
+@app.route('/notify', methods=['POST'])
 def notify():
+    if request.json is None:
+        return 'Discarding notification due to lack of request body. Lost in a ' \
+               'redirect maybe?', 400
+
+    if 'data' not in request.json:
+        return 'Discarding notification due to lack of request body ' \
+               'content.', 400
+
     payload = request.json['data']
     assert len(payload) == 1, 'Multiple data elements in notifications not supported yet'
     payload = payload[0]
