@@ -267,6 +267,38 @@ def test_geo_point(translator):
     assert_ngsi_entity_equals(entity, entities[0])
 
 
+def test_structured_value_to_array(translator):
+    entity = {
+        'id': '8906',
+        'type': 'AirQualityObserved',
+        TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
+        'aqi': {'type': 'Number', 'value': 43},
+        'city': {'type': 'Text', 'value': 'Antwerpen'},
+        'h': {'type': 'Number', 'value': 93},
+        'location': {
+            'type': 'geo:point',
+            'value': '51.2056589, 4.4180728',
+        },
+        'measurand': {
+            'type': 'StructuredValue',
+            'value': ['pm25, 43, ugm3, PM25', 'pm10, 30, ugm3, PM10',
+                      'p, 1012, hPa, Pressure']
+        },
+        'p': {'type': 'Number', 'value': 1012},
+        'pm10': {'type': 'Number', 'value': 30},
+        'pm25': {'type': 'Number', 'value': 43},
+        't': {'type': 'Number', 'value': 8.33}
+    }
+    translator.insert([entity])
+    translator._refresh([entity['type']])
+
+    r = translator.query()
+    assert len(r) == 1
+
+    # TODO Github issue 24
+    # assert_ngsi_entity_equals(entity, r[0])
+
+
 ################################################################################
 # FIWARE DATA MODELS
 ################################################################################

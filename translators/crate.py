@@ -12,11 +12,13 @@ NGSI_ID = 'id'
 NGSI_TYPE = 'type'
 NGSI_TEXT = 'Text'
 NGSI_DATETIME = 'DateTime'
+NGSI_STRUCTURED_VALUE = 'StructuredValue'
 
+CRATE_ARRAY_STR = 'array(string)'
 
 # CRATE TYPES: https://crate.io/docs/reference/sql/data_types.html
 NGSI_TO_CRATE = {
-    "Array": 'array(string)',  # TODO #36: Support numeric arrays
+    "Array": CRATE_ARRAY_STR,  # TODO #36: Support numeric arrays
     "Boolean": 'boolean',
     NGSI_DATETIME: 'timestamp',
     "Integer": 'long',
@@ -24,7 +26,7 @@ NGSI_TO_CRATE = {
     "geo:point": 'geo_point',
     "Number": 'float',
     NGSI_TEXT: 'string',
-    "StructuredValue": 'object'
+    NGSI_STRUCTURED_VALUE: 'object'
 }
 CRATE_TO_NGSI = dict((v, k) for (k,v) in NGSI_TO_CRATE.items())
 CRATE_TO_NGSI['string_array'] = 'Array'
@@ -171,6 +173,13 @@ class CrateTranslator(BaseTranslator):
                            len(e[attr]['value']) > 32765:
                             custom_columns.setdefault(tn, {})[attr] = crate_t \
                               + ' INDEX OFF'
+
+                        # Github issue 24: StructuredValue == object or array
+                        if ngsi_t == NGSI_STRUCTURED_VALUE:
+                            if 'value' in e[attr] and \
+                                    isinstance(e[attr]['value'], list):
+                                crate_t = CRATE_ARRAY_STR
+
                         table[attr] = crate_t
 
         persisted_metadata = self._process_metadata_table(tables.keys())
