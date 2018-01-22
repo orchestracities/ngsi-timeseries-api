@@ -175,9 +175,8 @@ class CrateTranslator(BaseTranslator):
                               + ' INDEX OFF'
 
                         # Github issue 24: StructuredValue == object or array
-                        if ngsi_t == NGSI_STRUCTURED_VALUE:
-                            if 'value' in e[attr] and \
-                                    isinstance(e[attr]['value'], list):
+                        if ngsi_t == NGSI_STRUCTURED_VALUE and \
+                                isinstance(e[attr].get('value', None), list):
                                 crate_t = CRATE_ARRAY_STR
 
                         table[attr] = crate_t
