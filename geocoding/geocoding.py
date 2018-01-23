@@ -36,7 +36,6 @@ a point but don't necessary have a street + postOfficeBoxNumber. For example,
 "Eiffel Tower, Paris".
 """
 import json
-
 import geocoder
 import logging
 import requests

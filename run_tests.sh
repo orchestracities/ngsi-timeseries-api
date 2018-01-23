@@ -23,6 +23,14 @@ if [ "$tot" -eq 0 ]; then
 fi
 cd -
 
+cd geocoding/tests
+sh run_tests.sh
+loc=$?
+if [ "$tot" -eq 0 ]; then
+   tot=$loc
+fi
+cd -
+
 docker rmi quantumleap
 
 exit $tot

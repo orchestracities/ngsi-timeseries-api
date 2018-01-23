@@ -6,6 +6,7 @@ from conftest import air_quality_observed, REDIS_HOST, REDIS_PORT
 from geocoding import geocoding
 import copy
 import json
+import pytest
 
 
 def test_entity_with_location(air_quality_observed):
@@ -56,7 +57,7 @@ def test_entity_add_street_line(air_quality_observed):
 
     geo = r['location']['value']
     assert geo['type'] == 'LineString'
-    assert len(geo['coordinates']) == 12
+    assert len(geo['coordinates']) == pytest.approx(12, abs=2)
 
 
 def test_entity_add_city_shape(air_quality_observed):
@@ -76,7 +77,7 @@ def test_entity_add_city_shape(air_quality_observed):
     geo = r['location']['value']
     assert geo['type'] == 'Polygon'
     assert len(geo['coordinates']) == 1
-    assert len(geo['coordinates'][0]) == 2186
+    assert len(geo['coordinates'][0]) == pytest.approx(2186, abs=100)
 
 
 def test_entity_add_country_shape(air_quality_observed):
@@ -94,7 +95,7 @@ def test_entity_add_country_shape(air_quality_observed):
 
     geo = r['location']['value']
     assert geo['type'] == 'MultiPolygon'
-    assert len(geo['coordinates']) == 12
+    assert len(geo['coordinates']) == pytest.approx(12, abs=2)
 
 
 def test_multiple_entities(air_quality_observed):

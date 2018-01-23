@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 docker-compose up -d
-sleep 5
+sleep 8
 
 docker run -ti --rm --network tests_geocodingtests quantumleap pytest geocoding/tests
 r=$?
