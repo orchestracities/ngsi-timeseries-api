@@ -9,6 +9,7 @@ from utils.common import assert_ngsi_entity_equals
 import json
 import pytest
 import requests
+import time
 
 
 notify_url = "{}/notify".format(QL_URL)
@@ -210,3 +211,34 @@ def test_air_quality_observed(air_quality_observed, orion_client, clean_mongo,
     # Not exactly one because first insert generates 2 notifications, see...
     # https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions
     assert len(entities) > 0
+
+
+def test_geocoding(notification, crate_translator):
+    # Add an address attribute to the entity
+    notification['data'][0]['address'] = {
+        'type': 'StructuredValue',
+        'value': {
+            "streetAddress": "IJzerlaan",
+            "postOfficeBoxNumber": "18",
+            "addressLocality": "Antwerpen",
+            "addressCountry": "BE",
+        },
+        'metadata': {
+            'dateModified': {
+                'type': 'DateTime',
+                'value': '2017-06-19T11:46:45.00Z'
+            }
+        }
+    }
+    r = requests.post('{}'.format(notify_url),
+                      data=json.dumps(notification),
+                      headers=HEADERS_PUT)
+    assert r.status_code == 200
+    assert r.text == 'Notification successfully processed'
+
+    time.sleep(3)  # Give time for notification to be processed.
+
+    entities = crate_translator.query()
+    assert len(entities) == 1
+
+    assert 'location' in entities[0]

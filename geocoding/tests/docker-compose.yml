@@ -1,0 +1,22 @@
+version: '3.3'
+
+services:
+  redis:
+    image: redis:3
+    deploy:
+      # Scaling Redis requires some extra work.
+      # See https://get-reddie.com/blog/redis4-cluster-docker-compose/
+      replicas: 1
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    networks:
+      - geocodingtests
+
+volumes:
+  redisdata:
+
+networks:
+  geocodingtests:
+    driver: bridge

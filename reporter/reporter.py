@@ -19,6 +19,7 @@ TODO:
 interest and make QL actually perform the corresponding subscription to orion. I.e, QL must be told where orion is.
 """
 from flask import Flask, request
+from geocoding.geocache import GeoCodingCache
 from utils.common import iter_entity_attrs
 from utils.hosts import LOCAL
 from datetime import datetime
@@ -116,7 +117,10 @@ def notify():
     from translators.crate import CrateTranslator
     payload[CrateTranslator.TIME_INDEX_NAME] = _get_time_index(payload)
 
-    # Send valid entity to translator
+    # Add GEO-DATE if enabled
+    add_geodata(payload)
+
+    # Send valid entities to translator
     DB_HOST = os.environ.get('CRATE_HOST', 'crate')
     DB_PORT = 4200
     DB_NAME = "ngsi-tsdb"
@@ -126,6 +130,20 @@ def notify():
     msg = "Notification successfully processed"
     logger.info(msg)
     return msg
+
+
+def add_geodata(entity):
+    # TODO: Move this setting to configuration (See GH issue #10)
+    use_geocoding = os.environ.get('USE_GEOCODING', False)
+    redis_host = os.environ.get('REDIS_HOST', None)
+
+    # No cache -> no geocoding by default
+    if use_geocoding and redis_host:
+        redis_port = os.environ.get('REDIS_PORT', 6379)
+        cache = GeoCodingCache(redis_host, redis_port)
+
+        from geocoding import geocoding
+        geocoding.add_location(entity, cache=cache)
 
 
 if __name__ == '__main__':
