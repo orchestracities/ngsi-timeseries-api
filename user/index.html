@@ -271,7 +271,7 @@ The table below shows which attribute types will be translated to which
 <thead>
 <tr>
 <th>NGSI Type</th>
-<th align="center">Crate Type</th>
+<th align="center">Crate Datatype</th>
 <th align="left">Observation</th>
 </tr>
 </thead>
@@ -297,14 +297,9 @@ The table below shows which attribute types will be translated to which
 <td align="left">TODO: Fix this inconsistency ASAP!</td>
 </tr>
 <tr>
-<td><a href="http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities">geo:point</a></td>
-<td align="center"><a href="https://crate.io/docs/crate/reference/sql/data_types.html#geo-point">geo_point</a></td>
-<td align="left"><strong>Attention!</strong> NGSI uses "lat, long" order whereas Crate stores points in [long, lat] order.</td>
-</tr>
-<tr>
-<td><a href="http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities">geo:json</a></td>
+<td>geo:json</td>
 <td align="center"><a href="https://crate.io/docs/crate/reference/sql/data_types.html#geo-shape">geo_shape</a></td>
-<td align="left">-</td>
+<td align="left">NGSI Simple Location Format is not yet supported. Use GeoJSON instead. Read more <a href="http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities">here</a>.</td>
 </tr>
 <tr>
 <td>Number</td>
