@@ -23,21 +23,20 @@ def test_entity_add_point(air_quality_observed):
     air_quality_observed.pop('location')
 
     air_quality_observed['address']['value'] = {
-        "streetAddress": "Acolman",
-        "postOfficeBoxNumber": "22",
-        "addressLocality": "Ciudad de México",
-        "addressCountry": "MX",
+        "streetAddress": "IJzerlaan",
+        "postOfficeBoxNumber": "18",
+        "addressLocality": "Antwerpen",
+        "addressCountry": "BE",
     }
 
     r = geocoding.add_location(air_quality_observed)
     assert r is air_quality_observed
 
     assert 'location' in r
-    assert r['location']['type'] == 'geo:json'
+    assert r['location']['type'] == 'geo:point'
 
-    geo = r['location']['value']['geometry']
-    assert geo['type'] == 'Point'
-    assert len(geo['coordinates']) == 2
+    geo = r['location']['value']
+    assert geo == '4.420609, 51.235646'
 
 
 def test_entity_add_street_line(air_quality_observed):

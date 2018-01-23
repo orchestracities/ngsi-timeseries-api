@@ -16,7 +16,8 @@ This service requires external connectivity in order to fetch data from
 from the address data to a geo:json structure.
 
 The returned structure can be a Point, a LineString (for streets) or a
-MultiPolygon (for states or countries).
+MultiPolygon (for states or countries). In the case of a point, a geo:point
+attribute will be created. Otherwise, geo:json will be preferred.
 
 If you provide all the fields of the 'address' dict, it is assumed you are
 looking for a Point. If you omit the 'postOfficeBoxNumber' but include the
@@ -167,10 +168,17 @@ def _do_add_location(entity, location):
     is_json_repr = 'value' in entity['address']
 
     if is_json_repr:
-        entity['location'] = {
-            'type': 'geo:json',
-            'value': location
-        }
+        if location.get('geometry', {}).get('type') == 'Point':
+            coords = location.get('geometry').get('coordinates')
+            entity['location'] = {
+                'type': 'geo:point',
+                'value': "{}, {}".format(*coords)
+            }
+        else:
+            entity['location'] = {
+                'type': 'geo:json',
+                'value': location
+            }
     else:
         entity['location'] = location
 
