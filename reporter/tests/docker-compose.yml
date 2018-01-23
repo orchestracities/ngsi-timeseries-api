@@ -34,6 +34,9 @@ services:
       - crate
     networks:
         - reportertests
+    environment:
+      - USE_GEOCODING=True
+      - REDIS_HOST=redis
 
   crate:
     image: crate:1.0.5
@@ -42,6 +45,17 @@ services:
       - "4200:4200"
       # Transport protocol
       - "4300:4300"
+    networks:
+        - reportertests
+
+  redis:
+    image: redis:3
+    deploy:
+      # Scaling Redis requires some extra work.
+      # See https://get-reddie.com/blog/redis4-cluster-docker-compose/
+      replicas: 1
+    ports:
+      - "6379:6379"
     networks:
         - reportertests
 

@@ -134,12 +134,13 @@ def notify():
 
 def add_geodata(entity):
     # TODO: Move this setting to configuration (See GH issue #10)
-    if os.environ.get('USE_GEOCODING', True):
-        cache = None
-        redis_host = os.environ.get('REDIS_HOST', None)
-        if redis_host:
-            redis_port = os.environ.get('REDIS_PORT', 6379)
-            cache = GeoCodingCache(redis_host, redis_port)
+    use_geocoding = os.environ.get('USE_GEOCODING', False)
+    redis_host = os.environ.get('REDIS_HOST', None)
+
+    # No cache -> no geocoding by default
+    if use_geocoding and redis_host:
+        redis_port = os.environ.get('REDIS_PORT', 6379)
+        cache = GeoCodingCache(redis_host, redis_port)
 
         from geocoding import geocoding
         geocoding.add_location(entity, cache=cache)
