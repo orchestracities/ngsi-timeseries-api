@@ -105,24 +105,35 @@ def test_multiple_entities(air_quality_observed):
     assert len(r) == 2
 
 
-def test_caching(air_quality_observed):
+def test_caching(air_quality_observed, monkeypatch):
     air_quality_observed.pop('location')
 
     air_quality_observed['address']['value'] = {
-        "streetAddress": "Acolman",
-        "postOfficeBoxNumber": "22",
-        "addressLocality": "Ciudad de México",
-        "addressCountry": "MX",
+        "streetAddress": "IJzerlaan",
+        "postOfficeBoxNumber": "18",
+        "addressLocality": "Antwerpen",
+        "addressCountry": "BE",
     }
 
     from geocoding.geocache import GeoCodingCache
     cache = GeoCodingCache(REDIS_HOST, REDIS_PORT)
-    value = {'type': 'Point', 'coordinates': [-98.9109537, 19.6389474]}
-    cache.put('Acolman 22 , Ciudad de México , MX', json.dumps(value))
+    assert len(cache.redis.keys('*')) == 0
 
-    r = geocoding.add_location(air_quality_observed, cache=cache)
-    assert r is air_quality_observed
+    try:
+        r = geocoding.add_location(air_quality_observed, cache=cache)
+        assert r is air_quality_observed
+        assert 'location' in r
+        assert r['location']['type'] == 'geo:point'
+        assert len(cache.redis.keys('*')) == 1
 
-    assert 'location' in r
-    assert r['location']['type'] == 'geo:json'
-    assert r['location']['value'] == value
+        # Make sure no external calls are made
+        monkeypatch.delattr("requests.sessions.Session.request")
+
+        r.pop('location')
+        r = geocoding.add_location(air_quality_observed, cache=cache)
+        assert 'location' in r
+        assert r['location']['type'] == 'geo:point'
+        assert len(cache.redis.keys('*')) == 1
+
+    finally:
+        cache.redis.flushall()

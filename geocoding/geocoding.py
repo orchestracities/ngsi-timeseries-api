@@ -36,8 +36,8 @@ which will be the search term for osm. This is to cover cases where you want
 a point but don't necessary have a street + postOfficeBoxNumber. For example,
 "Eiffel Tower, Paris".
 """
-import json
 import geocoder
+import json
 import logging
 import requests
 
@@ -157,7 +157,7 @@ def add_location(entity, raise_error=False, session=None, cache=None):
         return entity
 
     if cache:
-        cache.put(key, loc)
+        cache.put(key, json.dumps(loc))
 
     return _do_add_location(entity, loc)
 
