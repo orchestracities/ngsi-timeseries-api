@@ -16,3 +16,12 @@ class GeoCodingCache(object):
 
     def put(self, key, value):
         self.redis.set(key, value)
+
+
+def temp_geo_cache(host, port):
+    gc = GeoCodingCache(host, port)
+    try:
+        yield gc
+    finally:
+        gc.redis.flushall()
+

@@ -5,7 +5,6 @@ openstreetmap services.
 from conftest import air_quality_observed, REDIS_HOST, REDIS_PORT
 from geocoding import geocoding
 import copy
-import json
 import pytest
 
 
@@ -36,7 +35,27 @@ def test_entity_add_point(air_quality_observed):
     assert r['location']['type'] == 'geo:point'
 
     geo = r['location']['value']
-    assert geo == '4.420609, 51.235646'
+    assert geo == '51.235646, 4.420609'
+
+
+def test_entity_add_point_negative_coord(air_quality_observed):
+    air_quality_observed.pop('location')
+
+    air_quality_observed['address']['value'] = {
+        "streetAddress": "Acolman",
+        "postOfficeBoxNumber": "22",
+        "addressLocality": "Ciudad de México",
+        "addressCountry": "MX",
+    }
+
+    r = geocoding.add_location(air_quality_observed)
+    assert r is air_quality_observed
+
+    assert 'location' in r
+    assert r['location']['type'] == 'geo:point'
+
+    geo = r['location']['value']
+    assert geo == '19.6389474, -98.9109537'
 
 
 def test_entity_add_street_line(air_quality_observed):
@@ -115,8 +134,8 @@ def test_caching(air_quality_observed, monkeypatch):
         "addressCountry": "BE",
     }
 
-    from geocoding.geocache import GeoCodingCache
-    cache = GeoCodingCache(REDIS_HOST, REDIS_PORT)
+    from geocoding.geocache import temp_geo_cache
+    cache = next(temp_geo_cache(REDIS_HOST, REDIS_PORT))
     assert len(cache.redis.keys('*')) == 0
 
     try:
@@ -124,6 +143,7 @@ def test_caching(air_quality_observed, monkeypatch):
         assert r is air_quality_observed
         assert 'location' in r
         assert r['location']['type'] == 'geo:point'
+        assert r['location']['value'] == '51.235646, 4.420609'
         assert len(cache.redis.keys('*')) == 1
 
         # Make sure no external calls are made
@@ -133,6 +153,7 @@ def test_caching(air_quality_observed, monkeypatch):
         r = geocoding.add_location(air_quality_observed, cache=cache)
         assert 'location' in r
         assert r['location']['type'] == 'geo:point'
+        assert r['location']['value'] == '51.235646, 4.420609'
         assert len(cache.redis.keys('*')) == 1
 
     finally:
