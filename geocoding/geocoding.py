@@ -172,7 +172,8 @@ def _do_add_location(entity, location):
             coords = location.get('geometry').get('coordinates')
             entity['location'] = {
                 'type': 'geo:point',
-                'value': "{}, {}".format(*coords)
+                # Seems osm response is long,lat rather than lat,long
+                'value': "{}, {}".format(coords[1], coords[0])
             }
         else:
             entity['location'] = {

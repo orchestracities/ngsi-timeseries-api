@@ -218,10 +218,10 @@ def test_geocoding(notification, crate_translator):
     notification['data'][0]['address'] = {
         'type': 'StructuredValue',
         'value': {
-            "streetAddress": "IJzerlaan",
-            "postOfficeBoxNumber": "18",
-            "addressLocality": "Antwerpen",
-            "addressCountry": "BE",
+            "streetAddress": "Kaivokatu",
+            "postOfficeBoxNumber": "1",
+            "addressLocality": "Helsinki",
+            "addressCountry": "FI",
         },
         'metadata': {
             'dateModified': {
@@ -242,3 +242,5 @@ def test_geocoding(notification, crate_translator):
     assert len(entities) == 1
 
     assert 'location' in entities[0]
+    assert entities[0]['location']['type'] == 'geo:point'
+    assert entities[0]['location']['value'] == '60.1707129, 24.9412167'

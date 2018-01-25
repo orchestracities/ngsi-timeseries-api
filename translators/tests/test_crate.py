@@ -247,7 +247,7 @@ def test_geo_point(translator):
         TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
         'location': {
             'type': 'geo:point',
-            'value': "41.3763726, 2.186447514"
+            'value': "19.6389474, -98.9109537"  # lat, long
         }
     }
     translator.insert([entity])
@@ -258,7 +258,7 @@ def test_geo_point(translator):
     translator.cursor.execute(op)
     res = translator.cursor.fetchall()
     assert len(res) == 1
-    assert res[0] == [41.3763726, 2.186447514]
+    assert res[0] == [19.6389474, -98.9109537]
 
     entities = translator.query()
     assert len(entities) == 1
