@@ -18,3 +18,5 @@ export QL_HOST=$LH
 export CRATE_HOST=$LH
 export INFLUX_HOST=$LH
 export RETHINK_HOST=$LH
+
+export REDIS_HOST=$LH

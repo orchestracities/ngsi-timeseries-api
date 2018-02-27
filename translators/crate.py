@@ -12,18 +12,21 @@ NGSI_ID = 'id'
 NGSI_TYPE = 'type'
 NGSI_TEXT = 'Text'
 NGSI_DATETIME = 'DateTime'
+NGSI_STRUCTURED_VALUE = 'StructuredValue'
 
+CRATE_ARRAY_STR = 'array(string)'
 
 # CRATE TYPES: https://crate.io/docs/reference/sql/data_types.html
 NGSI_TO_CRATE = {
-    "Array": 'array(string)',  # TODO #36: Support numeric arrays
+    "Array": CRATE_ARRAY_STR,  # TODO #36: Support numeric arrays
     "Boolean": 'boolean',
     NGSI_DATETIME: 'timestamp',
     "Integer": 'long',
     "geo:json": 'geo_shape',
+    "geo:point": 'geo_point',
     "Number": 'float',
     NGSI_TEXT: 'string',
-    "StructuredValue": 'object'
+    NGSI_STRUCTURED_VALUE: 'object'
 }
 CRATE_TO_NGSI = dict((v, k) for (k,v) in NGSI_TO_CRATE.items())
 CRATE_TO_NGSI['string_array'] = 'Array'
@@ -113,6 +116,8 @@ class CrateTranslator(BaseTranslator):
                     entity[original_name] = {'value': v, 'type': original_type}
                     if original_type == NGSI_DATETIME and v:
                         entity[original_name]['value'] = self._get_isoformat(v)
+
+            self._postprocess_values(entity)
             yield entity
 
 
@@ -127,6 +132,7 @@ class CrateTranslator(BaseTranslator):
 
         tables = {}         # {table_name -> {column_name -> crate_column_type}}
         entities_by_tn = {}  # {table_name -> list(entities)}
+        custom_columns = {}  # {table_name -> attr_name -> custom_column}
 
         # Collect tables info
         for e in entities:
@@ -136,11 +142,11 @@ class CrateTranslator(BaseTranslator):
             entities_by_tn.setdefault(tn, []).append(e)
 
             if self.TIME_INDEX_NAME not in e:
-                # Recall it's the reporter's job to ensure each entity comes
-                # with a TIME_INDEX attribute.
                 import warnings
-                mgs = "Translating entity without TIME_INDEX. {}"
+                msg = "Translating entity without TIME_INDEX. " \
+                      "It should have been inserted by the 'Reporter'. {}"
                 warnings.warn(msg.format(e))
+                e[self.TIME_INDEX_NAME] = datetime.now().isoformat()
 
             # Intentionally avoid using 'id' and 'type' as a column names.
             # It's problematic for some dbs.
@@ -162,6 +168,17 @@ class CrateTranslator(BaseTranslator):
                         table[attr] = ngsi_t
                     else:
                         crate_t = NGSI_TO_CRATE[ngsi_t]
+                        # Github issue 44: Disable indexing for long string
+                        if ngsi_t == NGSI_TEXT and \
+                           len(e[attr]['value']) > 32765:
+                            custom_columns.setdefault(tn, {})[attr] = crate_t \
+                              + ' INDEX OFF'
+
+                        # Github issue 24: StructuredValue == object or array
+                        if ngsi_t == NGSI_STRUCTURED_VALUE and \
+                                isinstance(e[attr].get('value', None), list):
+                                crate_t = CRATE_ARRAY_STR
+
                         table[attr] = crate_t
 
         persisted_metadata = self._process_metadata_table(tables.keys())
@@ -185,6 +202,10 @@ class CrateTranslator(BaseTranslator):
                         original_attrs[attr.lower()] = (attr, CRATE_TO_NGSI[t])
             new_metadata[tn] = original_attrs
 
+            # Apply custom column modifiers
+            for _attr_name, cc in custom_columns.setdefault(tn, {}).items():
+                table[_attr_name] = cc
+
             # Now create data table
             columns = ', '.join('{} {}'.format(cn, ct) for cn, ct in table.items())
             stmt = "create table if not exists {} ({})".format(tn, columns)
@@ -200,16 +221,7 @@ class CrateTranslator(BaseTranslator):
 
             entries = []  # raw values in same order as column names
             for e in entities:
-                temp = e.copy()
-                temp['entity_type'] = {'value': temp.pop('type')}
-                temp['entity_id'] = {'value': temp.pop('id')}
-                temp[self.TIME_INDEX_NAME] = {'value': temp[self.TIME_INDEX_NAME]}
-                try:
-                    values = tuple(temp[x]['value'] for x in col_names)
-                except KeyError as e:
-                    msg = ("Seems like not all entities of same type came "
-                           "with the same set of attributes. {}").format(e)
-                    raise NotImplementedError(msg)
+                values = self._preprocess_values(e, col_names)
                 entries.append(values)
 
             stmt = "insert into {} ({}) values ({})".format(
@@ -217,6 +229,36 @@ class CrateTranslator(BaseTranslator):
             self.cursor.executemany(stmt, entries)
 
         return self.cursor
+
+    def _preprocess_values(self, e, col_names):
+        values = []
+        for cn in col_names:
+            if cn == 'entity_type':
+                values.append(e['type'])
+            elif cn == 'entity_id':
+                values.append(e['id'])
+            elif cn == self.TIME_INDEX_NAME:
+                values.append(e[self.TIME_INDEX_NAME])
+            else:
+                # Normal attributes
+                try:
+                    if 'type' in e[cn] and e[cn]['type'] == 'geo:point':
+                        lat, lon = e[cn]['value'].split(',')
+                        values.append([float(lon), float(lat)])
+                    else:
+                        values.append(e[cn]['value'])
+                except KeyError as e:
+                    msg = ("Seems like not all entities of same type came "
+                           "with the same set of attributes. {}").format(e)
+                    raise NotImplementedError(msg)
+        return values
+
+    def _postprocess_values(self, e):
+        for attr in iter_entity_attrs(e):
+            if 'type' in e[attr] and e[attr]['type'] == 'geo:point':
+                lon, lat = e[attr]['value']
+                e[attr]['value'] = "{}, {}".format(lat, lon)
+        return e
 
 
     def _process_metadata_table(self, table_names):
@@ -274,7 +316,7 @@ class CrateTranslator(BaseTranslator):
                 METADATA_TABLE_NAME))
         except client.exceptions.ProgrammingError as e:
             # Metadata table still not created
-            mssg = "Could not retrieve METADATA_TABLE. Empty database maybe?. {}"
+            msg = "Could not retrieve METADATA_TABLE. Empty database maybe?. {}"
             logging.debug(msg.format(e))
             return []
         return [r[0] for r in self.cursor.rows]

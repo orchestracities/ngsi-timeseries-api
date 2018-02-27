@@ -1,0 +1,13 @@
+# REPO STRUCTURE
+.git
+.cache
+doc/
+env/
+translators/plots/
+Dockerfile
+id_rsa_qldocs.enc
+
+# PYTHON FILES
+**__pycache__/
+.pyc
+

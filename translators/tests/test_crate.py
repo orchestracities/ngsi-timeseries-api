@@ -204,7 +204,104 @@ def test_capitals(translator):
     assert_ngsi_entity_equals(e, entities[0])
 
 
+def test_no_time_index(translator):
+    """
+    The Reporter is responsible for injecting the 'time_index' attribute to the
+    entity, but even if for some reason the attribute is not there, there
+    should be no problem with the insertion.
+    """
+    e = {
+        'id': 'entityId1',
+        'type': 'type1',
+        'foo': {'type': 'Text', 'value': "SomeText"}
+    }
+    translator.insert([e])
+    translator._refresh([e['type']])
+    assert len(translator.query()) == 1
+
+
+def test_long_json(translator):
+    # Github issue 44
+    big_entity = {
+        'id': 'entityId1',
+        'type': 'type1',
+        TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
+        'foo': {
+            'type': 'Text',
+            'value': "SomeTextThatWillGetLong" * 2000
+        }
+    }
+    translator.insert([big_entity])
+    translator._refresh([big_entity['type']])
+
+    r = translator.query()
+    assert len(r) == 1
+    assert_ngsi_entity_equals(big_entity, r[0])
+
+
+def test_geo_point(translator):
+    # Github issue #35: Support geo:point
+    entity = {
+        'id': 'Room1',
+        'type': 'Room',
+        TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
+        'location': {
+            'type': 'geo:point',
+            'value': "19.6389474, -98.9109537"  # lat, long
+        }
+    }
+    translator.insert([entity])
+    translator._refresh([entity['type']])
+
+    # Check location is saved as a geo_point column in crate
+    op = 'select latitude(location), longitude(location) from etroom'
+    translator.cursor.execute(op)
+    res = translator.cursor.fetchall()
+    assert len(res) == 1
+    assert res[0] == [19.6389474, -98.9109537]
+
+    entities = translator.query()
+    assert len(entities) == 1
+
+    # Check entity is retrieved as it was inserted
+    assert_ngsi_entity_equals(entity, entities[0])
+
+
+def test_structured_value_to_array(translator):
+    entity = {
+        'id': '8906',
+        'type': 'AirQualityObserved',
+        TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
+        'aqi': {'type': 'Number', 'value': 43},
+        'city': {'type': 'Text', 'value': 'Antwerpen'},
+        'h': {'type': 'Number', 'value': 93},
+        'location': {
+            'type': 'geo:point',
+            'value': '51.2056589, 4.4180728',
+        },
+        'measurand': {
+            'type': 'StructuredValue',
+            'value': ['pm25, 43, ugm3, PM25', 'pm10, 30, ugm3, PM10',
+                      'p, 1012, hPa, Pressure']
+        },
+        'p': {'type': 'Number', 'value': 1012},
+        'pm10': {'type': 'Number', 'value': 30},
+        'pm25': {'type': 'Number', 'value': 43},
+        't': {'type': 'Number', 'value': 8.33}
+    }
+    translator.insert([entity])
+    translator._refresh([entity['type']])
+
+    r = translator.query()
+    assert len(r) == 1
+
+    # TODO Github issue 24
+    # assert_ngsi_entity_equals(entity, r[0])
+
+
+################################################################################
 # FIWARE DATA MODELS
+################################################################################
 
 def test_air_quality_observed(translator, air_quality_observed):
     # Add TIME_INDEX as Reporter would

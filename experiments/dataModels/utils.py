@@ -45,3 +45,30 @@ def update_entity(entity, attrs_to_update, orion_url):
     if not r.ok:
         raise RuntimeError(r.text)
     print("Updated {} with {}".format(entity['id'], attrs_to_update))
+
+
+def iter_entities(n_entities, id_prefix, create_entity):
+    for n in range(n_entities):
+        entity_id = '{}_{}'.format(id_prefix, n)
+        entity = create_entity(entity_id)
+        yield entity
+
+
+def main(script, sleep, orion_url, n_entities, id_prefix, create_entity,
+         get_attrs_to_update):
+    """
+    To be used as direct insert/update
+    """
+    print("Starting {} with options:".format(script))
+    print("SLEEP: {}".format(sleep))
+    print("ORION_URL: {}".format(orion_url))
+    print("N_ENTITIES: {}".format(n_entities))
+
+    entities = list(iter_entities(n_entities, id_prefix, create_entity))
+    insert_entities(entities, sleep, orion_url)
+
+    while True:
+        for e in entities:
+            time.sleep(sleep)
+            attrs_to_update = get_attrs_to_update()
+            update_entity(e, attrs_to_update, orion_url)
