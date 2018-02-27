@@ -1,3 +1,4 @@
+import os
 from crate import client
 from datetime import datetime, timedelta
 from translators.base_translator import BaseTranslator
@@ -322,8 +323,15 @@ class CrateTranslator(BaseTranslator):
         return [r[0] for r in self.cursor.rows]
 
 
-    def query(self, attr_names=None, entity_type=None, entity_id=None,
-              where_clause=None):
+    def query(self,
+              attr_names=None,
+              entity_type=None,
+              entity_id=None,
+              where_clause=None,
+              limit=10000):
+        # https://crate.io/docs/crate/reference/en/latest/general/dql/selects.html#limits
+        limit = min(10000, limit)
+
         if entity_id and not entity_type:
             msg = "For now you must specify entity_type when stating entity_id"
             raise NotImplementedError(msg)
@@ -348,8 +356,13 @@ class CrateTranslator(BaseTranslator):
 
         result = []
         for tn in table_names:
-            op = "select {} from {} {} order by {} ASC".format(
-                select_clause, tn, where_clause, self.TIME_INDEX_NAME)
+            op = "select {} from {} {} order by {} ASC limit {}".format(
+                select_clause,
+                tn,
+                where_clause,
+                self.TIME_INDEX_NAME,
+                limit
+            )
             self.cursor.execute(op)
             res = self.cursor.fetchall()
             col_names = [x[0] for x in self.cursor.description]
@@ -383,3 +396,11 @@ class CrateTranslator(BaseTranslator):
             values.append(avg)
 
         return statistics.mean(values)
+
+
+def CrateTranslatorInstance():
+    DB_HOST = os.environ.get('CRATE_HOST', 'crate')
+    DB_PORT = 4200
+    DB_NAME = "ngsi-tsdb"
+    with CrateTranslator(DB_HOST, DB_PORT, DB_NAME) as trans:
+        yield trans

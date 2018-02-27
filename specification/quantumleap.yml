@@ -260,7 +260,7 @@ parameters:
 paths:
   /version:
     get:
-      operationId: reporter.reporter.version
+      operationId: reporter.version.version
       summary: "Returns the version of QuantumLeap."
       tags:
         - meta
@@ -326,7 +326,7 @@ paths:
 ################################################################################
   /entities/{entityId}/attrs/{attrName}:
     get:
-      operationId: reporter.reporter.query_1T1E1A
+      operationId: reporter.query_1T1E1A.query_1T1E1A
       summary: "History of an attribute of a given entity instance."
       description: "For example, query max water level of the central tank
       throughout the last year. Queries can get more sophisticated with the use
@@ -379,7 +379,7 @@ paths:
 
   /entities/{entityId}/attrs/{attrName}/value:
     get:
-      operationId: reporter.reporter.query_1T1E1A_value
+      operationId: reporter.query_1T1E1A.query_1T1E1A_value
       summary: "History of an attribute (values only) of a given entity
       instance."
       description: "Similar to the previous, but focusing on the values

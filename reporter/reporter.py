@@ -29,14 +29,11 @@ I.e, QL must be told where orion is.
 from datetime import datetime
 from flask import request
 from geocoding.geocache import GeoCodingCache
+from translators.crate import CrateTranslator, CrateTranslatorInstance
 from utils.common import iter_entity_attrs
 import logging
 import os
 import warnings
-
-
-def version():
-    return {'version': '0.1.0'}
 
 
 def _validate_payload(payload):
@@ -125,17 +122,13 @@ def notify():
         return error, 400
 
     # Add TIME_INDEX attribute
-    from translators.crate import CrateTranslator
     payload[CrateTranslator.TIME_INDEX_NAME] = _get_time_index(payload)
 
     # Add GEO-DATE if enabled
     add_geodata(payload)
 
     # Send valid entities to translator
-    DB_HOST = os.environ.get('CRATE_HOST', 'crate')
-    DB_PORT = 4200
-    DB_NAME = "ngsi-tsdb"
-    with CrateTranslator(DB_HOST, DB_PORT, DB_NAME) as trans:
+    with CrateTranslatorInstance() as trans:
         trans.insert([payload])
 
     msg = 'Notification successfully processed'
@@ -155,41 +148,6 @@ def add_geodata(entity):
 
         from geocoding import geocoding
         geocoding.add_location(entity, cache=cache)
-
-
-def query_1T1E1A(attrName, entityId, type=None, aggrMethod=None,
-                 aggrPeriod=None, options=None, fromDate=None, toDate=None,
-                 lastN=None, limit=None, offset=None):
-    """
-    See /entities/{entityId}/attrs/{attrName} in API Specification
-    quantumleap.yml
-    """
-    DB_HOST = os.environ.get('CRATE_HOST', 'crate')
-    DB_PORT = 4200
-    DB_NAME = "ngsi-tsdb"
-
-    from translators.crate import CrateTranslator
-    TIME_INDEX = CrateTranslator.TIME_INDEX_NAME
-
-    with CrateTranslator(DB_HOST, DB_PORT, DB_NAME) as trans:
-        attr_names = [TIME_INDEX, attrName]
-        vals = trans.query(attr_names=attr_names, entity_type=type,
-                           entity_id=entityId)
-    res = {
-        'data': {
-            'entityId': entityId,
-            'attrName': attrName,
-            'index': [str(v[TIME_INDEX]) for v in vals],
-            'values': [v[attrName]['value'] for v in vals]
-        }
-    }
-    return res
-
-# Before implementing the rest of these methods, move query methods to a
-# different module.
-
-def query_1T1E1A_value():
-    raise NotImplementedError
 
 
 def query_1T1ENA():
