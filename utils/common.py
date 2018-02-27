@@ -131,6 +131,11 @@ def iter_entity_attrs(entity):
 
 
 def create_simple_subscription(notify_url):
+    """
+    Create a string subscription using NGSIv2 version *For testing only*
+    :param notify_url: reference to the registration
+    :return: string subscription using NGSIv2 version
+    """
     subscription = {
         "description": "Test subscription",
         "subject": {
@@ -155,12 +160,17 @@ def create_simple_subscription(notify_url):
                 "pressure",
                 "temperature"
             ]
-        },
+        }
     }
     return subscription
 
 
 def create_simple_subscription_v1(notify_url):
+    """
+    Create a string subscription using NGSIv1 version *For testing only*
+    :param notify_url: reference to the registration
+    :return: string subscription using NGSIv1 version
+    """
     subscription = {
         "entities": [
             {
@@ -169,16 +179,16 @@ def create_simple_subscription_v1(notify_url):
             }
         ],
         "attributes": [
-            "temperature",
+            "temperature"
         ],
         "reference": notify_url,
         "notifyConditions": [
             {
                 "type": "ONCHANGE",
                 "condValues": [
-                    "temperature",
+                    "temperature"
                 ]
             }
-        ],
+        ]
     }
     return subscription
