@@ -28,6 +28,16 @@ def insert_test_data(translator, entity_types, n_entities, n_days):
                                 'value': mod_value
                             }
                         }
+                    },
+                    'pressure': {
+                        'type': 'Number',
+                        'value': 10 * temp_value,
+                        'metadata': {
+                            'dateModified': {
+                                'type': 'DateTime',
+                                'value': mod_value
+                            }
+                        }
                     }
                 }
             ]

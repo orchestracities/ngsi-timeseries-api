@@ -422,7 +422,7 @@ paths:
 
   /entities/{entityId}:
     get:
-      operationId: reporter.reporter.query_1T1ENA
+      operationId: reporter.query_1T1ENA.query_1T1ENA
       summary: "History of N attributes of a given entity instance."
       description: "For example, query the average pressure, temperature and
       humidity of this month in the weather station WS1."
@@ -451,7 +451,7 @@ paths:
               data:
                 type: object
                 properties:
-                  id:
+                  entityId:
                     type: string
                   index:
                     $ref: '#/definitions/IndexArray'
@@ -463,7 +463,7 @@ paths:
             application/json:
               {
                 "data": {
-                  "id": "Kitchen1",
+                  "entityId": "Kitchen1",
                   "index": ["1510826981388", "1510826990438", "1510826999725"],
                   "attributes": [
                     {
@@ -480,7 +480,7 @@ paths:
 
   /entities/{entityId}/value:
     get:
-      operationId: reporter.reporter.query_1T1ENA_value
+      operationId: reporter.query_1T1ENA.query_1T1ENA_value
       summary: "History of N attributes (values only) of a given entity
       instance."
       description: "For example, query the average pressure, temperature and
@@ -576,6 +576,7 @@ paths:
                     items:
                       $ref: '#/definitions/EntityIndexedValues'
           examples:
+            # TODO: Maybe for this 'query all' we cloud keep a per-type index.
             application/json:
               {
                 "data": {
@@ -636,6 +637,7 @@ paths:
                     items:
                       $ref: '#/definitions/EntityIndexedValues'
           examples:
+            # TODO: Maybe for this 'query all' we cloud keep a per-type index.
             application/json:
               {
                 "data": {
@@ -705,6 +707,7 @@ paths:
                           items:
                             $ref: '#/definitions/AttributeValues'
           examples:
+            # TODO: Maybe for this 'query all' we cloud keep a per-type index.
             application/json:
               {
                 "data": {
@@ -796,6 +799,7 @@ paths:
                           items:
                             $ref: '#/definitions/AttributeValues'
           examples:
+            # TODO: Maybe for this 'query all' we cloud keep a per-type index.
             application/json:
               {
                 "data": {
@@ -883,6 +887,7 @@ paths:
                           items:
                             $ref: '#/definitions/EntityIndexedValues'
           examples:
+            # TODO: Maybe for this 'query all' we cloud keep a per-type index.
             application/json:
               {
                 "data": {
@@ -974,6 +979,7 @@ paths:
                           items:
                             $ref: '#/definitions/EntityIndexedValues'
           examples:
+            # TODO: Maybe for this 'query all' we cloud keep a per-type index.
             application/json:
               {
                 "data": {
@@ -1067,7 +1073,7 @@ paths:
                                 items:
                                   $ref: '#/definitions/EntityIndexedValues'
           examples:
-            # TODO: Maybe for this 'query all' we cloud keep a global index.
+            # TODO: Maybe for this 'query all' we cloud keep a per-type index.
             application/json:
               {
                 "data": {
@@ -1167,7 +1173,7 @@ paths:
                                 items:
                                   $ref: '#/definitions/EntityIndexedValues'
           examples:
-            # TODO: Maybe for this 'query all' we cloud keep a global index.
+            # TODO: Maybe for this 'query all' we cloud keep a per-type index.
             application/json:
               {
                 "data": {

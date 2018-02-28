@@ -386,7 +386,7 @@ class CrateTranslator(BaseTranslator):
             where_clause = self._get_where_clause(entity_id, fromDate, toDate)
 
         if aggrMethod:
-            order_by = ""
+            order_by = "" if select_clause == "*" else "group by entity_id"
         else:
             order_by = "order by {} ASC".format(self.TIME_INDEX_NAME)
 
@@ -414,7 +414,7 @@ class CrateTranslator(BaseTranslator):
                 )
             self.cursor.execute(op)
             res = self.cursor.fetchall()
-            if aggrMethod:
+            if aggrMethod and attr_names:
                 col_names = attr_names
             else:
                 col_names = [x[0] for x in self.cursor.description]
