@@ -11,31 +11,45 @@ def query_1T1E1A(attrName,   # In Path ↧
                  toDate=None,
                  lastN=None,
                  limit=10000,
-                 offset=None):
+                 offset=0):
     """
     See /entities/{entityId}/attrs/{attrName} in API Specification
     quantumleap.yml
     """
+    if options or aggrPeriod:
+        import warnings
+        warnings.warn("Unimplemented query parameters: options, aggrPeriod")
+
     vals = None
     with CrateTranslatorInstance() as trans:
-        attr_names = [trans.TIME_INDEX, attrName]
-        vals = trans.query(attr_names=attr_names,
+        vals = trans.query(attr_names=[attrName],
                            entity_type=type,
                            entity_id=entityId,
-                           limit=limit)
+                           aggrMethod=aggrMethod,
+                           fromDate=fromDate,
+                           toDate=toDate,
+                           lastN=lastN,
+                           limit=limit,
+                           offset=offset)
     if vals:
+        if aggrMethod:
+            index = []
+        else:
+            index = [str(v[CrateTranslator.TIME_INDEX_NAME]) for v in vals]
         res = {
             'data': {
                 'entityId': entityId,
                 'attrName': attrName,
-                'index': [str(v[CrateTranslator.TIME_INDEX_NAME]) for v in vals],
+                'index': index,
                 'values': [v[attrName]['value'] for v in vals]
             }
         }
         return res
 
-# Before implementing the rest of these methods, move query methods to a
-# different module.
 
-def query_1T1E1A_value():
-    raise NotImplementedError
+def query_1T1E1A_value(*args, **kwargs):
+    res = query_1T1E1A(*args, **kwargs)
+    if res:
+        res['data'].pop('entityId')
+        res['data'].pop('attrName')
+    return res

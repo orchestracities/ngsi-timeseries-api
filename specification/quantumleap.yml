@@ -226,13 +226,13 @@ parameters:
     name: fromDate
     type: string
     description: "Optional. The starting date and time from which the context
-    information is queried."
+    information is queried. Inclusive."
   toDate:
     in: query
     name: toDate
     type: string
     description: "Optional. The final date and time from which the context
-    information is queried."
+    information is queried. Inclusive."
   lastN:
     in: query
     name: lastN
@@ -252,7 +252,8 @@ parameters:
     type: integer
     description: "Optional. Offset to apply to the response results. For
     example, if the query was to return 10 results and you use an offset of
-    1, the response will return 9 values."
+    1, the response will return the last 9 values. Make sure you don't give
+    more offset than the number of results."
 
 ################################################################################
 # PATHS: META
