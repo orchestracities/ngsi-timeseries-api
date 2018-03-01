@@ -150,14 +150,6 @@ def add_geodata(entity):
         geocoding.add_location(entity, cache=cache)
 
 
-def query_1T1ENA():
-    raise NotImplementedError
-
-
-def query_1T1ENA_value():
-    raise NotImplementedError
-
-
 def query_1TNE1A():
     raise NotImplementedError
 
