@@ -1,3 +1,6 @@
+import os
+from contextlib import contextmanager
+
 from crate import client
 from datetime import datetime, timedelta
 from translators.base_translator import BaseTranslator
@@ -322,40 +325,105 @@ class CrateTranslator(BaseTranslator):
         return [r[0] for r in self.cursor.rows]
 
 
-    def query(self, attr_names=None, entity_type=None, entity_id=None,
-              where_clause=None):
+    def _get_select_clause(self, attr_names, aggrMethod):
+        if attr_names:
+            if aggrMethod:
+                attrs = ["{}({})".format(aggrMethod, a) for a in attr_names]
+            else:
+                attrs = [self.TIME_INDEX_NAME]
+                attrs.extend(str(a) for a in attr_names)
+            select = ",".join(attrs)
+
+        else:
+            # aggrMethod is ignored when no attribute is specified
+            select = '*'
+        return select
+
+
+    def _get_limit(self, limit):
+        # https://crate.io/docs/crate/reference/en/latest/general/dql/selects.html#limits
+        default = 10000
+        if not limit:
+            return default
+        limit = int(limit)
+        if limit < 1:
+            raise ValueError("Limit should be >=1 and <= 10000.")
+        return min(default, limit)
+
+
+    def _get_where_clause(self, entity_id, fromDate, toDate):
+        clauses = []
+        if entity_id:
+            clauses.append(" entity_id = '{}' ".format(entity_id))
+        if fromDate:
+            clauses.append(" {} >= '{}'".format(self.TIME_INDEX_NAME, fromDate))
+        if toDate:
+            clauses.append(" {} <= '{}'".format(self.TIME_INDEX_NAME, toDate))
+
+        if clauses:
+            return "where " + "and ".join(clauses)
+        return ''
+
+
+    def query(self,
+              attr_names=None,
+              entity_type=None,
+              entity_id=None,
+              where_clause=None,
+              aggrMethod=None,
+              fromDate=None,
+              toDate=None,
+              lastN=None,
+              limit=10000,
+              offset=0):
         if entity_id and not entity_type:
             msg = "For now you must specify entity_type when stating entity_id"
             raise NotImplementedError(msg)
 
-        if attr_names:
-            select = ",".join(str(a) for a in attr_names)
-        else:
-            select = '*'
-        select_clause = "{}".format(select)
+        select_clause = self._get_select_clause(attr_names, aggrMethod)
 
         if not where_clause:
-            # TODO: support entity_id filter with custom where clause
-            if entity_id:
-                where_clause = "where entity_id = '{}'".format(entity_id)
-            else:
-                where_clause = ''
+            where_clause = self._get_where_clause(entity_id, fromDate, toDate)
+
+        if aggrMethod:
+            order_by = "" if select_clause == "*" else "group by entity_id"
+        else:
+            order_by = "order by {} ASC".format(self.TIME_INDEX_NAME)
 
         if entity_type:
             table_names = [self._et2tn(entity_type)]
         else:
             table_names = self._get_et_table_names()
 
+        limit = self._get_limit(limit)
+        offset = max(0, offset)
+
         result = []
         for tn in table_names:
-            op = "select {} from {} {} order by {} ASC".format(
-                select_clause, tn, where_clause, self.TIME_INDEX_NAME)
+            op = "select {select_clause} " \
+                 "from {tn} " \
+                 "{where_clause} " \
+                 "{order_by} " \
+                 "limit {limit} offset {offset}".format(
+                    select_clause=select_clause,
+                    tn=tn,
+                    where_clause=where_clause,
+                    order_by=order_by,
+                    limit=limit,
+                    offset=offset,
+                )
             self.cursor.execute(op)
             res = self.cursor.fetchall()
-            col_names = [x[0] for x in self.cursor.description]
+            if aggrMethod and attr_names:
+                col_names = attr_names
+            else:
+                col_names = [x[0] for x in self.cursor.description]
             entities = list(self.translate_to_ngsi(res, col_names, tn))
             result.extend(entities)
 
+        if lastN:
+            # TODO: embed lastN in query to avoid waste.
+            return result[-lastN:]
         return result
 
 
@@ -383,3 +451,12 @@ class CrateTranslator(BaseTranslator):
             values.append(avg)
 
         return statistics.mean(values)
+
+
+@contextmanager
+def CrateTranslatorInstance():
+    DB_HOST = os.environ.get('CRATE_HOST', 'crate')
+    DB_PORT = 4200
+    DB_NAME = "ngsi-tsdb"
+    with CrateTranslator(DB_HOST, DB_PORT, DB_NAME) as trans:
+        yield trans
