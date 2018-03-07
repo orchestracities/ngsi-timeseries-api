@@ -14,5 +14,4 @@ services:
 
 networks:
   frontend:
-    driver: overlay
     external: true
