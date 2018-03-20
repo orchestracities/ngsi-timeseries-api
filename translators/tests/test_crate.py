@@ -299,6 +299,27 @@ def test_structured_value_to_array(translator):
     # assert_ngsi_entity_equals(entity, r[0])
 
 
+def test_ISO8601(translator):
+    """
+    ISO8601 should be a valid type, equivalent to DateTime.
+    """
+    e = {
+        "type": "MyType",
+        "id": "MyId",
+        TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
+        "iso_attr": {
+            "type": "ISO8601",
+            "value": "2018-03-20T13:26:38.722000",
+        },
+    }
+    result = translator.insert([e])
+    assert result.rowcount > 0
+    translator._refresh([e['type']])
+    loaded = translator.query()
+    assert len(loaded) > 0
+    assert_ngsi_entity_equals(e, loaded[0])
+
+
 ################################################################################
 # FIWARE DATA MODELS
 ################################################################################
