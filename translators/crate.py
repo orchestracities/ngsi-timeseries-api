@@ -16,6 +16,7 @@ NGSI_TYPE = 'type'
 NGSI_TEXT = 'Text'
 NGSI_DATETIME = 'DateTime'
 NGSI_STRUCTURED_VALUE = 'StructuredValue'
+NGSI_ISO8601 = 'ISO8601'
 
 CRATE_ARRAY_STR = 'array(string)'
 
@@ -23,6 +24,7 @@ CRATE_ARRAY_STR = 'array(string)'
 NGSI_TO_CRATE = {
     "Array": CRATE_ARRAY_STR,  # TODO #36: Support numeric arrays
     "Boolean": 'boolean',
+    NGSI_ISO8601: 'timestamp',
     NGSI_DATETIME: 'timestamp',
     "Integer": 'long',
     "geo:json": 'geo_shape',
@@ -117,7 +119,7 @@ class CrateTranslator(BaseTranslator):
 
                 else:
                     entity[original_name] = {'value': v, 'type': original_type}
-                    if original_type == NGSI_DATETIME and v:
+                    if original_type in (NGSI_DATETIME, NGSI_ISO8601) and v:
                         entity[original_name]['value'] = self._get_isoformat(v)
 
             self._postprocess_values(entity)
@@ -203,6 +205,8 @@ class CrateTranslator(BaseTranslator):
                 else:
                     if attr not in ('entity_type', 'entity_id'):
                         original_attrs[attr.lower()] = (attr, CRATE_TO_NGSI[t])
+                        if isinstance(e[attr], dict) and e[attr].get('type', None) == NGSI_ISO8601:
+                            original_attrs[attr.lower()] = (attr, NGSI_ISO8601)
             new_metadata[tn] = original_attrs
 
             # Apply custom column modifiers
