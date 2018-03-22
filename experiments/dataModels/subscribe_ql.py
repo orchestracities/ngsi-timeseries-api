@@ -16,7 +16,7 @@ ORION_URL = os.environ.get('ORION_URL', 'http://0.0.0.0:1026')
 
 def create_subscription(entity_type, notify_url):
     s = {
-        "description": "traffic_flow_observed",
+        "description": "Subscription for {}".format(entity_type),
         "subject": {
             "entities": [
               {
@@ -43,7 +43,7 @@ def create_subscription(entity_type, notify_url):
 
 def subscribe(entity_type):
     msg = "Subscribing at '{}', to notify to '{}' about any changes of '{}'"
-    notify_url = '{}/notify'.format(QL_URL)
+    notify_url = '{}/v2/notify'.format(QL_URL)
     orion_url = '{}/v2/subscriptions'.format(ORION_URL)
     print(msg.format(ORION_URL, notify_url, entity_type))
 
