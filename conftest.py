@@ -12,6 +12,9 @@ CRATE_PORT = 4200
 REDIS_HOST = os.environ.get('REDIS_HOST', 'redis')
 REDIS_PORT = 6379
 
+ORION_HOST = os.environ.get('ORION_HOST', 'orion')
+ORION_PORT = os.environ.get('ORION_PORT', '1026')
+ORION_URL = "http://{}:{}/v2".format(ORION_HOST, ORION_PORT)
 
 def do_clean_crate():
     from crate import client
