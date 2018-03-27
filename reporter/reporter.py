@@ -29,10 +29,13 @@ I.e, QL must be told where orion is.
 from datetime import datetime
 from flask import request
 from geocoding.geocache import GeoCodingCache
+from requests import RequestException
 from translators.crate import CrateTranslator, CrateTranslatorInstance
 from utils.common import iter_entity_attrs
+import json
 import logging
 import os
+import requests
 import warnings
 
 
@@ -184,3 +187,61 @@ def query_NTNENA_value():
 
 def config():
     raise NotImplementedError
+
+
+def subscribe(orionUrl,
+              quantumleapUrl,
+              entityType=None,
+              idPattern=".*",
+              attributes=None,
+              fiwareService=None,
+              fiwareServicepath=None):
+    # Validate Orion
+    try:
+        r = requests.get(orionUrl)
+    except RequestException:
+        r = None
+    if r is None or not r.ok:
+        msg = "Orion is not reachable by QuantumLeap at {}. " \
+              "Fix your orionUrl.".format(orionUrl)
+        return msg, 412
+
+    # Prepare subscription
+    subscription = {
+        "description": "Created by QuantumLeap {}.".format(quantumleapUrl),
+        "subject": {
+            "entities": [
+              {
+                "idPattern": idPattern,
+              }
+            ],
+            "condition": {
+              "attrs": attributes.split(',') if attributes else []
+            }
+          },
+        "notification": {
+            "http": {
+              "url": "{}/notify".format(quantumleapUrl)
+            },
+            "attrs": attributes.split(',') if attributes else [],
+            "metadata": ["dateCreated", "dateModified"],
+        },
+        "throttling": 1,
+    }
+    if entityType:
+        subscription['subject']['entities'][0]['type'] = entityType
+
+    # Send subscription
+    endpoint = '{}/subscriptions'.format(orionUrl)
+    data = json.dumps(subscription)
+    headers = {'Content-Type': 'application/json'}
+    if fiwareService:
+        headers['fiware-service'] = fiwareService
+    if fiwareServicepath:
+        headers['fiware-servicepath'] = fiwareServicepath
+    r = requests.post(endpoint, data=data, headers=headers)
+
+    if not r.ok:
+        logger = logging.getLogger(__name__)
+        logger.debug("subscribing to {} with headers: {} and data: {}")
+    return r.text, r.status_code

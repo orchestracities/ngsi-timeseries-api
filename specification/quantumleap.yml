@@ -322,6 +322,77 @@ paths:
         500:
           description: "Internal server error."
 
+  /subscribe:
+    post:
+      operationId: reporter.reporter.subscribe
+      summary: "Subscribe QL to process Orion notifications of certain type."
+      description: "This endpoint simplifies the creation of the subscription
+       in orion that will generate the notifications to be consumed by
+       QuantumLeap in order to save historical records. If you want an
+       advanced specification of the notifications, you can always create the
+       subscription in orion at your will. This endpoint just aims to
+       simplify the common use case."
+      parameters:
+        - in: query
+          name: orionUrl
+          required: true
+          type: string
+          description: "The url where QuantumLeap can reach Orion. Do not
+          include specific paths, just the base one including the api version.
+          E.g http://my-orion.com:1026/v2"
+        - in: query
+          name: quantumleapUrl
+          required: true
+          type: string
+          description: "The url where Orion can reach QuantumLeap. Do not
+          include specific paths, just the base one including the api version.
+          E.g http://my-quantumleap.com:8668/v2"
+        - in: query
+          name: entityType
+          required: false
+          type: string
+          description: "The type of entities for which to create a
+          subscription, so as to persist historical data of entities of this
+          type. ATTENTION: If not specified, all entity types will be tracked."
+        - in: query
+          name: idPattern
+          required: false
+          type: string
+          description: "The pattern covering the entity ids for which to
+          subscribe. If not specified, QL will track all entities of the
+          specified type. This attribute is documented in orion, see
+          https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions"
+        - in: query
+          name: attributes
+          required: false
+          type: string
+          description: "Comma-separated list of attribute names to keep
+          historical records. If not specified, QL will track all attributes of
+          the specified entities."
+        - in: query
+          name: fiwareService
+          required: false
+          type: string
+          description: "The 'fiware-service' header used in Orion for the
+          inserts of the entities you want to track. If not specified, this
+          header will not be used."
+        - in: query
+          name: fiwareServicepath
+          required: false
+          type: string
+          description: "The 'fiware-servicepath' header used in Orion for the
+          inserts of the entities you want to track. If not specified, this
+          header will not be used."
+      tags:
+        - input
+      responses:
+        201:
+          description: "Successfully created subscription."
+        412:
+          description: "You specified an unreachable Orion url for QuantumLeap."
+        500:
+          description: "Internal server error."
+
 ################################################################################
 # PATHS: OUTPUT
 ################################################################################
