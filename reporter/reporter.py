@@ -234,14 +234,21 @@ def subscribe(orionUrl,
     # Send subscription
     endpoint = '{}/subscriptions'.format(orionUrl)
     data = json.dumps(subscription)
-    headers = {'Content-Type': 'application/json'}
-    if fiwareService:
-        headers['fiware-service'] = fiwareService
-    if fiwareServicepath:
-        headers['fiware-servicepath'] = fiwareServicepath
-    r = requests.post(endpoint, data=data, headers=headers)
 
+    headers = {'Content-Type': 'application/json'}
+    fiware_s = fiwareService or \
+               request.headers.get('fiware-service', None)
+    if fiware_s:
+        headers['fiware-service'] = fiware_s
+
+    fiware_sp = fiwareServicepath or \
+                request.headers.get('fiware-servicepath', None)
+    if fiware_sp:
+        headers['fiware-servicepath'] = fiware_sp
+
+    r = requests.post(endpoint, data=data, headers=headers)
     if not r.ok:
         logger = logging.getLogger(__name__)
         logger.debug("subscribing to {} with headers: {} and data: {}")
+
     return r.text, r.status_code

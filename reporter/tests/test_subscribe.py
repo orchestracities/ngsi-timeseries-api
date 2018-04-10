@@ -47,6 +47,10 @@ def test_valid_defaults(clean_mongo):
 
 
 def test_valid_customs(clean_mongo):
+    headers = {
+        'Fiware-Service': 'ignored',
+        'Fiware-ServicePath': '/overriten/by/params',
+    }
     params = {
         'orionUrl': ORION_URL,
         'quantumleapUrl': QL_URL,
@@ -56,7 +60,7 @@ def test_valid_customs(clean_mongo):
         'fiwareService': "default",
         'fiwareServicepath': "/custom",
     }
-    r = requests.post(subscribe_url, params=params)
+    r = requests.post(subscribe_url, params=params, headers=headers)
     assert r.status_code == 201
 
     # Check created subscription
@@ -83,3 +87,36 @@ def test_valid_customs(clean_mongo):
         'metadata': ['dateCreated', 'dateModified'],
     }
     assert subscription['throttling'] == 1
+
+
+def test_use_multitenancy_headers(clean_mongo):
+    headers = {
+        'Fiware-Service': 'used',
+        'Fiware-ServicePath': '/custom/from/headers',
+    }
+    params = {
+        'orionUrl': ORION_URL,
+        'quantumleapUrl': QL_URL,
+        'entityType': "Room",
+        'idPattern': "Room1",
+        'attributes': "temperature,pressure",
+    }
+    # Post with FIWARE headers
+    r = requests.post(subscribe_url, params=params, headers=headers)
+    assert r.status_code == 201
+
+    # Check created subscription using headers via http headers
+    headers = {
+        'fiware-service': "used",
+        'fiware-servicepath': "/custom/from/headers",
+    }
+    r = requests.get("{}/subscriptions".format(ORION_URL), headers=headers)
+    assert r.ok
+    res = r.json()
+    assert len(res) == 1
+
+    # No headers no results
+    r = requests.get("{}/subscriptions".format(ORION_URL), headers={})
+    assert r.ok
+    res = r.json()
+    assert len(res) == 0

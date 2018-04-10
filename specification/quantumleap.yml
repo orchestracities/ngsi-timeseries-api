@@ -374,15 +374,17 @@ paths:
           required: false
           type: string
           description: "The 'fiware-service' header used in Orion for the
-          inserts of the entities you want to track. If not specified, this
-          header will not be used."
+          inserts of the entities you want to track. If not specified,
+          quantumleap will use the fiware-service header specified in the
+          request."
         - in: query
           name: fiwareServicepath
           required: false
           type: string
           description: "The 'fiware-servicepath' header used in Orion for the
-          inserts of the entities you want to track. If not specified, this
-          header will not be used."
+          inserts of the entities you want to track. If not specified,
+          quantumleap will use the fiware-servicepath header specified in the
+          request."
       tags:
         - input
       responses:
