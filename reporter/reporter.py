@@ -130,9 +130,13 @@ def notify():
     # Add GEO-DATE if enabled
     add_geodata(payload)
 
+    # Define FIWARE tenant
+    fiware_s = request.headers.get('fiware-service', None)
+    fiware_sp = request.headers.get('fiware-servicepath', None)
+
     # Send valid entities to translator
     with CrateTranslatorInstance() as trans:
-        trans.insert([payload])
+        trans.insert([payload], fiware_s, fiware_sp)
 
     msg = 'Notification successfully processed'
     logger.info(msg)

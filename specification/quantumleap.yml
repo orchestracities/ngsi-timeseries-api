@@ -91,7 +91,6 @@ definitions:
     to original measurements but rather the aggregate of measurements in
     each day."
 
-
   IndexedValues:
     type: object
     properties:
@@ -376,7 +375,8 @@ paths:
           description: "The 'fiware-service' header used in Orion for the
           inserts of the entities you want to track. If not specified,
           quantumleap will use the fiware-service header specified in the
-          request."
+          request.
+          See http://fiware-orion.readthedocs.io/en/latest/user/multitenancy/index.html#multi-tenancy"
         - in: query
           name: fiwareServicepath
           required: false
@@ -384,7 +384,8 @@ paths:
           description: "The 'fiware-servicepath' header used in Orion for the
           inserts of the entities you want to track. If not specified,
           quantumleap will use the fiware-servicepath header specified in the
-          request."
+          request.
+          See http://fiware-orion.readthedocs.io/en/latest/user/multitenancy/index.html#multi-tenancy"
       tags:
         - input
       responses:

@@ -1,3 +1,4 @@
+from flask import request
 from translators.crate import CrateTranslatorInstance, CrateTranslator
 
 
@@ -27,6 +28,9 @@ def query_1T1ENA(entityId,   # In Path
     if attrs is not None:
         attrs = attrs.split(',')
 
+    fiware_s = request.headers.get('fiware-service', None)
+    fiware_sp = request.headers.get('fiware-servicepath', None)
+
     entities = None
     with CrateTranslatorInstance() as trans:
         entities = trans.query(attr_names=attrs,
@@ -37,7 +41,9 @@ def query_1T1ENA(entityId,   # In Path
                            toDate=toDate,
                            lastN=lastN,
                            limit=limit,
-                           offset=offset)
+                           offset=offset,
+                           fiware_service=fiware_s,
+                           fiware_servicepath=fiware_sp,)
     if entities:
         if aggrMethod:
             index = []
