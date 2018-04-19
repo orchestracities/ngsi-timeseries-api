@@ -46,17 +46,10 @@ def test_valid_defaults(clean_mongo, clean_crate):
     assert subscription['throttling'] == 1
 
 
-<<<<<<< HEAD
 def test_valid_customs(clean_mongo, clean_crate):
     headers = {
         'Fiware-Service': 'custom',
         'Fiware-ServicePath': '/custom',
-=======
-def test_valid_customs(clean_mongo):
-    headers = {
-        'Fiware-Service': 'ignored',
-        'Fiware-ServicePath': '/overriten/by/params',
->>>>>>> Let /subscribe use the fiware headers from request
     }
     params = {
         'orionUrl': ORION_URL,
