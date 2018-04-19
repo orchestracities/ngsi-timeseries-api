@@ -132,7 +132,14 @@ def notify():
 
     # Define FIWARE tenant
     fiware_s = request.headers.get('fiware-service', None)
-    fiware_sp = request.headers.get('fiware-servicepath', None)
+    # It seems orion always sends a 'Fiware-Servicepath' header with value '/'
+    # But this is not correctly documented in the API, so in order not to
+    # depend on this, QL will not treat servicepath if there's no service
+    # specified.
+    if fiware_s:
+        fiware_sp = request.headers.get('fiware-servicepath', None)
+    else:
+        fiware_sp = None
 
     # Send valid entities to translator
     with CrateTranslatorInstance() as trans:

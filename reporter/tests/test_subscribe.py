@@ -5,7 +5,7 @@ import requests
 subscribe_url = "{}/subscribe".format(QL_URL)
 
 
-def test_invalid_wrong_orion_url():
+def test_invalid_wrong_orion_url(clean_mongo, clean_crate):
     params = {
         'orionUrl': "blabla",
         'quantumleapUrl': "quantumleap",
@@ -16,7 +16,7 @@ def test_invalid_wrong_orion_url():
                        "Fix your orionUrl."
 
 
-def test_valid_defaults(clean_mongo):
+def test_valid_defaults(clean_mongo, clean_crate):
     params = {
         'orionUrl': ORION_URL,
         'quantumleapUrl': QL_URL,
@@ -46,7 +46,7 @@ def test_valid_defaults(clean_mongo):
     assert subscription['throttling'] == 1
 
 
-def test_valid_customs(clean_mongo):
+def test_valid_customs(clean_mongo, clean_crate):
     headers = {
         'Fiware-Service': 'ignored',
         'Fiware-ServicePath': '/overriten/by/params',
@@ -89,7 +89,7 @@ def test_valid_customs(clean_mongo):
     assert subscription['throttling'] == 1
 
 
-def test_use_multitenancy_headers(clean_mongo):
+def test_use_multitenancy_headers(clean_mongo, clean_crate):
     headers = {
         'Fiware-Service': 'used',
         'Fiware-ServicePath': '/custom/from/headers',
