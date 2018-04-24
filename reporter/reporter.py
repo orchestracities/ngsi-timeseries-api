@@ -247,8 +247,7 @@ def subscribe(orionUrl,
     data = json.dumps(subscription)
 
     headers = {'Content-Type': 'application/json'}
-    fiware_s = fiwareService or \
-               request.headers.get('fiware-service', None)
+    fiware_s = fiwareService or request.headers.get('fiware-service', None)
     if fiware_s:
         headers['fiware-service'] = fiware_s
 

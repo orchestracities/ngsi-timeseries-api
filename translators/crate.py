@@ -41,6 +41,7 @@ CRATE_TO_NGSI['string_array'] = 'Array'
 METADATA_TABLE_NAME = "md_ets_metadata"
 
 FIWARE_SERVICEPATH = 'fiware_servicepath'
+TENANT_PREFIX = 'mt'
 
 
 class CrateTranslator(BaseTranslator):
@@ -113,7 +114,6 @@ class CrateTranslator(BaseTranslator):
                     continue
 
                 original_name, original_type = entity_attrs[k]
-
                 if original_name in (NGSI_TYPE, NGSI_ID):
                     entity[original_name] = v
 
@@ -135,10 +135,13 @@ class CrateTranslator(BaseTranslator):
         """
         Return table name based on entity type.
         When specified, fiware_service will define the table schema.
+        To avoid conflict with reserved words (
+        https://crate.io/docs/crate/reference/en/latest/sql/general/lexical-structure.html#key-words-and-identifiers),
+        both schema and table name are prefixed.
         """
         et = "et{}".format(entity_type.lower())
         if fiware_service:
-            return "{}.{}".format(fiware_service.lower(), et)
+            return "{}{}.{}".format(TENANT_PREFIX, fiware_service.lower(), et)
         return et
 
 
@@ -337,8 +340,8 @@ class CrateTranslator(BaseTranslator):
         """
         op = "select distinct table_name from {} ".format(METADATA_TABLE_NAME)
         if fiware_service:
-            op += "where table_name ~* '{}[.].*'".format(fiware_service.lower())
-
+            op += "where table_name ~* '{}{}[.].*'".format(TENANT_PREFIX,
+                                                           fiware_service.lower())
         try:
             self.cursor.execute(op)
         except client.exceptions.ProgrammingError as e:
@@ -467,7 +470,6 @@ class CrateTranslator(BaseTranslator):
             # TODO: embed lastN in query to avoid waste.
             return result[-lastN:]
         return result
-
 
     # TODO: Remove this method (needs refactoring of the benchmark)
     def average(self, attr_name, entity_type=None, entity_id=None):

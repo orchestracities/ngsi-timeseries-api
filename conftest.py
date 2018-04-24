@@ -16,6 +16,7 @@ ORION_HOST = os.environ.get('ORION_HOST', 'orion')
 ORION_PORT = os.environ.get('ORION_PORT', '1026')
 ORION_URL = "http://{}:{}/v2".format(ORION_HOST, ORION_PORT)
 
+
 def do_clean_crate():
     from crate import client
     conn = client.connect(["{}:{}".format(CRATE_HOST, CRATE_PORT)], error_trace=True)

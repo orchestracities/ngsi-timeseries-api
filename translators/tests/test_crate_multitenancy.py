@@ -121,3 +121,14 @@ def test_fiware_empty_tenant_is_no_tenant(translator):
     # Query with EMPTY tenant -> get results
     entities = translator.query()
     assert len(entities) == 2
+
+
+def test_fiware_tenant_reserved_word(translator):
+    e = entity("Room1")
+    fs = "default"
+    fsp = "/"
+    translator.insert([e], fiware_service=fs, fiware_servicepath=fsp)
+    translator._refresh([e['type']], fiware_service=fs)
+
+    entities = translator.query(fiware_service=fs, fiware_servicepath=fsp)
+    assert len(entities) == 1
