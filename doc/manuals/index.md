@@ -24,9 +24,9 @@ The idea of **QuantumLeap** is pretty straightforward. By leveraging on the [not
 There is typically a whole **IoT layer** governed by 1 or more [IoT Agents](https://catalogue.fiware.org/enablers/backend-device-management-idas) pushing data in NGSI format to the **[Orion Context Broker](https://fiware-orion.readthedocs.io
 )** **(2)**.
 
-Notifications will arrive to QuantumLeap's API `/notify` endpoint **(3)**. Its **Reporter** submodule will parse and validate the notification and eventually feed it to the configured **Translator**. The Translator is ultimately the responsible for persisting the NGSI information to the configured times-series database cluster.
+Notifications will arrive to QuantumLeap's API `/v2/notify` endpoint **(3)**. Its **Reporter** submodule will parse and validate the notification and eventually feed it to the configured **Translator**. The Translator is ultimately the responsible for persisting the NGSI information to the configured times-series database cluster.
 
-In addition to the `/notify` endpoint, the API is planned to include NGSI endpoints for advanced raw and aggregated data retrieval **(4)** for clients to query historical data.
+In addition to the `/v2/notify` endpoint, the API is planned to include NGSI endpoints for advanced raw and aggregated data retrieval **(4)** for clients to query historical data.
 
 For the visualisation of data **(5)** at the time being we are experimenting with [Grafana](http://grafana.com/) complemented with open source plugins for the databases. In the future, we could envision a plugin for direct interaction with the *query* API.
 
