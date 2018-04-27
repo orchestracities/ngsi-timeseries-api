@@ -34,8 +34,9 @@ def test_entity_add_point(air_quality_observed):
     assert 'location' in r
     assert r['location']['type'] == 'geo:point'
 
-    geo = r['location']['value']
-    assert geo == '51.2358357, 4.4201911'
+    lon, lat = r['location']['value'].split(',')
+    assert float(lon) == pytest.approx(51.2358357, abs=1e-2)
+    assert float(lat) == pytest.approx(4.4201911, abs=1e-2)
 
 
 def test_entity_add_point_negative_coord(air_quality_observed):
@@ -54,8 +55,9 @@ def test_entity_add_point_negative_coord(air_quality_observed):
     assert 'location' in r
     assert r['location']['type'] == 'geo:point'
 
-    geo = r['location']['value']
-    assert geo == '19.6389474, -98.9109537'
+    lon, lat = r['location']['value'].split(',')
+    assert float(lon) == pytest.approx(19.6389474, abs=1e-2)
+    assert float(lat) == pytest.approx(-98.9109537, abs=1e-2)
 
 
 def test_entity_add_street_line(air_quality_observed):
@@ -143,7 +145,9 @@ def test_caching(air_quality_observed, monkeypatch):
         assert r is air_quality_observed
         assert 'location' in r
         assert r['location']['type'] == 'geo:point'
-        assert r['location']['value'] == '51.2358357, 4.4201911'
+        lon, lat = r['location']['value'].split(',')
+        assert float(lon) == pytest.approx(51.2358357, abs=1e-2)
+        assert float(lat) == pytest.approx(4.4201911, abs=1e-2)
         assert len(cache.redis.keys('*')) == 1
 
         # Make sure no external calls are made
@@ -153,7 +157,9 @@ def test_caching(air_quality_observed, monkeypatch):
         r = geocoding.add_location(air_quality_observed, cache=cache)
         assert 'location' in r
         assert r['location']['type'] == 'geo:point'
-        assert r['location']['value'] == '51.2358357, 4.4201911'
+        lon, lat = r['location']['value'].split(',')
+        assert float(lon) == pytest.approx(51.2358357, abs=1e-2)
+        assert float(lat) == pytest.approx(4.4201911, abs=1e-2)
         assert len(cache.redis.keys('*')) == 1
 
     finally:

@@ -242,7 +242,9 @@ def test_geocoding(notification, crate_translator):
 
     assert 'location' in entities[0]
     assert entities[0]['location']['type'] == 'geo:point'
-    assert entities[0]['location']['value'] == '60.1707129, 24.9412167'
+    lon, lat = entities[0]['location']['value'].split(',')
+    assert float(lon) == pytest.approx(60.1707129, abs=1e-2)
+    assert float(lat) == pytest.approx(24.9412167, abs=1e-2)
 
 
 def test_no_multiple_data_elements(notification):
