@@ -201,7 +201,7 @@ in the corresponding section of <a href="https://fiware-orion.readthedocs.io/en/
     },
     "notification": {
         "http": {
-            "url": "http://quantumleap:8668/notify"
+            "url": "http://quantumleap:8668/v2/notify"
         },
         "attrs": [
         "temperature"
@@ -234,7 +234,7 @@ exactly what you want.</p>
 </li>
 <li>
 <p>The <code>"url"</code> field of the subscription specifies where Orion will send the
-notifications. I.e, this must be QuantumLeap's <code>/notify</code> endpoint. By default,
+notifications. I.e, this must be QuantumLeap's <code>/v2/notify</code> endpoint. By default,
 QuantumLeap listens at port <code>8668</code>.</p>
 </li>
 </ul>
