@@ -20,7 +20,7 @@ class TestAttributesController(BaseTestCase):
         """
         query_string = [('type', 'type_example')]
         response = self.client.open(
-            '/v2/entities/{entityId}/attrs/{attrName}'.format(entityId='entityId_example', attrName='attrName_example'),
+            '/context/v2/entities/{entityId}/attrs/{attrName}'.format(entityId='entityId_example', attrName='attrName_example'),
             method='GET',
             query_string=query_string)
         self.assert200(response,
@@ -33,7 +33,7 @@ class TestAttributesController(BaseTestCase):
         """
         query_string = [('type', 'type_example')]
         response = self.client.open(
-            '/v2/entities/{entityId}/attrs/{attrName}'.format(entityId='entityId_example', attrName='attrName_example'),
+            '/context/v2/entities/{entityId}/attrs/{attrName}'.format(entityId='entityId_example', attrName='attrName_example'),
             method='DELETE',
             query_string=query_string)
         self.assert200(response,
@@ -47,7 +47,7 @@ class TestAttributesController(BaseTestCase):
         body = None
         query_string = [('type', 'type_example')]
         response = self.client.open(
-            '/v2/entities/{entityId}/attrs/{attrName}'.format(entityId='entityId_example', attrName='attrName_example'),
+            '/context/v2/entities/{entityId}/attrs/{attrName}'.format(entityId='entityId_example', attrName='attrName_example'),
             method='PUT',
             data=json.dumps(body),
             content_type='application/json',

@@ -19,7 +19,7 @@ class TestAPIEntryPointController(BaseTestCase):
         
         """
         response = self.client.open(
-            '/v2/',
+            '/context/v2/',
             method='GET')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))

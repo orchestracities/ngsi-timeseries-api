@@ -20,7 +20,7 @@ class TestAttributeValueController(BaseTestCase):
         """
         query_string = [('type', 'type_example')]
         response = self.client.open(
-            '/v2/entities/{entityId}/attrs/{attrName}/value'.format(entityId='entityId_example', attrName='attrName_example'),
+            '/context/v2/entities/{entityId}/attrs/{attrName}/value'.format(entityId='entityId_example', attrName='attrName_example'),
             method='GET',
             query_string=query_string)
         self.assert200(response,
@@ -34,7 +34,7 @@ class TestAttributeValueController(BaseTestCase):
         body = AttributeValue()
         query_string = [('type', 'type_example')]
         response = self.client.open(
-            '/v2/entities/{entityId}/attrs/{attrName}/value'.format(entityId='entityId_example', attrName='attrName_example'),
+            '/context/v2/entities/{entityId}/attrs/{attrName}/value'.format(entityId='entityId_example', attrName='attrName_example'),
             method='PUT',
             data=json.dumps(body),
             content_type='application/json',

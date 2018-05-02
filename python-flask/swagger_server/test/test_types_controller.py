@@ -19,7 +19,7 @@ class TestTypesController(BaseTestCase):
         
         """
         response = self.client.open(
-            '/v2/types/{entityType}'.format(entityType='entityType_example'),
+            '/context/v2/types/{entityType}'.format(entityType='entityType_example'),
             method='GET')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -33,7 +33,7 @@ class TestTypesController(BaseTestCase):
                         ('offset', 1.2),
                         ('options', 'options_example')]
         response = self.client.open(
-            '/v2/types/',
+            '/context/v2/types/',
             method='GET',
             query_string=query_string)
         self.assert200(response,

@@ -25,7 +25,7 @@ class TestBatchOperationsController(BaseTestCase):
                         ('orderBy', 'orderBy_example'),
                         ('options', 'options_example')]
         response = self.client.open(
-            '/v2/op/query',
+            '/context/v2/op/query',
             method='POST',
             data=json.dumps(body),
             content_type='application/json',
@@ -41,7 +41,7 @@ class TestBatchOperationsController(BaseTestCase):
         body = BatchOperation()
         query_string = [('options', 'options_example')]
         response = self.client.open(
-            '/v2/op/update',
+            '/context/v2/op/update',
             method='POST',
             data=json.dumps(body),
             content_type='application/json',

@@ -20,7 +20,7 @@ class TestSubscriptionsController(BaseTestCase):
         """
         body = Subscription()
         response = self.client.open(
-            '/v2/subscriptions',
+            '/context/v2/subscriptions',
             method='POST',
             data=json.dumps(body),
             content_type='application/json')
@@ -33,7 +33,7 @@ class TestSubscriptionsController(BaseTestCase):
         
         """
         response = self.client.open(
-            '/v2/subscriptions/{subscriptionId}'.format(subscriptionId='subscriptionId_example'),
+            '/context/v2/subscriptions/{subscriptionId}'.format(subscriptionId='subscriptionId_example'),
             method='DELETE')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -44,7 +44,7 @@ class TestSubscriptionsController(BaseTestCase):
         
         """
         response = self.client.open(
-            '/v2/subscriptions/{subscriptionId}'.format(subscriptionId='subscriptionId_example'),
+            '/context/v2/subscriptions/{subscriptionId}'.format(subscriptionId='subscriptionId_example'),
             method='GET')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -58,7 +58,7 @@ class TestSubscriptionsController(BaseTestCase):
                         ('offset', 1.2),
                         ('options', 'options_example')]
         response = self.client.open(
-            '/v2/subscriptions',
+            '/context/v2/subscriptions',
             method='GET',
             query_string=query_string)
         self.assert200(response,
@@ -71,7 +71,7 @@ class TestSubscriptionsController(BaseTestCase):
         """
         body = Subscription()
         response = self.client.open(
-            '/v2/subscriptions/{subscriptionId}'.format(subscriptionId='subscriptionId_example'),
+            '/context/v2/subscriptions/{subscriptionId}'.format(subscriptionId='subscriptionId_example'),
             method='PATCH',
             data=json.dumps(body),
             content_type='application/json')

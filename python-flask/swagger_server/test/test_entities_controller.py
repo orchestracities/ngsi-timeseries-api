@@ -22,7 +22,7 @@ class TestEntitiesController(BaseTestCase):
         body = Entity()
         query_string = [('options', 'options_example')]
         response = self.client.open(
-            '/v2/entities',
+            '/context/v2/entities',
             method='POST',
             data=json.dumps(body),
             content_type='application/json',
@@ -50,7 +50,7 @@ class TestEntitiesController(BaseTestCase):
                         ('orderBy', 'orderBy_example'),
                         ('options', 'options_example')]
         response = self.client.open(
-            '/v2/entities',
+            '/context/v2/entities',
             method='GET',
             query_string=query_string)
         self.assert200(response,
@@ -63,7 +63,7 @@ class TestEntitiesController(BaseTestCase):
         """
         query_string = [('type', 'type_example')]
         response = self.client.open(
-            '/v2/entities/{entityId}'.format(entityId='entityId_example'),
+            '/context/v2/entities/{entityId}'.format(entityId='entityId_example'),
             method='DELETE',
             query_string=query_string)
         self.assert200(response,
@@ -78,7 +78,7 @@ class TestEntitiesController(BaseTestCase):
         query_string = [('type', 'type_example'),
                         ('options', 'options_example')]
         response = self.client.open(
-            '/v2/entities/{entityId}/attrs'.format(entityId='entityId_example'),
+            '/context/v2/entities/{entityId}/attrs'.format(entityId='entityId_example'),
             method='PUT',
             data=json.dumps(body),
             content_type='application/json',
@@ -95,7 +95,7 @@ class TestEntitiesController(BaseTestCase):
                         ('attrs', 'attrs_example'),
                         ('options', 'options_example')]
         response = self.client.open(
-            '/v2/entities/{entityId}'.format(entityId='entityId_example'),
+            '/context/v2/entities/{entityId}'.format(entityId='entityId_example'),
             method='GET',
             query_string=query_string)
         self.assert200(response,
@@ -110,7 +110,7 @@ class TestEntitiesController(BaseTestCase):
                         ('attrs', 'attrs_example'),
                         ('options', 'options_example')]
         response = self.client.open(
-            '/v2/entities/{entityId}/attrs'.format(entityId='entityId_example'),
+            '/context/v2/entities/{entityId}/attrs'.format(entityId='entityId_example'),
             method='GET',
             query_string=query_string)
         self.assert200(response,
@@ -125,7 +125,7 @@ class TestEntitiesController(BaseTestCase):
         query_string = [('type', 'type_example'),
                         ('options', 'options_example')]
         response = self.client.open(
-            '/v2/entities/{entityId}/attrs'.format(entityId='entityId_example'),
+            '/context/v2/entities/{entityId}/attrs'.format(entityId='entityId_example'),
             method='PATCH',
             data=json.dumps(body),
             content_type='application/json',
@@ -142,7 +142,7 @@ class TestEntitiesController(BaseTestCase):
         query_string = [('type', 'type_example'),
                         ('options', 'options_example')]
         response = self.client.open(
-            '/v2/entities/{entityId}/attrs'.format(entityId='entityId_example'),
+            '/context/v2/entities/{entityId}/attrs'.format(entityId='entityId_example'),
             method='POST',
             data=json.dumps(body),
             content_type='application/json',
