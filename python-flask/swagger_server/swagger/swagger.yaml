@@ -7,7 +7,7 @@ info:
   license:
     name: "MIT"
     url: "http://github.com/gruntjs/grunt/blob/master/LICENSE-MIT"
-host: "https://api.s.orchestracities.com/context/v2/"
+host: "https://api.s.orchestracities.com"
 basePath: "/v2"
 schemes:
 - "https"
@@ -1134,7 +1134,7 @@ definitions:
         type: "object"
         properties: {}
     example:
-      value: 35.6
+      value: 35.60000000000000142108547152020037174224853515625
       type: "Number"
       metadata:
         accuracy:
@@ -1168,7 +1168,7 @@ definitions:
       type: "Room"
       id: "DC_S1-D41"
       temperature:
-        value: 35.6
+        value: 35.60000000000000142108547152020037174224853515625
         type: "Number"
         metadata:
           accuracy:
@@ -1241,7 +1241,7 @@ definitions:
       - type: "Room"
         id: "DC_S1-D41"
         temperature:
-          value: 35.6
+          value: 35.60000000000000142108547152020037174224853515625
           type: "Number"
           metadata:
             accuracy:
@@ -1250,7 +1250,7 @@ definitions:
       - type: "Room"
         id: "DC_S1-D41"
         temperature:
-          value: 35.6
+          value: 35.60000000000000142108547152020037174224853515625
           type: "Number"
           metadata:
             accuracy:
