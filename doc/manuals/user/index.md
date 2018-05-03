@@ -44,7 +44,7 @@ Here's an example of the payload of the subscription you need to create in Orion
         },
         "notification": {
             "http": {
-                "url": "http://quantumleap:8668/notify"
+                "url": "http://quantumleap:8668/v2/notify"
             },
             "attrs": [
             "temperature"
@@ -73,7 +73,7 @@ exactly what you want.
  ```"attrsFormat": "keyValues"```
 
 - The ```"url"``` field of the subscription specifies where Orion will send the
-notifications. I.e, this must be QuantumLeap's `/notify` endpoint. By default,
+notifications. I.e, this must be QuantumLeap's `/v2/notify` endpoint. By default,
 QuantumLeap listens at port `8668`.
 
 
