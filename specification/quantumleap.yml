@@ -565,6 +565,27 @@ paths:
                   ]
                 }
               }
+    delete:
+      operationId: reporter.delete.delete_entity
+      summary: "Delete historical data of a certain entity."
+      description: "Given an entity (with type and id), delete all its
+      historical records."
+      tags:
+        - input
+      parameters:
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
+        # In Path...
+        - $ref: '#/parameters/entityIdInPath'
+        # In Query...
+        - $ref: '#/parameters/type'
+        - $ref: '#/parameters/fromDate'
+        - $ref: '#/parameters/toDate'
+        - $ref: '#/parameters/lastN'
+      responses:
+        204:
+          description: "Records successfully deleted."
 
   /entities/{entityId}/value:
     get:
@@ -847,6 +868,26 @@ paths:
                   ]
                 }
               }
+    delete:
+      operationId: reporter.delete.delete_entities
+      summary: "Delete historical data of all entities of a certain type."
+      description: "Given an entity type, delete all the historical records of
+      all entities of such type."
+      tags:
+        - input
+      parameters:
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
+        # In Path...
+        - $ref: '#/parameters/entityTypeInPath'
+        # In Query...
+        - $ref: '#/parameters/fromDate'
+        - $ref: '#/parameters/toDate'
+        - $ref: '#/parameters/lastN'
+      responses:
+        204:
+          description: "Records successfully deleted."
 
 
   /types/{entityType}/value:
