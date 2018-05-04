@@ -3,7 +3,7 @@ version: '3'
 services:
 
   orion:
-    image: fiware/orion:1.7.0
+    image: fiware/orion:${ORION_VERSION}
     ports:
       - "1026:1026"
     command: -logLevel DEBUG -dbhost mongo
@@ -18,7 +18,7 @@ services:
         - reportertests
 
   mongo:
-    image: mongo:3.2
+    image: mongo:${MONGO_VERSION}
     ports:
       - "27017:27017"
     networks:
@@ -39,7 +39,7 @@ services:
       - REDIS_HOST=redis
 
   crate:
-    image: crate:1.0.5
+    image: crate:${CRATE_VERSION}
     ports:
       # Admin UI
       - "4200:4200"
@@ -49,7 +49,7 @@ services:
         - reportertests
 
   redis:
-    image: redis:3
+    image: redis:${REDIS_VERSION}
     deploy:
       # Scaling Redis requires some extra work.
       # See https://get-reddie.com/blog/redis4-cluster-docker-compose/
