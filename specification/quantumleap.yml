@@ -8,6 +8,7 @@ produces:
   - text/plain
   - application/json
 
+
 ################################################################################
 # DEFINITIONS
 ################################################################################
@@ -119,9 +120,27 @@ definitions:
 
 
 ################################################################################
-# PARAMETERS: IN PATH
+# PARAMETERS: IN HEADERS
 ################################################################################
 parameters:
+  fiwareService:
+    in: header
+    name: fiwareService
+    required: false
+    type: string
+    description: "The corresponding 'fiware-service' header.
+    See http://fiware-orion.readthedocs.io/en/latest/user/multitenancy/index.html#multi-tenancy"
+  fiwareServicePath:
+    in: header
+    name: fiwareServicePath
+    required: false
+    type: string
+    description: "The corresponding 'fiware-servicepath' header.
+    See http://fiware-orion.readthedocs.io/en/latest/user/multitenancy/index.html#multi-tenancy"
+
+################################################################################
+# PARAMETERS: IN PATH
+################################################################################
 # Unfortunately Swagger 2.0 does not support examples for parameters :(
   entityTypeInPath:
     in: path
@@ -305,6 +324,8 @@ paths:
       summary: "Notify QuantumLeap the arrival of a new NGSI notification."
       description: ""
       parameters:
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
         - in: body
           name: notification
           required: true
@@ -332,6 +353,8 @@ paths:
        subscription in orion at your will. This endpoint just aims to
        simplify the common use case."
       parameters:
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
         - in: query
           name: orionUrl
           required: true
@@ -368,24 +391,6 @@ paths:
           description: "Comma-separated list of attribute names to keep
           historical records. If not specified, QL will track all attributes of
           the specified entities."
-        - in: query
-          name: fiwareService
-          required: false
-          type: string
-          description: "The 'fiware-service' header used in Orion for the
-          inserts of the entities you want to track. If not specified,
-          quantumleap will use the fiware-service header specified in the
-          request.
-          See http://fiware-orion.readthedocs.io/en/latest/user/multitenancy/index.html#multi-tenancy"
-        - in: query
-          name: fiwareServicepath
-          required: false
-          type: string
-          description: "The 'fiware-servicepath' header used in Orion for the
-          inserts of the entities you want to track. If not specified,
-          quantumleap will use the fiware-servicepath header specified in the
-          request.
-          See http://fiware-orion.readthedocs.io/en/latest/user/multitenancy/index.html#multi-tenancy"
       tags:
         - input
       responses:
@@ -409,6 +414,9 @@ paths:
       tags:
         - queries
       parameters:
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/entityIdInPath'
         - $ref: '#/parameters/attrNameInPath'
@@ -462,6 +470,9 @@ paths:
       tags:
         - queries
       parameters:
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/entityIdInPath'
         - $ref: '#/parameters/attrNameInPath'
@@ -503,6 +514,9 @@ paths:
       tags:
         - queries
       parameters:
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/entityIdInPath'
         # In Query...
@@ -563,6 +577,9 @@ paths:
       tags:
         - queries
       parameters:
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/entityIdInPath'
         # In Query...
@@ -619,6 +636,9 @@ paths:
       tags:
         - queries
       parameters:
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/entityTypeInPath'
         - $ref: '#/parameters/attrNameInPath'
@@ -684,6 +704,9 @@ paths:
       tags:
         - queries
       parameters:
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/entityTypeInPath'
         - $ref: '#/parameters/attrNameInPath'
@@ -742,6 +765,9 @@ paths:
       tags:
         - queries
       parameters:
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/entityTypeInPath'
         # In Query...
@@ -834,6 +860,9 @@ paths:
       tags:
         - queries
       parameters:
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/entityTypeInPath'
         # In Query...
@@ -924,6 +953,9 @@ paths:
       tags:
         - queries
       parameters:
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/attrNameInPath'
         # In Query...
@@ -1016,6 +1048,9 @@ paths:
       tags:
         - queries
       parameters:
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/attrNameInPath'
         # In Query...
@@ -1106,6 +1141,9 @@ paths:
       tags:
         - queries
       parameters:
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
         # In Query...
         - $ref: '#/parameters/type'
         - $ref: '#/parameters/id'
@@ -1206,6 +1244,9 @@ paths:
       tags:
         - queries
       parameters:
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
         # In Query...
         - $ref: '#/parameters/type'
         - $ref: '#/parameters/id'

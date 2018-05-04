@@ -48,8 +48,8 @@ def test_valid_defaults(clean_mongo, clean_crate):
 
 def test_valid_customs(clean_mongo, clean_crate):
     headers = {
-        'Fiware-Service': 'ignored',
-        'Fiware-ServicePath': '/overriten/by/params',
+        'Fiware-Service': 'custom',
+        'Fiware-ServicePath': '/custom',
     }
     params = {
         'orionUrl': ORION_URL,
@@ -57,25 +57,19 @@ def test_valid_customs(clean_mongo, clean_crate):
         'entityType': "Room",
         'idPattern': "Room1",
         'attributes': "temperature,pressure",
-        'fiwareService': "default",
-        'fiwareServicepath': "/custom",
     }
     r = requests.post(subscribe_url, params=params, headers=headers)
     assert r.status_code == 201
 
     # Check created subscription
-    headers = {
-        'fiware-service': "default",
-        'fiware-servicepath': "/custom",
-    }
     r = requests.get("{}/subscriptions".format(ORION_URL), headers=headers)
     assert r.ok
     res = r.json()
     assert len(res) == 1
     subscription = res[0]
 
-    assert subscription['description'] == 'Created by QuantumLeap {}.' \
-                                          ''.format(QL_URL)
+    description = 'Created by QuantumLeap {}.'.format(QL_URL)
+    assert subscription['description'] == description
     assert subscription['subject'] == {
         'entities': [{'idPattern': 'Room1', 'type': 'Room'}],
         'condition': {'attrs': ["temperature", "pressure"]}

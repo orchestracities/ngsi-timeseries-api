@@ -25,25 +25,21 @@ def test_integration_with_orion(clean_mongo, clean_crate, entity):
     """
     Make sure QL correctly handles headers in Orion's notification
     """
-    fiware_service = "myservice"
-    fiware_servicepath = "/"
+    h = {
+        'Content-Type': 'application/json',
+        'Fiware-Service': 'myservice',
+        'Fiware-ServicePath': '/',
+    }
 
     # Subscribe QL to Orion
     params = {
         'orionUrl': ORION_URL,
         'quantumleapUrl': QL_URL,
-        'fiwareService': fiware_service,
-        'fiwareServicepath': fiware_servicepath,
     }
-    r = requests.post("{}/subscribe".format(QL_URL), params=params)
+    r = requests.post("{}/subscribe".format(QL_URL), params=params, headers=h)
     assert r.status_code == 201
 
     # Insert values in Orion with Service and ServicePath
-    h = {
-        'Content-Type': 'application/json',
-        'Fiware-Service': fiware_service,
-        'Fiware-ServicePath': fiware_servicepath,
-    }
     data = json.dumps(entity)
     r = requests.post('{}/entities'.format(ORION_URL), data=data, headers=h)
     assert r.ok

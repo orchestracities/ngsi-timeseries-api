@@ -3,7 +3,7 @@ from translators.crate import CrateTranslatorInstance, CrateTranslator
 
 
 def query_1T1ENA(entityId,   # In Path
-                 type=None,  # In Query ↧
+                 type=None,  # In Query
                  attrs=None,
                  aggrMethod=None,
                  aggrPeriod=None,

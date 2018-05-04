@@ -204,9 +204,7 @@ def subscribe(orionUrl,
               quantumleapUrl,
               entityType=None,
               idPattern=".*",
-              attributes=None,
-              fiwareService=None,
-              fiwareServicepath=None):
+              attributes=None):
     # Validate Orion
     try:
         r = requests.get(orionUrl)
@@ -247,14 +245,13 @@ def subscribe(orionUrl,
     data = json.dumps(subscription)
 
     headers = {'Content-Type': 'application/json'}
-    fiware_s = fiwareService or request.headers.get('fiware-service', None)
+    fiware_s = request.headers.get('fiware-service', None)
     if fiware_s:
         headers['fiware-service'] = fiware_s
 
-    fiware_sp = fiwareServicepath or \
-                request.headers.get('fiware-servicepath', None)
-    if fiware_sp:
-        headers['fiware-servicepath'] = fiware_sp
+        fiware_sp = request.headers.get('fiware-servicepath', None)
+        if fiware_sp:
+            headers['fiware-servicepath'] = fiware_sp
 
     r = requests.post(endpoint, data=data, headers=headers)
     if not r.ok:

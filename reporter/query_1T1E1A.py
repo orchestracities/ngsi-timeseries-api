@@ -2,9 +2,9 @@ from flask import request
 from translators.crate import CrateTranslatorInstance, CrateTranslator
 
 
-def query_1T1E1A(attrName,   # In Path ↧
+def query_1T1E1A(attrName,   # In Path
                  entityId,
-                 type=None,  # In Query ↧
+                 type=None,  # In Query
                  aggrMethod=None,
                  aggrPeriod=None,
                  options=None,
