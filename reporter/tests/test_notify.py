@@ -145,6 +145,7 @@ def do_integration(entity, notify_url, orion_client, crate_translator):
             ],
             "metadata": ["dateCreated", "dateModified"]
         },
+        "throttling": 1,
     }
     orion_client.subscribe(subscription)
     orion_client.insert(entity)

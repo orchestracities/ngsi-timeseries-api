@@ -17,6 +17,7 @@ install:
   - docker-compose -f geocoding/tests/docker-compose.yml pull --ignore-pull-failures
 
 script:
+  - source deps.env
   - sh run_tests.sh
 
 after_success:
