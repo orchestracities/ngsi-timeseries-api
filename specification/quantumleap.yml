@@ -582,7 +582,6 @@ paths:
         - $ref: '#/parameters/type'
         - $ref: '#/parameters/fromDate'
         - $ref: '#/parameters/toDate'
-        - $ref: '#/parameters/lastN'
       responses:
         204:
           description: "Records successfully deleted."
@@ -884,10 +883,11 @@ paths:
         # In Query...
         - $ref: '#/parameters/fromDate'
         - $ref: '#/parameters/toDate'
-        - $ref: '#/parameters/lastN'
       responses:
         204:
           description: "Records successfully deleted."
+        # What if no entities were found?
+        # Shall we return number of deleted records?
 
 
   /types/{entityType}/value:
