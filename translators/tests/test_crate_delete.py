@@ -26,7 +26,7 @@ def test_delete_entity_defaults(translator):
                                       entity_id=deleted_id))
     assert n_selected == 5
 
-    n_deleted = translator.delete_entity(deleted_id, type=deleted_type)
+    n_deleted = translator.delete_entity(deleted_id, entity_type=deleted_type)
     assert n_deleted == 5
     _refresh_all(translator, entities)
 
@@ -53,7 +53,7 @@ def test_delete_entity_customs(translator):
     deleted_type = to_delete['type']
     deleted_id = to_delete['id']
 
-    res = translator.delete_entity(deleted_id, type=deleted_type,
+    res = translator.delete_entity(deleted_id, entity_type=deleted_type,
                                    from_date=datetime(2018, 1, 8).isoformat(),
                                    to_date=datetime(2018, 1, 16).isoformat())
     assert res == 5

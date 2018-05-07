@@ -498,14 +498,15 @@ class CrateTranslator(BaseTranslator):
         return statistics.mean(values)
 
 
-    def delete_entity(self, entity_id, type=None, from_date=None, to_date=None,
-                      fiware_service=None, fiware_servicepath=None):
-        if not type:
+    def delete_entity(self, entity_id, entity_type=None, from_date=None,
+                      to_date=None, fiware_service=None,
+                      fiware_servicepath=None):
+        if not entity_type:
             msg = "For now you must specify entity type"
             raise NotImplementedError(msg)
 
         # First delete entries from table
-        table_name = self._et2tn(type, fiware_service)
+        table_name = self._et2tn(entity_type, fiware_service)
         where_clause = self._get_where_clause(entity_id,
                                               from_date,
                                               to_date,
@@ -556,7 +557,7 @@ class CrateTranslator(BaseTranslator):
             return 0
 
         # Delete entry from metadata table
-        op = "delete from {} where 'table_name' = {}".format(
+        op = "delete from {} where 'table_name' = '{}'".format(
             METADATA_TABLE_NAME, table_name
         )
         try:

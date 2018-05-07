@@ -1,7 +1,7 @@
 from client.client import HEADERS_PUT
 from client.fixtures import clean_mongo, orion_client
-from conftest import QL_URL, entity, do_clean_crate
-from flask import url_for
+from conftest import QL_URL, entity
+from reporter.fixtures import notification
 from translators.crate import CrateTranslator
 from translators.fixtures import crate_translator
 from unittest.mock import patch
@@ -12,29 +12,6 @@ import requests
 import time
 
 notify_url = "{}/notify".format(QL_URL)
-
-
-@pytest.fixture
-def notification():
-    return {
-        'subscriptionId': '5947d174793fe6f7eb5e3961',
-        'data': [
-            {
-                'id': 'Room1',
-                'type': 'Room',
-                'temperature': {
-                    'type': 'Number',
-                    'value': 25.4,
-                    'metadata': {
-                        'dateModified': {
-                            'type': 'DateTime',
-                            'value': '2017-06-19T11:46:45.00Z'
-                        }
-                    }
-                }
-            }
-        ]
-    }
 
 
 def test_invalid_no_body(clean_mongo, clean_crate):

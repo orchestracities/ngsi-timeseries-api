@@ -585,6 +585,10 @@ paths:
       responses:
         204:
           description: "Records successfully deleted."
+          schema:
+            type: string
+        404:
+          description: "No records of the specified entity were found."
 
   /entities/{entityId}/value:
     get:
