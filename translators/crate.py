@@ -352,17 +352,17 @@ class CrateTranslator(BaseTranslator):
         return [r[0] for r in self.cursor.rows]
 
 
-    def _get_select_clause(self, attr_names, aggrMethod):
+    def _get_select_clause(self, attr_names, aggr_method):
         if attr_names:
-            if aggrMethod:
-                attrs = ["{}({})".format(aggrMethod, a) for a in attr_names]
+            if aggr_method:
+                attrs = ["{}({})".format(aggr_method, a) for a in attr_names]
             else:
                 attrs = [self.TIME_INDEX_NAME]
                 attrs.extend(str(a) for a in attr_names)
             select = ",".join(attrs)
 
         else:
-            # aggrMethod is ignored when no attribute is specified
+            # aggr_method is ignored when no attribute is specified
             select = '*'
         return select
 
@@ -378,15 +378,15 @@ class CrateTranslator(BaseTranslator):
         return min(default, limit)
 
 
-    def _get_where_clause(self, entity_id, fromDate, toDate, fiware_sp=None):
+    def _get_where_clause(self, entity_id, from_date, to_date, fiware_sp=None):
         clauses = []
 
         if entity_id:
             clauses.append(" entity_id = '{}' ".format(entity_id))
-        if fromDate:
-            clauses.append(" {} >= '{}'".format(self.TIME_INDEX_NAME, fromDate))
-        if toDate:
-            clauses.append(" {} <= '{}'".format(self.TIME_INDEX_NAME, toDate))
+        if from_date:
+            clauses.append(" {} >= '{}'".format(self.TIME_INDEX_NAME, from_date))
+        if to_date:
+            clauses.append(" {} <= '{}'".format(self.TIME_INDEX_NAME, to_date))
 
         if fiware_sp:
             # Match prefix of fiware service path
@@ -404,10 +404,10 @@ class CrateTranslator(BaseTranslator):
               entity_type=None,
               entity_id=None,
               where_clause=None,
-              aggrMethod=None,
-              fromDate=None,
-              toDate=None,
-              lastN=None,
+              aggr_method=None,
+              from_date=None,
+              to_date=None,
+              last_n=None,
               limit=10000,
               offset=0,
               fiware_service=None,
@@ -416,15 +416,15 @@ class CrateTranslator(BaseTranslator):
             msg = "For now you must specify entity_type when stating entity_id"
             raise NotImplementedError(msg)
 
-        select_clause = self._get_select_clause(attr_names, aggrMethod)
+        select_clause = self._get_select_clause(attr_names, aggr_method)
 
         if not where_clause:
             where_clause = self._get_where_clause(entity_id,
-                                                  fromDate,
-                                                  toDate,
+                                                  from_date,
+                                                  to_date,
                                                   fiware_servicepath)
 
-        if aggrMethod:
+        if aggr_method:
             order_by = "" if select_clause == "*" else "group by entity_id"
         else:
             order_by = "order by {} ASC".format(self.TIME_INDEX_NAME)
@@ -459,16 +459,16 @@ class CrateTranslator(BaseTranslator):
                 entities = []
             else:
                 res = self.cursor.fetchall()
-                if aggrMethod and attr_names:
+                if aggr_method and attr_names:
                     col_names = attr_names
                 else:
                     col_names = [x[0] for x in self.cursor.description]
                 entities = list(self.translate_to_ngsi(res, col_names, tn))
             result.extend(entities)
 
-        if lastN:
-            # TODO: embed lastN in query to avoid waste.
-            return result[-lastN:]
+        if last_n:
+            # TODO: embed last_n in query to avoid waste.
+            return result[-last_n:]
         return result
 
     # TODO: Remove this method (needs refactoring of the benchmark)

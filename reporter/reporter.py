@@ -200,28 +200,28 @@ def config():
     raise NotImplementedError
 
 
-def subscribe(orionUrl,
-              quantumleapUrl,
-              entityType=None,
-              idPattern=".*",
+def subscribe(orion_url,
+              quantumleap_url,
+              entity_type=None,
+              id_pattern=".*",
               attributes=None):
     # Validate Orion
     try:
-        r = requests.get(orionUrl)
+        r = requests.get(orion_url)
     except RequestException:
         r = None
     if r is None or not r.ok:
         msg = "Orion is not reachable by QuantumLeap at {}. " \
-              "Fix your orionUrl.".format(orionUrl)
+              "Fix your orionUrl.".format(orion_url)
         return msg, 412
 
     # Prepare subscription
     subscription = {
-        "description": "Created by QuantumLeap {}.".format(quantumleapUrl),
+        "description": "Created by QuantumLeap {}.".format(quantumleap_url),
         "subject": {
             "entities": [
               {
-                "idPattern": idPattern,
+                "idPattern": id_pattern,
               }
             ],
             "condition": {
@@ -230,18 +230,18 @@ def subscribe(orionUrl,
           },
         "notification": {
             "http": {
-              "url": "{}/notify".format(quantumleapUrl)
+              "url": "{}/notify".format(quantumleap_url)
             },
             "attrs": attributes.split(',') if attributes else [],
             "metadata": ["dateCreated", "dateModified"],
         },
         "throttling": 1,
     }
-    if entityType:
-        subscription['subject']['entities'][0]['type'] = entityType
+    if entity_type:
+        subscription['subject']['entities'][0]['type'] = entity_type
 
     # Send subscription
-    endpoint = '{}/subscriptions'.format(orionUrl)
+    endpoint = '{}/subscriptions'.format(orion_url)
     data = json.dumps(subscription)
 
     headers = {'Content-Type': 'application/json'}
