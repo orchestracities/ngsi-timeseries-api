@@ -395,13 +395,6 @@ class CrateTranslator(BaseTranslator):
             # Match prefix of fiware service path
             clauses.append(" "+FIWARE_SERVICEPATH+" = ''")
 
-        if fiware_sp:
-            # Match prefix of fiware service path
-            clauses.append(" "+FIWARE_SERVICEPATH+" ~* '"+fiware_sp+"($|/.*)'")
-        else:
-            # Match prefix of fiware service path
-            clauses.append(" "+FIWARE_SERVICEPATH+" = ''")
-
         where_clause = "where " + "and ".join(clauses)
         return where_clause
 
