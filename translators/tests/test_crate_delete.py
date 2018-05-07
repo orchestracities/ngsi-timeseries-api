@@ -75,15 +75,15 @@ def test_delete_entity_with_tenancy(translator):
     to_delete = entities[0]
     deleted_type = to_delete['type']
     deleted_id = to_delete['id']
-    res = translator.delete_entity(deleted_id, type=deleted_type)
+    res = translator.delete_entity(deleted_id, entity_type=deleted_type)
     assert res == 0
 
     res = translator.delete_entity(deleted_id,
-                                   type=deleted_type,
+                                   entity_type=deleted_type,
                                    fiware_service=fs)
     assert res == 0
     res = translator.delete_entity(deleted_id,
-                                   type=deleted_type,
+                                   entity_type=deleted_type,
                                    fiware_service=fs,
                                    fiware_servicepath=fsp)
     assert res == 5

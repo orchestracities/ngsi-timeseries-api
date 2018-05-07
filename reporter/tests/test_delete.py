@@ -1,9 +1,9 @@
 from client.client import HEADERS_PUT
 from conftest import QL_URL
 from reporter.fixtures import create_notification
+from translators.fixtures import crate_translator as translator
 import json
 import requests
-import time
 
 
 notify_url = "{}/notify".format(QL_URL)
@@ -20,7 +20,7 @@ def insert_test_data():
                 assert r.status_code == 200, r.text
 
 
-def test_delete_entity(clean_crate):
+def test_delete_entity(translator):
     """
     By default, delete all records of some entity.
     """
@@ -40,9 +40,9 @@ def test_delete_entity(clean_crate):
     # Delete them
     r = requests.delete(url, params=params)
     assert r.status_code == 204, r.text
+    translator._refresh([entity_type])
 
     # Values are gone
-    time.sleep(1)
     r = requests.get(url, params=params)
     # TODO: Update query API to use 404 in these cases
     assert r.status_code == 200, r.text
@@ -55,23 +55,24 @@ def test_delete_entity(clean_crate):
     assert r.text != ''
 
 
-def test_delete_entities(clean_crate):
+def test_delete_entities(translator):
     """
     By default, delete all historical records of all entities of some type.
     """
-    insert_test_data()
-
     entity_type = "TrafficFlowObserved"
     params = {
         'type': entity_type,
     }
+
+    insert_test_data()
+    translator._refresh([entity_type, "Room"])
 
     # Values are there for both entities
     for e in range(2):
         url = '{}/entities/{}'.format(QL_URL, '{}{}'.format(entity_type, e))
         r = requests.get(url, params=params)
         assert r.status_code == 200, r.text
-        assert r.text == ''
+        assert r.text != ''
 
     # 1 Delete call
     url = '{}/types/{}'.format(QL_URL, entity_type)
@@ -79,9 +80,15 @@ def test_delete_entities(clean_crate):
     assert r.status_code == 204, r.text
 
     # Values are gone for both entities
-    time.sleep(1)
     for e in range(2):
         url = '{}/entities/{}'.format(QL_URL, '{}{}'.format(entity_type, e))
         r = requests.get(url, params=params)
+        # TODO: Update query API to use 404 in these cases
         assert r.status_code == 200, r.text
         assert r.text == ''
+
+    # But not for entities of other types
+    url = '{}/entities/{}'.format(QL_URL, 'Room1')
+    r = requests.get(url, params={'type': 'Room'})
+    assert r.status_code == 200, r.text
+    assert r.text != ''
