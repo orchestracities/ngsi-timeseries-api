@@ -4,6 +4,7 @@
 #      $ source setup_dev_env.sh
 
 export PYTHONPATH=$PWD:$PYTHONPATH
+source deps.env
 
 source env/bin/activate
 

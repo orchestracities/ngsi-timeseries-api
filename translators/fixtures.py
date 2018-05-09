@@ -1,4 +1,4 @@
-from conftest import CRATE_HOST, CRATE_PORT
+from conftest import CRATE_HOST, CRATE_PORT, clean_crate
 from translators.crate import CrateTranslator
 from translators.influx import InfluxTranslator
 from translators.rethink import RethinkTranslator

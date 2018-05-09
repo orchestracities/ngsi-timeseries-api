@@ -2,7 +2,7 @@ version: '3'
 
 services:
   influx:
-    image: influxdb:1.2.2
+    image: influxdb:${INFLUX_VERSION}
     ports:
       # client-server comm over InfluxDB’s HTTP API
       - "8086:8086"
@@ -14,7 +14,7 @@ services:
         - translatorstests
 
   crate:
-    image: crate:1.0.5
+    image: crate:${CRATE_VERSION}
     ports:
       # Admin UI
       - "4200:4200"
@@ -24,7 +24,7 @@ services:
         - translatorstests
 
   rethink:
-    image: rethinkdb:2.3.5
+    image: rethinkdb:${RETHINK_VERSION}
     ports:
       # process
       - "28015:28015"

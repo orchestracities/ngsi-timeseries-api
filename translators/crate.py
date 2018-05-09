@@ -1,11 +1,11 @@
-import os
 from contextlib import contextmanager
-
 from crate import client
+from crate.client.exceptions import ProgrammingError
 from datetime import datetime, timedelta
 from translators.base_translator import BaseTranslator
 from utils.common import iter_entity_attrs
 import logging
+import os
 import statistics
 
 
@@ -40,6 +40,9 @@ CRATE_TO_NGSI['string_array'] = 'Array'
 # A table to store the configuration and metadata of each entity type.
 METADATA_TABLE_NAME = "md_ets_metadata"
 
+FIWARE_SERVICEPATH = 'fiware_servicepath'
+TENANT_PREFIX = 'mt'
+
 
 class CrateTranslator(BaseTranslator):
 
@@ -59,13 +62,13 @@ class CrateTranslator(BaseTranslator):
         self.conn.close()
 
 
-    def _refresh(self, entity_types):
+    def _refresh(self, entity_types, fiware_service=None):
         """
         Used for testing purposes only!
         :param entity_types: list(str) list of entity types whose tables will be
          refreshed
         """
-        table_names = [self._et2tn(et) for et in entity_types]
+        table_names = [self._et2tn(et, fiware_service) for et in entity_types]
         table_names.append(METADATA_TABLE_NAME)
         self.cursor.execute("refresh table {}".format(','.join(table_names)))
 
@@ -107,8 +110,10 @@ class CrateTranslator(BaseTranslator):
         for r in resultset:
             entity = {}
             for k, v in zip(col_names, r):
-                original_name, original_type = entity_attrs[k]
+                if k not in entity_attrs:
+                    continue
 
+                original_name, original_type = entity_attrs[k]
                 if original_name in (NGSI_TYPE, NGSI_ID):
                     entity[original_name] = v
 
@@ -126,11 +131,21 @@ class CrateTranslator(BaseTranslator):
             yield entity
 
 
-    def _et2tn(self, entity_type):
-        return "et{}".format(entity_type.lower())
+    def _et2tn(self, entity_type, fiware_service=None):
+        """
+        Return table name based on entity type.
+        When specified, fiware_service will define the table schema.
+        To avoid conflict with reserved words (
+        https://crate.io/docs/crate/reference/en/latest/sql/general/lexical-structure.html#key-words-and-identifiers),
+        both schema and table name are prefixed.
+        """
+        et = "et{}".format(entity_type.lower())
+        if fiware_service:
+            return "{}{}.{}".format(TENANT_PREFIX, fiware_service.lower(), et)
+        return et
 
 
-    def insert(self, entities):
+    def insert(self, entities, fiware_service=None, fiware_servicepath=None):
         if not isinstance(entities, list):
             msg = "Entities expected to be of type list, but got {}"
             raise TypeError(msg.format(type(entities)))
@@ -141,7 +156,7 @@ class CrateTranslator(BaseTranslator):
 
         # Collect tables info
         for e in entities:
-            tn = self._et2tn(e['type'])
+            tn = self._et2tn(e['type'], fiware_service)
 
             table = tables.setdefault(tn, {})
             entities_by_tn.setdefault(tn, []).append(e)
@@ -225,10 +240,13 @@ class CrateTranslator(BaseTranslator):
         # Populate data tables
         for tn, entities in entities_by_tn.items():
             col_names = sorted(tables[tn].keys())
+            col_names.append(FIWARE_SERVICEPATH)
 
             entries = []  # raw values in same order as column names
             for e in entities:
-                values = self._preprocess_values(e, col_names)
+                values = self._preprocess_values(e,
+                                                 col_names,
+                                                 fiware_servicepath)
                 entries.append(values)
 
             stmt = "insert into {} ({}) values ({})".format(
@@ -237,7 +255,7 @@ class CrateTranslator(BaseTranslator):
 
         return self.cursor
 
-    def _preprocess_values(self, e, col_names):
+    def _preprocess_values(self, e, col_names, fiware_servicepath):
         values = []
         for cn in col_names:
             if cn == 'entity_type':
@@ -246,6 +264,8 @@ class CrateTranslator(BaseTranslator):
                 values.append(e['id'])
             elif cn == self.TIME_INDEX_NAME:
                 values.append(e[self.TIME_INDEX_NAME])
+            elif cn == FIWARE_SERVICEPATH:
+                values.append(fiware_servicepath or '')
             else:
                 # Normal attributes
                 try:
@@ -313,14 +333,17 @@ class CrateTranslator(BaseTranslator):
                 self.cursor.execute(stmt, (tn, persisted_metadata[tn]))
 
 
-    def _get_et_table_names(self):
+    def _get_et_table_names(self, fiware_service=None):
         """
         Return the names of all the tables representing entity types.
         :return: list(unicode)
         """
+        op = "select distinct table_name from {} ".format(METADATA_TABLE_NAME)
+        if fiware_service:
+            op += "where table_name ~* '{}{}[.].*'".format(TENANT_PREFIX,
+                                                           fiware_service.lower())
         try:
-            self.cursor.execute("select distinct table_name from {}".format(
-                METADATA_TABLE_NAME))
+            self.cursor.execute(op)
         except client.exceptions.ProgrammingError as e:
             # Metadata table still not created
             msg = "Could not retrieve METADATA_TABLE. Empty database maybe?. {}"
@@ -329,17 +352,17 @@ class CrateTranslator(BaseTranslator):
         return [r[0] for r in self.cursor.rows]
 
 
-    def _get_select_clause(self, attr_names, aggrMethod):
+    def _get_select_clause(self, attr_names, aggr_method):
         if attr_names:
-            if aggrMethod:
-                attrs = ["{}({})".format(aggrMethod, a) for a in attr_names]
+            if aggr_method:
+                attrs = ["{}({})".format(aggr_method, a) for a in attr_names]
             else:
                 attrs = [self.TIME_INDEX_NAME]
                 attrs.extend(str(a) for a in attr_names)
             select = ",".join(attrs)
 
         else:
-            # aggrMethod is ignored when no attribute is specified
+            # aggr_method is ignored when no attribute is specified
             select = '*'
         return select
 
@@ -355,18 +378,25 @@ class CrateTranslator(BaseTranslator):
         return min(default, limit)
 
 
-    def _get_where_clause(self, entity_id, fromDate, toDate):
+    def _get_where_clause(self, entity_id, from_date, to_date, fiware_sp=None):
         clauses = []
+
         if entity_id:
             clauses.append(" entity_id = '{}' ".format(entity_id))
-        if fromDate:
-            clauses.append(" {} >= '{}'".format(self.TIME_INDEX_NAME, fromDate))
-        if toDate:
-            clauses.append(" {} <= '{}'".format(self.TIME_INDEX_NAME, toDate))
+        if from_date:
+            clauses.append(" {} >= '{}'".format(self.TIME_INDEX_NAME, from_date))
+        if to_date:
+            clauses.append(" {} <= '{}'".format(self.TIME_INDEX_NAME, to_date))
 
-        if clauses:
-            return "where " + "and ".join(clauses)
-        return ''
+        if fiware_sp:
+            # Match prefix of fiware service path
+            clauses.append(" "+FIWARE_SERVICEPATH+" ~* '"+fiware_sp+"($|/.*)'")
+        else:
+            # Match prefix of fiware service path
+            clauses.append(" "+FIWARE_SERVICEPATH+" = ''")
+
+        where_clause = "where " + "and ".join(clauses)
+        return where_clause
 
 
     def query(self,
@@ -374,30 +404,35 @@ class CrateTranslator(BaseTranslator):
               entity_type=None,
               entity_id=None,
               where_clause=None,
-              aggrMethod=None,
-              fromDate=None,
-              toDate=None,
-              lastN=None,
+              aggr_method=None,
+              from_date=None,
+              to_date=None,
+              last_n=None,
               limit=10000,
-              offset=0):
+              offset=0,
+              fiware_service=None,
+              fiware_servicepath=None):
         if entity_id and not entity_type:
             msg = "For now you must specify entity_type when stating entity_id"
             raise NotImplementedError(msg)
 
-        select_clause = self._get_select_clause(attr_names, aggrMethod)
+        select_clause = self._get_select_clause(attr_names, aggr_method)
 
         if not where_clause:
-            where_clause = self._get_where_clause(entity_id, fromDate, toDate)
+            where_clause = self._get_where_clause(entity_id,
+                                                  from_date,
+                                                  to_date,
+                                                  fiware_servicepath)
 
-        if aggrMethod:
+        if aggr_method:
             order_by = "" if select_clause == "*" else "group by entity_id"
         else:
             order_by = "order by {} ASC".format(self.TIME_INDEX_NAME)
 
         if entity_type:
-            table_names = [self._et2tn(entity_type)]
+            table_names = [self._et2tn(entity_type, fiware_service)]
         else:
-            table_names = self._get_et_table_names()
+            table_names = self._get_et_table_names(fiware_service)
 
         limit = self._get_limit(limit)
         offset = max(0, offset)
@@ -416,21 +451,27 @@ class CrateTranslator(BaseTranslator):
                     limit=limit,
                     offset=offset,
                 )
-            self.cursor.execute(op)
-            res = self.cursor.fetchall()
-            if aggrMethod and attr_names:
-                col_names = attr_names
+            try:
+                self.cursor.execute(op)
+            except ProgrammingError as e:
+                # Reason 1: fiware_service_path column in legacy dbs.
+                logging.debug("{}".format(e))
+                entities = []
             else:
-                col_names = [x[0] for x in self.cursor.description]
-            entities = list(self.translate_to_ngsi(res, col_names, tn))
+                res = self.cursor.fetchall()
+                if aggr_method and attr_names:
+                    col_names = attr_names
+                else:
+                    col_names = [x[0] for x in self.cursor.description]
+                entities = list(self.translate_to_ngsi(res, col_names, tn))
             result.extend(entities)
 
-        if lastN:
-            # TODO: embed lastN in query to avoid waste.
-            return result[-lastN:]
+        if last_n:
+            # TODO: embed last_n in query to avoid waste.
+            return result[-last_n:]
         return result
 
-
+    # TODO: Remove this method (needs refactoring of the benchmark)
     def average(self, attr_name, entity_type=None, entity_id=None):
         if entity_id and not entity_type:
             msg = "For now you must specify entity_type when stating entity_id"

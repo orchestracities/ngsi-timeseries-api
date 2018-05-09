@@ -3,13 +3,15 @@ from conftest import entity
 from random import random
 from utils.common import create_simple_subscription, create_simple_subscription_v1
 import json
+import os
 import pytest
 
 
 def test_version(orion):
     r = orion.version()
     assert r.ok, r.text
-    assert '"version" : "1.7.0"' in r.text
+    version = os.environ.get('ORION_VERSION', '1.13.0')
+    assert '"version" : "{}"'.format(version) in r.text
 
 
 def test_subscribe(orion, clean_mongo):

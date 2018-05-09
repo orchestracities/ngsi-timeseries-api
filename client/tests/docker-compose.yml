@@ -3,7 +3,7 @@ version: '3'
 services:
 
   orion:
-    image: fiware/orion:1.7.0
+    image: fiware/orion:${ORION_VERSION}
     ports:
       - "1026:1026"
     command: -logLevel DEBUG -dbhost mongo
@@ -18,7 +18,7 @@ services:
         - clienttests
 
   mongo:
-    image: mongo:3.2
+    image: mongo:${MONGO_VERSION}
     ports:
       - "27017:27017"
     networks:

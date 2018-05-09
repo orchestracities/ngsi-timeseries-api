@@ -11,8 +11,8 @@ ORION_PORT = os.environ.get('ORION_PORT', 1026)
 
 def do_clean_mongo():
     db_client = pm.MongoClient(MONGO_HOST, MONGO_PORT)
-    db_client.drop_database("orion")
-    db_client.drop_database("orion-default")
+    for db in db_client.database_names():
+        db_client.drop_database(db)
 
 
 @pytest.fixture

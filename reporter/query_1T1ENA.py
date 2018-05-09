@@ -1,45 +1,51 @@
+from flask import request
 from translators.crate import CrateTranslatorInstance, CrateTranslator
 
 
-def query_1T1ENA(entityId,   # In Path
-                 type=None,  # In Query ↧
+def query_1T1ENA(entity_id,   # In Path
+                 type_=None,  # In Query
                  attrs=None,
-                 aggrMethod=None,
-                 aggrPeriod=None,
+                 aggr_method=None,
+                 aggr_period=None,
                  options=None,
-                 fromDate=None,
-                 toDate=None,
-                 lastN=None,
+                 from_date=None,
+                 to_date=None,
+                 last_n=None,
                  limit=10000,
                  offset=0):
     """
     See /entities/{entityId}/attrs/{attrName} in API Specification
     quantumleap.yml
     """
-    if options or aggrPeriod:
+    if options or aggr_period:
         import warnings
         warnings.warn("Unimplemented query parameters: options, aggrPeriod")
 
-    if aggrMethod and not attrs:
+    if aggr_method and not attrs:
         msg = "Specified aggrMethod = {} but missing attrs parameter."
-        return msg.format(aggrMethod), 400
+        return msg.format(aggr_method), 400
 
     if attrs is not None:
         attrs = attrs.split(',')
 
+    fiware_s = request.headers.get('fiware-service', None)
+    fiware_sp = request.headers.get('fiware-servicepath', None)
+
     entities = None
     with CrateTranslatorInstance() as trans:
         entities = trans.query(attr_names=attrs,
-                           entity_type=type,
-                           entity_id=entityId,
-                           aggrMethod=aggrMethod,
-                           fromDate=fromDate,
-                           toDate=toDate,
-                           lastN=lastN,
+                           entity_type=type_,
+                           entity_id=entity_id,
+                           aggr_method=aggr_method,
+                           from_date=from_date,
+                           to_date=to_date,
+                           last_n=last_n,
                            limit=limit,
-                           offset=offset)
+                           offset=offset,
+                           fiware_service=fiware_s,
+                           fiware_servicepath=fiware_sp,)
     if entities:
-        if aggrMethod:
+        if aggr_method:
             index = []
         else:
             index = [str(e[CrateTranslator.TIME_INDEX_NAME]) for e in entities]
@@ -60,7 +66,7 @@ def query_1T1ENA(entityId,   # In Path
 
         res = {
             'data': {
-                'entityId': entityId,
+                'entityId': entity_id,
                 'index': index,
                 'attributes': attributes
             }

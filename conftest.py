@@ -16,15 +16,20 @@ ORION_HOST = os.environ.get('ORION_HOST', 'orion')
 ORION_PORT = os.environ.get('ORION_PORT', '1026')
 ORION_URL = "http://{}:{}/v2".format(ORION_HOST, ORION_PORT)
 
+
 def do_clean_crate():
     from crate import client
     conn = client.connect(["{}:{}".format(CRATE_HOST, CRATE_PORT)], error_trace=True)
     cursor = conn.cursor()
 
     try:
-        cursor.execute("select table_name from information_schema.tables where table_schema = 'doc'")
-        for tn in cursor.rows:
-            cursor.execute("DROP TABLE IF EXISTS {}".format(tn[0]))
+        # Clean tables created by user (i.e, not system tables)
+        cursor.execute("select table_schema, table_name from "
+                       "information_schema.tables "
+                       "where table_schema not in ('sys', "
+                       "'information_schema', 'pg_catalog')")
+        for (ts, tn) in cursor.rows:
+            cursor.execute("DROP TABLE IF EXISTS {}.{}".format(ts, tn))
     finally:
         cursor.close()
 

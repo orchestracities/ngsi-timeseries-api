@@ -3,8 +3,6 @@ import json
 
 
 HEADERS = {
-    'Fiware-Service': 'default',
-    'Fiware-ServicePath': '/',
 }
 HEADERS_PUT = HEADERS.copy()
 HEADERS_PUT['Content-Type'] = 'application/json'

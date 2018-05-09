@@ -130,9 +130,20 @@ def notify():
     # Add GEO-DATE if enabled
     add_geodata(payload)
 
+    # Define FIWARE tenant
+    fiware_s = request.headers.get('fiware-service', None)
+    # It seems orion always sends a 'Fiware-Servicepath' header with value '/'
+    # But this is not correctly documented in the API, so in order not to
+    # depend on this, QL will not treat servicepath if there's no service
+    # specified.
+    if fiware_s:
+        fiware_sp = request.headers.get('fiware-servicepath', None)
+    else:
+        fiware_sp = None
+
     # Send valid entities to translator
     with CrateTranslatorInstance() as trans:
-        trans.insert([payload])
+        trans.insert([payload], fiware_s, fiware_sp)
 
     msg = 'Notification successfully processed'
     logger.info(msg)
@@ -189,30 +200,28 @@ def config():
     raise NotImplementedError
 
 
-def subscribe(orionUrl,
-              quantumleapUrl,
-              entityType=None,
-              idPattern=".*",
-              attributes=None,
-              fiwareService=None,
-              fiwareServicepath=None):
+def subscribe(orion_url,
+              quantumleap_url,
+              entity_type=None,
+              id_pattern=".*",
+              attributes=None):
     # Validate Orion
     try:
-        r = requests.get(orionUrl)
+        r = requests.get(orion_url)
     except RequestException:
         r = None
     if r is None or not r.ok:
         msg = "Orion is not reachable by QuantumLeap at {}. " \
-              "Fix your orionUrl.".format(orionUrl)
+              "Fix your orionUrl.".format(orion_url)
         return msg, 412
 
     # Prepare subscription
     subscription = {
-        "description": "Created by QuantumLeap {}.".format(quantumleapUrl),
+        "description": "Created by QuantumLeap {}.".format(quantumleap_url),
         "subject": {
             "entities": [
               {
-                "idPattern": idPattern,
+                "idPattern": id_pattern,
               }
             ],
             "condition": {
@@ -221,27 +230,32 @@ def subscribe(orionUrl,
           },
         "notification": {
             "http": {
-              "url": "{}/notify".format(quantumleapUrl)
+              "url": "{}/notify".format(quantumleap_url)
             },
             "attrs": attributes.split(',') if attributes else [],
             "metadata": ["dateCreated", "dateModified"],
         },
         "throttling": 1,
     }
-    if entityType:
-        subscription['subject']['entities'][0]['type'] = entityType
+    if entity_type:
+        subscription['subject']['entities'][0]['type'] = entity_type
 
     # Send subscription
-    endpoint = '{}/subscriptions'.format(orionUrl)
+    endpoint = '{}/subscriptions'.format(orion_url)
     data = json.dumps(subscription)
-    headers = {'Content-Type': 'application/json'}
-    if fiwareService:
-        headers['fiware-service'] = fiwareService
-    if fiwareServicepath:
-        headers['fiware-servicepath'] = fiwareServicepath
-    r = requests.post(endpoint, data=data, headers=headers)
 
+    headers = {'Content-Type': 'application/json'}
+    fiware_s = request.headers.get('fiware-service', None)
+    if fiware_s:
+        headers['fiware-service'] = fiware_s
+
+        fiware_sp = request.headers.get('fiware-servicepath', None)
+        if fiware_sp:
+            headers['fiware-servicepath'] = fiware_sp
+
+    r = requests.post(endpoint, data=data, headers=headers)
     if not r.ok:
         logger = logging.getLogger(__name__)
         logger.debug("subscribing to {} with headers: {} and data: {}")
+
     return r.text, r.status_code
