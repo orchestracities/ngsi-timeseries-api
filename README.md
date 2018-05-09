@@ -7,7 +7,8 @@
 
 ## Introduction
 
-QuantumLeap is an API that supports the storage of [FIWARE NGSIv2](http://docs.orioncontextbroker.apiary.io/#) data into a [time series database](https://en.wikipedia.org/wiki/Time_series_database).
+QuantumLeap is an API that supports the storage of [FIWARE NGSIv2](http://docs.orioncontextbroker.apiary.io/#)
+data into a [time series database](https://en.wikipedia.org/wiki/Time_series_database).
 
 Want to know more? Head to the [docs](https://smartsdk.github.io/ngsi-timeseries-api/).
 
