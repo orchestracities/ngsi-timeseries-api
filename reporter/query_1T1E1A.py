@@ -71,5 +71,4 @@ def query_1T1E1A_value(*args, **kwargs):
     if isinstance(res, dict) and 'data' in res:
         res['data'].pop('entityId')
         res['data'].pop('attrName')
-        return res
     return res
