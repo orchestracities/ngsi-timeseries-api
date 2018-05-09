@@ -62,5 +62,4 @@ def test_integration_with_orion(clean_mongo, clean_crate, entity):
 
     # Query WITHOUT headers
     r = requests.get(url, params=query_params)
-    assert r.status_code == 200, r.text
-    assert r.text == ''
+    assert r.status_code == 404, r.text

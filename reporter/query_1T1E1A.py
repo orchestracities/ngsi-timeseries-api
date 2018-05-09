@@ -17,6 +17,13 @@ def query_1T1E1A(attr_name,   # In Path
     See /entities/{entityId}/attrs/{attrName} in API Specification
     quantumleap.yml
     """
+    if type_ is None:
+        r = {
+            "error": "Not Implemented",
+            "description": "For now, you must always specify entity type."
+        }
+        return r, 400
+
     if options or aggr_period:
         import warnings
         warnings.warn("Unimplemented query parameters: options, aggrPeriod")
@@ -52,10 +59,17 @@ def query_1T1E1A(attr_name,   # In Path
         }
         return res
 
+    r = {
+        "error": "Not Found",
+        "description": "No records were found for such query."
+    }
+    return r, 404
+
 
 def query_1T1E1A_value(*args, **kwargs):
     res = query_1T1E1A(*args, **kwargs)
-    if res:
+    if isinstance(res, dict) and 'data' in res:
         res['data'].pop('entityId')
         res['data'].pop('attrName')
+        return res
     return res

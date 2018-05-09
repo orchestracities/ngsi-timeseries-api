@@ -259,3 +259,27 @@ def test_1T1E1A_values_defaults(reporter_dataset):
         }
     }
     assert r.json() == expected_data
+
+
+def test_not_found():
+    query_params = {
+        'type': entity_type,
+    }
+    r = requests.get(query_url(), params=query_params, headers=HEADERS)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "Not Found",
+        "description": "No records were found for such query."
+    }
+
+
+def test_tmp_no_type():
+    """
+    For now specifying entity type is mandatory
+    """
+    r = requests.get(query_url(), params={}, headers=HEADERS)
+    assert r.status_code == 400, r.text
+    assert r.json() == {
+        "error": "Not Implemented",
+        "description": "For now, you must always specify entity type."
+    }

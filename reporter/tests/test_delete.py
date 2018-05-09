@@ -44,9 +44,7 @@ def test_delete_entity(translator):
 
     # Values are gone
     r = requests.get(url, params=params)
-    # TODO: Update query API to use 404 in these cases
-    assert r.status_code == 200, r.text
-    assert r.text == ''
+    assert r.status_code == 404, r.text
 
     # But not for other entities of same type
     url = '{}/entities/{}'.format(QL_URL, entity_type+'1')
@@ -83,12 +81,40 @@ def test_delete_entities(translator):
     for e in range(2):
         url = '{}/entities/{}'.format(QL_URL, '{}{}'.format(entity_type, e))
         r = requests.get(url, params=params)
-        # TODO: Update query API to use 404 in these cases
-        assert r.status_code == 200, r.text
-        assert r.text == ''
+        assert r.status_code == 404, r.text
 
     # But not for entities of other types
     url = '{}/entities/{}'.format(QL_URL, 'Room1')
     r = requests.get(url, params={'type': 'Room'})
     assert r.status_code == 200, r.text
     assert r.text != ''
+
+
+def test_not_found():
+    entity_type = "AirQualityObserved"
+    params = {
+        'type': entity_type,
+    }
+    url = '{}/entities/{}'.format(QL_URL, entity_type+'0')
+
+    r = requests.delete(url, params=params)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "Not Found",
+        "description": "No records were found for such query."
+    }
+
+
+def test_tmp_no_type():
+    """
+    For now specifying entity type is mandatory
+    """
+    entity_type = "TrafficFlowObserved"
+    url = '{}/entities/{}'.format(QL_URL, entity_type+'0')
+    r = requests.delete(url, params={})
+
+    assert r.status_code == 400, r.text
+    assert r.json() == {
+        "error": "Not Implemented",
+        "description": "For now, you must always specify entity type."
+    }
