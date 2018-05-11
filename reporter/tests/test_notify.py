@@ -141,9 +141,9 @@ def do_integration(entity, notify_url, orion_client, crate_translator):
     assert entities[0]['type'] == entity['type']
     assert entities[0]['temperature'] == entity['temperature']
 
-    # Orion is notifying pressure when we only requested temperature.
-    # Uncomment following lines when issue is solved in
-    # https://github.com/telefonicaid/fiware-orion/issues/3159
+    # TODO: Uncomment following lines when issue being investigated is solved.
+    # Probably not a problem with orion notification but rather a wrong cleanup
+    # of orion after tests.
     # entities[0].pop(CrateTranslator.TIME_INDEX_NAME)
     # entity.pop('pressure')
     # assert_ngsi_entity_equals(entities[0], entity)
