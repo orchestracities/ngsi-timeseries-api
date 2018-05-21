@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+docker build -t quantumleap ../../
+
 docker-compose up -d
 sleep 10
 

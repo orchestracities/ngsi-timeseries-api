@@ -25,5 +25,3 @@ def clean_mongo():
 def orion_client():
     client = OrionClient(ORION_HOST, ORION_PORT)
     yield client
-
-

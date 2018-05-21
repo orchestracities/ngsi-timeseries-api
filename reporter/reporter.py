@@ -165,39 +165,75 @@ def add_geodata(entity):
 
 
 def query_1TNE1A():
-    raise NotImplementedError
+    r = {
+        "error": "Not Implemented",
+        "description": "This API method is not yet implemented."
+    }
+    return r, 400
 
 
 def query_1TNE1A_value():
-    raise NotImplementedError
+    r = {
+        "error": "Not Implemented",
+        "description": "This API method is not yet implemented."
+    }
+    return r, 400
 
 
 def query_1TNENA():
-    raise NotImplementedError
+    r = {
+        "error": "Not Implemented",
+        "description": "This API method is not yet implemented."
+    }
+    return r, 400
 
 
 def query_1TNENA_value():
-    raise NotImplementedError
+    r = {
+        "error": "Not Implemented",
+        "description": "This API method is not yet implemented."
+    }
+    return r, 400
 
 
 def query_NTNE1A():
-    raise NotImplementedError
+    r = {
+        "error": "Not Implemented",
+        "description": "This API method is not yet implemented."
+    }
+    return r, 400
 
 
 def query_NTNE1A_value():
-    raise NotImplementedError
+    r = {
+        "error": "Not Implemented",
+        "description": "This API method is not yet implemented."
+    }
+    return r, 400
 
 
 def query_NTNENA():
-    raise NotImplementedError
+    r = {
+        "error": "Not Implemented",
+        "description": "This API method is not yet implemented."
+    }
+    return r, 400
 
 
 def query_NTNENA_value():
-    raise NotImplementedError
+    r = {
+        "error": "Not Implemented",
+        "description": "This API method is not yet implemented."
+    }
+    return r, 400
 
 
 def config():
-    raise NotImplementedError
+    r = {
+        "error": "Not Implemented",
+        "description": "This API method is not yet implemented."
+    }
+    return r, 400
 
 
 def subscribe(orion_url,

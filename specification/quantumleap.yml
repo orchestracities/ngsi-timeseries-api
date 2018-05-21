@@ -300,7 +300,9 @@ paths:
   /config:
     post:
       operationId: reporter.reporter.config
-      summary: "Customize your persistance configuration to better suit your
+      summary: "(To Be Implemented) Customize your persistance configuration to
+      better suit
+      your
       needs."
       description: ""
       parameters:
@@ -459,6 +461,21 @@ paths:
                     "values": [24.1, 25.3, 26.7]
                   }
               }
+        404:
+          description: "Not Found"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              description:
+                type: string
+          examples:
+            application/json:
+              {
+                "error": "Not Found",
+                "description": "No records were found for such query."
+              }
 
   /entities/{entityId}/attrs/{attrName}/value:
     get:
@@ -503,7 +520,21 @@ paths:
                     "values": [24.1, 25.3, 26.7]
                   }
               }
-
+        404:
+          description: "Not Found"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              description:
+                type: string
+          examples:
+            application/json:
+              {
+                "error": "Not Found",
+                "description": "No records were found for such query."
+              }
 
   /entities/{entityId}:
     get:
@@ -565,6 +596,58 @@ paths:
                   ]
                 }
               }
+        404:
+          description: "Not Found"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              description:
+                type: string
+          examples:
+            application/json:
+              {
+                "error": "Not Found",
+                "description": "No records were found for such query."
+              }
+    delete:
+      operationId: reporter.delete.delete_entity
+      summary: "Delete historical data of a certain entity."
+      description: "Given an entity (with type and id), delete all its
+      historical records."
+      tags:
+        - input
+      parameters:
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
+        # In Path...
+        - $ref: '#/parameters/entityIdInPath'
+        # In Query...
+        - $ref: '#/parameters/type'
+        - $ref: '#/parameters/fromDate'
+        - $ref: '#/parameters/toDate'
+      responses:
+        204:
+          description: "Records successfully deleted."
+          schema:
+            type: string
+        404:
+          description: "Not Found"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              description:
+                type: string
+          examples:
+            application/json:
+              {
+                "error": "Not Found",
+                "description": "No records were found for such query."
+              }
 
   /entities/{entityId}/value:
     get:
@@ -625,12 +708,28 @@ paths:
                   ]
                 }
               }
+        404:
+          description: "Not Found"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              description:
+                type: string
+          examples:
+            application/json:
+              {
+                "error": "Not Found",
+                "description": "No records were found for such query."
+              }
 
 
   /types/{entityType}/attrs/{attrName}:
     get:
       operationId: reporter.reporter.query_1TNE1A
-      summary: "History of an attribute of N entities of the same type."
+      summary: "(To Be Implemented) History of an attribute of N entities of
+       the same type."
       description: "For example, query the average pressure of this month in
       all the weather stations."
       tags:
@@ -697,8 +796,8 @@ paths:
   /types/{entityType}/attrs/{attrName}/value:
     get:
       operationId: reporter.reporter.query_1TNE1A_value
-      summary: "History of an attribute (values only) of N entities of the
-      same type."
+      summary: "(To Be Implemented) History of an attribute (values only) of N
+      entities of the same type."
       description: "For example, query the average pressure (values only,
       no metadata) of this month in all the weather stations."
       tags:
@@ -759,7 +858,8 @@ paths:
   /types/{entityType}:
     get:
       operationId: reporter.reporter.query_1TNENA
-      summary: "History of N attributes of N entities of the same type."
+      summary: "(To Be Implemented) History of N attributes of N entities of
+      the same type."
       description: "For example, query the average pressure, temperature and
       humidity of this month in all the weather stations."
       tags:
@@ -847,13 +947,34 @@ paths:
                   ]
                 }
               }
+    delete:
+      operationId: reporter.delete.delete_entities
+      summary: "Delete historical data of all entities of a certain type."
+      description: "Given an entity type, delete all the historical records of
+      all entities of such type."
+      tags:
+        - input
+      parameters:
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
+        # In Path...
+        - $ref: '#/parameters/entityTypeInPath'
+        # In Query...
+        - $ref: '#/parameters/fromDate'
+        - $ref: '#/parameters/toDate'
+      responses:
+        204:
+          description: "Records successfully deleted."
+        # What if no entities were found?
+        # Shall we return number of deleted records?
 
 
   /types/{entityType}/value:
     get:
       operationId: reporter.reporter.query_1TNENA_value
-      summary: "History of N attributes (values only) of N entities of the same
-      type."
+      summary: "(To Be Implemented) History of N attributes (values only) of N
+      entities of the same type."
       description: "For example, query the average pressure, temperature and
       humidity (values only, no metadata) of this month in all the weather
       stations."
@@ -946,7 +1067,8 @@ paths:
   /attrs/{attrName}:
     get:
       operationId: reporter.reporter.query_NTNE1A
-      summary: "History of an attribute of N entities of N types."
+      summary: "(To Be Implemented) History of an attribute of N entities of N
+      types."
       description: "For example, query the average temperature of this month
       in all the devices capable of measuring temperature. In this case, you
       are responsible for providing entity types which contain the attrName."
@@ -1040,7 +1162,8 @@ paths:
   /attrs/{attrName}/value:
     get:
       operationId: reporter.reporter.query_NTNE1A_value
-      summary: "History of an attribute (values only) of N entities of N types."
+      summary: "(To Be Implemented) History of an attribute (values only) of N
+      entities of N types."
       description: "For example, query the average temperature (values only, no
       metadata) of this month in all the devices capable of measuring
       temperature. In this case, you are reponsible for providing entity types
@@ -1134,7 +1257,8 @@ paths:
   /attrs:
     get:
       operationId: reporter.reporter.query_NTNENA
-      summary: "History of N attributes of N entities of N types."
+      summary: "(To Be Implemented) History of N attributes of N entities of N
+      types."
       description: "This is sort of a query all. The response will likely not
       fit into a single response so an efficient paging mechanism and sensible
       defaults will be required."
@@ -1237,7 +1361,8 @@ paths:
   /attrs/value:
     get:
       operationId: reporter.reporter.query_NTNENA_value
-      summary: "History of N attributes (values only) of N entities of N types."
+      summary: "(To Be Implemented) History of N attributes (values only) of N
+      entities of N types."
       description: "This is sort of a query all. The response will likely not
       fit into a single response so an efficient paging mechanism and sensible
       defaults will be required."

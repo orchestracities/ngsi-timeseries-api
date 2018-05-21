@@ -498,6 +498,77 @@ class CrateTranslator(BaseTranslator):
         return statistics.mean(values)
 
 
+    def delete_entity(self, entity_id, entity_type=None, from_date=None,
+                      to_date=None, fiware_service=None,
+                      fiware_servicepath=None):
+        if not entity_type:
+            msg = "For now you must specify entity type"
+            raise NotImplementedError(msg)
+
+        # First delete entries from table
+        table_name = self._et2tn(entity_type, fiware_service)
+        where_clause = self._get_where_clause(entity_id,
+                                              from_date,
+                                              to_date,
+                                              fiware_servicepath)
+        op = "delete from {} {}".format(table_name, where_clause)
+
+        try:
+            self.cursor.execute(op)
+        except ProgrammingError as e:
+            logging.debug("{}".format(e))
+            return 0
+
+        return self.cursor.rowcount
+
+
+    def delete_entities(self, entity_type, from_date=None, to_date=None,
+                        fiware_service=None, fiware_servicepath=None):
+        table_name = self._et2tn(entity_type, fiware_service)
+
+        # Delete only requested range
+        if from_date or to_date or fiware_servicepath:
+            entity_id = None
+            where_clause = self._get_where_clause(entity_id,
+                                                  from_date,
+                                                  to_date,
+                                                  fiware_servicepath)
+            op = "delete from {} {}".format(table_name, where_clause)
+            try:
+                self.cursor.execute(op)
+            except ProgrammingError as e:
+                logging.debug("{}".format(e))
+                return 0
+            return self.cursor.rowcount
+
+        # Drop whole table
+        try:
+            self.cursor.execute("select count(*) from {}".format(table_name))
+        except ProgrammingError as e:
+            logging.debug("{}".format(e))
+            return 0
+        count = self.cursor.fetchone()[0]
+
+        op = "drop table {}".format(table_name)
+        try:
+            self.cursor.execute(op)
+        except ProgrammingError as e:
+            logging.debug("{}".format(e))
+            return 0
+
+        # Delete entry from metadata table
+        op = "delete from {} where 'table_name' = '{}'".format(
+            METADATA_TABLE_NAME, table_name
+        )
+        try:
+            self.cursor.execute(op)
+        except ProgrammingError as e:
+            # What if this one fails and previous didn't?
+            logging.debug("{}".format(e))
+
+        return count
+
+
 @contextmanager
 def CrateTranslatorInstance():
     DB_HOST = os.environ.get('CRATE_HOST', 'crate')
