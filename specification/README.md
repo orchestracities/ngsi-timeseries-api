@@ -16,3 +16,5 @@ and open your browser to here:
 ```
 http://0.0.0.0:8668/v2/ui/
 ```
+
+Or, go to your QuantumLeap deployment to the `/v2/ui` endpoint.
