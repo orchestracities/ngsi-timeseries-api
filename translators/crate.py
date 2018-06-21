@@ -230,7 +230,8 @@ class CrateTranslator(BaseTranslator):
 
             # Now create data table
             columns = ', '.join('{} {}'.format(cn, ct) for cn, ct in table.items())
-            stmt = "create table if not exists {} ({})".format(tn, columns)
+            stmt = "create table if not exists {} ({}) with " \
+                   "(number_of_replicas = '2-all')".format(tn, columns)
             self.cursor.execute(stmt)
 
         # Update metadata if necessary
@@ -302,7 +303,8 @@ class CrateTranslator(BaseTranslator):
             The content of METADATA_TABLE_NAME.
         """
         stmt = ("create table if not exists {} "
-                "(table_name string primary key, entity_attrs object)")
+                "(table_name string primary key, entity_attrs object) with "
+                "(number_of_replicas = '2-all')")
         self.cursor.execute(stmt.format(METADATA_TABLE_NAME))
         if self.cursor.rowcount:  # i.e, table just created
             return {}
