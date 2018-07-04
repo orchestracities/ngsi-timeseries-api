@@ -149,28 +149,52 @@
             <div class="section">
               
                 <h1 id="grafana">Grafana</h1>
-<p><a href="https://grafana.com/"><strong>Grafana</strong></a> is a powerful visualization tool that we can use to display graphics of the persisted data.</p>
-<p>In order to read data from a <a href="../crate/">Crate</a> database, grafana leverages on the <a href="https://grafana.com/plugins/crate-datasource">Grafana Datasource Plugin for CrateDB</a>.</p>
-<p>If you followed the <a href="../">Installation Guide</a>, you have already Grafana running in a Docker container, with the aforementioned plugin already installed.</p>
-<p>For now, crate data sources are restricted to a single table, and Quantum leap creates one table per entity type; hence, you'll have to create one data source per entity type. If this is a problem/limitation for you, open an issue in quantumleap's repo and we can see how to work around.</p>
+<p><a href="https://grafana.com/"><strong>Grafana</strong></a> is a powerful visualisation tool that we
+can use to display graphics of the persisted data.</p>
+<p>In order to read data from a <a href="../crate/">Crate</a> database, grafana leverages on
+the <a href="https://grafana.com/plugins/crate-datasource">Grafana Datasource Plugin for CrateDB</a>.</p>
+<p>If you followed the <a href="../">Installation Guide</a>, you have already Grafana
+running in a Docker container, with the crate-datasource plugin already
+installed.</p>
+<p>For now, crate data sources are restricted to a single table, and Quantum leap
+creates one table per entity type; hence, you'll have to create one data source
+per entity type. If this is a problem/limitation for you, <a href="https://github.com/smartsdk/ngsi-timeseries-api/issues">open an issue in
+quantumleap's repo</a>
+and we can see how to work this out.</p>
 <h2 id="configuring-the-datasource">Configuring the DataSource</h2>
-<p>Explore your deployed grafana instance (e.g http://localhost:3000). If you didn't change the defaults, <em>admin/admin</em> are the default credentials.</p>
-<p>Go to <em>Add data source</em> and fill in the required fields, with the following observations:</p>
+<p>Explore your deployed grafana instance (e.g http://localhost:3000). If you
+didn't change the defaults credentials, use <code>admin</code> as both user and password.</p>
+<p>Go to <em>Add data source</em> and fill in the required fields, with the following
+observations:</p>
 <ul>
-<li><strong>Name</strong>: This is the name you want for the Datasource. We recommend naming it after the entity type (i.e, the table you will connect to).</li>
-<li><strong>Type</strong>: Use <code>Crate</code>. If you don't see <code>Crate</code>, check your installation of the datasource plugin.</li>
+<li><strong>Name</strong>: This is the name you want for the Datasource. We recommend naming
+it after the entity type (i.e, the table you will connect to).</li>
+<li><strong>Type</strong>: Use <code>Crate</code>. If you don't see <code>Crate</code> as an option, check your
+installation of the datasource plugin in the container.</li>
 <li><strong>Url</strong>: The full url where cratedb was deployed.</li>
-<li><strong>Access</strong>: Use <code>direct</code> if you're deploying everything locally. If you are deploying crate behind a proxy (as in the case of <a href="../">HA deployment</a>), choose the <code>proxy</code> option instead.</li>
-<li><strong>Schema</strong>: The schema where the table is defined. By default in crate use <code>doc</code>.</li>
-<li><strong>Table</strong>: The name of the table of the entity. See the <a href="../../user/">Data Retrieval</a> section to know how table names are defined.</li>
-<li><strong>Time column</strong>: The name of the column used as time index. By default is 'time_index', as explained in the <a href="../../user/">The Time Index</a> section.</li>
+<li><strong>Access</strong>: Use <code>direct</code> if you're deploying everything locally. If you are
+deploying crate behind a proxy (as in the case of <a href="../">HA deployment</a>),
+choose the <code>proxy</code> option instead.</li>
+<li><strong>Schema</strong>: The schema where the table is defined. By default, crate uses
+<code>doc</code> schema, but if you are using multi-tenancy headers, the schema will be
+defined by the tenant of the entity type. More info in the
+<a href="../../user/#multi-tenancy">Multi-tenancy section</a>.</li>
+<li><strong>Table</strong>: The name of the table of the entity. See the <a href="../../user/#data-retrieval">Data Retrieval</a> section to know how table names are
+defined.</li>
+<li><strong>Time column</strong>: The name of the column used as time index. By default, it is <code>time_index</code>, as explained in the <a href="../../user/##data-retrieval">Time Index</a>
+ section.</li>
 </ul>
-<p>Image below as an example
-<img alt="alt text" src="../../rsrc/crate_datasource.png" title="Crate Datasource Config" /></p>
+<p>The following image shows an example of the datasource configuration for an
+entity type called <em>yourentity</em>
+<img alt="alt text" src="../../rsrc/crate_datasource.png" title="Configuring the DataSource" /></p>
 <h2 id="using-the-datasource-in-your-graph">Using the DataSource in your Graph</h2>
-<p>Having your datasource setup, you can start using it in the different visualization widgets.</p>
-<p>The following is an example of a Graph using a Crate datasource. Note the selection of the datasource (called CrateDB in this case), as well as the specification of the table in the <em>from</em> field. Note that the table is referenced as <em>schema.tablename</em> (e.g: <em>doc.etairqualityobserved</em>)</p>
-<p><img alt="alt text" src="../../rsrc/graph_example.png" title="Crate Datasource Usage Example" /></p>
+<p>Having your datasource setup, you can start using it in the different
+visualisation widgets.</p>
+<p>The following is an example of a Graph using a Crate datasource. Note the
+selection of the datasource (called CrateDB in this case), as well as the
+specification of the table in the <em>from</em> field. Note that the table is
+referenced as <em>schema.tablename</em> (e.g: <em>doc.etairqualityobserved</em>)</p>
+<p><img alt="alt text" src="../../rsrc/graph_example.png" title="Using the DataSource in your Graph" /></p>
               
             </div>
           </div>

@@ -2,42 +2,42 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
      <loc>/</loc>
-     <lastmod>2018-06-21</lastmod>
+     <lastmod>2018-07-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>/user/</loc>
-     <lastmod>2018-06-21</lastmod>
+     <lastmod>2018-07-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>/user/troubleshooting/</loc>
-     <lastmod>2018-06-21</lastmod>
+     <lastmod>2018-07-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>/user/contributing/</loc>
-     <lastmod>2018-06-21</lastmod>
+     <lastmod>2018-07-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>/admin/</loc>
-     <lastmod>2018-06-21</lastmod>
+     <lastmod>2018-07-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>/admin/ports/</loc>
-     <lastmod>2018-06-21</lastmod>
+     <lastmod>2018-07-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>/admin/crate/</loc>
-     <lastmod>2018-06-21</lastmod>
+     <lastmod>2018-07-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>/admin/grafana/</loc>
-     <lastmod>2018-06-21</lastmod>
+     <lastmod>2018-07-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
 </urlset>

@@ -70,7 +70,9 @@
     
         <ul>
         
-            <li><a class="toctree-l4" href="#nothing-happens">Nothing Happens</a></li>
+            <li><a class="toctree-l4" href="#nothing-happens">Nothing happens</a></li>
+        
+            <li><a class="toctree-l4" href="#cannot-retrieve-data">Cannot retrieve data</a></li>
         
             <li><a class="toctree-l4" href="#bug-reporting">Bug reporting</a></li>
         
@@ -149,45 +151,78 @@
             <div class="section">
               
                 <h1 id="troubleshooting">Troubleshooting</h1>
-<p>Something not working as expected? Don't worry! the expected thing is for it not to work :p.</p>
-<p>Checkout the following section to make sure you didn't miss a critical step, and if none of that applies to your case, then refer to the <strong>Bug Reporting</strong> section.</p>
-<h2 id="nothing-happens">Nothing Happens</h2>
-<p>If you don't see your data being saved in the database, before reporting a bug please ask yourself the following questions:</p>
+<p>Something not working as expected? Don't worry! the expected thing is for it
+not to work :p.</p>
+<p>Checkout the following section to make sure you didn't miss a critical step,
+and if none of that applies to your case, then refer to the <strong>Bug reporting</strong>
+section.</p>
+<h2 id="nothing-happens">Nothing happens</h2>
+<p>If you don't see your data being saved in the database, before reporting a bug
+please ask yourself the following questions:</p>
 <ul>
 <li>
-<p>Have you created a subscription for the entity type you are inserting?</p>
+<p>Have you created a subscription for the entity type you are inserting? Is
+the subscription NGSIv2 and WITHOUT the "keyValues" option?. Review the <a href="https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions">Orion Subscriptions Docs</a>.</p>
 </li>
 <li>
-<p>Are you inserting/updating attributes listed in the "condition" of the subscription? I.e, will Orion trigger notifications for that insert/update?</p>
+<p>Are you inserting/updating attributes listed in the "condition" of the
+subscription? I.e, will Orion trigger notifications for that insert/update?</p>
 </li>
 <li>
-<p>Is the location of QuantumLeap expressed in the <em>notify_url</em> field of the subscription a resolvable url for the conteinerized Orion? Review the <a href="../">Usage Section</a> for more details.</p>
+<p>Can you see such subscription if you query Orion subscriptions? When is its
+"last_success"?</p>
 </li>
 <li>
-<p>Are you running the different components behind firewalls? If so, did you open the corresponding ports? (See the <a href="../../admin/ports/">Ports</a> section.)</p>
+<p>Is the location of QuantumLeap expressed in the <em>notify_url</em> field of the
+subscription a resolvable url for the containerised Orion? Review the <a href="../">Usage Section</a> for more details.</p>
+</li>
+<li>
+<p>Are you running the different components behind firewalls? If so, did you
+open the corresponding ports? (See the <a href="../../admin/ports/">Ports</a> section.)</p>
+</li>
+</ul>
+<h2 id="cannot-retrieve-data">Cannot retrieve data</h2>
+<ul>
+<li>
+<p>Are you using the correct FIWARE headers for the tenant? Refer to the <a href="../#multi-tenancy">Multi-tenancy</a>
+part of the docs.</p>
+</li>
+<li>
+<p>Is the endpoint you are using implemented? Note for now some of them are not.
+These are flagged in the API specification.</p>
+</li>
+<li>
+<p>Have a look at the message in the returned body for hints of what could have
+gone wrong. You may be missing an important parameter in your request.</p>
 </li>
 </ul>
 <h2 id="bug-reporting">Bug reporting</h2>
-<p>Bugs should be reported in the form of <a href="https://github.com/smartsdk/ngsi-timeseries-api/issues">issues</a> in the github repository.</p>
+<p>Bugs should be reported in the form of <a href="https://github.com/smartsdk/ngsi-timeseries-api/issues">issues</a> in the github
+repository.</p>
 <p>Please, look through the open issues before opening a repeated one :)</p>
 <p>Include as much context info as possible, also ideally the following things:</p>
 <ul>
 <li>
 <p>The inserted entity that may have caused the problem. E.g:</p>
 <pre><code>{
-    'id': 'Room1',
-    'type': 'Room',
+    'id': 'MyEntityId',
+    'type': 'MyEntityType',
     'attr1': 'blabla',
     ...
 }
 </code></pre>
 </li>
 <li>
-<p>The payload of the subscription(s) that you created.</p>
+<p>The payload of the subscription(s) that you created. See <a href="https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions">this section</a>
+of Orion documentation.</p>
 </li>
 <li>
 <p>The logs of the QuantumLeap container.</p>
-<p>The logs can be retrieved with the <em><a href="https://docs.docker.com/engine/reference/commandline/logs/#options">docker logs command</a></em> or <em><a href="https://docs.docker.com/engine/reference/commandline/service_logs/">docker service logs</a></em> if you deployed QL as a service on Swarm. In the first case, you can discover the container id with <em><a href="">docker ps -a</a></em>.</p>
+<p>The logs can be retrieved with the <a href="https://docs.docker.com/engine/reference/commandline/logs/#options">docker logs command</a>
+or <a href="https://docs.docker.com/engine/reference/commandline/service_logs/">docker service logs</a>
+if you deployed QL as a service. In the first case, you can discover the
+container id with <code>docker ps -a</code>. In the second case, use
+<code>docker service ls</code> to find the service name.</p>
 </li>
 </ul>
               

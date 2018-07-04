@@ -73,7 +73,10 @@
     <li class="toctree-l3"><a href="#contributions">Contributions</a></li>
     
 
-    <li class="toctree-l3"><a href="#development-setup-and-structure">Development Setup and Structure</a></li>
+    <li class="toctree-l3"><a href="#development-setup">Development Setup</a></li>
+    
+
+    <li class="toctree-l3"><a href="#repository-structure">Repository Structure</a></li>
     
 
     </ul>
@@ -145,23 +148,32 @@
               
                 <h2 id="contributions">Contributions</h2>
 <p>Contributions are more than welcome in the form of pull requests.</p>
-<p>You can either pick one of the open issues to work on, or provide enhancements according to your own needs. In any case, we suggest getting in touch beforehand to make sure the contribution will be aligned with the current development status.</p>
+<p>You can either pick one of the <a href="https://github.com/smartsdk/ngsi-timeseries-api/issues">open issues</a>
+to work on, or provide enhancements according to your own needs. In any case,
+we suggest getting in touch beforehand to make sure the contribution will be
+aligned with the current development status.</p>
 <p>To contribute:</p>
 <ol>
 <li>Fork the repository and clone the fork to your local development environment</li>
-<li>Identify a modular contribution to the code (avoid too large contributions to simplify review)</li>
-<li>Create a branch in your repository where you tackle the "modular contributions"</li>
-<li>For multiple contributions tackling different functionalities, create different branches</li>
-<li>For all the new functionalities provide tests (see <code>setup_dev_env.sh</code> and <code>run.sh</code> in the root to understand how tests can be run locally)</li>
+<li>Identify a modular contribution to the code (avoid too large contributions
+    to simplify review)</li>
+<li>Create a branch in your repository where you tackle the "modular
+contributions"</li>
+<li>For multiple contributions tackling different functionalities, create
+   different branches</li>
+<li>For all the new functionalities provide tests (see <code>setup_dev_env.sh</code>
+   and <code>run.sh</code> in the root to understand how tests can be run locally)</li>
 <li>When done, verify that all tests are passing</li>
-<li>If so, create a pull request against our repository (we cannot review pull requests with failing tests)</li>
+<li>If so, create a pull request against our repository (we cannot review pull
+   requests with failing tests)</li>
 <li>Wait for the review</li>
 <li>Implement required changes</li>
-<li>repeat until approval</li>
+<li>Repeat until approval</li>
 <li>Done :) You can delete the branch in your repository.</li>
 </ol>
-<h2 id="development-setup-and-structure">Development Setup and Structure</h2>
-<p>The development is mostly python3 based for now, and really in the early stages so things will change for sure. For now, you can start with:</p>
+<h2 id="development-setup">Development Setup</h2>
+<p>The development is mostly in <em>python3</em> for now, and really in the early stages
+so things will change for sure. For now, you can start with:</p>
 <pre><code>git clone https://github.com/smartsdk/ngsi-timeseries-api.git
 cd ngsi-timeseries-api
 python3 -m venv env
@@ -170,17 +182,32 @@ pip install -r requirements.txt
 # if you want to test everything locally, you'll need to...
 source setup_dev_env.sh
 </code></pre>
-<p>Pytest is used as the testing framework, but since most of QL's functionality is integration of components, you'll find <code>docker-compose.yml</code> files in the test folders to be run as a setup for tests. If you see <code>.travis.yml</code> file you'll see how they are running today, but probably at some point it's worth exploring pytest-docker plugins.</p>
-<p>The <code>requirements.txt</code> still needs to be split between testing and production, that's why the docker image is massive for now.</p>
-<p>In the file tree structure you can find (to be refactored soon):</p>
+<p><a href="https://docs.pytest.org/en/latest/">pytest</a> is used as the testing framework,
+but since most of QL's functionality is integration of components, you'll find <code>docker-compose.yml</code> files in the test folders to be run as a setup for tests.
+If you see <code>.travis.yml</code> file you'll see how they are running today, but
+probably at some point it's worth exploring <em>pytest-docker</em> plugins.</p>
+<p>The <code>requirements.txt</code> still needs to be split between testing and production,
+that's also why the docker image is massive for now.</p>
+<h2 id="repository-structure">Repository Structure</h2>
+<p>In the current project tree structure you can find:</p>
 <ul>
-<li><strong>ngsi-timeseries-api</strong><ul>
-<li><strong>client</strong>: holds a simple Orion Context Broker client to ease integration testing. To be moved out of here at some point.</li>
-<li><strong>experiments</strong>: sandbox for quick manual tests to try some stuff and derive new test cases.</li>
-<li><strong>python-flask</strong> : will hold the implementation of the swagger-defined API controllers.</li>
-<li><strong>reporter</strong>: this module is acting as the receiver of the notifications, who "parses/validates" them before being handled to the translators.</li>
-<li><strong>translators</strong>: specific translators for timeseries databases.</li>
-<li><strong>utils</strong>: common shared stuff looking for a better place to live in.</li>
+<li><code>ngsi-timeseries-api</code><ul>
+<li><code>client</code>: Holds a simple Orion Context Broker client to ease integration
+testing. To be moved out of this repo.</li>
+<li><code>doc</code>: Holds documentation files.</li>
+<li><code>docker</code>: To hold docker-related files for the scope of the project.</li>
+<li><code>experiments</code>: Sandbox for quick manual tests to try some stuff and
+derive new test cases.</li>
+<li><code>geocoding</code>: Holds the code for interacting with OSM and doing
+geo-related processing.</li>
+<li><code>reporter</code>: Modules acting as the receiver of the notifications and API
+requests. It "parses/validates" them before handling tasks to the
+translators.</li>
+<li><code>specification</code>: Holds the swagger-based <em>ngsi-tsdb</em> API specification
+that QL implements.</li>
+<li><code>translators</code>: Specific translators for each time-series databases,
+responsible for interacting with the lower-level database details.</li>
+<li><code>utils</code>: Common shared stuff looking for a better place to live in.</li>
 </ul>
 </li>
 </ul>

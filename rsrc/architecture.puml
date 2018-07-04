@@ -1,0 +1,40 @@
+# Convert the following to png using http://www.gravizo.com/#converter.
+@startuml;
+skinparam componentStyle uml2
+
+!define ICONURL https://raw.githubusercontent.com/smartsdk/architecture-diagrams/master/dist
+!includeurl ICONURL/common.puml
+!includeurl ICONURL/fiware.puml
+!includeurl ICONURL/smartsdk.puml
+
+interface NGSI
+
+FIWARE(cb,"Orion \nContext Broker",component)
+
+package "IoT Layer" {
+    FIWARE(iota,"IoT Agent",component)
+}
+iota -up- NGSI
+NGSI -up- cb
+iota -up-> "2" cb
+[Client] - NGSI
+package "QuantumLeap" {
+	SMARTSDK(api,"API",component)
+	SMARTSDK(reporter,"Reporter",component)
+	SMARTSDK(translator,"Translator",component)
+	SMARTSDK(geocoder,"Geocoder",component)
+	api -up- NGSI
+	api <-down-> reporter
+	reporter <-right-> translator
+	reporter <-down-> geocoder
+
+    [Client] "1" -down-> api
+    cb "3" -down-> api
+    [Client] "4" <-down-> api
+}
+[OSM] <-down-> geocoder
+[DB Cluster] <-left-> translator
+[Grafana] <-down-> [DB Cluster]
+[Client] "5" <-> [Grafana]
+
+@enduml

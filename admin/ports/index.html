@@ -141,7 +141,9 @@
             <div class="section">
               
                 <h1 id="used-ports">Used Ports</h1>
-<p>The table below summarizes the default ports for each of the services typically used with QuantumLeap. So, if you run them behind firewalls, remember to include the corresponding rules.</p>
+<p>The table below summarises the default ports for each of the services typically
+used with QuantumLeap. So, if you run them behind firewalls, remember to
+include the corresponding rules.</p>
 <table>
 <thead>
 <tr>
@@ -163,6 +165,29 @@
 </tr>
 <tr>
 <td>TCP</td>
+<td align="center">3000</td>
+<td align="left">Grafana</td>
+</tr>
+</tbody>
+</table>
+<p>Just FYI, the following ones should not be typically exposed to the outside but
+are used within the cluster.</p>
+<table>
+<thead>
+<tr>
+<th>Protocol</th>
+<th align="center">Port</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TCP</td>
+<td align="center">27017</td>
+<td align="left">Mongo database</td>
+</tr>
+<tr>
+<td>TCP</td>
 <td align="center">4200</td>
 <td align="left">CrateDB Admin UI</td>
 </tr>
@@ -173,11 +198,13 @@
 </tr>
 <tr>
 <td>TCP</td>
-<td align="center">3000</td>
-<td align="left">Grafana</td>
+<td align="center">6379</td>
+<td align="left">Redis cache (used by geocoding)</td>
 </tr>
 </tbody>
 </table>
+<p>For more info on ports numbers, you can always inspect the ports being exposed
+in the <code>docker-compose.yml</code> files of this repo.</p>
               
             </div>
           </div>
