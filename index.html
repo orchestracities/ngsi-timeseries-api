@@ -98,6 +98,10 @@
                 </li>
                 <li class="">
                     
+    <a class="" href="admin/sanity/">Sanity Check</a>
+                </li>
+                <li class="">
+                    
     <a class="" href="admin/ports/">Ports</a>
                 </li>
                 <li class="">
@@ -150,7 +154,8 @@
 <h2 id="overview">Overview</h2>
 <p>QuantumLeap is the first implementation of an API that supports the storage of
 NGSI <a href="http://docs.orioncontextbroker.apiary.io/#">FIWARE NGSIv2</a> data into a
-<a href="https://en.wikipedia.org/wiki/Time_series_database">time-series database</a>.</p>
+<a href="https://en.wikipedia.org/wiki/Time_series_database">time-series database</a>,
+known as <a href="https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1">ngsi-tsdb</a>.</p>
 <p>In the end, it has similar goals to those of <a href="https://fiware-sth-comet.readthedocs.io/en/latest/">FIWARE's Comet STH</a>.
 However, Comet does not yet support NGSIv2, it's strongly tied to MongoDB, and
 some of the conditions and constraints under which it was developed are no
@@ -186,7 +191,8 @@ explained in the <a href="user/#orion-subscription">Orion Subscription part of t
 <strong>(2)</strong> for the entities of interest, for example from a whole <strong>IoT layer</strong>
 governed by 1 or more <a href="https://catalogue.fiware.org/enablers/backend-device-management-idas">IoT Agents</a>
 pushing data in NGSI format. Consequently, notifications will arrive to
-QuantumLeap's API <code>/v2/notify</code> endpoint <strong>(3)</strong>.</p>
+QuantumLeap's API <a href="https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1#/input/reporter.reporter.notify">/v2/notify</a>
+endpoint <strong>(3)</strong>.</p>
 <p>QuantumLeap's <strong>Reporter</strong> submodule will parse and validate the received
 notification and eventually feed it to the configured <strong>Translator</strong>. The
 Translator is ultimately responsible for persisting the NGSI information to the
@@ -260,5 +266,5 @@ for more examples of QuantumLeap usage.</li>
 
 <!--
 MkDocs version : 0.17.4
-Build Date UTC : 2018-07-04 13:52:49
+Build Date UTC : 2018-07-05 13:02:19
 -->

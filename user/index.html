@@ -104,6 +104,10 @@
                 </li>
                 <li class="">
                     
+    <a class="" href="../admin/sanity/">Sanity Check</a>
+                </li>
+                <li class="">
+                    
     <a class="" href="../admin/ports/">Ports</a>
                 </li>
                 <li class="">
@@ -159,8 +163,8 @@
                 <h1 id="using-quantumleap">Using QuantumLeap</h1>
 <p>First you need to have QuantumLeap and its complementary services running (of
 course). Refer to the <a href="../admin/">Installation Manual</a> for instructions.</p>
-<p>Then, you need to connect <em>Orion Context Broker</em> to QuantumLeap through an <a href="https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions">NGSIv2
-subscription</a>
+<p>Then, you need to connect <em>Orion Context Broker</em> to QuantumLeap through an
+<a href="https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions">NGSIv2 subscription</a>
 for each <a href="https://orioncontextbroker.docs.apiary.io/#introduction/specification/terminology">Entity Type</a>
 whose historical data you are interested in.</p>
 <p>Not an Orion expert yet? No problem, you can create the subscription through
@@ -412,7 +416,8 @@ QuantumLeap will use the <code>FIWARE-Service</code> as the <a href="">database 
 with a specific prefix. This way, if you insert an entity of type <code>Room</code> in the
 using the <code>Fiware-Service: magic</code> header, you should expect to find your table
 at <code>mtmagic.etroom</code>. This information is also useful for example if you are
-configuring the Grafana datasource, as explained in the <a href="../admin/grafana/">Grafana section</a> of the docs.</p>
+configuring the Grafana datasource, as explained in the
+<a href="../admin/grafana/">Grafana section</a> of the docs.</p>
 <h2 id="geocoding">GeoCoding</h2>
 <p>This is an optional and experimental feature of QuantumLeap, which helps
 harmonising the way location information is stored in the historical records.</p>
@@ -427,8 +432,9 @@ will represent the street (if any) or the city boundaries (if any) or even the
 country boundaries. In these cases the generated location will be of the
 <code>geo:json</code> form and will contain the values of such shape.</p>
 <p><strong>WARNING:</strong> This feature uses <a href="https://www.openstreetmap.org">OpenStreetMap</a>
-and its Nominatim service. As such, you need to be aware of its <a href="https://www.openstreetmap.org/copyright">copyright notes</a> and most importantly of their
-Usage Policies (<a href="https://operations.osmfoundation.org/policies/api/">API Usage Policy</a>
+and its Nominatim service. As such, you need to be aware of its
+<a href="https://www.openstreetmap.org/copyright">copyright notes</a> and most importantly
+of their Usage Policies (<a href="https://operations.osmfoundation.org/policies/api/">API Usage Policy</a>
 , <a href="https://operations.osmfoundation.org/policies/nominatim/">Nominatim Usage Policy</a>
 You should not abuse of this free service and you should cache your requests.
 This is why you need to specify a cache in order to enable the geocoding.
@@ -436,7 +442,8 @@ QuantumLeap uses <a href="https://redis.io/">Redis</a>.</p>
 <p>So, to enable this feature, you need to pass (at initialisation time) to the
 QuantumLeap container the environment variable <code>USE_GEOCODING</code> set to <code>True</code>
 and the environment variables <code>REDIS_HOST</code> and <code>REDIS_PORT</code> respectively set to
-the location of your REDIS instance and its access port. See the <a href="https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/docker/docker-compose-dev.yml">docker-compose-dev.yml</a> for example.</p>
+the location of your REDIS instance and its access port. See the <a href="https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/docker/docker-compose-dev.yml">docker-compose-dev.yml</a>
+for example.</p>
               
             </div>
           </div>
