@@ -4,7 +4,8 @@
 
 QuantumLeap is the first implementation of an API that supports the storage of
 NGSI [FIWARE NGSIv2](http://docs.orioncontextbroker.apiary.io/#) data into a
-[time-series database](https://en.wikipedia.org/wiki/Time_series_database).
+[time-series database](https://en.wikipedia.org/wiki/Time_series_database),
+known as [ngsi-tsdb](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1).
 
 In the end, it has similar goals to those of [FIWARE's Comet STH](https://fiware-sth-comet.readthedocs.io/en/latest/).
 However, Comet does not yet support NGSIv2, it's strongly tied to MongoDB, and
@@ -46,7 +47,8 @@ Then, new values arrive in [Orion Context Broker](https://fiware-orion.readthedo
 **(2)** for the entities of interest, for example from a whole **IoT layer**
 governed by 1 or more [IoT Agents](https://catalogue.fiware.org/enablers/backend-device-management-idas)
 pushing data in NGSI format. Consequently, notifications will arrive to
-QuantumLeap's API `/v2/notify` endpoint **(3)**.
+QuantumLeap's API [/v2/notify](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1#/input/reporter.reporter.notify)
+endpoint **(3)**.
 
 QuantumLeap's **Reporter** submodule will parse and validate the received
 notification and eventually feed it to the configured **Translator**. The

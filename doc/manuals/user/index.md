@@ -3,8 +3,8 @@
 First you need to have QuantumLeap and its complementary services running (of
 course). Refer to the [Installation Manual](../admin/index.md) for instructions.
 
-Then, you need to connect *Orion Context Broker* to QuantumLeap through an [NGSIv2
-subscription](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions)
+Then, you need to connect *Orion Context Broker* to QuantumLeap through an
+[NGSIv2 subscription](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions)
 for each [Entity Type](https://orioncontextbroker.docs.apiary.io/#introduction/specification/terminology)
 whose historical data you are interested in.
 
@@ -241,7 +241,8 @@ QuantumLeap will use the `FIWARE-Service` as the [database scheme]() for crate,
 with a specific prefix. This way, if you insert an entity of type `Room` in the
 using the `Fiware-Service: magic` header, you should expect to find your table
 at `mtmagic.etroom`. This information is also useful for example if you are
-configuring the Grafana datasource, as explained in the [Grafana section](../admin/grafana.md) of the docs.
+configuring the Grafana datasource, as explained in the
+[Grafana section](../admin/grafana.md) of the docs.
 
 ## GeoCoding
 
@@ -260,8 +261,9 @@ country boundaries. In these cases the generated location will be of the
 `geo:json` form and will contain the values of such shape.
 
 **WARNING:** This feature uses [OpenStreetMap](https://www.openstreetmap.org)
-and its Nominatim service. As such, you need to be aware of its [copyright notes](https://www.openstreetmap.org/copyright) and most importantly of their
-Usage Policies ([API Usage Policy](https://operations.osmfoundation.org/policies/api/)
+and its Nominatim service. As such, you need to be aware of its
+[copyright notes](https://www.openstreetmap.org/copyright) and most importantly
+of their Usage Policies ([API Usage Policy](https://operations.osmfoundation.org/policies/api/)
 , [Nominatim Usage Policy](https://operations.osmfoundation.org/policies/nominatim/)
 You should not abuse of this free service and you should cache your requests.
 This is why you need to specify a cache in order to enable the geocoding.
@@ -270,4 +272,5 @@ QuantumLeap uses [Redis](https://redis.io/).
 So, to enable this feature, you need to pass (at initialisation time) to the
 QuantumLeap container the environment variable `USE_GEOCODING` set to `True`
 and the environment variables `REDIS_HOST` and `REDIS_PORT` respectively set to
-the location of your REDIS instance and its access port. See the [docker-compose-dev.yml](https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/docker/docker-compose-dev.yml) for example.
+the location of your REDIS instance and its access port. See the [docker-compose-dev.yml](https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
+for example.

@@ -22,7 +22,8 @@ docker-compose --version
 The QuantumLeap Docker Image is hosted at [https://hub.docker.com/r/smartsdk/quantumleap/](https://hub.docker.com/r/smartsdk/quantumleap/).
 
 Now, depending on your scenario, you have different deployment options. See
-from the sections below which fits yours.
+from the sections below which fits yours. After installation, you can check
+everything is working as expected by following the [Sanity Check](check.md).
 
 ## Deploy QuantumLeap on a single-host for local testing
 
