@@ -23,7 +23,7 @@ services:
       - mongodata:/data/db
 
   quantumleap:
-    image: smartsdk/quantumleap
+    image: ${QL_IMAGE:-smartsdk/quantumleap}
     ports:
       - "8668:8668"
     depends_on:

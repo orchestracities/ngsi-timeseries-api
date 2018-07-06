@@ -1,14 +1,16 @@
 # Sanity Check
 
 To make sure your deployment of QuantumLeap is complete and well functioning,
-you can follow any of these sanity checks. Following the process manually will
-help you get acquainted with the flow.
+you can follow any of these sanity checks.
 
 The instructions assume a local docker-based deployment with the ports mapped to
 localhost. But of course, you will need to update the IP addresses of the
 services accordingly to suit your deployment.
 
-To assist you, you can use the *Orion* and *QuantumLeap* requests in [this postman collection](https://raw.githubusercontent.com/smartsdk/smartsdk-recipes/master/recipes/tools/postman_collection.json).
+## Manual Sanity Check
+
+Following the process manually can help you get acquainted with the flow. To
+assist you, you can use the *Orion* and *QuantumLeap* requests in [this postman collection](https://raw.githubusercontent.com/smartsdk/smartsdk-recipes/master/recipes/tools/postman_collection.json).
 If you don't use Postman, you can use the equivalent curl commands bellow.
 
 1. Check you can get *Orion version*
@@ -120,3 +122,36 @@ If you don't use Postman, you can use the equivalent curl commands bellow.
         curl -X DELETE \
         http://0.0.0.0:1026/v2/subscriptions/5b3df2ae940fcc446763ef90 \
         -H 'Accept: application/json'
+
+## Automated Sanity Check
+
+If you are already familiar with the flow and just want a quick way to check
+the essential services are correctly deployed, you can make use of one of the
+integration tests that checks exactly this connection among core components.
+
+*IMPORTANT:* It is not suggested to run this script in production deployments
+with valuable data. If things go wrong in the test, it may leave garbage data
+or can lead to data loses. As always, use automation with caution.
+
+You can see the test script [here](https://github.com/smartsdk/ngsi-timeseries-api/blob/master/tests/test_integration.py).
+Pay attention to the input variables that, depending on your deployment, you
+may need to configure. These indicate the URLs where to find the core services.
+By default, it assumes all services run in a local docker-based deployment.
+
+You can quickly execute the test in a container as shown below. You will have to
+adjust, of course, the urls so that they point to your deployed services. In
+the following example, ORION and QL are reachable by the test container at
+`192.0.0.1` and then, by default, ORION and QL find each other at `orion` and
+`quantumleap` endpoints because both were deployed in the same docker network.
+
+```
+docker run -ti --rm -e ORION_URL="http://192.0.0.1:1026" -e QL_URL="http://192.0.0.1:8668" quantumleap pytest tests/test_integration.py
+```
+
+Or, assuming all services are in the same docker deployment and you have access
+to it, you can run the test container in the same network so as to use the
+service names in the urls.
+
+```
+docker run -ti --rm --network docker_default -e ORION_URL="http://orion:1026" -e QL_URL="http://quantumleap:8668" quantumleap pytest tests/test_integration.py
+```
