@@ -26,8 +26,8 @@ observations:
 
 - **Name**: This is the name you want for the Datasource. We recommend naming
 it after the entity type (i.e, the table you will connect to).
-- **Type**: Use `Crate`. If you don't see `Crate` as an option, check your
-installation of the datasource plugin in the container.
+- **Type**: Use `Crate`. If you don't see `Crate` as an option, refer to the
+[Troubleshooting section](../user/troubleshooting.md).
 - **Url**: The full url where cratedb was deployed.
 - **Access**: Use `direct` if you're deploying everything locally. If you are
 deploying crate behind a proxy (as in the case of [HA deployment](./index.md)),

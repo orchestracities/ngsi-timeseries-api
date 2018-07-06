@@ -38,35 +38,29 @@ file. Then start it up:
 
 ```
 # same path were you have placed the docker-compose-dev.yml
-$ docker stack deploy -c docker-compose-dev.yml ql
+$ docker-compose -f docker-compose-dev.yml up -d
 ```
 
-**NOTE:** If you are using an old docker version, it might be the case that your
-local docker daemon is not running in the **swarm mode** and the above command
-fails. You can either update your docker installation (suggested), enable the
-**swarm mode** executing `docker swarm init` or ultimately fall back to
-deploying using **docker-compose**
-(`docker-compose -f docker-compose-dev.yml up -d`).
-
-After a while, check that all containers are running (up):
+After a while, check that all containers are up and running:
 
 ```
-$ docker service ls
-ID                  NAME                MODE                REPLICAS            IMAGE                         PORTS
-zpkl93c67ix1        ql_crate            replicated          1/1                 crate:1.0.5                   *:4200->4200/tcp, *:4300->4300/tcp
-s3dkplowfvhy        ql_grafana          replicated          1/1                 grafana/grafana:latest        *:3000->3000/tcp
-afdrgwc4eo1r        ql_mongo            replicated          1/1                 mongo:3.2                     *:27017->27017/tcp
-l32fn6yft42q        ql_orion            replicated          1/1                 fiware/orion:1.13.0           *:1026->1026/tcp
-gcm1lszuj2k8        ql_quantumleap      replicated          1/1                 smartsdk/quantumleap:latest   *:8668->8668/tcp
-rrnd03qqb2il        ql_redis            replicated          1/1                 redis:latest                  *:6379->6379/tcp
+$ docker ps
+CONTAINER ID        IMAGE                  COMMAND                  CREATED             STATUS                   PORTS                                                           NAMES
+8cf0b544868d        smartsdk/quantumleap   "/bin/sh -c 'python …"   2 minutes ago       Up 2 minutes             0.0.0.0:8668->8668/tcp                                          docker_quantumleap_1
+aa09dbcb8500        fiware/orion:1.13.0    "/usr/bin/contextBro…"   2 minutes ago       Up 2 minutes (healthy)   0.0.0.0:1026->1026/tcp                                          docker_orion_1
+32709dbc5701        grafana/grafana        "/run.sh"                2 minutes ago       Up 2 minutes             0.0.0.0:3000->3000/tcp                                          docker_grafana_1
+ed9f8a60b6e8        crate:1.0.5            "/docker-entrypoint.…"   2 minutes ago       Up 2 minutes             0.0.0.0:4200->4200/tcp, 0.0.0.0:4300->4300/tcp, 5432-5532/tcp   docker_crate_1
+76de9d756b7d        mongo:3.2              "docker-entrypoint.s…"   2 minutes ago       Up 2 minutes             0.0.0.0:27017->27017/tcp                                        docker_mongo_1
+92e2129fec9b        redis                  "docker-entrypoint.s…"   2 minutes ago       Up 2 minutes             0.0.0.0:6379->6379/tcp                                          docker_redis_1
 ```
 
 Now you're ready to use QuantumLeap as instructed in the [User Manual](../user/index.md).
 
-When you are done experimenting, remember to teardown the stack.
+When you are done experimenting, remember to teardown things.
 
 ```
-$ docker stack rm ql
+# same path were you have placed the docker-compose-dev.yml
+$ docker-compose -f docker-compose-dev.yml down -v
 ```
 
 ## Deploy QuantumLeap in HA on a Docker Swarm cluster

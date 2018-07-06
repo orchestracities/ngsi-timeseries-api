@@ -4,10 +4,11 @@ Something not working as expected? Don't worry! the expected thing is for it
 not to work :p.
 
 Checkout the following section to make sure you didn't miss a critical step,
-and if none of that applies to your case, then refer to the **Bug reporting**
-section.
+and if none of that applies to your case, then proceed to the **Bug reporting**.
 
-## Nothing happens
+## FAQs
+
+#### Followed the instructions, but nothing happens
 
 If you don't see your data being saved in the database, before reporting a bug
 please ask yourself the following questions:
@@ -22,12 +23,13 @@ subscription? I.e, will Orion trigger notifications for that insert/update?
 "last_success"?
 
 - Is the location of QuantumLeap expressed in the *notify_url* field of the
-subscription a resolvable url for the containerised Orion? Review the [Usage Section](./index.md) for more details.
+subscription a resolvable url for the containerised Orion? Review the
+[Usage Section](./index.md) for more details.
 
 - Are you running the different components behind firewalls? If so, did you
 open the corresponding ports? (See the [Ports](../admin/ports.md) section.)
 
-## Cannot retrieve data
+#### Cannot retrieve data
 
 - Are you using the correct FIWARE headers for the tenant? Refer to the [Multi-tenancy](index.md#multi-tenancy)
 part of the docs.
@@ -38,9 +40,25 @@ These are flagged in the API specification.
 - Have a look at the message in the returned body for hints of what could have
 gone wrong. You may be missing an important parameter in your request.
 
+
+#### Crate Datasource is not available in Grafana.
+
+By default, QuantumLeap recipes deploy Grafana with crate's plugin already
+installed. See []().
+
+If you don't see crate as an option while creating the datasource as explained
+in [Grafana section](../admin/grafana.md), either the grafana container failed
+to get internet connectivity (to download and install the plugin) or you are
+using an external grafana instance that needs to get the plugin installed.
+
+Go [here]() for documentation on crate's datasource plugin or
+[here](http://docs.grafana.org/plugins/installation/) for documentation on
+installing grafana plugins in general.
+
 ## Bug reporting
 
-Bugs should be reported in the form of [issues](https://github.com/smartsdk/ngsi-timeseries-api/issues) in the github
+Bugs should be reported in the form of
+[issues](https://github.com/smartsdk/ngsi-timeseries-api/issues) in the github
 repository.
 
 Please, look through the open issues before opening a repeated one :)
