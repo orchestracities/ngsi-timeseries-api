@@ -70,9 +70,7 @@
     
         <ul>
         
-            <li><a class="toctree-l4" href="#nothing-happens">Nothing happens</a></li>
-        
-            <li><a class="toctree-l4" href="#cannot-retrieve-data">Cannot retrieve data</a></li>
+            <li><a class="toctree-l4" href="#faqs">FAQs</a></li>
         
             <li><a class="toctree-l4" href="#bug-reporting">Bug reporting</a></li>
         
@@ -158,9 +156,9 @@
 <p>Something not working as expected? Don't worry! the expected thing is for it
 not to work :p.</p>
 <p>Checkout the following section to make sure you didn't miss a critical step,
-and if none of that applies to your case, then refer to the <strong>Bug reporting</strong>
-section.</p>
-<h2 id="nothing-happens">Nothing happens</h2>
+and if none of that applies to your case, then proceed to the <strong>Bug reporting</strong>.</p>
+<h2 id="faqs">FAQs</h2>
+<h4 id="followed-the-instructions-but-nothing-happens">Followed the instructions, but nothing happens</h4>
 <p>If you don't see your data being saved in the database, before reporting a bug
 please ask yourself the following questions:</p>
 <ul>
@@ -178,14 +176,15 @@ subscription? I.e, will Orion trigger notifications for that insert/update?</p>
 </li>
 <li>
 <p>Is the location of QuantumLeap expressed in the <em>notify_url</em> field of the
-subscription a resolvable url for the containerised Orion? Review the <a href="../">Usage Section</a> for more details.</p>
+subscription a resolvable url for the containerised Orion? Review the
+<a href="../">Usage Section</a> for more details.</p>
 </li>
 <li>
 <p>Are you running the different components behind firewalls? If so, did you
 open the corresponding ports? (See the <a href="../../admin/ports/">Ports</a> section.)</p>
 </li>
 </ul>
-<h2 id="cannot-retrieve-data">Cannot retrieve data</h2>
+<h4 id="cannot-retrieve-data">Cannot retrieve data</h4>
 <ul>
 <li>
 <p>Are you using the correct FIWARE headers for the tenant? Refer to the <a href="../#multi-tenancy">Multi-tenancy</a>
@@ -200,8 +199,19 @@ These are flagged in the API specification.</p>
 gone wrong. You may be missing an important parameter in your request.</p>
 </li>
 </ul>
+<h4 id="crate-datasource-is-not-available-in-grafana">Crate Datasource is not available in Grafana.</h4>
+<p>By default, QuantumLeap recipes deploy Grafana with crate's plugin already
+installed. See <a href=""></a>.</p>
+<p>If you don't see crate as an option while creating the datasource as explained
+in <a href="../../admin/grafana/">Grafana section</a>, either the grafana container failed
+to get internet connectivity (to download and install the plugin) or you are
+using an external grafana instance that needs to get the plugin installed.</p>
+<p>Go <a href="">here</a> for documentation on crate's datasource plugin or
+<a href="http://docs.grafana.org/plugins/installation/">here</a> for documentation on
+installing grafana plugins in general.</p>
 <h2 id="bug-reporting">Bug reporting</h2>
-<p>Bugs should be reported in the form of <a href="https://github.com/smartsdk/ngsi-timeseries-api/issues">issues</a> in the github
+<p>Bugs should be reported in the form of
+<a href="https://github.com/smartsdk/ngsi-timeseries-api/issues">issues</a> in the github
 repository.</p>
 <p>Please, look through the open issues before opening a repeated one :)</p>
 <p>Include as much context info as possible, also ideally the following things:</p>

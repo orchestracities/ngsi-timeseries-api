@@ -181,29 +181,24 @@ QuantumLeap ASAP.</p>
 <p>Download (or create locally) a copy of <a href="https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/docker/docker-compose-dev.yml">this docker-compose.yml</a>
 file. Then start it up:</p>
 <pre><code># same path were you have placed the docker-compose-dev.yml
-$ docker stack deploy -c docker-compose-dev.yml ql
+$ docker-compose -f docker-compose-dev.yml up -d
 </code></pre>
 
-<p><strong>NOTE:</strong> If you are using an old docker version, it might be the case that your
-local docker daemon is not running in the <strong>swarm mode</strong> and the above command
-fails. You can either update your docker installation (suggested), enable the
-<strong>swarm mode</strong> executing <code>docker swarm init</code> or ultimately fall back to
-deploying using <strong>docker-compose</strong>
-(<code>docker-compose -f docker-compose-dev.yml up -d</code>).</p>
-<p>After a while, check that all containers are running (up):</p>
-<pre><code>$ docker service ls
-ID                  NAME                MODE                REPLICAS            IMAGE                         PORTS
-zpkl93c67ix1        ql_crate            replicated          1/1                 crate:1.0.5                   *:4200-&gt;4200/tcp, *:4300-&gt;4300/tcp
-s3dkplowfvhy        ql_grafana          replicated          1/1                 grafana/grafana:latest        *:3000-&gt;3000/tcp
-afdrgwc4eo1r        ql_mongo            replicated          1/1                 mongo:3.2                     *:27017-&gt;27017/tcp
-l32fn6yft42q        ql_orion            replicated          1/1                 fiware/orion:1.13.0           *:1026-&gt;1026/tcp
-gcm1lszuj2k8        ql_quantumleap      replicated          1/1                 smartsdk/quantumleap:latest   *:8668-&gt;8668/tcp
-rrnd03qqb2il        ql_redis            replicated          1/1                 redis:latest                  *:6379-&gt;6379/tcp
+<p>After a while, check that all containers are up and running:</p>
+<pre><code>$ docker ps
+CONTAINER ID        IMAGE                  COMMAND                  CREATED             STATUS                   PORTS                                                           NAMES
+8cf0b544868d        smartsdk/quantumleap   &quot;/bin/sh -c 'python …&quot;   2 minutes ago       Up 2 minutes             0.0.0.0:8668-&gt;8668/tcp                                          docker_quantumleap_1
+aa09dbcb8500        fiware/orion:1.13.0    &quot;/usr/bin/contextBro…&quot;   2 minutes ago       Up 2 minutes (healthy)   0.0.0.0:1026-&gt;1026/tcp                                          docker_orion_1
+32709dbc5701        grafana/grafana        &quot;/run.sh&quot;                2 minutes ago       Up 2 minutes             0.0.0.0:3000-&gt;3000/tcp                                          docker_grafana_1
+ed9f8a60b6e8        crate:1.0.5            &quot;/docker-entrypoint.…&quot;   2 minutes ago       Up 2 minutes             0.0.0.0:4200-&gt;4200/tcp, 0.0.0.0:4300-&gt;4300/tcp, 5432-5532/tcp   docker_crate_1
+76de9d756b7d        mongo:3.2              &quot;docker-entrypoint.s…&quot;   2 minutes ago       Up 2 minutes             0.0.0.0:27017-&gt;27017/tcp                                        docker_mongo_1
+92e2129fec9b        redis                  &quot;docker-entrypoint.s…&quot;   2 minutes ago       Up 2 minutes             0.0.0.0:6379-&gt;6379/tcp                                          docker_redis_1
 </code></pre>
 
 <p>Now you're ready to use QuantumLeap as instructed in the <a href="../user/">User Manual</a>.</p>
-<p>When you are done experimenting, remember to teardown the stack.</p>
-<pre><code>$ docker stack rm ql
+<p>When you are done experimenting, remember to teardown things.</p>
+<pre><code># same path were you have placed the docker-compose-dev.yml
+$ docker-compose -f docker-compose-dev.yml down -v
 </code></pre>
 
 <h2 id="deploy-quantumleap-in-ha-on-a-docker-swarm-cluster">Deploy QuantumLeap in HA on a Docker Swarm cluster</h2>
