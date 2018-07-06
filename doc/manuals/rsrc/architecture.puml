@@ -7,7 +7,6 @@ skinparam componentStyle uml2
 !includeurl ICONURL/fiware.puml
 !includeurl ICONURL/smartsdk.puml
 
-
 interface NGSI
 
 FIWARE(cb,"Orion \nContext Broker",component)
@@ -16,27 +15,26 @@ package "IoT Layer" {
     FIWARE(iota,"IoT Agent",component)
 }
 iota -up- NGSI
-[Client] -left- NGSI
 NGSI -up- cb
-
-[Client] "1" -up-> cb
 iota -up-> "2" cb
-
+[Client] - NGSI
 package "QuantumLeap" {
 	SMARTSDK(api,"API",component)
 	SMARTSDK(reporter,"Reporter",component)
 	SMARTSDK(translator,"Translator",component)
+	SMARTSDK(geocoder,"Geocoder",component)
 	api -up- NGSI
-    cb "3" -down-> api
+	api <-down-> reporter
+	reporter <-right-> translator
+	reporter <-down-> geocoder
 
-	api <-down-> translator
-	api -down-> reporter
-	reporter -right-> translator
+    [Client] "1" -down-> api
+    cb "3" -down-> api
     [Client] "4" <-down-> api
 }
-
-[DB Cluster] <-left- translator
-[Grafana] <-down- [DB Cluster]
-[Client] "5" <-down- [Grafana]
+[OSM] <-down-> geocoder
+[DB Cluster] <-left-> translator
+[Grafana] <-down-> [DB Cluster]
+[Client] "5" <-> [Grafana]
 
 @enduml

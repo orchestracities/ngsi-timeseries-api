@@ -326,14 +326,14 @@ paths:
       summary: "Notify QuantumLeap the arrival of a new NGSI notification."
       description: ""
       parameters:
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
         - in: body
           name: notification
           required: true
           schema:
             type: object
             $ref: "#/definitions/Notification"
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
       tags:
         - input
       responses:
@@ -355,8 +355,6 @@ paths:
        subscription in orion at your will. This endpoint just aims to
        simplify the common use case."
       parameters:
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
         - in: query
           name: orionUrl
           required: true
@@ -393,6 +391,8 @@ paths:
           description: "Comma-separated list of attribute names to keep
           historical records. If not specified, QL will track all attributes of
           the specified entities."
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
       tags:
         - input
       responses:
@@ -416,9 +416,6 @@ paths:
       tags:
         - queries
       parameters:
-        # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/entityIdInPath'
         - $ref: '#/parameters/attrNameInPath'
@@ -432,6 +429,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
       responses:
         200:
           description: OK
@@ -487,9 +487,6 @@ paths:
       tags:
         - queries
       parameters:
-        # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/entityIdInPath'
         - $ref: '#/parameters/attrNameInPath'
@@ -503,6 +500,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
       responses:
         200:
           description: OK
@@ -545,9 +545,6 @@ paths:
       tags:
         - queries
       parameters:
-        # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/entityIdInPath'
         # In Query...
@@ -561,6 +558,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
       responses:
         200:
           description: OK
@@ -619,15 +619,15 @@ paths:
       tags:
         - input
       parameters:
-        # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/entityIdInPath'
         # In Query...
         - $ref: '#/parameters/type'
         - $ref: '#/parameters/fromDate'
         - $ref: '#/parameters/toDate'
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
       responses:
         204:
           description: "Records successfully deleted."
@@ -660,9 +660,6 @@ paths:
       tags:
         - queries
       parameters:
-        # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/entityIdInPath'
         # In Query...
@@ -676,6 +673,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
       responses:
         200:
           description: OK
@@ -735,9 +735,6 @@ paths:
       tags:
         - queries
       parameters:
-        # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/entityTypeInPath'
         - $ref: '#/parameters/attrNameInPath'
@@ -751,6 +748,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
       responses:
         200:
           description: OK
@@ -803,9 +803,6 @@ paths:
       tags:
         - queries
       parameters:
-        # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/entityTypeInPath'
         - $ref: '#/parameters/attrNameInPath'
@@ -819,6 +816,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
       responses:
         200:
           description: OK
@@ -865,9 +865,6 @@ paths:
       tags:
         - queries
       parameters:
-        # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/entityTypeInPath'
         # In Query...
@@ -882,6 +879,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
       responses:
         200:
           description: OK
@@ -955,14 +955,14 @@ paths:
       tags:
         - input
       parameters:
-        # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/entityTypeInPath'
         # In Query...
         - $ref: '#/parameters/fromDate'
         - $ref: '#/parameters/toDate'
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
       responses:
         204:
           description: "Records successfully deleted."
@@ -981,9 +981,6 @@ paths:
       tags:
         - queries
       parameters:
-        # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/entityTypeInPath'
         # In Query...
@@ -998,6 +995,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
       responses:
         200:
           description: OK
@@ -1075,9 +1075,6 @@ paths:
       tags:
         - queries
       parameters:
-        # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/attrNameInPath'
         # In Query...
@@ -1092,6 +1089,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
       responses:
         200:
           description: OK
@@ -1171,9 +1171,6 @@ paths:
       tags:
         - queries
       parameters:
-        # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
         # In Path...
         - $ref: '#/parameters/attrNameInPath'
         # In Query...
@@ -1188,6 +1185,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
       responses:
         200:
           description: OK
@@ -1265,9 +1265,6 @@ paths:
       tags:
         - queries
       parameters:
-        # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
         # In Query...
         - $ref: '#/parameters/type'
         - $ref: '#/parameters/id'
@@ -1281,6 +1278,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
       responses:
         200:
           description: OK
@@ -1369,9 +1369,6 @@ paths:
       tags:
         - queries
       parameters:
-        # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
         # In Query...
         - $ref: '#/parameters/type'
         - $ref: '#/parameters/id'
@@ -1385,6 +1382,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
       responses:
         200:
           description: OK

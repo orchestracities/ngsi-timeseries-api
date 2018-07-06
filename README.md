@@ -4,6 +4,7 @@
 [![Documentation badge](https://img.shields.io/badge/docs-latest-yellow.svg)](https://smartsdk.github.io/ngsi-timeseries-api/)
 [![Build Status](https://travis-ci.org/smartsdk/ngsi-timeseries-api.svg?branch=master)](https://travis-ci.org/smartsdk/ngsi-timeseries-api)
 [![Docker Status](https://img.shields.io/docker/pulls/smartsdk/quantumleap.svg)](https://hub.docker.com/r/smartsdk/quantumleap/)
+[![Swagger Validator](https://img.shields.io/swagger/valid/2.0/https/raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v2.0/json/petstore-expanded.json.svg)](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1)
 
 ## Introduction
 
