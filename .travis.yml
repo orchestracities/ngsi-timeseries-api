@@ -15,6 +15,7 @@ install:
   - docker-compose -f translators/tests/docker-compose.yml pull --ignore-pull-failures
   - docker-compose -f reporter/tests/docker-compose.yml pull --ignore-pull-failures
   - docker-compose -f geocoding/tests/docker-compose.yml pull --ignore-pull-failures
+  - docker-compose -f docker/docker-compose-dev.yml pull --ignore-pull-failures
 
 script:
   - source deps.env
