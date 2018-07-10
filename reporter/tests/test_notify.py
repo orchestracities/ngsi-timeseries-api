@@ -1,11 +1,12 @@
 from client.client import HEADERS_PUT
 from client.fixtures import clean_mongo, orion_client
 from conftest import QL_URL, entity
+from datetime import datetime
 from reporter.fixtures import notification
 from translators.crate import CrateTranslator
 from translators.fixtures import crate_translator
-from unittest.mock import patch
 from utils.common import assert_ngsi_entity_equals
+import copy
 import json
 import pytest
 import requests
@@ -251,3 +252,59 @@ def test_no_multiple_data_elements(notification, clean_mongo, clean_crate):
     assert r.status_code == 400
     assert r.json() == 'Multiple data elements in notifications not ' \
                        'supported yet'
+
+
+def test_time_index(notification, clean_mongo, crate_translator):
+    # If present, use entity-level dateModified as time_index
+    global_modified = datetime(2000, 1, 2).isoformat()
+    modified = {
+        'type': 'DateTime',
+        'value': global_modified
+    }
+    notification['data'][0]['dateModified'] = modified
+    r = requests.post('{}'.format(notify_url),
+                      data=json.dumps(notification),
+                      headers=HEADERS_PUT)
+    assert r.status_code == 200
+    assert r.json() == 'Notification successfully processed'
+
+    entity_type = notification['data'][0]['type']
+    crate_translator._refresh([entity_type])
+    entities = crate_translator.query()
+    assert entities[0][CrateTranslator.TIME_INDEX_NAME] == global_modified
+
+    # If not, use newest of changes
+    notification['data'][0].pop('dateModified')
+    temp = notification['data'][0]['temperature']
+    notification['data'][0]['pressure'] = copy.deepcopy(temp)
+
+    older = datetime(2001, 1, 2).isoformat()
+    newer = datetime(2002, 1, 2).isoformat()
+    e = notification['data'][0]
+    e['temperature']['metadata']['dateModified']['value'] = older
+    e['pressure']['metadata']['dateModified']['value'] = newer
+
+    r = requests.post('{}'.format(notify_url),
+                      data=json.dumps(notification),
+                      headers=HEADERS_PUT)
+    assert r.status_code == 200
+    assert r.json() == 'Notification successfully processed'
+
+    crate_translator._refresh([entity_type])
+    entities = crate_translator.query()
+    assert entities[-1][CrateTranslator.TIME_INDEX_NAME] == newer
+
+    # Otherwise, use current time.
+    current = datetime.now()
+    notification['data'][0]['pressure'].pop('metadata')
+    notification['data'][0]['temperature'].pop('metadata')
+    r = requests.post('{}'.format(notify_url),
+                      data=json.dumps(notification),
+                      headers=HEADERS_PUT)
+    assert r.status_code == 200
+    assert r.json() == 'Notification successfully processed'
+
+    crate_translator._refresh([entity_type])
+    entities = crate_translator.query()
+    obtained = entities[-1][CrateTranslator.TIME_INDEX_NAME]
+    assert obtained.startswith("{}".format(current.year))

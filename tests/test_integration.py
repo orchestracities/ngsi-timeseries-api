@@ -130,7 +130,10 @@ def test_integration():
         url = "{}/v2/entities/{}/attrs/precipitation".format(QL_URL, entity_id)
         res = requests.get(url, params={'type': entity_type})
         assert res.ok
-        assert len(res.json()['data']['index']) > 1
+
+        index = res.json()['data']['index']
+        assert len(index) > 1
+        assert index[0] != index[-1]
 
     finally:
         # Cleanup Subscription
