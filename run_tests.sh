@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source deps.env
-
 docker build -t quantumleap .
 
 cd client/tests
