@@ -559,7 +559,7 @@ class CrateTranslator(BaseTranslator):
             return 0
 
         # Delete entry from metadata table
-        op = "delete from {} where 'table_name' = '{}'".format(
+        op = "delete from {} where table_name = '{}'".format(
             METADATA_TABLE_NAME, table_name
         )
         try:
