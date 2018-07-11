@@ -12,20 +12,21 @@ QuantumLeap is the first implementation of [an API](https://app.swaggerhub.com/a
 that supports the storage of [FIWARE NGSIv2](http://docs.orioncontextbroker.apiary.io/#)
 data into a [time series database](https://en.wikipedia.org/wiki/Time_series_database).
 
-Want to know more? Head to the [docs](https://smartsdk.github.io/ngsi-timeseries-api/).
+Want to know more? Refer to the [docs](https://quantumleap.readthedocs.io/en/latest/).
 
 ## Installation and Configuration
 
-Refer to the [Installation Guide](https://smartsdk.github.io/ngsi-timeseries-api/admin/).
+Refer to the [Installation Guide](https://quantumleap.readthedocs.io/en/latest/admin/).
 
 ## Getting started
 
-Refer to the [User Manual](https://smartsdk.github.io/ngsi-timeseries-api/user/).
+Refer to the [User Manual](https://quantumleap.readthedocs.io/en/latest/user/).
 
 ## Troubleshooting
 
-Refer to the [Troubleshooting](https://smartsdk.github.io/ngsi-timeseries-api/user/troubleshooting/) section.
+Refer to the [Troubleshooting](https://quantumleap.readthedocs.io/en/latest/user/troubleshooting/) section.
 
 ## Contributing
 
-Refer to the [Contributing](https://smartsdk.github.io/ngsi-timeseries-api/user/contributing/) section.
+Refer to the [Contributing](https://quantumleap.readthedocs.io/en/latest/user/contributing/)
+section.
