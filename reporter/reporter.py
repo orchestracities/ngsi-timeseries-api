@@ -68,11 +68,6 @@ def _validate_payload(payload):
         if 'value' not in payload[attr] or payload[attr]['value'] == '':
             return 'Payload is missing value for attribute {}'.format(attr)
 
-        if 'dateModified' not in payload[attr]['metadata']:
-            msg = "Attribute '{}' did not include a dateModified. " \
-                  "Assuming notification arrival time."
-            warnings.warn(msg.format(attr))
-
 
 def _get_time_index(payload):
     """
@@ -85,19 +80,26 @@ def _get_time_index(payload):
     The strategy for now is simple. Received notifications are expected to have
     the dateModified field
     (http://docs.orioncontextbroker.apiary.io/#introduction/specification/virtual-attributes)
-    If the notification lacks this attribute, the received time will be assumed.
+    If the notification lacks this attribute, we try using the "latest" of the
+    modification times of any of the attributes in the notification. If there
+    isn't any, the notification received time will be assumed.
 
     In future, this could be enhanced with customs notifications where user
     specifies which attribute is to be used as "time index".
     """
     if 'dateModified' in payload:
-        return payload['dateModified']
+        return payload['dateModified']['value']
 
+    # Orion did not include dateModified at the entity level.
+    # Let's use the newest of the changes in any of the attributes.
+    dates = set([])
     for attr in iter_entity_attrs(payload):
         if 'dateModified' in payload[attr].get('metadata', {}):
-            return payload[attr]['metadata']['dateModified']['value']
+            dates.add(payload[attr]['metadata']['dateModified']['value'])
+    if dates:
+        return sorted(dates)[-1]
 
-    # Assume current timestamp as dateModified
+    # Finally, assume current timestamp as dateModified
     return datetime.now().isoformat()
 
 

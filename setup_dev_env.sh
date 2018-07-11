@@ -4,6 +4,9 @@
 #      $ source setup_dev_env.sh
 
 export PYTHONPATH=$PWD:$PYTHONPATH
+
+docker build -t quantumleap .
+
 source deps.env
 
 source env/bin/activate
