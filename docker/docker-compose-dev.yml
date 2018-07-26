@@ -31,7 +31,7 @@ services:
       - orion
       - crate
     environment:
-      - CRATE_HOST=crate
+      - CRATE_HOST=${CRATE_HOST:-crate}
       - USE_GEOCODING=True
       - REDIS_HOST=redis
       - REDIS_PORT=6379
