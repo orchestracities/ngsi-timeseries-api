@@ -175,17 +175,14 @@ class CrateTranslator(BaseTranslator):
         res = None
         for et in entities_by_type.keys():
             res = self._insert_entities_of_type(et,
-                                                entities_by_type[et],
-                                                fiware_service,
-                                                fiware_servicepath)
+                                          entities_by_type[et],
+                                          fiware_service,
+                                          fiware_servicepath)
         return res
 
 
-    def _insert_entities_of_type(self,
-                                 entity_type,
-                                 entities,
-                                 fiware_service=None,
-                                 fiware_servicepath=None):
+    def _insert_entities_of_type(self, entity_type, entities,
+                                fiware_service=None, fiware_servicepath=None):
         # All entities must be of the same type and have a time index
         for e in entities:
             if e[NGSI_TYPE] != entity_type:
