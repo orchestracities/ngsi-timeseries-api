@@ -47,7 +47,7 @@ def subscribe(entity_type):
     orion_url = 'http://{}:{}'.format(ORION_HOST, ORION_PORT)
     r = requests.post('{}/v2/subscriptions'.format(orion_url),
                       data=json.dumps(subscription),
-                      headers={'Content-Type': 'application/json'})
+                      headers={'Content-Type':'application/json'})
     assert r.ok, r.text
     print('Subscription successfully finished:')
     print('Entity Type: {}'.format(entity_type))
