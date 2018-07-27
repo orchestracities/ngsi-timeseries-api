@@ -1,8 +1,10 @@
-from utils import HEADERS_PUT
-from locust import HttpLocust, TaskSet, task
 import json
 import os
 import random
+
+from locust import HttpLocust, TaskSet, task
+
+from src.utils import HEADERS_PUT
 
 # INPUT (via environment variables)
 ORION_URL = os.environ.get('ORION_URL', 'http://0.0.0.0:1026')

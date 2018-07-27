@@ -3,11 +3,14 @@ Script to create subscriptions for changes in entities of type
 AirQualityObserved and TrafficFlowObserved to be sent to Quantumleap.
 """
 from __future__ import print_function
-from utils import HEADERS_PUT
+
 import json
 import os
-import requests
 import pprint
+
+import requests
+
+from src.utils import HEADERS_PUT
 
 # INPUT (via environment variables)
 QL_URL = os.environ.get('QL_URL', 'http://quantumleap:8668')

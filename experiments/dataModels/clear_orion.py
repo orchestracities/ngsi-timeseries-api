@@ -1,6 +1,7 @@
 import os
-import requests
 import sys
+
+import requests
 
 # INPUT
 ORION_HOST = os.environ.get('ORION_HOST', '0.0.0.0')
@@ -9,7 +10,7 @@ ORION_URL = 'http://{}:{}'.format(ORION_HOST, ORION_PORT)
 
 
 if __name__ == '__main__':
-    from utils import HEADERS
+    from src.utils import HEADERS
     # Confirm deletion
     msg = "Remove all subscriptions and entities in ORION {}? [y/N] "
     print(msg.format(ORION_URL))

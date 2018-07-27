@@ -2,12 +2,12 @@
 
 docker build -t quantumleap .
 
-cd translators/tests
+cd src/translators/tests
 sh run_tests.sh
 tot=$?
 cd -
 
-cd reporter/tests
+cd src/reporter/tests
 sh run_tests.sh
 loc=$?
 if [ "$tot" -eq 0 ]; then
@@ -15,7 +15,7 @@ if [ "$tot" -eq 0 ]; then
 fi
 cd -
 
-cd geocoding/tests
+cd src/geocoding/tests
 sh run_tests.sh
 loc=$?
 if [ "$tot" -eq 0 ]; then
@@ -23,7 +23,7 @@ if [ "$tot" -eq 0 ]; then
 fi
 cd -
 
-cd tests/
+cd src/tests/
 sh run_tests.sh
 loc=$?
 if [ "$tot" -eq 0 ]; then
