@@ -20,8 +20,5 @@ script:
   - source deps.env
   - sh run_tests.sh
 
-after_success:
-    - sh ./deploy_docs.sh
-
 notifications:
   email: false
