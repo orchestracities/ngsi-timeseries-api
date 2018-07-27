@@ -1,5 +1,6 @@
-from client.client import OrionClient
+import json
 import os
+import requests
 
 # Input
 QL_HOST = os.environ.get('QL_HOST', '0.0.0.0')
@@ -43,8 +44,10 @@ def subscribe(entity_type):
         },
         "throttling": 5
     }
-    orion = OrionClient(ORION_HOST, ORION_PORT)
-    r = orion.subscribe(subscription)
+    orion_url = 'http://{}:{}'.format(ORION_HOST, ORION_PORT)
+    r = requests.post('{}/v2/subscriptions'.format(orion_url),
+                      data=json.dumps(subscription),
+                      headers={'Content-Type':'application/json'})
     assert r.ok, r.text
     print('Subscription successfully finished:')
     print('Entity Type: {}'.format(entity_type))

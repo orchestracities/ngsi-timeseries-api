@@ -1,4 +1,3 @@
-from client.client import HEADERS
 from conftest import QL_URL
 from reporter.tests.utils import insert_test_data
 from translators.fixtures import crate_translator as translator
@@ -37,7 +36,7 @@ def test_1T1ENA_defaults(reporter_dataset):
     query_params = {
         'type': entity_type,
     }
-    r = requests.get(query_url(), params=query_params, headers=HEADERS)
+    r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
 
     # Assert
@@ -80,7 +79,7 @@ def test_1T1ENA_aggrMethod(reporter_dataset, aggr_method, aggr_press, aggr_temp)
         'aggrMethod': aggr_method,
         'attrs': temperature + ',' + pressure,
     }
-    r = requests.get(query_url(), params=query_params, headers=HEADERS)
+    r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
 
     # Assert
@@ -109,7 +108,7 @@ def test_1T1ENA_fromDate_toDate(reporter_dataset):
         'fromDate': "1970-01-06T00:00:00",
         'toDate': "1970-01-17T00:00:00",
     }
-    r = requests.get(query_url(), params=query_params, headers=HEADERS)
+    r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
 
     # Expect only last N
@@ -148,7 +147,7 @@ def test_1T1ENA_lastN(reporter_dataset):
         'type': entity_type,
         'lastN': 10
     }
-    r = requests.get(query_url(), params=query_params, headers=HEADERS)
+    r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
 
     # Expect only last N
@@ -187,7 +186,7 @@ def test_1T1ENA_limit(reporter_dataset):
         'type': entity_type,
         'limit': 5
     }
-    r = requests.get(query_url(), params=query_params, headers=HEADERS)
+    r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
 
     # Expect only last N
@@ -226,7 +225,7 @@ def test_1T1ENA_offset(reporter_dataset):
         'type': entity_type,
         'offset': 3
     }
-    r = requests.get(query_url(), params=query_params, headers=HEADERS)
+    r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
 
     # Expect only last N
@@ -267,7 +266,7 @@ def test_1T1ENA_combined(reporter_dataset):
         'toDate': "1970-01-20T00:00:00",
         'limit': 28,
     }
-    r = requests.get(query_url(), params=query_params, headers=HEADERS)
+    r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
 
     # Expect only last N
@@ -305,9 +304,7 @@ def test_1T1ENA_values_defaults(reporter_dataset):
     query_params = {
         'type': entity_type,
     }
-    r = requests.get(query_url(values=True),
-                     params=query_params,
-                     headers=HEADERS)
+    r = requests.get(query_url(values=True), params=query_params)
     assert r.status_code == 200, r.text
 
     # Assert
@@ -338,7 +335,7 @@ def test_not_found():
     query_params = {
         'type': entity_type,
     }
-    r = requests.get(query_url(), params=query_params, headers=HEADERS)
+    r = requests.get(query_url(), params=query_params)
     assert r.status_code == 404, r.text
     assert r.json() == {
         "error": "Not Found",
@@ -350,7 +347,7 @@ def test_tmp_no_type():
     """
     For now specifying entity type is mandatory
     """
-    r = requests.get(query_url(), params={}, headers=HEADERS)
+    r = requests.get(query_url(), params={})
     assert r.status_code == 400, r.text
     assert r.json() == {
         "error": "Not Implemented",

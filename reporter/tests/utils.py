@@ -1,4 +1,3 @@
-from client.client import HEADERS_PUT
 from conftest import QL_URL
 from datetime import datetime
 import json
@@ -50,7 +49,7 @@ def insert_test_data(translator, entity_types, n_entities, n_days):
                 n = get_notification(et, ei, temp_value=d, mod_value=dt)
                 r = requests.post(notify_url(),
                                   data=json.dumps(n),
-                                  headers=HEADERS_PUT)
+                                  headers={'Content-Type': 'application/json'})
                 assert r.ok
 
     translator._refresh(entity_types)

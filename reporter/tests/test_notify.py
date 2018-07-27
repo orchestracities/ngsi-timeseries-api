@@ -1,6 +1,4 @@
-from client.client import HEADERS_PUT
-from client.fixtures import clean_mongo, orion_client
-from conftest import QL_URL, entity
+from conftest import QL_URL, entity, clean_mongo, clean_crate, orion_client
 from datetime import datetime
 from reporter.fixtures import notification
 from translators.crate import CrateTranslator
@@ -13,6 +11,7 @@ import requests
 import time
 
 notify_url = "{}/notify".format(QL_URL)
+HEADERS_PUT = {'Content-Type': 'application/json'}
 
 
 def test_invalid_no_body(clean_mongo, clean_crate):
