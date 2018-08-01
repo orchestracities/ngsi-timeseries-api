@@ -1,11 +1,10 @@
 # REPO STRUCTURE
 .git
 .cache
-doc/
+docs/
 env/
-translators/plots/
+src/translators/plots/
 Dockerfile
-id_rsa_qldocs.enc
 
 # PYTHON FILES
 **__pycache__/

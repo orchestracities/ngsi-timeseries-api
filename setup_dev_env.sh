@@ -3,7 +3,7 @@
 # Usage: 
 #      $ source setup_dev_env.sh
 
-export PYTHONPATH=$PWD:$PYTHONPATH
+export PYTHONPATH=${PWD}/src:${PYTHONPATH}
 
 docker build -t quantumleap .
 

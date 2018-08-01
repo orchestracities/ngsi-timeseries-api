@@ -8,7 +8,7 @@ RUN pip install -r /src/ngsi-timeseries-api/requirements.txt
 
 COPY . /src/ngsi-timeseries-api/
 
-WORKDIR /src/ngsi-timeseries-api/
+WORKDIR /src/ngsi-timeseries-api/src
 
 ENV PYTHONPATH=$PWD:$PYTHONPATH
 

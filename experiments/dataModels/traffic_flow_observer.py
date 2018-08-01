@@ -8,10 +8,10 @@ Variables can be set as environment variables or directly hardcoded in this
 script.
 """
 from __future__ import print_function
-from datetime import datetime, timedelta
+
 import os
 import random
-
+from datetime import datetime, timedelta
 
 # INPUT
 SLEEP = int(os.environ.get('SLEEP', 3))
@@ -20,7 +20,7 @@ N_ENTITIES = int(os.environ.get('N_ENTITIES', 9))
 
 
 def create_entity(entity_id):
-    from utils import COORDS
+    from src.utils import COORDS
     pivot = 10
     date_from = (datetime.now() - timedelta(seconds=pivot)).isoformat()
     date_to = datetime.now().isoformat()
@@ -79,7 +79,7 @@ def get_attrs_to_update():
 
 
 if __name__ == '__main__':
-    from utils import main
+    from src.utils import main
     id_prefix = 'traffic_flow_observer'
     main(
         __file__, SLEEP, ORION_URL, N_ENTITIES,

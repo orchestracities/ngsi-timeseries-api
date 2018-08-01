@@ -1,6 +1,6 @@
 site_name: QuantumLeap
 site_description: An NGSI to TSDB Adapter to allow processing of Historical Data.
-docs_dir: doc/manuals
+docs_dir: docs/manuals
 pages:
   - Home: index.md
   - 'User & Programmers Manual':

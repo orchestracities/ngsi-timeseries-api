@@ -8,12 +8,11 @@ services:
   - docker
 
 install:
-  - pip install mkdocs
   - docker --version
   - docker build -t quantumleap .
-  - docker-compose -f translators/tests/docker-compose.yml pull --ignore-pull-failures
-  - docker-compose -f reporter/tests/docker-compose.yml pull --ignore-pull-failures
-  - docker-compose -f geocoding/tests/docker-compose.yml pull --ignore-pull-failures
+  - docker-compose -f src/translators/tests/docker-compose.yml pull --ignore-pull-failures
+  - docker-compose -f src/reporter/tests/docker-compose.yml pull --ignore-pull-failures
+  - docker-compose -f src/geocoding/tests/docker-compose.yml pull --ignore-pull-failures
   - docker-compose -f docker/docker-compose-dev.yml pull --ignore-pull-failures
 
 script:

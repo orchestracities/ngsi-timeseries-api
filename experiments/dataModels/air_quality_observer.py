@@ -8,10 +8,10 @@ Variables can be set as environment variables or directly hardcoded in this
 script.
 """
 from __future__ import print_function
-from datetime import datetime
+
 import os
 import random
-
+from datetime import datetime
 
 # INPUT
 SLEEP = int(os.environ.get('SLEEP', 3))
@@ -20,7 +20,7 @@ N_ENTITIES = int(os.environ.get('N_ENTITIES', 9))
 
 
 def create_entity(entity_id):
-    from utils import COORDS
+    from src.utils import COORDS
     entity = {
         "id": entity_id,
         "type": "AirQualityObserved",
@@ -82,7 +82,7 @@ def get_attrs_to_update():
 
 
 if __name__ == '__main__':
-    from utils import main
+    from src.utils import main
     id_prefix = 'air_quality_observer'
     main(
         __file__, SLEEP, ORION_URL, N_ENTITIES,
