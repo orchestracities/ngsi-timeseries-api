@@ -9,18 +9,20 @@ import os
 import statistics
 
 
-# NGSI TYPES: Not properly documented so this might change. Based on Orion
-# output.
-NGSI_ID = 'id'
-NGSI_TYPE = 'type'
-NGSI_TEXT = 'Text'
+# NGSI TYPES
+# Based on Orion output because official docs don't say much about these :(
 NGSI_DATETIME = 'DateTime'
-NGSI_STRUCTURED_VALUE = 'StructuredValue'
+NGSI_ID = 'id'
 NGSI_ISO8601 = 'ISO8601'
+NGSI_STRUCTURED_VALUE = 'StructuredValue'
+NGSI_TEXT = 'Text'
+NGSI_TYPE = 'type'
 
+# CRATE TYPES
+# https://crate.io/docs/crate/reference/en/latest/general/ddl/data-types.html
 CRATE_ARRAY_STR = 'array(string)'
 
-# CRATE TYPES: https://crate.io/docs/reference/sql/data_types.html
+# Translation
 NGSI_TO_CRATE = {
     "Array": CRATE_ARRAY_STR,  # TODO #36: Support numeric arrays
     "Boolean": 'boolean',
@@ -36,10 +38,9 @@ NGSI_TO_CRATE = {
 CRATE_TO_NGSI = dict((v, k) for (k,v) in NGSI_TO_CRATE.items())
 CRATE_TO_NGSI['string_array'] = 'Array'
 
-
+# QUANTUMLEAP Internals
 # A table to store the configuration and metadata of each entity type.
 METADATA_TABLE_NAME = "md_ets_metadata"
-
 FIWARE_SERVICEPATH = 'fiware_servicepath'
 TENANT_PREFIX = 'mt'
 
@@ -65,6 +66,7 @@ class CrateTranslator(BaseTranslator):
     def _refresh(self, entity_types, fiware_service=None):
         """
         Used for testing purposes only!
+        Refreshing ensures a query after an insert retrieves the inserted data.
         :param entity_types: list(str) list of entity types whose tables will be
          refreshed
         """
@@ -136,8 +138,8 @@ class CrateTranslator(BaseTranslator):
         Return table name based on entity type.
         When specified, fiware_service will define the table schema.
         To avoid conflict with reserved words (
-        https://crate.io/docs/crate/reference/en/latest/sql/general/lexical-structure.html#key-words-and-identifiers),
-        both schema and table name are prefixed.
+        https://crate.io/docs/crate/reference/en/latest/sql/general/lexical-structure.html#key-words-and-identifiers
+        ), both schema and table name are prefixed.
         """
         et = "et{}".format(entity_type.lower())
         if fiware_service:
@@ -145,21 +147,50 @@ class CrateTranslator(BaseTranslator):
         return et
 
 
+    def _ea2cn(self, entity_attr):
+        """
+        Entity Attr to Column Name.
+
+        To create a column name out of an entity attribute, note the naming
+        restrictions in crate.
+        https://crate.io/docs/crate/reference/en/latest/general/ddl/create-table.html#naming-restrictions
+
+        :return: column name
+        """
+        # GH Issue #64: prefix attributes with ea_.
+        # This will break users connecting to db directly.
+        # Implement when that becomes a real problem.
+        return "{}".format(entity_attr.lower())
+
+
     def insert(self, entities, fiware_service=None, fiware_servicepath=None):
         if not isinstance(entities, list):
             msg = "Entities expected to be of type list, but got {}"
             raise TypeError(msg.format(type(entities)))
 
-        tables = {}         # {table_name -> {column_name -> crate_column_type}}
-        entities_by_tn = {}  # {table_name -> list(entities)}
-        custom_columns = {}  # {table_name -> attr_name -> custom_column}
-
-        # Collect tables info
+        entities_by_type = {}
         for e in entities:
-            tn = self._et2tn(e['type'], fiware_service)
+            entities_by_type.setdefault(e['type'], []).append(e)
 
-            table = tables.setdefault(tn, {})
-            entities_by_tn.setdefault(tn, []).append(e)
+        res = None
+        for et in entities_by_type.keys():
+            res = self._insert_entities_of_type(et,
+                                                entities_by_type[et],
+                                                fiware_service,
+                                                fiware_servicepath)
+        return res
+
+
+    def _insert_entities_of_type(self,
+                                 entity_type,
+                                 entities,
+                                 fiware_service=None,
+                                 fiware_servicepath=None):
+        # All entities must be of the same type and have a time index
+        for e in entities:
+            if e[NGSI_TYPE] != entity_type:
+                msg = "Entity {} is not of type {}."
+                raise ValueError(msg.format(e[NGSI_ID], entity_type))
 
             if self.TIME_INDEX_NAME not in e:
                 import warnings
@@ -168,93 +199,88 @@ class CrateTranslator(BaseTranslator):
                 warnings.warn(msg.format(e))
                 e[self.TIME_INDEX_NAME] = datetime.now().isoformat()
 
-            # Intentionally avoid using 'id' and 'type' as a column names.
-            # It's problematic for some dbs.
-            table['entity_id'] = NGSI_TO_CRATE['Text']
-            table['entity_type'] = NGSI_TO_CRATE['Text']
+        # Define column types
+        # {column_name -> crate_column_type}
+        table = {
+            'entity_id': NGSI_TO_CRATE['Text'],
+            'entity_type': NGSI_TO_CRATE['Text'],
+        }
+
+        # Preserve original attr names and types
+        # {column_name -> (attr_name, attr_type)}
+        original_attrs = {
+            'entity_type': (NGSI_TYPE, NGSI_TEXT),
+            'entity_id': (NGSI_ID, NGSI_TEXT),
+            self.TIME_INDEX_NAME: (self.TIME_INDEX_NAME, NGSI_DATETIME),
+        }
+
+        for e in entities:
             for attr in iter_entity_attrs(e):
                 if attr == self.TIME_INDEX_NAME:
-                    table[self.TIME_INDEX_NAME] = NGSI_TO_CRATE['DateTime']
+                    table[self.TIME_INDEX_NAME] = NGSI_TO_CRATE[NGSI_DATETIME]
+                    continue
+
+                col = self._ea2cn(attr)
+
+                if isinstance(e[attr], dict) and 'type' in e[attr]:
+                    attr_t = e[attr]['type']
                 else:
-                    ngsi_t = e[attr]['type'] if 'type' in e[attr] else NGSI_TEXT
-                    if ngsi_t not in NGSI_TO_CRATE:
-                        msg = ("'{}' is not a supported NGSI type. "
-                               "Please use any of the following: {}. "
-                               "Falling back to {}.").format(
-                            ngsi_t, ", ".join(NGSI_TO_CRATE.keys()), NGSI_TEXT)
-                        self.logger.warning(msg)
-                        # Keep the original type to be saved in the metadata
-                        # table, but switch to TEXT for crate column.
-                        table[attr] = ngsi_t
-                    else:
-                        crate_t = NGSI_TO_CRATE[ngsi_t]
-                        # Github issue 44: Disable indexing for long string
-                        if ngsi_t == NGSI_TEXT and \
-                           len(e[attr]['value']) > 32765:
-                            custom_columns.setdefault(tn, {})[attr] = crate_t \
-                              + ' INDEX OFF'
+                    # Won't guess the type if used did't specify the type.
+                    attr_t = NGSI_TEXT
 
-                        # Github issue 24: StructuredValue == object or array
-                        if ngsi_t == NGSI_STRUCTURED_VALUE and \
-                                isinstance(e[attr].get('value', None), list):
-                                crate_t = CRATE_ARRAY_STR
+                original_attrs[col] = (attr, attr_t)
 
-                        table[attr] = crate_t
+                if attr_t not in NGSI_TO_CRATE:
+                    supported_types = ', '.join(NGSI_TO_CRATE.keys())
+                    msg = ("'{}' is not a supported NGSI type. "
+                           "Please use any of the following: {}. "
+                           "Falling back to {}.")
+                    self.logger.warning(msg.format(
+                        attr_t, supported_types, NGSI_TEXT))
 
-        persisted_metadata = self._process_metadata_table(tables.keys())
-        new_metadata = {}
+                    table[col] = NGSI_TO_CRATE[NGSI_TEXT]
 
-        # Create data tables
-        for tn, table in tables.items():
-            # Preserve original attr names and types
-            original_attrs = {
-                'entity_type': (NGSI_TYPE, NGSI_TEXT),
-                'entity_id': (NGSI_ID, NGSI_TEXT),
-            }
-            for attr, t in table.items():
-                if t not in CRATE_TO_NGSI:
-                    original_attrs[attr.lower()] = (attr, t)
-                    # Having persisted original types in metadata, weird types
-                    # fall back to string for crate.
-                    table[attr] = NGSI_TO_CRATE[NGSI_TEXT]
                 else:
-                    if attr not in ('entity_type', 'entity_id'):
-                        original_attrs[attr.lower()] = (attr, CRATE_TO_NGSI[t])
-                        if isinstance(e[attr], dict) and e[attr].get('type', None) == NGSI_ISO8601:
-                            original_attrs[attr.lower()] = (attr, NGSI_ISO8601)
-            new_metadata[tn] = original_attrs
+                    crate_t = NGSI_TO_CRATE[attr_t]
 
-            # Apply custom column modifiers
-            for _attr_name, cc in custom_columns.setdefault(tn, {}).items():
-                table[_attr_name] = cc
+                    # Github issue 44: Disable indexing for long string
+                    if attr_t == NGSI_TEXT and \
+                        len(e[attr].get('value', '')) > 32765:
+                        crate_t = crate_t + ' INDEX OFF'
 
-            # Now create data table
-            columns = ', '.join('{} {}'.format(cn, ct) for cn, ct in table.items())
-            stmt = "create table if not exists {} ({}) with " \
-                   "(number_of_replicas = '2-all')".format(tn, columns)
-            self.cursor.execute(stmt)
+                    # Github issue 24: StructuredValue == object or array
+                    is_list = isinstance(e[attr].get('value', None), list)
+                    if attr_t == NGSI_STRUCTURED_VALUE and is_list:
+                        crate_t = CRATE_ARRAY_STR
 
-        # Update metadata if necessary
-        self._update_metadata_table(
-            tables.keys(), persisted_metadata, new_metadata)
+                    table[attr] = crate_t
 
-        # Populate data tables
-        for tn, entities in entities_by_tn.items():
-            col_names = sorted(tables[tn].keys())
-            col_names.append(FIWARE_SERVICEPATH)
+        # Create/Update metadata table for this type
+        table_name = self._et2tn(entity_type, fiware_service)
+        self._update_metadata_table(table_name, original_attrs)
 
-            entries = []  # raw values in same order as column names
-            for e in entities:
-                values = self._preprocess_values(e,
-                                                 col_names,
-                                                 fiware_servicepath)
-                entries.append(values)
+        # Create Data Table
+        columns = ', '.join('{} {}'.format(cn, ct) for cn, ct in table.items())
+        stmt = "create table if not exists {} ({}) with " \
+               "(number_of_replicas = '2-all')".format(table_name, columns)
+        self.cursor.execute(stmt)
 
-            stmt = "insert into {} ({}) values ({})".format(
-                tn, ', '.join(col_names), ('?,' * len(col_names))[:-1])
-            self.cursor.executemany(stmt, entries)
+        # Gather attribute values
+        col_names = sorted(table.keys())
+        col_names.append(FIWARE_SERVICEPATH)
+        entries = []  # raw values in same order as column names
+        for e in entities:
+            values = self._preprocess_values(e, col_names, fiware_servicepath)
+            entries.append(values)
 
+        # Insert entities data
+        p1 = table_name
+        p2 = ', '.join(col_names)
+        p3 = ','.join(['?'] * len(col_names))
+        stmt = "insert into {} ({}) values ({})".format(p1, p2, p3)
+        self.cursor.executemany(stmt, entries)
         return self.cursor
+
 
     def _preprocess_values(self, e, col_names, fiware_servicepath):
         values = []
@@ -281,6 +307,7 @@ class CrateTranslator(BaseTranslator):
                     raise NotImplementedError(msg)
         return values
 
+
     def _postprocess_values(self, e):
         for attr in iter_entity_attrs(e):
             if 'type' in e[attr] and e[attr]['type'] == 'geo:point':
@@ -289,50 +316,47 @@ class CrateTranslator(BaseTranslator):
         return e
 
 
-    def _process_metadata_table(self, table_names):
+    def _update_metadata_table(self, table_name, metadata):
         """
-        This method creates the METADATA_TABLE_NAME (if not exists). This table
-        maps, for each table_name (entity type), a translation table (dict)
-        mapping the column names (entity attributes) to the corresponding
+        This method creates the METADATA_TABLE_NAME (if not exists), which
+        stores, for each table_name (entity type), a translation table (dict)
+        mapping the column names (from entity attributes) to the corresponding
         attributes metadata such as original attribute names and NGSI types.
 
-        :param table_names: iterable(unicode)
-            The names of the tables whose metadata you are interested in.
+        If such table existed, this method updates it accordingly if required.
+        Required means, either there was no metadata for that
+        table_name or the new_metadata has new entries not present in
+        persisted_metadata.
 
-        :return: dict
-            The content of METADATA_TABLE_NAME.
+        :param table_name: unicode
+            The name of the table whose metadata will be updated
+
+        :param metadata: dict
+            The dict mapping the matedata of each column. See original_attrs.
         """
         stmt = ("create table if not exists {} "
                 "(table_name string primary key, entity_attrs object) with "
                 "(number_of_replicas = '2-all')")
         self.cursor.execute(stmt.format(METADATA_TABLE_NAME))
-        if self.cursor.rowcount:  # i.e, table just created
-            return {}
 
-        # Bring all translation tables
-        stmt = "select table_name, entity_attrs from {} where table_name in ({})".format(
-            METADATA_TABLE_NAME, ','.join("'{}'".format(t) for t in table_names)
-        )
-        self.cursor.execute(stmt)
-        persisted_metadata = dict({tn: ea for (tn, ea) in self.cursor.fetchall()})
-        return persisted_metadata
+        if self.cursor.rowcount:
+            # Table just created!
+            persisted_metadata = {}
+        else:
+            # Bring translation table!
+            stmt = "select entity_attrs from {} where table_name = '{}'"
+            self.cursor.execute(stmt.format(METADATA_TABLE_NAME, table_name))
 
+            # By design, one entry per table_name
+            res = self.cursor.fetchall()
+            persisted_metadata = res[0][0] if res else {}
 
-    def _update_metadata_table(self, table_names, persisted_metadata,
-                               new_metadata):
-        """
-        Update the metadata (attributes translation table) of each table_name
-        in table_names if required.
-
-        Required means, either there was no metadata for that table_name or the
-        new_metadata has new entries not present in persisted_metadata.
-        """
-        for tn in table_names:
-            if tn not in persisted_metadata or new_metadata[tn].keys() - persisted_metadata[tn].keys():
-                persisted_metadata.setdefault(tn, {}).update(new_metadata[tn])
-                stmt = "insert into {} (table_name, entity_attrs) values (?,?) " \
-                   "on duplicate key update entity_attrs = values(entity_attrs)".format(METADATA_TABLE_NAME)
-                self.cursor.execute(stmt, (tn, persisted_metadata[tn]))
+        if metadata.keys() - persisted_metadata.keys():
+            persisted_metadata.update(metadata)
+            stmt = "insert into {} (table_name, entity_attrs) values (?,?) " \
+               "on duplicate key update entity_attrs = values(entity_attrs)"
+            stmt = stmt.format(METADATA_TABLE_NAME)
+            self.cursor.execute(stmt, (table_name, persisted_metadata))
 
 
     def _get_et_table_names(self, fiware_service=None):

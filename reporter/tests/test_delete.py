@@ -1,4 +1,3 @@
-from client.client import HEADERS_PUT
 from conftest import QL_URL
 from reporter.fixtures import create_notification
 from translators.fixtures import crate_translator as translator
@@ -16,7 +15,9 @@ def insert_test_data():
             for u in range(10):
                 notification = create_notification(t, '{}{}'.format(t, e))
                 data = json.dumps(notification)
-                r = requests.post(notify_url, data=data, headers=HEADERS_PUT)
+                r = requests.post(notify_url,
+                                  data=data,
+                                  headers={'Content-Type':'application/json'})
                 assert r.status_code == 200, r.text
 
 

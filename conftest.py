@@ -1,6 +1,8 @@
+import json
 import os
+import pymongo as pm
 import pytest
-
+import requests
 
 QL_HOST = os.environ.get('QL_HOST', "quantumleap")
 QL_PORT = 8668
@@ -12,9 +14,47 @@ CRATE_PORT = 4200
 REDIS_HOST = os.environ.get('REDIS_HOST', 'redis')
 REDIS_PORT = 6379
 
+MONGO_HOST = os.environ.get('MONGO_HOST', 'mongo')
+MONGO_PORT = os.environ.get('MONGO_PORT', 27017)
+
 ORION_HOST = os.environ.get('ORION_HOST', 'orion')
 ORION_PORT = os.environ.get('ORION_PORT', '1026')
 ORION_URL = "http://{}:{}/v2".format(ORION_HOST, ORION_PORT)
+
+
+def do_clean_mongo():
+    db_client = pm.MongoClient(MONGO_HOST, MONGO_PORT)
+    for db in db_client.database_names():
+        db_client.drop_database(db)
+
+
+@pytest.fixture
+def clean_mongo():
+    yield
+    do_clean_mongo()
+
+
+class OrionClient(object):
+    def __init__(self, host, port):
+        self.url = 'http://{}:{}'.format(host, port)
+
+    def subscribe(self, subscription):
+        r = requests.post('{}/v2/subscriptions'.format(self.url),
+                          data=json.dumps(subscription),
+                          headers={'Content-Type': 'application/json'})
+        return r
+
+    def insert(self, entity):
+        r = requests.post('{}/v2/entities'.format(self.url),
+                          data=json.dumps(entity),
+                          headers={'Content-Type': 'application/json'})
+        return r
+
+
+@pytest.fixture
+def orion_client():
+    oc = OrionClient(ORION_HOST, ORION_PORT)
+    yield oc
 
 
 def do_clean_crate():

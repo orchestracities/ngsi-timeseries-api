@@ -36,7 +36,6 @@ import json
 import logging
 import os
 import requests
-import warnings
 
 
 def _validate_payload(payload):

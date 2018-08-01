@@ -12,10 +12,7 @@ a query using either the same or just "/eu/" service path. It will not return
 results if used with "/eu/greece" or any other deviation from the path used at
 insertion.
 """
-# Explicitly import pytest fixtures
-from client.fixtures import clean_mongo
-from conftest import entity
-from conftest import QL_URL, ORION_URL, clean_crate
+from conftest import entity, clean_mongo, clean_crate, QL_URL, ORION_URL
 import json
 import requests
 import time

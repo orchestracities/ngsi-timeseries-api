@@ -11,7 +11,6 @@ install:
   - pip install mkdocs
   - docker --version
   - docker build -t quantumleap .
-  - docker-compose -f client/tests/docker-compose.yml pull --ignore-pull-failures
   - docker-compose -f translators/tests/docker-compose.yml pull --ignore-pull-failures
   - docker-compose -f reporter/tests/docker-compose.yml pull --ignore-pull-failures
   - docker-compose -f geocoding/tests/docker-compose.yml pull --ignore-pull-failures
@@ -20,9 +19,6 @@ install:
 script:
   - source deps.env
   - sh run_tests.sh
-
-after_success:
-    - sh ./deploy_docs.sh
 
 notifications:
   email: false

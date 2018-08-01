@@ -1,5 +1,4 @@
-from client.fixtures import clean_mongo
-from conftest import QL_URL, ORION_URL
+from conftest import QL_URL, ORION_URL, clean_mongo, clean_crate
 import json
 import requests
 import time
