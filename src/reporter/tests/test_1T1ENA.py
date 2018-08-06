@@ -335,6 +335,7 @@ def test_not_found():
         'type': entity_type,
     }
     r = requests.get(query_url(), params=query_params)
+    print(r.text)
     assert r.status_code == 404, r.text
     assert r.json() == {
         "error": "Not Found",

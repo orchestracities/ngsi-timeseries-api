@@ -39,18 +39,24 @@ def query_1T1ENA(entity_id,   # In Path
     fiware_sp = request.headers.get('fiware-servicepath', None)
 
     entities = None
-    with CrateTranslatorInstance() as trans:
-        entities = trans.query(attr_names=attrs,
-                           entity_type=type_,
-                           entity_id=entity_id,
-                           aggr_method=aggr_method,
-                           from_date=from_date,
-                           to_date=to_date,
-                           last_n=last_n,
-                           limit=limit,
-                           offset=offset,
-                           fiware_service=fiware_s,
-                           fiware_servicepath=fiware_sp,)
+    try:
+        with CrateTranslatorInstance() as trans:
+            entities = trans.query(attr_names=attrs,
+                               entity_type=type_,
+                               entity_id=entity_id,
+                               aggr_method=aggr_method,
+                               from_date=from_date,
+                               to_date=to_date,
+                               last_n=last_n,
+                               limit=limit,
+                               offset=offset,
+                               fiware_service=fiware_s,
+                               fiware_servicepath=fiware_sp,)
+    except Exception as e:
+        # Temp workaround to debug test_not_found
+        msg = "Something went wrong with QL. Error: {}".format(e)
+        return msg, 500
+
     if entities:
         if aggr_method:
             index = []
