@@ -98,10 +98,8 @@ def add_location(entity, raise_error=False, session=None, cache=None):
     addr = entity['address']
     if not isinstance(addr, dict) or not isinstance(addr['value'], dict):
         error_msg = 'Attribute address in entity (type: "{}", id: "{}")' \
-                    'is not a dict, so geocoding will not act.'.format(
-            entity['type'],entity['id']
-        )
-        logger.info('{}'.format(error_msg))
+                    'is not a dict, so geocoding will not act.'
+        logger.info(error_msg.format(entity['type'], entity['id']))
         return entity
 
     # Get Address Key
