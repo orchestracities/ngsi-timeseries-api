@@ -18,6 +18,17 @@ def test_entity_with_location(air_quality_observed):
     assert r == old_entity
 
 
+def test_entity_with_non_dict_address(air_quality_observed):
+    air_quality_observed.pop('location')
+    air_quality_observed['address']['value'] = "string address"
+
+    old_entity = copy.copy(air_quality_observed)
+
+    r = geocoding.add_location(air_quality_observed)
+    assert r is air_quality_observed
+    assert r == old_entity
+
+
 def test_entity_add_point(air_quality_observed):
     air_quality_observed.pop('location')
 

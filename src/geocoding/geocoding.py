@@ -95,6 +95,15 @@ def add_location(entity, raise_error=False, session=None, cache=None):
         logger.info('{}, missing "address" attribute.'.format(error_msg))
         return entity
 
+    addr = entity['address']
+    if not isinstance(addr, dict) or not isinstance(addr['value'], dict):
+        error_msg = 'Attribute address in entity (type: "{}", id: "{}")' \
+                    'is not a dict, so geocoding will not act.'.format(
+            entity['type'],entity['id']
+        )
+        logger.info('{}'.format(error_msg))
+        return entity
+
     # Get Address Key
     key, osm_type = get_address_key_and_type(entity)
 

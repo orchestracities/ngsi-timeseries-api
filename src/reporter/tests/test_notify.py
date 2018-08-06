@@ -304,3 +304,32 @@ def test_time_index(notification, clean_mongo, crate_translator):
     entities = crate_translator.query()
     obtained = entities[-1][CrateTranslator.TIME_INDEX_NAME]
     assert obtained.startswith("{}".format(current.year))
+
+
+def test_no_value_in_notification(notification):
+    # No value
+    notification['data'][0] = {
+        'id': '299531',
+        'type': 'AirQualityObserved',
+        'p': {'type': 'string', 'value': '994', 'metadata': {}},
+        'pm10': {'type': 'string', 'metadata': {}},
+        'pm25': {'type': 'string', 'value': '5', 'metadata': {}},
+    }
+    url = '{}'.format(notify_url)
+    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    assert r.status_code == 400
+    assert 'Payload is missing value for attribute pm10' in r.text
+
+    # Empty value
+    notification['data'][0] = {
+        'id': '299531',
+        'type': 'AirQualityObserved',
+        'p': {'type': 'string', 'value': '994', 'metadata': {}},
+        'pm10': {'type': 'string', 'value': '0', 'metadata': {}},
+        'pm25': {'type': 'string', 'value': '', 'metadata': {}},
+    }
+    url = '{}'.format(notify_url)
+    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    assert r.status_code == 400
+    print(r.text)
+    assert 'Payload is missing value for attribute pm25' in r.text
