@@ -25,7 +25,7 @@ services:
         - reportertests
 
   quantumleap:
-    build: ../../
+    build: ../../../
     image: quantumleap
     ports:
       - "8668:8668"
