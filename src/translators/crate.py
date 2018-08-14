@@ -74,6 +74,11 @@ class CrateTranslator(base_translator.BaseTranslator):
         self.cursor.execute("refresh table {}".format(','.join(table_names)))
 
 
+    def get_db_version(self):
+        self.cursor.execute("select version['number'] from sys.nodes")
+        return self.cursor.fetchall()[0][0]
+
+
     def _get_isoformat(self, ms_since_epoch):
         """
         :param ms_since_epoch:
@@ -85,7 +90,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         if ms_since_epoch is None:
             raise ValueError
         d = timedelta(milliseconds=ms_since_epoch)
-        utc = datetime(1970,1,1,0,0,0,0) + d
+        utc = datetime(1970, 1, 1, 0, 0, 0, 0) + d
         return utc.isoformat()
 
 
@@ -240,12 +245,9 @@ class CrateTranslator(base_translator.BaseTranslator):
                     table[col] = NGSI_TO_CRATE[NGSI_TEXT]
 
                 else:
-                    crate_t = NGSI_TO_CRATE[attr_t]
-
                     # Github issue 44: Disable indexing for long string
-                    if attr_t == NGSI_TEXT and \
-                        len(e[attr].get('value', '')) > 32765:
-                        crate_t = crate_t + ' INDEX OFF'
+                    db_version = self.get_db_version()
+                    crate_t = _adjust_gh_44(attr_t, e[attr], db_version)
 
                     # Github issue 24: StructuredValue == object or array
                     is_list = isinstance(e[attr].get('value', None), list)
@@ -333,10 +335,11 @@ class CrateTranslator(base_translator.BaseTranslator):
         :param metadata: dict
             The dict mapping the matedata of each column. See original_attrs.
         """
-        stmt = ("create table if not exists {} "
-                "(table_name string primary key, entity_attrs object) with "
-                "(number_of_replicas = '2-all')")
-        self.cursor.execute(stmt.format(METADATA_TABLE_NAME))
+        stmt = "create table if not exists {} " \
+               "(table_name string primary key, entity_attrs object) " \
+               "with (number_of_replicas = '2-all')"
+        op = stmt.format(METADATA_TABLE_NAME)
+        self.cursor.execute(op)
 
         if self.cursor.rowcount:
             # Table just created!
@@ -592,6 +595,25 @@ class CrateTranslator(base_translator.BaseTranslator):
             logging.debug("{}".format(e))
 
         return count
+
+
+def _adjust_gh_44(attr_t, attr, db_version):
+    """
+    Github issue 44: Disable indexing for long string
+    """
+    crate_t = NGSI_TO_CRATE[attr_t]
+    if attr_t == NGSI_TEXT:
+        is_long = len(attr.get('value', '')) > 32765
+        if is_long:
+            # Before Crate v2.3
+            crate_t += ' INDEX OFF'
+
+            # After Crate v2.3
+            major = int(db_version.split('.')[0])
+            minor = int(db_version.split('.')[1])
+            if (major == 2 and minor >= 3) or major > 2:
+                crate_t += ' STORAGE WITH (columnstore = false)'
+    return crate_t
 
 
 @contextmanager

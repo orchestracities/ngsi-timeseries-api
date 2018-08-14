@@ -6,8 +6,13 @@ from utils.common import *
 import statistics
 
 
+def test_db_version(translator):
+    version = translator.get_db_version()
+    assert version == '3.0.5'
+
+
 def test_insert(translator):
-    entities = create_random_entities(1, 2, 10, use_time=True, use_geo=True)
+    entities = create_random_entities(1, 2, 3, use_time=True, use_geo=True)
     result = translator.insert(entities)
     assert result.rowcount == len(entities)
 

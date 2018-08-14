@@ -40,6 +40,7 @@ services:
 
   crate:
     image: crate:${CRATE_VERSION}
+    command: crate -Clicense.enterprise=false -Cauth.host_based.enabled=false
     ports:
       # Admin UI
       - "4200:4200"
