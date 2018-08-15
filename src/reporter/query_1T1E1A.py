@@ -1,5 +1,7 @@
+from exceptions.exceptions import AmbiguousNGSIIdError
 from flask import request
 from translators.crate import CrateTranslatorInstance, CrateTranslator
+import logging
 
 
 def query_1T1E1A(attr_name,   # In Path
@@ -17,13 +19,6 @@ def query_1T1E1A(attr_name,   # In Path
     See /entities/{entityId}/attrs/{attrName} in API Specification
     quantumleap.yml
     """
-    if type_ is None:
-        r = {
-            "error": "Not Implemented",
-            "description": "For now, you must always specify entity type."
-        }
-        return r, 400
-
     if options or aggr_period:
         import warnings
         warnings.warn("Unimplemented query parameters: options, aggrPeriod")
@@ -32,18 +27,31 @@ def query_1T1E1A(attr_name,   # In Path
     fiware_sp = request.headers.get('fiware-servicepath', None)
 
     entities = None
-    with CrateTranslatorInstance() as trans:
-        entities = trans.query(attr_names=[attr_name],
-                           entity_type=type_,
-                           entity_id=entity_id,
-                           aggr_method=aggr_method,
-                           from_date=from_date,
-                           to_date=to_date,
-                           last_n=last_n,
-                           limit=limit,
-                           offset=offset,
-                           fiware_service=fiware_s,
-                           fiware_servicepath=fiware_sp,)
+    try:
+        with CrateTranslatorInstance() as trans:
+            entities = trans.query(attr_names=[attr_name],
+                               entity_type=type_,
+                               entity_id=entity_id,
+                               aggr_method=aggr_method,
+                               from_date=from_date,
+                               to_date=to_date,
+                               last_n=last_n,
+                               limit=limit,
+                               offset=offset,
+                               fiware_service=fiware_s,
+                               fiware_servicepath=fiware_sp,)
+    except AmbiguousNGSIIdError as e:
+        return {
+            "error": "AmbiguousNGSIIdError",
+            "description": str(e)
+        }, 409
+
+    except Exception as e:
+        # Temp workaround to debug test_not_found
+        msg = "Something went wrong with QL. Error: {}".format(e)
+        logging.getLogger().error(msg, exc_info=True)
+        return msg, 500
+
     if entities:
         if aggr_method:
             index = []

@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from crate import client
 from crate.client.exceptions import ProgrammingError
 from datetime import datetime, timedelta
+from exceptions.exceptions import AmbiguousNGSIIdError
 from translators import base_translator
 from utils.common import iter_entity_attrs
 import logging
@@ -42,6 +43,7 @@ CRATE_TO_NGSI['string_array'] = 'Array'
 METADATA_TABLE_NAME = "md_ets_metadata"
 FIWARE_SERVICEPATH = 'fiware_servicepath'
 TENANT_PREFIX = 'mt'
+TYPE_PREFIX = 'et'
 
 
 class CrateTranslator(base_translator.BaseTranslator):
@@ -145,7 +147,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         https://crate.io/docs/crate/reference/en/latest/sql/general/lexical-structure.html#key-words-and-identifiers
         ), both schema and table name are prefixed.
         """
-        et = "et{}".format(entity_type.lower())
+        et = "{}{}".format(TYPE_PREFIX, entity_type.lower())
         if fiware_service:
             return "{}{}.{}".format(TENANT_PREFIX, fiware_service.lower(), et)
         return et
@@ -441,8 +443,13 @@ class CrateTranslator(base_translator.BaseTranslator):
               fiware_service=None,
               fiware_servicepath=None):
         if entity_id and not entity_type:
-            msg = "For now you must specify entity_type when stating entity_id"
-            raise NotImplementedError(msg)
+            entity_type = self._get_entity_type(entity_id, fiware_service)
+
+            if not entity_type:
+                return []
+
+            if len(entity_type.split(',')) > 1:
+                raise AmbiguousNGSIIdError(entity_id)
 
         select_clause = self._get_select_clause(attr_names, aggr_method)
 
@@ -530,8 +537,13 @@ class CrateTranslator(base_translator.BaseTranslator):
                       to_date=None, fiware_service=None,
                       fiware_servicepath=None):
         if not entity_type:
-            msg = "For now you must specify entity type"
-            raise NotImplementedError(msg)
+            entity_type = self._get_entity_type(entity_id, fiware_service)
+
+            if not entity_type:
+                return 0
+
+            if len(entity_type.split(',')) > 1:
+                raise AmbiguousNGSIIdError(entity_id)
 
         # First delete entries from table
         table_name = self._et2tn(entity_type, fiware_service)
@@ -595,6 +607,41 @@ class CrateTranslator(base_translator.BaseTranslator):
             logging.debug("{}".format(e))
 
         return count
+
+
+    def _get_entity_type(self, entity_id, fiware_service):
+        """
+        Find the type of the given entity_id.
+        :returns: unicode
+            Empty value if there is no entity with such entity_id.
+            Or just the entity_type of the given entity_id if unique.
+            Or a comma-separated list of entity_types with at least one record
+            with such entity_id.
+        """
+        # Filter using tenant information
+        if fiware_service is None:
+            wc = "where table_name NOT like '{}%.%'".format(TENANT_PREFIX)
+        else:
+            # See _et2tn
+            prefix = "{}{}".format(TENANT_PREFIX, fiware_service.lower())
+            wc = "where table_name like '{}.%'".format(prefix)
+
+        stmt = "select distinct(table_name) from {} {}".format(
+            METADATA_TABLE_NAME,
+            wc
+        )
+        self.cursor.execute(stmt)
+        all_types = [et[0] for et in self.cursor.fetchall()]
+
+        matching_types = []
+        for et in all_types:
+            stmt = "select distinct(entity_type) from {} " \
+                   "where entity_id = '{}'".format(et, entity_id)
+            self.cursor.execute(stmt)
+            types = [t[0] for t in self.cursor.fetchall()]
+            matching_types.extend(types)
+
+        return ','.join(matching_types)
 
 
 def _adjust_gh_44(attr_t, attr, db_version):

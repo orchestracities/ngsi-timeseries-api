@@ -1,5 +1,7 @@
+from exceptions.exceptions import AmbiguousNGSIIdError
 from flask import request
 from translators.crate import CrateTranslatorInstance, CrateTranslator
+import logging
 
 
 def query_1T1ENA(entity_id,   # In Path
@@ -17,13 +19,6 @@ def query_1T1ENA(entity_id,   # In Path
     See /entities/{entityId}/attrs/{attrName} in API Specification
     quantumleap.yml
     """
-    if type_ is None:
-        r = {
-            "error": "Not Implemented",
-            "description": "For now, you must always specify entity type."
-        }
-        return r, 400
-
     if options or aggr_period:
         import warnings
         warnings.warn("Unimplemented query parameters: options, aggrPeriod")
@@ -52,9 +47,16 @@ def query_1T1ENA(entity_id,   # In Path
                                offset=offset,
                                fiware_service=fiware_s,
                                fiware_servicepath=fiware_sp,)
+    except AmbiguousNGSIIdError as e:
+        return {
+            "error": "AmbiguousNGSIIdError",
+            "description": str(e)
+        }, 409
+
     except Exception as e:
         # Temp workaround to debug test_not_found
         msg = "Something went wrong with QL. Error: {}".format(e)
+        logging.getLogger().error(msg, exc_info=True)
         return msg, 500
 
     if entities:

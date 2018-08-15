@@ -1,3 +1,4 @@
+from exceptions.exceptions import AmbiguousNGSIIdError
 from translators.base_translator import BaseTranslator
 from translators.benchmark import benchmark
 from translators.crate import NGSI_TEXT
@@ -69,16 +70,48 @@ def test_query_all(translator):
 def test_attrs_by_entity_id(translator):
     # First insert some data
     num_updates = 10
-    entities = create_random_entities(1, 2, num_updates, use_time=True, use_geo=True)
+    entities = create_random_entities(num_types=2,
+                                      num_ids_per_type=2,
+                                      num_updates=num_updates,
+                                      use_time=True,
+                                      use_geo=True)
     translator.insert(entities)
-    translator._refresh(['0'])
+    translator._refresh(['0', '1'])
 
     # Now query by entity id
     entity_id = '0-1'
     loaded_entities = translator.query(entity_type='0', entity_id=entity_id)
-
     assert len(loaded_entities) == num_updates
-    assert all(map(lambda e: e['id'] == entity_id, loaded_entities))
+    assert all(map(lambda e: e['id'] == '0-1', loaded_entities))
+
+    # entity_type should be optional
+    entity_id = '1-1'
+    loaded_entities = translator.query(entity_id=entity_id)
+    assert len(loaded_entities) == num_updates
+    assert all(map(lambda e: e['id'] == '1-1', loaded_entities))
+
+    # nonexistent id should return no data
+    loaded_entities = translator.query(entity_id='some_nonexistent_id')
+    assert len(loaded_entities) == 0
+
+
+def test_attrs_by_id_ambiguity(translator):
+    entities = create_random_entities(num_types=2,
+                                      num_ids_per_type=2,
+                                      num_updates=3)
+    for e in entities:
+        e['id'] = 'repeated_id'
+
+    translator.insert(entities)
+    translator._refresh(['0', '1'])
+
+    # OK if specifying type
+    loaded_entities = translator.query(entity_type='0', entity_id='repeated_id')
+    assert len(loaded_entities) == 3 * 2
+
+    # NOT OK otherwise
+    with pytest.raises(AmbiguousNGSIIdError):
+        translator.query(entity_id='repeated_id')
 
 
 WITHIN_EAST_EMISPHERE = "within(attr_geo, 'POLYGON ((0 -90, 180 -90, 180 90, 0 90, 0 -90))')"
