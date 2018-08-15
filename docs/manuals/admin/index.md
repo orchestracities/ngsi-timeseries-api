@@ -66,7 +66,7 @@ $ docker-compose -f docker-compose-dev.yml down -v
 ## Deploy QuantumLeap in HA on a Docker Swarm cluster
 
 To deploy QuantumLeap services in HA as a service on a Docker Swarm Cluster,
-you can follow the instructions in [this repository](https://smartsdk.github.io/smartsdk-recipes/data-management/quantumleap/readme/).
+you can follow the instructions in [this repository](https://smartsdk-recipes.readthedocs.io/en/latest/data-management/quantumleap/readme/).
 
 There, you will find instructions on how to deploy in HA not only
 **QuantumLeap** but also all the complementary services that typically form

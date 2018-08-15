@@ -56,7 +56,7 @@ $ docker-compose -f docker-compose-dev.yml down -v
 
 ## Docker Swarm クラスタ上で HA に QuantumLeap をデプロイ
 
-Docker Swarm Cluster 上のサービスとして HA　に QuantumLeap サービスをデプロイするには、[このリポジトリ](https://smartsdk.github.io/smartsdk-recipes/data-management/quantumleap/readme/)の指示に従います。
+Docker Swarm Cluster 上のサービスとして HA　に QuantumLeap サービスをデプロイするには、[このリポジトリ](https://smartsdk-recipes.readthedocs.io/en/latest/data-management/quantumleap/readme/)の指示に従います。
 
 ここでは、**QuantumLeap** だけでなく、通常は展開シナリオの一部を構成する補完的なサービスを展開する方法について説明します。
 
