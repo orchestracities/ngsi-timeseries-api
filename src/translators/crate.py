@@ -104,9 +104,9 @@ class CrateTranslator(base_translator.BaseTranslator):
         :return: iterable(NGSI Entity)
             Iterable over the translated NGSI entities.
         """
-        stmt = "select entity_attrs from {} where table_name = '{}'".format(
-            METADATA_TABLE_NAME, table_name)
-        self.cursor.execute(stmt)
+        stmt = "select entity_attrs from {} " \
+               "where table_name = ?".format(METADATA_TABLE_NAME)
+        self.cursor.execute(stmt, [table_name,])
         res = self.cursor.fetchall()
 
         if len(res) != 1:
@@ -348,8 +348,8 @@ class CrateTranslator(base_translator.BaseTranslator):
             persisted_metadata = {}
         else:
             # Bring translation table!
-            stmt = "select entity_attrs from {} where table_name = '{}'"
-            self.cursor.execute(stmt.format(METADATA_TABLE_NAME, table_name))
+            stmt = "select entity_attrs from {} where table_name = ?"
+            self.cursor.execute(stmt.format(METADATA_TABLE_NAME), [table_name,])
 
             # By design, one entry per table_name
             res = self.cursor.fetchall()
@@ -597,11 +597,9 @@ class CrateTranslator(base_translator.BaseTranslator):
             return 0
 
         # Delete entry from metadata table
-        op = "delete from {} where table_name = '{}'".format(
-            METADATA_TABLE_NAME, table_name
-        )
+        op = "delete from {} where table_name = ?".format(METADATA_TABLE_NAME)
         try:
-            self.cursor.execute(op)
+            self.cursor.execute(op, [table_name,])
         except ProgrammingError as e:
             # What if this one fails and previous didn't?
             logging.debug("{}".format(e))
@@ -636,8 +634,8 @@ class CrateTranslator(base_translator.BaseTranslator):
         matching_types = []
         for et in all_types:
             stmt = "select distinct(entity_type) from {} " \
-                   "where entity_id = '{}'".format(et, entity_id)
-            self.cursor.execute(stmt)
+                   "where entity_id = ?".format(et)
+            self.cursor.execute(stmt, [entity_id,])
             types = [t[0] for t in self.cursor.fetchall()]
             matching_types.extend(types)
 
