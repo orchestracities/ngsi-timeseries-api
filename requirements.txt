@@ -15,7 +15,7 @@ influxdb==4.0.0
 itsdangerous==0.24
 Jinja2==2.9.6
 jsonschema==2.6.0
-locustio==0.8
+locustio==0.8a1
 MarkupSafe==1.0
 matplotlib==2.0.1
 msgpack-python==0.4.8
