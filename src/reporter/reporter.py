@@ -165,22 +165,6 @@ def add_geodata(entity):
         geocoding.add_location(entity, cache=cache)
 
 
-def query_1TNE1A():
-    r = {
-        "error": "Not Implemented",
-        "description": "This API method is not yet implemented."
-    }
-    return r, 400
-
-
-def query_1TNE1A_value():
-    r = {
-        "error": "Not Implemented",
-        "description": "This API method is not yet implemented."
-    }
-    return r, 400
-
-
 def query_1TNENA():
     r = {
         "error": "Not Implemented",

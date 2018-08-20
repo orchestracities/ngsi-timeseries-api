@@ -126,7 +126,7 @@ def create_random_entities(num_types, num_ids_per_type, num_updates, use_time=Fa
 
 def iter_entity_attrs(entity):
     for attr in entity:
-        if attr not in ['type', 'id']:
+        if attr not in ['type', 'id']:  # Include TIME_INDEX_NAME
             yield attr
 
 
