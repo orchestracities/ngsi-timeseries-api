@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from crate import client
 from crate.client.exceptions import ProgrammingError
 from datetime import datetime, timedelta
-from exceptions.exceptions import AmbiguousNGSIIdError
+from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption
 from translators import base_translator
 from utils.common import iter_entity_attrs
 import logging
@@ -44,6 +44,7 @@ METADATA_TABLE_NAME = "md_ets_metadata"
 FIWARE_SERVICEPATH = 'fiware_servicepath'
 TENANT_PREFIX = 'mt'
 TYPE_PREFIX = 'et'
+VALID_AGGR_METHODS = ['count', 'sum', 'avg', 'min', 'max',]
 
 
 class CrateTranslator(base_translator.BaseTranslator):
@@ -210,6 +211,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         table = {
             'entity_id': NGSI_TO_CRATE['Text'],
             'entity_type': NGSI_TO_CRATE['Text'],
+            self.TIME_INDEX_NAME: NGSI_TO_CRATE[NGSI_DATETIME],
         }
 
         # Preserve original attr names and types
@@ -223,10 +225,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         for e in entities:
             for attr in iter_entity_attrs(e):
                 if attr == self.TIME_INDEX_NAME:
-                    table[self.TIME_INDEX_NAME] = NGSI_TO_CRATE[NGSI_DATETIME]
                     continue
-
-                col = self._ea2cn(attr)
 
                 if isinstance(e[attr], dict) and 'type' in e[attr]:
                     attr_t = e[attr]['type']
@@ -234,6 +233,7 @@ class CrateTranslator(base_translator.BaseTranslator):
                     # Won't guess the type if used did't specify the type.
                     attr_t = NGSI_TEXT
 
+                col = self._ea2cn(attr)
                 original_attrs[col] = (attr, attr_t)
 
                 if attr_t not in NGSI_TO_CRATE:
@@ -385,12 +385,13 @@ class CrateTranslator(base_translator.BaseTranslator):
     def _get_select_clause(self, attr_names, aggr_method, add_ids=False):
         if attr_names:
             if aggr_method:
-                attrs = ["{}({})".format(aggr_method, a) for a in attr_names]
+                attrs = ["{}({}) as {}".format(aggr_method, a, a) for a in
+                         set(attr_names)]
             else:
                 attrs = [self.TIME_INDEX_NAME]
-                if add_ids:
-                    attrs.append('entity_id')
                 attrs.extend(str(a) for a in attr_names)
+            if add_ids:
+                attrs.append('entity_id')
             select = ",".join(attrs)
 
         else:
@@ -449,6 +450,9 @@ class CrateTranslator(base_translator.BaseTranslator):
         if entity_id and entity_ids:
             raise ValueError("Cannot use both entity_id and entity_ids params "
                              "in the same call.")
+
+        if aggr_method and aggr_method not in VALID_AGGR_METHODS:
+            raise UnsupportedOption("aggr_method={}".format(aggr_method))
 
         if entity_id and not entity_type:
             entity_type = self._get_entity_type(entity_id, fiware_service)
@@ -510,10 +514,7 @@ class CrateTranslator(base_translator.BaseTranslator):
                 entities = []
             else:
                 res = self.cursor.fetchall()
-                if aggr_method and attr_names:
-                    col_names = attr_names
-                else:
-                    col_names = [x[0] for x in self.cursor.description]
+                col_names = [x[0] for x in self.cursor.description]
                 entities = list(self.translate_to_ngsi(res, col_names, tn))
             result.extend(entities)
 

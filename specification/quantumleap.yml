@@ -215,42 +215,48 @@ parameters:
     name: aggrPeriod
     type: string
     enum: [year, month, day, hour, minute, second]
-    description: "Optional. In not defined, the aggregation will apply to all
-     the values contained in the search result. If defined, the aggregation
-     function will instead be applied N times, once for each period, and all
-     those results will be considered for the result. For example, a query
-     asking for the average temperature of an attribute will typically return
-     1 value. However, with an aggregationPeriod of day, you get the daily
-     average of the temperature instead (more than one value assuming you had
-      measurements across many days within the scope of your search result)"
+    description: "Optional. (This parameter is not yet supported). In not
+    defined, the aggregation will apply to all the values contained in the
+    search result.
+    If defined, the aggregation function will instead be applied N times,
+    once for each period, and all those results will be considered for the
+    result. For example, a query asking for the average temperature of an
+    attribute will typically return 1 value.
+    However, with an aggregationPeriod of day, you get the daily average of
+    the temperature instead (more than one value assuming you had
+    measurements across many days within the scope of your search result)"
   aggrScope:
     in: query
     name: aggrScope
     type: string
     enum: [global, entity]
     default: entity
-    description: "Optional. When the query results cover historical data for
-    multiple entities instances, you can define the aggregation method to be
-    applied for each entity instance [entity] or across them [global]."
+    description: "Optional. (This parameter is not yet supported). When the
+    query results cover historical data for multiple entities instances, you
+    can define the aggregation method to be applied for each entity instance
+    [entity] or across them [global]."
   options:
     in: query
     name: options
     type: string
     enum: [keyValues, values]
-    description: "Options dictionary to format output. See definition in
+    description: "Optional. (This parameter is not yet supported). Options
+    dictionary to format output. See definition in
     NGSIv2 for example here: https://orioncontextbroker.docs.apiary.io/#reference/entities/list-entities/list-entities"
   fromDate:
     in: query
     name: fromDate
     type: string
-    description: "Optional. The starting date and time from which the context
-    information is queried. Inclusive."
+    description: "Optional. The starting date and time (inclusive) from which
+    the context information is queried. Must be in ISO8601 format (e.g.,
+    2018-01-05T15:44:34)"
   toDate:
     in: query
     name: toDate
     type: string
-    description: "Optional. The final date and time from which the context
-    information is queried. Inclusive."
+    description: "Optional. The final date and time (inclusive) from which the
+    context information is queried. Must be in ISO8601 format (e.g.,
+    2018-01-05T15:44:34)"
   lastN:
     in: query
     name: lastN
@@ -727,11 +733,13 @@ paths:
 
   /types/{entityType}/attrs/{attrName}:
     get:
-      operationId: reporter.reporter.query_1TNE1A
-      summary: "(To Be Implemented) History of an attribute of N entities of
-       the same type."
-      description: "For example, query the average pressure of this month in
-      all the weather stations."
+      operationId: reporter.query_1TNE1A.query_1TNE1A
+      summary: "History of an attribute of N entities of the same type."
+      description: "For example, query the pressure measurements of this
+      month in all the weather stations. Note in the response, the index and
+      values arrays are parallel. Also, when using aggrMethod, the aggregation
+      is done by-entity instance. In this case, the index array is just the
+      fromDate and toDate values user specified in the request (if any)."
       tags:
         - queries
       parameters:
@@ -795,9 +803,9 @@ paths:
 
   /types/{entityType}/attrs/{attrName}/value:
     get:
-      operationId: reporter.reporter.query_1TNE1A_value
-      summary: "(To Be Implemented) History of an attribute (values only) of N
-      entities of the same type."
+      operationId: reporter.query_1TNE1A.query_1TNE1A_value
+      summary: "History of an attribute (values only) of N entities of the
+      same type."
       description: "For example, query the average pressure (values only,
       no metadata) of this month in all the weather stations."
       tags:
