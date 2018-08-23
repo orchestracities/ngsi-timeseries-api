@@ -341,15 +341,3 @@ def test_not_found():
         "error": "Not Found",
         "description": "No records were found for such query."
     }
-
-
-def test_tmp_no_type():
-    """
-    For now specifying entity type is mandatory
-    """
-    r = requests.get(query_url(), params={})
-    assert r.status_code == 400, r.text
-    assert r.json() == {
-        "error": "Not Implemented",
-        "description": "For now, you must always specify entity type."
-    }

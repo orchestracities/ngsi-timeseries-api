@@ -1,22 +1,24 @@
-from conftest import QL_URL
+from conftest import QL_URL, crate_translator as translator
+from exceptions.exceptions import AmbiguousNGSIIdError
 from reporter.conftest import create_notification
-from conftest import crate_translator as translator
 import json
 import requests
 
 notify_url = "{}/notify".format(QL_URL)
 
 
-def insert_test_data():
+def insert_test_data(entity_id=None):
     # 3 entity types, 2 entities for each, 10 updates for each entity.
     for t in ("AirQualityObserved", "Room", "TrafficFlowObserved"):
         for e in range(2):
             for u in range(10):
-                notification = create_notification(t, '{}{}'.format(t, e))
+                ei = entity_id or '{}{}'.format(t, e)
+                notification = create_notification(t, ei)
                 data = json.dumps(notification)
+                h = {'Content-Type': 'application/json'}
                 r = requests.post(notify_url,
                                   data=data,
-                                  headers={'Content-Type':'application/json'})
+                                  headers=h)
                 assert r.status_code == 200, r.text
 
 
@@ -105,16 +107,73 @@ def test_not_found():
     }
 
 
-def test_tmp_no_type():
-    """
-    For now specifying entity type is mandatory
-    """
-    entity_type = "TrafficFlowObserved"
-    url = '{}/entities/{}'.format(QL_URL, entity_type+'0')
-    r = requests.delete(url, params={})
+def test_no_type_not_unique(translator):
+    # If id is not unique across types, you must specify type.
+    insert_test_data(entity_id='repeatedId')
+    translator._refresh(['AirQualityObserved'])
 
-    assert r.status_code == 400, r.text
+    url = '{}/entities/{}'.format(QL_URL, 'repeatedId')
+
+    # Without type
+    r = requests.delete(url, params={})
+    assert r.status_code == 409, r.text
     assert r.json() == {
-        "error": "Not Implemented",
-        "description": "For now, you must always specify entity type."
+        "error": "AmbiguousNGSIIdError",
+        "description": str(AmbiguousNGSIIdError('repeatedId'))
     }
+
+    # With type
+    r = requests.delete(url, params={'type': 'AirQualityObserved'})
+    assert r.status_code == 204, r.text
+
+
+def test_delete_no_type_with_multitenancy(translator):
+    """
+    A Car and a Truck with the same entity_id. Same thing in two different
+    tenants (USA an EU).
+    """
+    # You have a car1
+    car = json.dumps(create_notification("Car", "car1"))
+
+    # In Default
+    h_def = {'Content-Type': 'application/json'}
+    r = requests.post(notify_url, data=car, headers=h_def)
+    assert r.status_code == 200
+    translator._refresh(['Car'])
+
+    # In EU
+    h_eu = {
+        'Content-Type': 'application/json',
+        'Fiware-Service': 'EU'
+    }
+    r = requests.post(notify_url, data=car, headers=h_eu)
+    assert r.status_code == 200
+    translator._refresh(['Car'], fiware_service='EU')
+
+    # In USA
+    h_usa = {
+        'Content-Type': 'application/json',
+        'Fiware-Service': 'USA'
+    }
+    r = requests.post(notify_url, data=car, headers=h_usa)
+    assert r.status_code == 200
+    translator._refresh(['Car'], fiware_service='USA')
+
+    # I could delete car1 from default without giving a type
+    url = '{}/entities/{}'.format(QL_URL, 'car1')
+    r = requests.delete(url, params={}, headers=h_def)
+    assert r.status_code == 204, r.text
+
+    # But it should still be in EU.
+    r = requests.get(url, params={}, headers=h_eu)
+    assert r.status_code == 200, r.text
+
+    # I could delete car1 from EU without giving a type
+    url = '{}/entities/{}'.format(QL_URL, 'car1')
+    r = requests.delete(url, params={}, headers=h_eu)
+    assert r.status_code == 204, r.text
+    translator._refresh(['Car'], fiware_service='EU')
+
+    # But it should still be in USA.
+    r = requests.get(url, params={}, headers=h_usa)
+    assert r.status_code == 200, r.text

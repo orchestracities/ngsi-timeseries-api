@@ -8,15 +8,17 @@ def notify_url():
     return "{}/notify".format(QL_URL)
 
 
-def insert_test_data(translator, entity_types, n_entities, n_days):
+def insert_test_data(translator, entity_types, n_entities, n_days,
+                     entity_id=None):
     assert isinstance(entity_types, list)
 
     def get_notification(et, ei, temp_value, mod_value):
+        eid = entity_id or '{}{}'.format(et, ei)
         return {
             'subscriptionId': '5947d174793fe6f7eb5e3961',
             'data': [
                 {
-                    'id': '{}{}'.format(et, ei),
+                    'id': eid,
                     'type': et,
                     'temperature': {
                         'type': 'Number',

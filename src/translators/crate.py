@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from crate import client
 from crate.client.exceptions import ProgrammingError
 from datetime import datetime, timedelta
+from exceptions.exceptions import AmbiguousNGSIIdError
 from translators import base_translator
 from utils.common import iter_entity_attrs
 import logging
@@ -42,6 +43,7 @@ CRATE_TO_NGSI['string_array'] = 'Array'
 METADATA_TABLE_NAME = "md_ets_metadata"
 FIWARE_SERVICEPATH = 'fiware_servicepath'
 TENANT_PREFIX = 'mt'
+TYPE_PREFIX = 'et'
 
 
 class CrateTranslator(base_translator.BaseTranslator):
@@ -74,6 +76,11 @@ class CrateTranslator(base_translator.BaseTranslator):
         self.cursor.execute("refresh table {}".format(','.join(table_names)))
 
 
+    def get_db_version(self):
+        self.cursor.execute("select version['number'] from sys.nodes")
+        return self.cursor.fetchall()[0][0]
+
+
     def _get_isoformat(self, ms_since_epoch):
         """
         :param ms_since_epoch:
@@ -85,7 +92,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         if ms_since_epoch is None:
             raise ValueError
         d = timedelta(milliseconds=ms_since_epoch)
-        utc = datetime(1970,1,1,0,0,0,0) + d
+        utc = datetime(1970, 1, 1, 0, 0, 0, 0) + d
         return utc.isoformat()
 
 
@@ -97,9 +104,9 @@ class CrateTranslator(base_translator.BaseTranslator):
         :return: iterable(NGSI Entity)
             Iterable over the translated NGSI entities.
         """
-        stmt = "select entity_attrs from {} where table_name = '{}'".format(
-            METADATA_TABLE_NAME, table_name)
-        self.cursor.execute(stmt)
+        stmt = "select entity_attrs from {} " \
+               "where table_name = ?".format(METADATA_TABLE_NAME)
+        self.cursor.execute(stmt, [table_name,])
         res = self.cursor.fetchall()
 
         if len(res) != 1:
@@ -140,7 +147,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         https://crate.io/docs/crate/reference/en/latest/sql/general/lexical-structure.html#key-words-and-identifiers
         ), both schema and table name are prefixed.
         """
-        et = "et{}".format(entity_type.lower())
+        et = "{}{}".format(TYPE_PREFIX, entity_type.lower())
         if fiware_service:
             return "{}{}.{}".format(TENANT_PREFIX, fiware_service.lower(), et)
         return et
@@ -240,12 +247,9 @@ class CrateTranslator(base_translator.BaseTranslator):
                     table[col] = NGSI_TO_CRATE[NGSI_TEXT]
 
                 else:
-                    crate_t = NGSI_TO_CRATE[attr_t]
-
                     # Github issue 44: Disable indexing for long string
-                    if attr_t == NGSI_TEXT and \
-                        len(e[attr].get('value', '')) > 32765:
-                        crate_t = crate_t + ' INDEX OFF'
+                    db_version = self.get_db_version()
+                    crate_t = _adjust_gh_44(attr_t, e[attr], db_version)
 
                     # Github issue 24: StructuredValue == object or array
                     is_list = isinstance(e[attr].get('value', None), list)
@@ -333,18 +337,19 @@ class CrateTranslator(base_translator.BaseTranslator):
         :param metadata: dict
             The dict mapping the matedata of each column. See original_attrs.
         """
-        stmt = ("create table if not exists {} "
-                "(table_name string primary key, entity_attrs object) with "
-                "(number_of_replicas = '2-all')")
-        self.cursor.execute(stmt.format(METADATA_TABLE_NAME))
+        stmt = "create table if not exists {} " \
+               "(table_name string primary key, entity_attrs object) " \
+               "with (number_of_replicas = '2-all')"
+        op = stmt.format(METADATA_TABLE_NAME)
+        self.cursor.execute(op)
 
         if self.cursor.rowcount:
             # Table just created!
             persisted_metadata = {}
         else:
             # Bring translation table!
-            stmt = "select entity_attrs from {} where table_name = '{}'"
-            self.cursor.execute(stmt.format(METADATA_TABLE_NAME, table_name))
+            stmt = "select entity_attrs from {} where table_name = ?"
+            self.cursor.execute(stmt.format(METADATA_TABLE_NAME), [table_name,])
 
             # By design, one entry per table_name
             res = self.cursor.fetchall()
@@ -438,8 +443,13 @@ class CrateTranslator(base_translator.BaseTranslator):
               fiware_service=None,
               fiware_servicepath=None):
         if entity_id and not entity_type:
-            msg = "For now you must specify entity_type when stating entity_id"
-            raise NotImplementedError(msg)
+            entity_type = self._get_entity_type(entity_id, fiware_service)
+
+            if not entity_type:
+                return []
+
+            if len(entity_type.split(',')) > 1:
+                raise AmbiguousNGSIIdError(entity_id)
 
         select_clause = self._get_select_clause(attr_names, aggr_method)
 
@@ -527,8 +537,13 @@ class CrateTranslator(base_translator.BaseTranslator):
                       to_date=None, fiware_service=None,
                       fiware_servicepath=None):
         if not entity_type:
-            msg = "For now you must specify entity type"
-            raise NotImplementedError(msg)
+            entity_type = self._get_entity_type(entity_id, fiware_service)
+
+            if not entity_type:
+                return 0
+
+            if len(entity_type.split(',')) > 1:
+                raise AmbiguousNGSIIdError(entity_id)
 
         # First delete entries from table
         table_name = self._et2tn(entity_type, fiware_service)
@@ -582,16 +597,68 @@ class CrateTranslator(base_translator.BaseTranslator):
             return 0
 
         # Delete entry from metadata table
-        op = "delete from {} where table_name = '{}'".format(
-            METADATA_TABLE_NAME, table_name
-        )
+        op = "delete from {} where table_name = ?".format(METADATA_TABLE_NAME)
         try:
-            self.cursor.execute(op)
+            self.cursor.execute(op, [table_name,])
         except ProgrammingError as e:
             # What if this one fails and previous didn't?
             logging.debug("{}".format(e))
 
         return count
+
+
+    def _get_entity_type(self, entity_id, fiware_service):
+        """
+        Find the type of the given entity_id.
+        :returns: unicode
+            Empty value if there is no entity with such entity_id.
+            Or just the entity_type of the given entity_id if unique.
+            Or a comma-separated list of entity_types with at least one record
+            with such entity_id.
+        """
+        # Filter using tenant information
+        if fiware_service is None:
+            wc = "where table_name NOT like '{}%.%'".format(TENANT_PREFIX)
+        else:
+            # See _et2tn
+            prefix = "{}{}".format(TENANT_PREFIX, fiware_service.lower())
+            wc = "where table_name like '{}.%'".format(prefix)
+
+        stmt = "select distinct(table_name) from {} {}".format(
+            METADATA_TABLE_NAME,
+            wc
+        )
+        self.cursor.execute(stmt)
+        all_types = [et[0] for et in self.cursor.fetchall()]
+
+        matching_types = []
+        for et in all_types:
+            stmt = "select distinct(entity_type) from {} " \
+                   "where entity_id = ?".format(et)
+            self.cursor.execute(stmt, [entity_id,])
+            types = [t[0] for t in self.cursor.fetchall()]
+            matching_types.extend(types)
+
+        return ','.join(matching_types)
+
+
+def _adjust_gh_44(attr_t, attr, db_version):
+    """
+    Github issue 44: Disable indexing for long string
+    """
+    crate_t = NGSI_TO_CRATE[attr_t]
+    if attr_t == NGSI_TEXT:
+        is_long = len(attr.get('value', '')) > 32765
+        if is_long:
+            # Before Crate v2.3
+            crate_t += ' INDEX OFF'
+
+            # After Crate v2.3
+            major = int(db_version.split('.')[0])
+            minor = int(db_version.split('.')[1])
+            if (major == 2 and minor >= 3) or major > 2:
+                crate_t += ' STORAGE WITH (columnstore = false)'
+    return crate_t
 
 
 @contextmanager

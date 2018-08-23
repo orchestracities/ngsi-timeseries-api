@@ -2,7 +2,7 @@ appdirs==1.4.3
 click==6.7
 clickclick==1.2.1
 connexion==1.1.8
-crate==0.19.1
+crate==0.22.1
 cycler==0.10.0
 decorator==4.1.2
 Flask==0.12.1
@@ -15,7 +15,6 @@ influxdb==4.0.0
 itsdangerous==0.24
 Jinja2==2.9.6
 jsonschema==2.6.0
-locust==0.8
 locustio==0.8a1
 MarkupSafe==1.0
 matplotlib==2.0.1

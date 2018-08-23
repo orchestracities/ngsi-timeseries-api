@@ -1,6 +1,6 @@
-from conftest import QL_URL
+from conftest import QL_URL, crate_translator as translator
+from exceptions.exceptions import AmbiguousNGSIIdError
 from reporter.tests.utils import insert_test_data
-from conftest import crate_translator as translator
 import pytest
 import requests
 
@@ -269,13 +269,46 @@ def test_not_found():
     }
 
 
-def test_tmp_no_type():
+def test_no_type(translator):
     """
-    For now specifying entity type is mandatory
+    Specifying entity type is optional, provided that id is unique.
     """
+    insert_test_data(translator, ['Room', 'Car'], n_entities=2, n_days=30)
+
+    # With type
+    r = requests.get(query_url(), params={'type': 'Room'})
+    assert r.status_code == 200, r.text
+    res_with_type = r.json()
+
+    # Without type
     r = requests.get(query_url(), params={})
-    assert r.status_code == 400, r.text
+    assert r.status_code == 200, r.text
+    res_without_type = r.json()
+
+    assert res_with_type == res_without_type
+
+
+def test_no_type_not_unique(translator):
+    # If id is not unique across types, you must specify type.
+    insert_test_data(translator,
+                     ['Room', 'Car'],
+                     n_entities=2,
+                     n_days=30,
+                     entity_id="repeatedId")
+
+    url = "{qlUrl}/entities/{entityId}/attrs/temperature".format(
+        qlUrl=QL_URL,
+        entityId="repeatedId",
+    )
+
+    # With type
+    r = requests.get(url, params={'type': 'Room'})
+    assert r.status_code == 200, r.text
+
+    # Without type
+    r = requests.get(url, params={})
+    assert r.status_code == 409, r.text
     assert r.json() == {
-        "error": "Not Implemented",
-        "description": "For now, you must always specify entity type."
+        "error": "AmbiguousNGSIIdError",
+        "description": str(AmbiguousNGSIIdError('repeatedId'))
     }
