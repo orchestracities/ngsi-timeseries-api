@@ -418,7 +418,8 @@ class CrateTranslator(base_translator.BaseTranslator):
             ids = ",".join("'{}'".format(e) for e in entity_ids)
             clauses.append(" entity_id in ({}) ".format(ids))
         if from_date:
-            clauses.append(" {} >= '{}'".format(self.TIME_INDEX_NAME, from_date))
+            clauses.append(" {} >= '{}'".format(self.TIME_INDEX_NAME,
+                                                from_date))
         if to_date:
             clauses.append(" {} <= '{}'".format(self.TIME_INDEX_NAME, to_date))
 
@@ -542,7 +543,9 @@ class CrateTranslator(base_translator.BaseTranslator):
                 where_clause = ("where entity_id = '%s'" % entity_id)
             else:
                 where_clause = ''
-            stmt = "select {} from {} {}".format(select_clause, tn, where_clause)
+            stmt = "select {} from {} {}".format(select_clause,
+                                                 tn,
+                                                 where_clause)
             self.cursor.execute(stmt)
             avg = self.cursor.fetchone()[0]
             values.append(avg)

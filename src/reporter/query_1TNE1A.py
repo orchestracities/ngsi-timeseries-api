@@ -33,16 +33,16 @@ def query_1TNE1A(attr_name,   # In Path
     try:
         with CrateTranslatorInstance() as trans:
             entities = trans.query(attr_names=[attr_name],
-                               entity_type=entity_type,
-                               entity_ids=entity_ids,
-                               aggr_method=aggr_method,
-                               from_date=from_date,
-                               to_date=to_date,
-                               last_n=last_n,
-                               limit=limit,
-                               offset=offset,
-                               fiware_service=fiware_s,
-                               fiware_servicepath=fiware_sp,)
+                                   entity_type=entity_type,
+                                   entity_ids=entity_ids,
+                                   aggr_method=aggr_method,
+                                   from_date=from_date,
+                                   to_date=to_date,
+                                   last_n=last_n,
+                                   limit=limit,
+                                   offset=offset,
+                                   fiware_service=fiware_s,
+                                   fiware_servicepath=fiware_sp,)
     except AmbiguousNGSIIdError as e:
         return {
             "error": "AmbiguousNGSIIdError",
