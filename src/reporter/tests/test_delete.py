@@ -110,7 +110,7 @@ def test_not_found():
 def test_no_type_not_unique(translator):
     # If id is not unique across types, you must specify type.
     insert_test_data(entity_id='repeatedId')
-    translator._refresh(['AirQualityObserved'])
+    translator._refresh(['AirQualityObserved', 'Room', 'TrafficFlowObserved'])
 
     url = '{}/entities/{}'.format(QL_URL, 'repeatedId')
 
