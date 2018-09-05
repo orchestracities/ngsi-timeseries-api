@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from crate import client
 from crate.client.exceptions import ProgrammingError
 from datetime import datetime, timedelta
-from exceptions.exceptions import AmbiguousNGSIIdError
+from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption
 from translators import base_translator
 from utils.common import iter_entity_attrs
 import logging
@@ -44,6 +44,7 @@ METADATA_TABLE_NAME = "md_ets_metadata"
 FIWARE_SERVICEPATH = 'fiware_servicepath'
 TENANT_PREFIX = 'mt'
 TYPE_PREFIX = 'et'
+VALID_AGGR_METHODS = ['count', 'sum', 'avg', 'min', 'max',]
 
 
 class CrateTranslator(base_translator.BaseTranslator):
@@ -210,6 +211,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         table = {
             'entity_id': NGSI_TO_CRATE['Text'],
             'entity_type': NGSI_TO_CRATE['Text'],
+            self.TIME_INDEX_NAME: NGSI_TO_CRATE[NGSI_DATETIME],
         }
 
         # Preserve original attr names and types
@@ -223,10 +225,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         for e in entities:
             for attr in iter_entity_attrs(e):
                 if attr == self.TIME_INDEX_NAME:
-                    table[self.TIME_INDEX_NAME] = NGSI_TO_CRATE[NGSI_DATETIME]
                     continue
-
-                col = self._ea2cn(attr)
 
                 if isinstance(e[attr], dict) and 'type' in e[attr]:
                     attr_t = e[attr]['type']
@@ -234,6 +233,7 @@ class CrateTranslator(base_translator.BaseTranslator):
                     # Won't guess the type if used did't specify the type.
                     attr_t = NGSI_TEXT
 
+                col = self._ea2cn(attr)
                 original_attrs[col] = (attr, attr_t)
 
                 if attr_t not in NGSI_TO_CRATE:
@@ -382,13 +382,16 @@ class CrateTranslator(base_translator.BaseTranslator):
         return [r[0] for r in self.cursor.rows]
 
 
-    def _get_select_clause(self, attr_names, aggr_method):
+    def _get_select_clause(self, attr_names, aggr_method, add_ids=False):
         if attr_names:
             if aggr_method:
-                attrs = ["{}({})".format(aggr_method, a) for a in attr_names]
+                attrs = ["{}({}) as {}".format(aggr_method, a, a) for a in
+                         set(attr_names)]
             else:
                 attrs = [self.TIME_INDEX_NAME]
                 attrs.extend(str(a) for a in attr_names)
+            if add_ids:
+                attrs.append('entity_id')
             select = ",".join(attrs)
 
         else:
@@ -408,13 +411,15 @@ class CrateTranslator(base_translator.BaseTranslator):
         return min(default, limit)
 
 
-    def _get_where_clause(self, entity_id, from_date, to_date, fiware_sp=None):
+    def _get_where_clause(self, entity_ids, from_date, to_date, fiware_sp=None):
         clauses = []
 
-        if entity_id:
-            clauses.append(" entity_id = '{}' ".format(entity_id))
+        if entity_ids:
+            ids = ",".join("'{}'".format(e) for e in entity_ids)
+            clauses.append(" entity_id in ({}) ".format(ids))
         if from_date:
-            clauses.append(" {} >= '{}'".format(self.TIME_INDEX_NAME, from_date))
+            clauses.append(" {} >= '{}'".format(self.TIME_INDEX_NAME,
+                                                from_date))
         if to_date:
             clauses.append(" {} <= '{}'".format(self.TIME_INDEX_NAME, to_date))
 
@@ -433,6 +438,7 @@ class CrateTranslator(base_translator.BaseTranslator):
               attr_names=None,
               entity_type=None,
               entity_id=None,
+              entity_ids=None,
               where_clause=None,
               aggr_method=None,
               from_date=None,
@@ -442,6 +448,13 @@ class CrateTranslator(base_translator.BaseTranslator):
               offset=0,
               fiware_service=None,
               fiware_servicepath=None):
+        if entity_id and entity_ids:
+            raise ValueError("Cannot use both entity_id and entity_ids params "
+                             "in the same call.")
+
+        if aggr_method and aggr_method not in VALID_AGGR_METHODS:
+            raise UnsupportedOption("aggr_method={}".format(aggr_method))
+
         if entity_id and not entity_type:
             entity_type = self._get_entity_type(entity_id, fiware_service)
 
@@ -451,10 +464,18 @@ class CrateTranslator(base_translator.BaseTranslator):
             if len(entity_type.split(',')) > 1:
                 raise AmbiguousNGSIIdError(entity_id)
 
-        select_clause = self._get_select_clause(attr_names, aggr_method)
+        if entity_id:
+            entity_ids = tuple([entity_id])
+            # User specifies 1 entity_id -> exclude ids from response
+            add_ids = False
+        else:
+            add_ids = True
 
+        select_clause = self._get_select_clause(attr_names,
+                                                aggr_method,
+                                                add_ids)
         if not where_clause:
-            where_clause = self._get_where_clause(entity_id,
+            where_clause = self._get_where_clause(entity_ids,
                                                   from_date,
                                                   to_date,
                                                   fiware_servicepath)
@@ -494,10 +515,7 @@ class CrateTranslator(base_translator.BaseTranslator):
                 entities = []
             else:
                 res = self.cursor.fetchall()
-                if aggr_method and attr_names:
-                    col_names = attr_names
-                else:
-                    col_names = [x[0] for x in self.cursor.description]
+                col_names = [x[0] for x in self.cursor.description]
                 entities = list(self.translate_to_ngsi(res, col_names, tn))
             result.extend(entities)
 
@@ -525,7 +543,9 @@ class CrateTranslator(base_translator.BaseTranslator):
                 where_clause = ("where entity_id = '%s'" % entity_id)
             else:
                 where_clause = ''
-            stmt = "select {} from {} {}".format(select_clause, tn, where_clause)
+            stmt = "select {} from {} {}".format(select_clause,
+                                                 tn,
+                                                 where_clause)
             self.cursor.execute(stmt)
             avg = self.cursor.fetchone()[0]
             values.append(avg)
@@ -536,6 +556,9 @@ class CrateTranslator(base_translator.BaseTranslator):
     def delete_entity(self, entity_id, entity_type=None, from_date=None,
                       to_date=None, fiware_service=None,
                       fiware_servicepath=None):
+        if not entity_id:
+            raise ValueError("entity_id cannot be None nor empty")
+
         if not entity_type:
             entity_type = self._get_entity_type(entity_id, fiware_service)
 
@@ -547,7 +570,7 @@ class CrateTranslator(base_translator.BaseTranslator):
 
         # First delete entries from table
         table_name = self._et2tn(entity_type, fiware_service)
-        where_clause = self._get_where_clause(entity_id,
+        where_clause = self._get_where_clause([entity_id,],
                                               from_date,
                                               to_date,
                                               fiware_servicepath)

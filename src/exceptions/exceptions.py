@@ -21,3 +21,9 @@ class AmbiguousNGSIIdError(NGSIUsageError):
         msg = "There are multiple entities with the given entity_id {}. " \
               "Please specify entity_type."
         NGSIUsageError.__init__(self, msg.format(entity_id))
+
+
+class UnsupportedOption(QLError):
+    """
+    Used to flag usage of an unsupported/invalid option in any of the methods.
+    """
