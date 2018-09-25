@@ -95,4 +95,15 @@ docker run -d -p 8668:8668 -e "CRATE_HOST=http://your_crate_location" smartsdk/q
 The environment variable `CRATE_HOST` will tell QuantumLeap where to reach
 *Crate*, so you need to provide a reachable hostname where Crate is running.
 By default QL will append the port `4200` to the hostname. You can of course
-add your required environment variables with `-e`. For more options see [docker run reference](https://docs.docker.com/engine/reference/run/).
+add your required environment variables with `-e`. For more options see
+[docker run reference](https://docs.docker.com/engine/reference/run/).
+
+## FIWARE Releases Compatibility
+
+The current version of QuantumLeap is compatible with any FIWARE release
+greater than `6.3.1`. More info of FIWARE releases can be seen [here](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Releases_and_Sprints_numbering,_with_mapping_to_calendar_dates).
+
+To check which versions of the Generic Enablers and external dependencies QL is
+used and tested, checkout the
+[docker-compose-dev.yml](https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
+file used for the deployment.

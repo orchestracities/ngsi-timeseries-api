@@ -26,21 +26,28 @@ contributions"
    - Repeat until approval
 1. Done :) You can delete the branch in your repository.
 
+Ultimately, contributing guides should keep aligned with those suggested by
+FIWARE (see [here](https://github.com/Fiware/developmentGuidelines/blob/master/external_contributions.mediawiki)).
+
 ## Development Setup
 
 The development is mostly in *python3* for now, and really in the early stages
-so things will change for sure. For now, you can start with:
+so things will change for sure. For now, you can get started with:
 
-    git clone https://github.com/smartsdk/ngsi-timeseries-api.git
-    cd ngsi-timeseries-api
-    python3 -m venv env
-    pip install -r requirements.txt
+```
+git clone https://github.com/smartsdk/ngsi-timeseries-api.git
+cd ngsi-timeseries-api
+python3 -m venv env
+source env/bin/activate
+pip install -r requirements.txt
 
-    # if you want to test everything locally, you'll need to...
-    source setup_dev_env.sh
+# if you want to test everything locally, you'll need to...
+source setup_dev_env.sh
+```
 
 [pytest](https://docs.pytest.org/en/latest/) is used as the testing framework,
-but since most of QL's functionality is integration of components, you'll find `docker-compose.yml` files in the test folders to be run as a setup for tests.
+but since most of QL's functionality is integration of components, you'll find
+`docker-compose.yml` files in the test folders to be run as a setup for tests.
 If you see `.travis.yml` file you'll see how they are running today, but
 probably at some point it's worth exploring *pytest-docker* plugins.
 
@@ -52,19 +59,14 @@ that's also why the docker image is massive for now.
 In the current project tree structure you can find:
 
 - `ngsi-timeseries-api`
-    - `client`: Holds a simple Orion Context Broker client to ease integration
-    testing. To be moved out of this repo.
-    - `doc`: Holds documentation files.
+    - `docs`: Holds documentation files.
     - `docker`: To hold docker-related files for the scope of the project.
     - `experiments`: Sandbox for quick manual tests to try some stuff and
     derive new test cases.
-    - `geocoding`: Holds the code for interacting with OSM and doing
-    geo-related processing.
-    - `reporter`: Modules acting as the receiver of the notifications and API
-    requests. It "parses/validates" them before handling tasks to the
-    translators.
-    - `specification`: Holds the swagger-based *ngsi-tsdb* API specification
-    that QL implements.
-    - `translators`: Specific translators for each time-series databases,
-    responsible for interacting with the lower-level database details.
-    - `utils`: Common shared stuff looking for a better place to live in.
+    - `specification`: Contains the OpenAPI definition that QL implements.
+    - `src`: Source code folder.
+        - `geocoding`: Holds the code for interacting with OSM and doing geo-related processing.
+        - `reporter`: Modules acting as the receiver of the notifications and API requests. It "parses/validates" them before handling tasks to the translators.
+        - `translators`: Specific translators for each time-series databases,
+        responsible for interacting with the lower-level database details.
+        - `utils`: Common shared stuff looking for a better place to live in.
