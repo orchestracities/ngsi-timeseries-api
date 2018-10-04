@@ -143,17 +143,17 @@ attributes, which are documented in the *Specification* section of the [NGSI API
 column of the translation table below, and mind its capitalisation.
 
 The table below shows which attribute types will be translated to which
-[Crate Data Types](https://crate.io/docs/crate/reference/sql/data_types.html).
+[CrateDB Data Types](https://crate.io/docs/crate/reference/sql/data_types.html).
 
-**Crate Translation Table**
+**CrateDB Translation Table**
 
-| NGSI Type          | Crate Type          | Observation |
+| NGSI Type          | CrateDB Type          | Observation |
 | ------------------ |:-----------------------:| :-----------|
 |Array               | [array(string)](https://crate.io/docs/crate/reference/sql/data_types.html#array)           | [Issue 36: Support arrays of other types](https://github.com/smartsdk/ngsi-timeseries-api/issues/36) |
 |Boolean             | [boolean](https://crate.io/docs/crate/reference/sql/data_types.html#boolean)                 | - |
 |DateTime            | [timestamp](https://crate.io/docs/crate/reference/sql/data_types.html#timestamp)                 | 'ISO8601' can be used as equivalent of 'DateTime'. |
 |Integer             | [long](https://crate.io/docs/crate/reference/sql/data_types.html#numeric-types)                  | - |
-|[geo:point](http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities)            | [geo_point](https://crate.io/docs/crate/reference/sql/data_types.html#geo-point)               | **Attention!** NGSI uses "lat, long" order whereas Crate stores points in [long, lat] order.|
+|[geo:point](http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities)            | [geo_point](https://crate.io/docs/crate/reference/sql/data_types.html#geo-point)               | **Attention!** NGSI uses "lat, long" order whereas CrateDB stores points in [long, lat] order.|
 |[geo:json](http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities)            | [geo_shape](https://crate.io/docs/crate/reference/sql/data_types.html#geo-shape)               | - |
 |Number              | [float](https://crate.io/docs/crate/reference/sql/data_types.html#numeric-types)                   |-|
 |Text                | [string](https://crate.io/docs/crate/reference/sql/data_types.html#string)                  | This is the default type if the provided NGSI Type is unsupported or wrong. |
@@ -184,7 +184,7 @@ Note there are a lot of possibilities, but not all of them are fully
 implemented yet.
 
 If you want to, you can interact directly with the database. For more details
-refer to the [Crate](../admin/crate.md) section of the docs. What you need to
+refer to the [CrateDB](../admin/crate.md) section of the docs. What you need to
 know in this case is that QuantumLeap will create one table per each entity
 type. Table names are formed with a prefix (et) plus the lowercase version of
 the entity type. I.e, if your entity type is *AirQualityObserved*, the
