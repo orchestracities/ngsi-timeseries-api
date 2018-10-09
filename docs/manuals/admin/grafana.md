@@ -3,7 +3,7 @@
 [**Grafana**](https://grafana.com/) is a powerful visualisation tool that we
 can use to display graphics of the persisted data.
 
-In order to read data from a [Crate](./crate.md) database, grafana leverages on
+In order to read data from a [CrateDB](./crate.md) database, grafana leverages on
 the [Grafana Datasource Plugin for CrateDB](https://grafana.com/plugins/crate-datasource).
 
 If you followed the [Installation Guide](./index.md), you have already Grafana
@@ -50,7 +50,7 @@ entity type called *yourentity*
 Having your datasource setup, you can start using it in the different
 visualisation widgets.
 
-The following is an example of a Graph using a Crate datasource. Note the
+The following is an example of a Graph using a CrateDB datasource. Note the
 selection of the datasource (called CrateDB in this case), as well as the
 specification of the table in the *from* field. Note that the table is
 referenced as *schema.tablename* (e.g: *doc.etairqualityobserved*)

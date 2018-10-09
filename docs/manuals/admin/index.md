@@ -93,7 +93,7 @@ docker run -d -p 8668:8668 -e "CRATE_HOST=http://your_crate_location" smartsdk/q
 ```
 
 The environment variable `CRATE_HOST` will tell QuantumLeap where to reach
-*Crate*, so you need to provide a reachable hostname where Crate is running.
+*CrateDB*, so you need to provide a reachable hostname where CrateDB is running.
 By default QL will append the port `4200` to the hostname. You can of course
 add your required environment variables with `-e`. For more options see
 [docker run reference](https://docs.docker.com/engine/reference/run/).

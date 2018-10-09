@@ -6,7 +6,7 @@ QuantumLeapは、NGSI [FIWARE NGSIv2](http://docs.orioncontextbroker.apiary.io/#
 
 最終的には、FIWARE の [FIWARE's Comet STH](https://fiware-sth-comet.readthedocs.io/en/latest/) と同様の目標を持っています。しかし、Comet は、まだ、NGSIv2 をサポートしていません。MongoDB と結びついており、開発された条件や制約のいくつかはもはや成り立ちません。それについて間違いないと言われています。これは、FIWARE NGSIv2 の履歴データにバックエンドとして異なる、時系列データベースを提供する新しい方法を探ることに過ぎません。
 
-アイデアは、さまざま時系列データベースをサポートすることを望んでいることです。[InfluxDB](https://docs.influxdata.com/influxdb/), [RethinkDB](https://www.rethinkdb.com/docs/), [Crate](http://www.crate.io) のテストを開始しました。 しかし、私たちは、現在、次の利点のために、[Crate](http://www.crate.io) のトランスレータにその開発を集中させることを決めました。
+アイデアは、さまざま時系列データベースをサポートすることを望んでいることです。[InfluxDB](https://docs.influxdata.com/influxdb/), [RethinkDB](https://www.rethinkdb.com/docs/), [CrateDB](http://www.crate.io) のテストを開始しました。 しかし、私たちは、現在、次の利点のために、[CrateDB](http://www.crate.io) のトランスレータにその開発を集中させることを決めました。
 
 - [コンテナ化されたデータベース・クラスタ](https://crate.io/docs/crate/guide/en/latest/deployment/containers/index.html)による容易なスケーラビリティ
 - [ジオ・クエリー](https://crate.io/docs/crate/reference/en/latest/general/dql/geo.html)をサポート

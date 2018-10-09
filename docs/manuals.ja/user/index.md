@@ -102,11 +102,11 @@ Orion への挿入ペイロードの例は、前に示した "Test subscription"
 
 NGSI エンティティが属性に有効な NGSI 型を使用していることを確認する必要があります。これらの型は、NGSI API の仕様セクションに記載されています。下記の変換表の最初の欄を参照し、大文字を覚えておいてください。
 
-下の表は、どの属性型がどの Crate のデータ型に変換されるかを示しています 。
+下の表は、どの属性型がどの CrateDB のデータ型に変換されるかを示しています 。
 
-**Crate 変換テーブル**
+**CrateDB 変換テーブル**
 
-| NGSI 型          | Crate 型          | 見解 |
+| NGSI 型          | CrateDB 型          | 見解 |
 | ------------------ |:-----------------------:| :-----------|
 |Array               | [array(string)](https://crate.io/docs/crate/reference/sql/data_types.html#array)           | [Issue 36: 他のタイプの配列をサポートする](https://github.com/smartsdk/ngsi-timeseries-api/issues/36) |
 |Boolean             | [boolean](https://crate.io/docs/crate/reference/sql/data_types.html#boolean)                 | - |
@@ -131,7 +131,7 @@ NGSI エンティティが属性に有効な NGSI 型を使用していること
 
 QuantumLeap から履歴データを取得するには、[ここ](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1#/queries)で説明する API エンドポイントを使用します。可能性はたくさんありますが、それらのすべてがまだ完全に実装されているわけではありません。
 
-必要に応じて、データベースと直接対話できます。詳細は、ドキュメントの [Crate](../admin/crate.md) セクションを参照してください。この場合、あなたが知る必要があるのは、QuantumLeap が各エンティティ型ごとに1つのテーブルを作成するということです。テーブル名には接頭辞 (et) とエンティティ型の小文字のバージョンが含まれます。つまり、エンティティ型が *AirQualityObserved* であれば、対応するテーブル名がエイリアスになります。テーブル名には、定義されているスキーマも前に付ける必要があります。以下の[マルチテナンシー](#multi-tenancy)のセクションを参照してください 。
+必要に応じて、データベースと直接対話できます。詳細は、ドキュメントの [CrateDB](../admin/crate.md) セクションを参照してください。この場合、あなたが知る必要があるのは、QuantumLeap が各エンティティ型ごとに1つのテーブルを作成するということです。テーブル名には接頭辞 (et) とエンティティ型の小文字のバージョンが含まれます。つまり、エンティティ型が *AirQualityObserved* であれば、対応するテーブル名がエイリアスになります。テーブル名には、定義されているスキーマも前に付ける必要があります。以下の[マルチテナンシー](#multi-tenancy)のセクションを参照してください 。
 
 最後に、[Grafana](https://grafana.com/) を使用してデータを視覚的に操作することができます。確認するために、ドキュメントの [Grafana](../admin/grafana.md) をセクションを参照してください。
 

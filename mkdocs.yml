@@ -6,7 +6,7 @@ edit_uri: 'edit/master/docs/'
 docs_dir: docs/manuals
 theme: readthedocs
 markdown_extensions: [toc,fenced_code]
-extra_css: ["https://fiware.org/style/fiware_readthedocs.css"]
+extra_css: ["https://fiware.org/style/fiware_readthedocs.css", "https://fiware.org/style/fiware_readthedocs_core.css"]
 pages:
   - Home: index.md
   - 'User & Programmers Manual':
@@ -17,5 +17,5 @@ pages:
     - 'Introduction': 'admin/index.md'
     - 'Sanity Check': 'admin/check.md'
     - 'Ports': 'admin/ports.md'
-    - 'Crate': 'admin/crate.md'
+    - 'CrateDB': 'admin/crate.md'
     - 'Grafana': 'admin/grafana.md'

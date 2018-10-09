@@ -41,7 +41,7 @@ These are flagged in the API specification.
 gone wrong. You may be missing an important parameter in your request.
 
 
-#### Crate Datasource is not available in Grafana.
+#### CrateDB Datasource is not available in Grafana.
 
 By default, QuantumLeap recipes deploy Grafana with crate's plugin already
 installed. See []().

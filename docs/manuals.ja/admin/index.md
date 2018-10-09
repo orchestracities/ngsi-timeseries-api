@@ -72,4 +72,4 @@ Docker Swarm Cluster 上のサービスとして HA　に QuantumLeap サービ�
 docker run -d -p 8668:8668 -e "CRATE_HOST=http://your_crate_location" smartsdk/quantumleap
 ```
 
-環境変数 `CRATE_HOST` は、QuantumLeap に Crate に到達する場所を通知するので、Crate が実行されている到達可能なホスト名を指定する必要があります。デフォルトでは、QuantumLeap は ポート `4200` をホスト名に追加します。もちろん、`-e` で必要な環境変数を追加することもできます。他のオプションについては、[docker run reference](https://docs.docker.com/engine/reference/run/) を参照してください。
+環境変数 `CRATE_HOST` は、QuantumLeap に CrateDB に到達する場所を通知するので、CrateDB が実行されている到達可能なホスト名を指定する必要があります。デフォルトでは、QuantumLeap は ポート `4200` をホスト名に追加します。もちろん、`-e` で必要な環境変数を追加することもできます。他のオプションについては、[docker run reference](https://docs.docker.com/engine/reference/run/) を参照してください。

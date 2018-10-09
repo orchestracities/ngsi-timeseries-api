@@ -31,13 +31,13 @@
 - 間違っていた可能性のあるヒントについては、返されたボディのメッセージを見てください。リクエストに重要なパラメータがないかもしれません。
 
 
-#### Grafana では Crate Datasource は利用できません
+#### Grafana では CrateDB Datasource は利用できません
 
-デフォルトでは、QuantumLeap レシピは、Crate のプラグインがすでにインストールされている Grafana をデプロイします。
+デフォルトでは、QuantumLeap レシピは、CrateDB のプラグインがすでにインストールされている Grafana をデプロイします。
 
-[Grafana セクション](../admin/grafana.md)で説明されているようにデータソースを作成中にオプションとして Crate が表示されない場合は、Grafana コンテナがインターネット接続に失敗したか、プラグインのダウンロードとインストールに失敗したか、または プラグインをインストールする必要がある外部 Grafana インスタンスを使用しています。
+[Grafana セクション](../admin/grafana.md)で説明されているようにデータソースを作成中にオプションとして CrateDB が表示されない場合は、Grafana コンテナがインターネット接続に失敗したか、プラグインのダウンロードとインストールに失敗したか、または プラグインをインストールする必要がある外部 Grafana インスタンスを使用しています。
 
-Crate のデータソース・プラグインのドキュメントはここで、一般的に、Grafana プラグインのインストールに関するドキュメントは[ここ](http://docs.grafana.org/plugins/installation/)です。
+CrateDB のデータソース・プラグインのドキュメントはここで、一般的に、Grafana プラグインのインストールに関するドキュメントは[ここ](http://docs.grafana.org/plugins/installation/)です。
 
 ## バグ・レポート
 
