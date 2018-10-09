@@ -45,9 +45,7 @@ def assert_ngsi_entity_equals(entity, other):
                     d1 = datetime.strptime(other[ek], "%Y-%m-%dT%H:%M:%S.%f")
                     assert d0 == d1
                 else:
-                    if ev != other[ek]:
-                        print('Debug!')
-                    assert ev == other[ek]
+                    assert ev == other[ek], "{} != {}".format(ev, other[ek])
 
 
 def entity_pk(entity):
@@ -96,12 +94,11 @@ def create_random_entities(num_types, num_ids_per_type, num_updates, use_time=Fa
     for u in range(num_updates):
         for nt in range(num_types):
             for ni in range(num_ids_per_type):
+                t = datetime.now().isoformat(timespec='microseconds')[:-3]
                 entity = {
                     "type": "{}".format(nt),
                     "id": "{}-{}".format(nt, ni),
-                    # This column is the one added by reporter with notification timestamp
-                    # zeroing last 3 digits of microseconds to avoid annoying diffs in testing
-                    TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
+                    TIME_INDEX_NAME: t,
                 }
                 # This is to guarantee significant differences among entities for the TIME_INDEX_NAME attribute.
                 import time; time.sleep(0.001)
@@ -111,12 +108,15 @@ def create_random_entities(num_types, num_ids_per_type, num_updates, use_time=Fa
                 add_attr(entity, "attr_bool", bool(random.choice((0, 1))))
 
                 if use_time:
-                    # dt = datetime.now()
-                    dt = datetime(1970, round(random.uniform(1, 12)), round(random.uniform(1, 28)), 0, 0, 0, 0)
-                    add_attr(entity, "attr_time", dt.isoformat())
+                    month = round(random.uniform(1, 12))
+                    day = round(random.uniform(1, 28))
+                    dt = datetime(1970, month, day, 0, 0, 0, 0)
+                    v_iso = dt.isoformat()
+                    add_attr(entity, "attr_time", v_iso)
 
                 if use_geo:
-                    long, lat = random.uniform(-180, 180), random.uniform(-90, 90)
+                    long = random.uniform(-180, 180)
+                    lat = random.uniform(-90, 90)
                     point = {"type": "Point", "coordinates": [long, lat]}
                     add_attr(entity, "attr_geo", point)
 
