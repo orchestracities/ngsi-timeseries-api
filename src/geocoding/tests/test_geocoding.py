@@ -88,7 +88,7 @@ def test_entity_add_street_line(air_quality_observed):
 
     geo = r['location']['value']
     assert geo['type'] == 'LineString'
-    assert len(geo['coordinates']) == pytest.approx(12, abs=2)
+    assert len(geo['coordinates']) > 1
 
 
 def test_entity_add_city_shape(air_quality_observed):
