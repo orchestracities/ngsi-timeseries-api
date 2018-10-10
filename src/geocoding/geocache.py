@@ -1,3 +1,4 @@
+from datetime import datetime
 
 
 class GeoCodingCache(object):
@@ -16,6 +17,29 @@ class GeoCodingCache(object):
 
     def put(self, key, value):
         self.redis.set(key, value)
+
+    def get_health(self):
+        """
+        :return: dictionary with redis service health. ::see:: reporter.health.
+        """
+        import redis
+
+        res = {}
+        res['time'] = datetime.now().isoformat()
+        try:
+            r = self.redis.ping()
+        except (redis.exceptions.ConnectionError,
+                redis.exceptions.TimeoutError,
+                redis.exceptions.RedisError) as e:
+            res['status'] = 'fail'
+            res['output'] = "{}".format(e)
+        else:
+            if r:
+                res['status'] = 'pass'
+            else:
+                res['status'] = 'warn'
+                res['output'] = "Redis is not playing ping pong :/"
+        return res
 
 
 def temp_geo_cache(host, port):
