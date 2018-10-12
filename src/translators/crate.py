@@ -86,7 +86,8 @@ class CrateTranslator(base_translator.BaseTranslator):
         """
         Return a dict of the status of crate service.
 
-        Checkout https://crate.io/docs/crate/reference/en/latest/admin/system-information.html#health
+        Checkout
+        https://crate.io/docs/crate/reference/en/latest/admin/system-information.html#health
         """
         health = {}
 

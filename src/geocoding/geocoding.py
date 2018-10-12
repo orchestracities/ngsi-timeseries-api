@@ -307,4 +307,3 @@ def get_health():
         time = datetime.now().isoformat()
         res = {'status': 'fail', 'time': time, 'output': g.status}
         return res
-

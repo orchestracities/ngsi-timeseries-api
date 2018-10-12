@@ -1,7 +1,7 @@
 import os
 
 
-def check_crateDB():
+def check_crate():
     """
     crateDB is the default backend of QuantumLeap, so it is required by
     default.
@@ -41,6 +41,17 @@ def check_geocoder():
     return health
 
 
+def _get_http_code(res):
+    if res['status'] == 'pass':
+        code = 200
+    elif res['status'] == 'warn':
+        code = 207
+    else:
+        assert res['status'] == 'fail'
+        code = 424
+    return code
+
+
 def get_health():
     """
     Return status of QuantumLeap service, taking into account status of the
@@ -54,7 +65,7 @@ def get_health():
     res = {}
 
     # Check crateDB (critical)
-    health = check_crateDB()
+    health = check_crate()
     res['status'] = health['status']
     if health['status'] != 'pass':
         res.setdefault('details', {})['crateDB'] = health
@@ -74,12 +85,5 @@ def get_health():
             res['status'] = 'warn'
 
     # Determine HTTP code
-    if res['status'] == 'pass':
-        code = 200
-    elif res['status'] == 'warn':
-        code = 207
-    else:
-        assert res['status'] == 'fail'
-        code = 424
-
+    code = _get_http_code(res)
     return res, code, {'Cache-Control': 'max-age=180'}

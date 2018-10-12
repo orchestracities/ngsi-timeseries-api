@@ -280,4 +280,3 @@ def subscribe(orion_url,
         logger.debug("subscribing to {} with headers: {} and data: {}")
 
     return r.text, r.status_code
-
