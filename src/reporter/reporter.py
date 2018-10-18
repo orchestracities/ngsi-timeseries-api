@@ -289,6 +289,7 @@ def _validate_query_params(aggr_period, aggr_method, attr_names, options):
             "description": "aggrMethod is compulsory when using aggrPeriod."
         }
         return r, 400
+
     if options or aggr_period:
         r = {
             "error": "Not implemented option",
