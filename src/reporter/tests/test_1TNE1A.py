@@ -323,3 +323,23 @@ def test_aggregation_is_per_instance(translator):
     assert obtained_data['data']['entityType'] == t
     assert obtained_data['data']['attrName'] == attr_name
     assert obtained_data['data']['entities'] == expected_entities
+
+
+def test_1T1ENA_aggrPeriod(reporter_dataset):
+    # GH issue https://github.com/smartsdk/ngsi-timeseries-api/issues/89
+
+    # aggrPeriod needs aggrMethod
+    query_params = {
+        'type': entity_type,
+        'aggrPeriod': 'minute',
+    }
+    r = requests.get(query_url(), params=query_params)
+    assert r.status_code == 400, r.text
+
+    query_params = {
+        'type': entity_type,
+        'aggrMethod': 'avg',
+        'aggrPeriod': 'minute',
+    }
+    r = requests.get(query_url(), params=query_params)
+    assert r.status_code == 501, r.text

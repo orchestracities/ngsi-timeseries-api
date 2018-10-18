@@ -280,3 +280,27 @@ def subscribe(orion_url,
         logger.debug("subscribing to {} with headers: {} and data: {}")
 
     return r.text, r.status_code
+
+
+def _validate_query_params(aggr_period, aggr_method, attr_names, options):
+    if aggr_period and not aggr_method:
+        r = {
+            "error": "Bad parameters use",
+            "description": "aggrMethod is compulsory when using aggrPeriod."
+        }
+        return r, 400
+    if options or aggr_period:
+        r = {
+            "error": "Not implemented option",
+            "description": "aggrPeriod and options are not yet implemented."
+        }
+        return r, 501
+
+    if aggr_method and not attr_names:
+        msg = "Specified aggrMethod = {} but missing attrs parameter."
+        r = {
+            "error": "Bad parameters use",
+            "description": msg.format(aggr_method)
+        }
+        return r, 400
+    return "OK", 200

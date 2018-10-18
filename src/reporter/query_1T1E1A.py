@@ -1,5 +1,6 @@
 from exceptions.exceptions import AmbiguousNGSIIdError
 from flask import request
+from reporter.reporter import _validate_query_params
 from translators.crate import CrateTranslatorInstance, CrateTranslator
 import logging
 
@@ -19,9 +20,12 @@ def query_1T1E1A(attr_name,   # In Path
     See /entities/{entityId}/attrs/{attrName} in API Specification
     quantumleap.yml
     """
-    if options or aggr_period:
-        import warnings
-        warnings.warn("Unimplemented query parameters: options, aggrPeriod")
+    r, c = _validate_query_params(aggr_period,
+                                  aggr_method,
+                                  [attr_name],
+                                  options)
+    if c != 200:
+        return r, c
 
     fiware_s = request.headers.get('fiware-service', None)
     fiware_sp = request.headers.get('fiware-servicepath', None)

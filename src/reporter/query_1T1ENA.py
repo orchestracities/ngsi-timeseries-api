@@ -1,5 +1,6 @@
 from exceptions.exceptions import AmbiguousNGSIIdError
 from flask import request
+from reporter.reporter import _validate_query_params
 from translators.crate import CrateTranslatorInstance, CrateTranslator
 import logging
 
@@ -19,13 +20,9 @@ def query_1T1ENA(entity_id,   # In Path
     See /entities/{entityId}/attrs/{attrName} in API Specification
     quantumleap.yml
     """
-    if options or aggr_period:
-        import warnings
-        warnings.warn("Unimplemented query parameters: options, aggrPeriod")
-
-    if aggr_method and not attrs:
-        msg = "Specified aggrMethod = {} but missing attrs parameter."
-        return msg.format(aggr_method), 400
+    r, c = _validate_query_params(aggr_period, aggr_method, attrs, options)
+    if c != 200:
+        return r, c
 
     if attrs is not None:
         attrs = attrs.split(',')

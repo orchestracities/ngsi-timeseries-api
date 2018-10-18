@@ -1,7 +1,7 @@
 swagger: '2.0'  # For 3.0 see (https://github.com/zalando/connexion/issues/420)
 info:
   title: "QuantumLeap API"
-  version: "0.1"
+  version: "0.1.1"
 host: "localhost:8668"  # it'll run in the same container, hence localhost.
 basePath: /v2
 produces:
@@ -215,7 +215,7 @@ parameters:
     name: aggrPeriod
     type: string
     enum: [year, month, day, hour, minute, second]
-    description: "Optional. (This parameter is not yet supported). In not
+    description: "(This parameter is not yet supported) Optional. If not
     defined, the aggregation will apply to all the values contained in the
     search result.
     If defined, the aggregation function will instead be applied N times,
