@@ -2,10 +2,11 @@
 
 [![FIWARE Core Context Management](https://nexus.lab.fiware.org/static/badges/chapters/core.svg)](https://www.fiware.org/developers/catalogue/)
 [![License: MIT](https://img.shields.io/github/license/smartsdk/ngsi-timeseries-api.svg)](https://opensource.org/licenses/MIT)
-[![Documentation badge](https://img.shields.io/readthedocs/quantumleap.svg)](https://quantumleap.readthedocs.io/en/latest/)
-[![Support](https://img.shields.io/badge/support-ask-yellowgreen.svg)](https://ask.fiware.org/questions/)
-[![Build Status](https://travis-ci.org/smartsdk/ngsi-timeseries-api.svg?branch=master)](https://travis-ci.org/smartsdk/ngsi-timeseries-api)
 [![Docker Status](https://img.shields.io/docker/pulls/smartsdk/quantumleap.svg)](https://hub.docker.com/r/smartsdk/quantumleap/)
+[![Support](https://img.shields.io/badge/support-ask-yellowgreen.svg)](https://ask.fiware.org/questions/)
+<br/>
+[![Documentation badge](https://img.shields.io/readthedocs/quantumleap.svg)](https://quantumleap.readthedocs.io/en/latest/)
+[![Build Status](https://travis-ci.org/smartsdk/ngsi-timeseries-api.svg?branch=master)](https://travis-ci.org/smartsdk/ngsi-timeseries-api)
 ![Status](https://nexus.lab.fiware.org/static/badges/statuses/quantum-leap.svg)
 [![Swagger Validator](https://img.shields.io/swagger/valid/2.0/https/raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v2.0/json/petstore-expanded.json.svg)](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1)
 
