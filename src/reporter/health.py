@@ -42,12 +42,9 @@ def check_geocoder():
 
 
 def _get_http_code(res):
-    if res['status'] == 'pass':
+    if res['status'] != 'fail':
         code = 200
-    elif res['status'] == 'warn':
-        code = 207
     else:
-        assert res['status'] == 'fail'
         code = 424
     return code
 

@@ -25,7 +25,7 @@ def test_health_warn_osm():
     url = '{}/health'.format(QL_URL)
     r = requests.get(url)
 
-    assert r.status_code == 207, r.text
+    assert r.status_code == 200, r.text
     response = r.json()
     assert response['status'] == 'warn'
     health = response['details']['osm']
