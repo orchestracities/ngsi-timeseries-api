@@ -71,7 +71,18 @@ def pick_random_entity_id(num_types, num_ids_per_type):
     return "{}-{}".format(int(random.uniform(0, num_types)), int(random.uniform(0, num_ids_per_type)))
 
 
-def create_random_entities(num_types, num_ids_per_type, num_updates, use_time=False, use_geo=False):
+def add_attr(ent, attr_name, attr_value):
+    ent[attr_name] = {
+        "value": attr_value,
+        "type": ATTR_TO_TYPE[attr_name]
+    }
+
+
+def create_random_entities(num_types=1,
+                           num_ids_per_type=1,
+                           num_updates=1,
+                           use_time=False,
+                           use_geo=False):
     """
     :param num_types:
     :param num_ids_per_type:
@@ -83,11 +94,6 @@ def create_random_entities(num_types, num_ids_per_type, num_updates, use_time=Fa
     :param use_geo:
     :return: Iter NGSI entities in JSON Entity Representation format.
     """
-    def add_attr(ent, attr_name, attr_value):
-        ent[attr_name] = {
-            "value": attr_value,
-            "type": ATTR_TO_TYPE[attr_name]
-        }
 
     # TODO: Rewrite with np and pandas
     entities = []
