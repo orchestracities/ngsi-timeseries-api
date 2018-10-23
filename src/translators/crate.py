@@ -13,6 +13,8 @@ import statistics
 # Based on Orion output because official docs don't say much about these :(
 NGSI_DATETIME = 'DateTime'
 NGSI_ID = 'id'
+NGSI_GEOJSON = 'geo:json'
+NGSI_GEOPOINT = 'geo:point'
 NGSI_ISO8601 = 'ISO8601'
 NGSI_STRUCTURED_VALUE = 'StructuredValue'
 NGSI_TEXT = 'Text'
@@ -29,8 +31,8 @@ NGSI_TO_CRATE = {
     NGSI_ISO8601: 'timestamp',
     NGSI_DATETIME: 'timestamp',
     "Integer": 'long',
-    "geo:json": 'geo_shape',
-    "geo:point": 'geo_point',
+    NGSI_GEOJSON: 'geo_shape',
+    NGSI_GEOPOINT: 'geo_point',
     "Number": 'float',
     NGSI_TEXT: 'string',
     NGSI_STRUCTURED_VALUE: 'object'
@@ -45,6 +47,7 @@ FIWARE_SERVICEPATH = 'fiware_servicepath'
 TENANT_PREFIX = 'mt'
 TYPE_PREFIX = 'et'
 VALID_AGGR_METHODS = ['count', 'sum', 'avg', 'min', 'max',]
+VALID_AGGR_PERIODS = ['year', 'month', 'day', 'hour', 'minute', 'second']
 
 
 class CrateTranslator(base_translator.BaseTranslator):
@@ -131,7 +134,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         return utc.isoformat()
 
 
-    def translate_to_ngsi(self, resultset, col_names, table_name):
+    def _format_response(self, resultset, col_names, table_name, last_n):
         """
         :param resultset: list of query results for one entity_type
         :param col_names: list of columns affected in the query
@@ -139,9 +142,11 @@ class CrateTranslator(base_translator.BaseTranslator):
         :return: iterable(NGSI Entity)
             Iterable over the translated NGSI entities.
         """
+        last_n = last_n or 0
+
         stmt = "select entity_attrs from {} " \
                "where table_name = ?".format(METADATA_TABLE_NAME)
-        self.cursor.execute(stmt, [table_name,])
+        self.cursor.execute(stmt, [table_name])
         res = self.cursor.fetchall()
 
         if len(res) != 1:
@@ -150,28 +155,31 @@ class CrateTranslator(base_translator.BaseTranslator):
             self.logger.error(msg)
         entity_attrs = res[0][0]
 
-        for r in resultset:
-            entity = {}
+        response = {}
+
+        for r in resultset[-last_n:]:  # Improve last_n, use dec order + limit
             for k, v in zip(col_names, r):
                 if k not in entity_attrs:
+                    # implementation-specific columns not representing attrs
                     continue
 
                 original_name, original_type = entity_attrs[k]
+
+                # CrateDBs and NGSI use different geo:point coordinates order.
+                if original_type == NGSI_GEOPOINT:
+                    lon, lat = v
+                    v = "{}, {}".format(lat, lon)
+
                 if original_name in (NGSI_TYPE, NGSI_ID):
-                    entity[original_name] = v
-
+                    response[original_name] = v
                 elif original_name == self.TIME_INDEX_NAME:
-                    # TODO: This might not be valid NGSI.
-                    # Should we include this time_index in the reply?.
-                    entity[original_name] = self._get_isoformat(v)
-
+                    v = self._get_isoformat(v)
+                    response['index'] = v
                 else:
-                    entity[original_name] = {'value': v, 'type': original_type}
-                    if original_type in (NGSI_DATETIME, NGSI_ISO8601) and v:
-                        entity[original_name]['value'] = self._get_isoformat(v)
+                    attr_dict = response.setdefault(original_name, {})
+                    attr_dict.setdefault('values', []).append(v)
 
-            self._postprocess_values(entity)
-            yield entity
+        return response
 
 
     def _et2tn(self, entity_type, fiware_service=None):
@@ -345,14 +353,6 @@ class CrateTranslator(base_translator.BaseTranslator):
         return values
 
 
-    def _postprocess_values(self, e):
-        for attr in iter_entity_attrs(e):
-            if 'type' in e[attr] and e[attr]['type'] == 'geo:point':
-                lon, lat = e[attr]['value']
-                e[attr]['value'] = "{}, {}".format(lat, lon)
-        return e
-
-
     def _update_metadata_table(self, table_name, metadata):
         """
         This method creates the METADATA_TABLE_NAME (if not exists), which
@@ -416,21 +416,19 @@ class CrateTranslator(base_translator.BaseTranslator):
         return [r[0] for r in self.cursor.rows]
 
 
-    def _get_select_clause(self, attr_names, aggr_method, add_ids=False):
-        if attr_names:
-            if aggr_method:
-                attrs = ["{}({}) as {}".format(aggr_method, a, a) for a in
-                         set(attr_names)]
-            else:
-                attrs = [self.TIME_INDEX_NAME]
-                attrs.extend(str(a) for a in attr_names)
-            if add_ids:
-                attrs.append('entity_id')
-            select = ",".join(attrs)
+    def _get_select_clause(self, attr_names, aggr_method):
+        if not attr_names:
+            return '*'
 
+        if aggr_method:
+            m = "{}({}) as {}"
+            attrs = [m.format(aggr_method, a, a) for a in set(attr_names)]
         else:
-            # aggr_method is ignored when no attribute is specified
-            select = '*'
+            attrs = [self.TIME_INDEX_NAME]
+            attrs.extend(str(a) for a in attr_names)
+        attrs.append('entity_type')
+        attrs.append('entity_id')
+        select = ','.join(attrs)
         return select
 
 
@@ -475,6 +473,7 @@ class CrateTranslator(base_translator.BaseTranslator):
               entity_ids=None,
               where_clause=None,
               aggr_method=None,
+              aggr_period=None,
               from_date=None,
               to_date=None,
               last_n=None,
@@ -482,6 +481,117 @@ class CrateTranslator(base_translator.BaseTranslator):
               offset=0,
               fiware_service=None,
               fiware_servicepath=None):
+        """
+        This translator method is used by all API query endpoints.
+
+        :param attr_names:
+            Array of attribute names to query for.
+        :param entity_type:
+            (Optional). NGSI Entity Type to query about. Unique and optional
+            as long as there are no 2 equal NGSI ids for a given NGSI type.
+        :param entity_id:
+            NGSI Id of the entity you ask for. Cannot be used with entity_ids.
+        :param entity_ids:
+            Array of NGSI Ids to consider in the response. Cannot be used with
+            entity_id.
+        :param where_clause:
+            (Optional), to use a custom SQL query (not open to public API).
+        :param aggr_method:
+            (Optional), function to apply to the queried values. Must be one
+            of the VALID_AGGR_METHODS (e.g, sum, avg, etc). You need to specify
+            at least one attribute in attr_names, otherwise this will be
+            ignored.
+        :param aggr_period:
+            (Optional), only valid when using aggr_method. Defines the time
+            scope on to which the aggr_method will be applied, hence defines
+            also the number of values that will be returned. Must be one of the
+            VALID_AGGR_PERIODS (e.g, hour). I.e., querying avg per hour will
+            return 24 values times the number of days of available measurements.
+        :param from_date:
+            (Optional), used to filter results, considering only from this date
+            inclusive.
+        :param to_date:
+            (Optional), used to filter results, considering only up to this date
+            inclusive.
+        :param last_n:
+            (Optional), used to filter results, return only the last_n elements
+            of what would be the result of the query once all filters where
+            applied.
+        :param limit:
+            (Optional), used to filter results, return up to limit elements
+            of what would be the result of the query once all filters where
+            applied.
+        :param offset:
+            (Optional), used to page results.
+        :param fiware_service:
+            (Optional), used to filter results, considering in the result only
+            entities in this FIWARE Service.
+        :param fiware_servicepath:
+            (Optional), used to filter results, considering in the result only
+            entities in this FIWARE Service.
+
+        :param aggr_per_instance: (Not Implemented). Defaults to False.
+            If True, it would allow to request the aggrMethod being applied
+            N times, once for each entityId.
+
+        :return:
+        The shape of the response is always like this:
+
+        [{
+         'type': 'Room',
+         'id': 'Room1',
+         'ids': ['Room1', 'Room2'],
+         'time_index': [t0, t1, ..., tn],
+         'attr_1': {
+             'index': [t0, t1, ..., tn], # index of this attr (if different)
+             'values': [v0, v1, ..., vn],
+         },
+         ...,
+         'attr_N': ...
+        },...
+        ]
+
+        It returns an array of dictionaries, each representing a query result
+        on a particular NGSI Entity Type. Each of the dicts in this array
+        consists of the following attributes.
+
+        'type' is the NGSI Entity Type of the response.
+
+        'id' or 'ids'. id if the response contains data from a specific NGSI
+        entity (with that id) or ids in the case the response uses data from
+        multiple entities (those with those ids). You get one or the other, not
+        both.
+
+        'time_index': The time index applying to the response, applies to all
+        attributes included in the response. It may not be present if each
+        attribute has its own time index array, in the cases where attributes
+        are measured at different moments in time. Not since this is a "global"
+        time index for the entity, it may contain some NULL values where
+        measurements were not available. It's an array containing time
+        measured in UTC milliseconds since epoch.
+
+        Each attribute in the response will be represented by a dictionary,
+        with an array called 'values' containing the actual historical values
+        of the query. Additionally, it may contain an array called 'index',
+        just like time_index but for this specific attribute. Thus, this 'index'
+        will never contain NULL values.
+
+        If the user did not specify an aggrMethod, the response will not mix
+        measurements of different entities in the same values array. So...
+        COMPLETE THIS!!
+
+        When using aggrPeriod, the index array is a completely new index,
+        composed of time steps of the original index of the attribute but
+        zeroing the less significant bits of time. For example, if there were
+        measurements in time 2018-04-03T08:15:15 and 2018-04-03T09:01:15, with
+        aggrPeriod = minute the new index will contain at least the steps
+        2018-04-03T08:15:00 and 2018-04-03T09:01:00 respectively.
+
+        :raises:
+        ValueError in case of missuse of the attributes.
+        UnsupportedOption for still-to-be-implemented features.
+        crate.DatabaseError in case of errors with CrateDB interaction.
+        """
         if entity_id and entity_ids:
             raise ValueError("Cannot use both entity_id and entity_ids params "
                              "in the same call.")
@@ -500,14 +610,8 @@ class CrateTranslator(base_translator.BaseTranslator):
 
         if entity_id:
             entity_ids = tuple([entity_id])
-            # User specifies 1 entity_id -> exclude ids from response
-            add_ids = False
-        else:
-            add_ids = True
 
-        select_clause = self._get_select_clause(attr_names,
-                                                aggr_method,
-                                                add_ids)
+        select_clause = self._get_select_clause(attr_names, aggr_method)
         if not where_clause:
             where_clause = self._get_where_clause(entity_ids,
                                                   from_date,
@@ -550,12 +654,8 @@ class CrateTranslator(base_translator.BaseTranslator):
             else:
                 res = self.cursor.fetchall()
                 col_names = [x[0] for x in self.cursor.description]
-                entities = list(self.translate_to_ngsi(res, col_names, tn))
-            result.extend(entities)
-
-        if last_n:
-            # TODO: embed last_n in query to avoid waste.
-            return result[-last_n:]
+                entities = self._format_response(res, col_names, tn, last_n)
+            result.append(entities)
         return result
 
     # TODO: Remove this method (needs refactoring of the benchmark)

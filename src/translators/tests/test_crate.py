@@ -2,7 +2,7 @@ from exceptions.exceptions import AmbiguousNGSIIdError
 from translators.base_translator import BaseTranslator
 from translators.benchmark import benchmark
 from translators.crate import NGSI_TEXT
-from conftest import crate_translator as translator
+from conftest import crate_translator as translator, entity
 from utils.common import *
 import statistics
 
@@ -19,29 +19,39 @@ def test_insert(translator):
 
 
 def test_insert_entity(translator, entity):
-    now = datetime.now().isoformat(timespec='microseconds')
-    entity[BaseTranslator.TIME_INDEX_NAME] = now
+    now = datetime.now()
+    now_iso = now.isoformat(timespec='seconds')
+    entity[BaseTranslator.TIME_INDEX_NAME] = now_iso
+
     result = translator.insert([entity])
     assert result.rowcount == 1
-
     translator._refresh([entity['type']])
 
-    loaded_entity = translator.query()
+    loaded_entities = translator.query()
+    assert len(loaded_entities) == 1
+    le = loaded_entities[0]
 
-    # These 2 can be ignored when empty. TODO: #12 Support attribute metadata
-    entity['temperature'].pop('metadata')
-    entity['pressure'].pop('metadata')
-
-    assert_ngsi_entity_equals(entity, loaded_entity[0])
+    assert le['id'] == entity['id']
+    assert le['type'] == entity['type']
+    assert le['index'] == entity['time_index']
+    assert le['pressure']['values'] == [entity['pressure']['value']]
+    assert le['temperature']['values'] == [entity['temperature']['value']]
 
 
 def test_insert_multiple_types(translator):
-    entities = create_random_entities(num_types=3, num_ids_per_type=2, num_updates=1, use_time=True, use_geo=True)
+    args = {
+        'num_types': 3,
+        'num_ids_per_type': 2,
+        'num_updates': 1,
+        'use_time': True,
+        'use_geo': True
+    }
+    entities = create_random_entities(**args)
     result = translator.insert(entities)
     assert result.rowcount > 0
 
     # Again to check metadata handling works fine
-    entities = create_random_entities(num_types=3, num_ids_per_type=2, num_updates=1, use_time=True, use_geo=True)
+    entities = create_random_entities(**args)
     result = translator.insert(entities)
     assert result.rowcount > 0
 
@@ -52,15 +62,23 @@ def test_query_all_before_insert(translator):
 
 
 def test_query_all(translator):
-    entities = create_random_entities(2, 2, 2, use_time=True, use_geo=True)
+    args = {
+        'num_types': 2,
+        'num_ids_per_type': 2,
+        'num_updates': 2,
+        'use_time': True,
+        'use_geo': True
+    }
+    entities = create_random_entities(**args)
     result = translator.insert(entities)
     assert result.rowcount > 0
 
-    translator._refresh(['0', '1'])
+    types = ['0', '1']
+    translator._refresh(types)
 
     loaded_entities = translator.query()
+    assert len(loaded_entities) == len(types)
 
-    assert len(loaded_entities) == len(entities)
     key = lambda e: e[BaseTranslator.TIME_INDEX_NAME]
     a = sorted(entities, key=key)
     b = sorted(loaded_entities, key=key)
