@@ -3,35 +3,28 @@ from conftest import crate_translator as translator
 from utils.common import create_random_entities, TIME_INDEX_NAME
 
 
-def _refresh_all(translator, entities, fiware_service=None):
-    types = set([e['type'] for e in entities])
-    translator._refresh(types, fiware_service)
-
-
 def test_delete_entity_defaults(translator):
-    entities = create_random_entities(num_types=2,
-                                      num_ids_per_type=2,
-                                      num_updates=5)
+    num_types = 2
+    num_ids_per_type = 2
+    num_updates = 5
+
+    entities = create_random_entities(num_types, num_ids_per_type, num_updates)
     translator.insert(entities)
-    _refresh_all(translator, entities)
 
-    to_delete = entities[0]
-    deleted_type = to_delete['type']
-    deleted_id = to_delete['id']
+    deleted_type = entities[0]['type']
+    deleted_id = entities[0]['id']
 
-    n_total = len(translator.query())
-    assert n_total == 2 * 2 * 5
+    total = translator.query()
+    assert len(total) == num_types * num_ids_per_type
 
-    n_selected = len(translator.query(entity_type=deleted_type,
-                                      entity_id=deleted_id))
-    assert n_selected == 5
+    selected = translator.query(entity_type=deleted_type, entity_id=deleted_id)
+    assert len(selected[0]['index']) == num_updates
 
     n_deleted = translator.delete_entity(deleted_id, entity_type=deleted_type)
-    assert n_deleted == 5
-    _refresh_all(translator, entities)
+    assert n_deleted == num_updates
 
     remaining = translator.query()
-    assert len(remaining) == (n_total - n_deleted)
+    assert len(remaining) == (len(total) - 1)
 
     survivors = translator.query(entity_type=deleted_type, entity_id=deleted_id)
     assert len(survivors) == 0
@@ -41,26 +34,35 @@ def test_delete_entity_customs(translator):
     entities = create_random_entities(num_types=1,
                                       num_ids_per_type=2,
                                       num_updates=10)
-
     for i, e in enumerate(entities):
-        time_index = datetime(2018, 1, 1 + i).isoformat()[:-3]
-        e[TIME_INDEX_NAME] = time_index
+        t = datetime(2018, 1, 1 + i).isoformat(timespec='milliseconds')
+        e[TIME_INDEX_NAME] = t
 
     translator.insert(entities)
-    _refresh_all(translator, entities)
 
-    to_delete = entities[-1]
-    deleted_type = to_delete['type']
-    deleted_id = to_delete['id']
+    deleted_type = entities[-1]['type']
+    deleted_id = entities[-1]['id']
 
-    res = translator.delete_entity(deleted_id, entity_type=deleted_type,
+    res = translator.delete_entity(entity_id=deleted_id,
+                                   entity_type=deleted_type,
                                    from_date=datetime(2018, 1, 8).isoformat(),
                                    to_date=datetime(2018, 1, 16).isoformat())
     assert res == 5
-    _refresh_all(translator, entities)
 
-    remaining = translator.query()
-    assert len(remaining) == 15
+    affected = translator.query(entity_id=deleted_id, entity_type=deleted_type)
+    assert len(affected) == 1
+    affected = affected[0]
+    assert affected['id'] == deleted_id
+    assert affected['type'] == deleted_type
+    assert len(affected['index']) == 10 - 5
+
+    res = translator.query(entity_type=deleted_type)
+    assert len(res) == 2
+
+    unaffected = res[0] if res[0]['id'] != deleted_id else res[1]
+    assert unaffected['id'] != deleted_id
+    assert unaffected['type'] == deleted_type
+    assert len(unaffected['index']) == 10
 
 
 def test_delete_entity_with_tenancy(translator):
@@ -70,18 +72,22 @@ def test_delete_entity_with_tenancy(translator):
     fs = 'fs'
     fsp = 'fsp'
     translator.insert(entities, fiware_service=fs, fiware_servicepath=fsp)
-    _refresh_all(translator, entities, fiware_service=fs)
 
     to_delete = entities[0]
     deleted_type = to_delete['type']
     deleted_id = to_delete['id']
+
+    # No fs nor fsp -> no deletion
     res = translator.delete_entity(deleted_id, entity_type=deleted_type)
     assert res == 0
 
+    # No fsp -> no deletion
     res = translator.delete_entity(deleted_id,
                                    entity_type=deleted_type,
                                    fiware_service=fs)
     assert res == 0
+
+    # Matching fs & fsp -> deletion
     res = translator.delete_entity(deleted_id,
                                    entity_type=deleted_type,
                                    fiware_service=fs,
@@ -94,14 +100,13 @@ def test_delete_entities_defaults(translator):
                                       num_ids_per_type=2,
                                       num_updates=20)
     translator.insert(entities)
-    _refresh_all(translator, entities)
 
     type_to_delete = entities[0]['type']
     res = translator.delete_entities(type_to_delete)
     assert res == 20 * 2
 
     remaining = translator.query()
-    assert len(remaining) == 20 * 2 * (3-1)
+    assert len(remaining) == (3-1) * 2
     assert all([r['type'] != type_to_delete for r in remaining])
 
 
@@ -114,17 +119,15 @@ def test_delete_entities_customs(translator):
         e[TIME_INDEX_NAME] = time_index
 
     translator.insert(entities)
-    _refresh_all(translator, entities)
 
     type_to_delete = entities[-1]['type']
     res = translator.delete_entities(type_to_delete,
                                      from_date=datetime(2018, 1, 4).isoformat(),
                                      to_date=datetime(2018, 1, 12).isoformat())
     assert res == 3
-    _refresh_all(translator, entities)
 
     remaining = translator.query()
-    assert len(remaining) == 4 * 4 - 3
+    assert sum([len(r['index']) for r in remaining]) == ((4 * 4) - 3)
 
 
 def test_delete_entities_with_tenancy(translator):
@@ -134,7 +137,6 @@ def test_delete_entities_with_tenancy(translator):
                                       num_ids_per_type=1,
                                       num_updates=10)
     translator.insert(entities, fiware_service=fs, fiware_servicepath=fsp)
-    _refresh_all(translator, entities, fiware_service=fs)
 
     type_to_delete = entities[0]['type']
     res = translator.delete_entities(type_to_delete)

@@ -34,16 +34,16 @@ def query_1T1E1A(attr_name,   # In Path
     try:
         with CrateTranslatorInstance() as trans:
             entities = trans.query(attr_names=[attr_name],
-                               entity_type=type_,
-                               entity_id=entity_id,
-                               aggr_method=aggr_method,
-                               from_date=from_date,
-                               to_date=to_date,
-                               last_n=last_n,
-                               limit=limit,
-                               offset=offset,
-                               fiware_service=fiware_s,
-                               fiware_servicepath=fiware_sp,)
+                                   entity_type=type_,
+                                   entity_id=entity_id,
+                                   aggr_method=aggr_method,
+                                   from_date=from_date,
+                                   to_date=to_date,
+                                   last_n=last_n,
+                                   limit=limit,
+                                   offset=offset,
+                                   fiware_service=fiware_s,
+                                   fiware_servicepath=fiware_sp,)
     except AmbiguousNGSIIdError as e:
         return {
             "error": "AmbiguousNGSIIdError",
@@ -57,16 +57,24 @@ def query_1T1E1A(attr_name,   # In Path
         return msg, 500
 
     if entities:
+        if len(entities) > 1:
+            import warnings
+            warnings.warn("Not expecting more than one result for a 1T1E1A.")
+
         if aggr_method:
-            index = []
+            if aggr_period:
+                # TODO #89
+                index = None
+            else:
+                index = []
         else:
-            index = [str(e[CrateTranslator.TIME_INDEX_NAME]) for e in entities]
+            index = entities[0]['index']
         res = {
             'data': {
-                'entityId': entity_id,
+                'entityId': entities[0]['id'],
                 'attrName': attr_name,
                 'index': index,
-                'values': [e[attr_name]['value'] for e in entities]
+                'values': entities[0][attr_name]['values']
             }
         }
         return res

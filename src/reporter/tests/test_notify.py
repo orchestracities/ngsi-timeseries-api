@@ -1,6 +1,7 @@
 from datetime import datetime
 from conftest import QL_URL
 from translators.crate import CrateTranslator
+from utils.common import assert_equal_time_index_arrays
 import copy
 import json
 import pytest
@@ -122,28 +123,23 @@ def do_integration(entity, notify_url, orion_client, crate_translator):
         "throttling": 1,
     }
     orion_client.subscribe(subscription)
-    orion_client.insert(entity)
+    time.sleep(2)
 
-    time.sleep(3)  # Give time for notification to be processed.
+    orion_client.insert(entity)
+    time.sleep(4)  # Give time for notification to be processed.
+    crate_translator._refresh([entity['type']])
 
     entities = crate_translator.query()
-
-    # Not exactly one because first insert generates 2 notifications, see...
-    # https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions
-    assert len(entities) > 0
-    # Metadata still not supported
-    entity['temperature'].pop('metadata')
+    assert len(entities) == 1
 
     assert entities[0]['id'] == entity['id']
     assert entities[0]['type'] == entity['type']
-    assert entities[0]['temperature'] == entity['temperature']
+    obtained_values = entities[0]['temperature']['values']
 
-    # TODO: Uncomment following lines when issue being investigated is solved.
-    # Probably not a problem with orion notification but rather a wrong cleanup
-    # of orion after tests.
-    # entities[0].pop(CrateTranslator.TIME_INDEX_NAME)
-    # entity.pop('pressure')
-    # assert_ngsi_entity_equals(entities[0], entity)
+    # Not exactly one because first insert generates 2 notifications, see...
+    # https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions
+    expected_value = entity['temperature']['value']
+    assert obtained_values[0] == pytest.approx(expected_value)
 
 
 def test_integration(entity, orion_client, clean_mongo, crate_translator):
@@ -185,10 +181,7 @@ def test_air_quality_observed(air_quality_observed, orion_client, clean_mongo,
     time.sleep(3)  # Give time for notification to be processed.
 
     entities = crate_translator.query()
-
-    # Not exactly one because first insert generates 2 notifications, see...
-    # https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions
-    assert len(entities) > 0
+    assert len(entities) == 1
 
 
 def test_geocoding(notification, clean_mongo, crate_translator):
@@ -221,7 +214,7 @@ def test_geocoding(notification, clean_mongo, crate_translator):
 
     assert 'location' in entities[0]
     assert entities[0]['location']['type'] == 'geo:point'
-    lon, lat = entities[0]['location']['value'].split(',')
+    lon, lat = entities[0]['location']['values'][0].split(',')
     assert float(lon) == pytest.approx(60.1707129, abs=1e-2)
     assert float(lat) == pytest.approx(24.9412167, abs=1e-2)
 
@@ -251,6 +244,8 @@ def test_no_multiple_data_elements(notification, clean_mongo, clean_crate):
 
 
 def test_time_index(notification, clean_mongo, crate_translator):
+    import time
+
     # If present, use entity-level dateModified as time_index
     global_modified = datetime(2000, 1, 2).isoformat()
     modified = {
@@ -258,16 +253,20 @@ def test_time_index(notification, clean_mongo, crate_translator):
         'value': global_modified
     }
     notification['data'][0]['dateModified'] = modified
+
     r = requests.post('{}'.format(notify_url),
                       data=json.dumps(notification),
                       headers=HEADERS_PUT)
     assert r.status_code == 200
     assert r.json() == 'Notification successfully processed'
 
+    time.sleep(1)
     entity_type = notification['data'][0]['type']
     crate_translator._refresh([entity_type])
+
     entities = crate_translator.query()
-    assert entities[0][CrateTranslator.TIME_INDEX_NAME] == global_modified
+    assert len(entities) == 1
+    assert_equal_time_index_arrays(entities[0]['index'], [global_modified])
 
     # If not, use newest of changes
     notification['data'][0].pop('dateModified')
@@ -286,9 +285,12 @@ def test_time_index(notification, clean_mongo, crate_translator):
     assert r.status_code == 200
     assert r.json() == 'Notification successfully processed'
 
+    time.sleep(1)
     crate_translator._refresh([entity_type])
     entities = crate_translator.query()
-    assert entities[-1][CrateTranslator.TIME_INDEX_NAME] == newer
+    assert len(entities) == 1
+    obtained = entities[0]['index']
+    assert_equal_time_index_arrays(obtained, [global_modified, newer])
 
     # Otherwise, use current time.
     current = datetime.now()
@@ -300,10 +302,12 @@ def test_time_index(notification, clean_mongo, crate_translator):
     assert r.status_code == 200
     assert r.json() == 'Notification successfully processed'
 
+    time.sleep(1)
     crate_translator._refresh([entity_type])
     entities = crate_translator.query()
-    obtained = entities[-1][CrateTranslator.TIME_INDEX_NAME]
-    assert obtained.startswith("{}".format(current.year))
+    assert len(entities) == 1
+    obtained = entities[0]['index']
+    assert obtained[-1].startswith("{}".format(current.year))
 
 
 def test_no_value_in_notification(notification):
@@ -331,5 +335,4 @@ def test_no_value_in_notification(notification):
     url = '{}'.format(notify_url)
     r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
     assert r.status_code == 400
-    print(r.text)
     assert 'Payload is missing value for attribute pm25' in r.text

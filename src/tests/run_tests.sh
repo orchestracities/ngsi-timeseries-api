@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-export QL_IMAGE=quantumleap  # built in CI
+docker build -t quantumleap ../../.
+
+export QL_IMAGE=quantumleap
 
 docker-compose -f ../../docker/docker-compose-dev.yml up -d
 sleep 60

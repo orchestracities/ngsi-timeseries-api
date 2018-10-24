@@ -1,6 +1,7 @@
 from conftest import QL_URL, crate_translator as translator
 from exceptions.exceptions import AmbiguousNGSIIdError
 from reporter.tests.utils import insert_test_data
+from utils.common import assert_equal_time_index_arrays
 import pytest
 import requests
 
@@ -30,6 +31,19 @@ def reporter_dataset(translator):
     yield
 
 
+def assert_1T1E1A_response(obtained, expected):
+    """
+    Check API responses for 1T1E1A
+    """
+    # Assert time index
+    obt_index = obtained['data'].pop('index')
+    exp_index = expected['data'].pop('index')
+    assert_equal_time_index_arrays(obt_index, exp_index)
+
+    # Assert rest of data
+    assert obtained == expected
+
+
 def test_1T1E1A_defaults(reporter_dataset):
     # Query
     query_params = {
@@ -38,20 +52,21 @@ def test_1T1E1A_defaults(reporter_dataset):
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
 
-    # Assert
-    expected_values = list(range(n_days))
-    expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
+    obtained = r.json()
+
+    exp_values = list(range(n_days))
+    exp_index = [
+        '1970-01-{:02}T00:00:00.00'.format(i+1) for i in exp_values
     ]
-    expected_data = {
+    expected = {
         'data': {
             'entityId': entity_id,
             'attrName': attr_name,
-            'index': expected_index,
-            'values': expected_values,
+            'index': exp_index,
+            'values': exp_values,
         }
     }
-    assert r.json() == expected_data
+    assert_1T1E1A_response(obtained, expected)
 
 
 @pytest.mark.parametrize("aggr_method, aggr_value", [
@@ -70,8 +85,8 @@ def test_1T1E1A_aggrMethod(reporter_dataset, aggr_method, aggr_value):
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
 
-    # Assert
-    expected_data = {
+    obtained = r.json()
+    expected = {
         'data': {
             'entityId': entity_id,
             'attrName': attr_name,
@@ -79,7 +94,8 @@ def test_1T1E1A_aggrMethod(reporter_dataset, aggr_method, aggr_value):
             'values': [aggr_value],
         }
     }
-    assert r.json() == expected_data
+    assert_1T1E1A_response(obtained, expected)
+
 
 
 def test_1T1E1A_aggrPeriod(reporter_dataset):
@@ -122,15 +138,16 @@ def test_1T1E1A_fromDate_toDate(reporter_dataset):
     assert expected_index[-1] == "1970-01-17T00:00:00"
 
     # Assert
-    expected_data = {
+    obtained = r.json()
+    expected = {
         'data': {
             'entityId': entity_id,
-            'attrName': attr_name,
             'index': expected_index,
+            'attrName': attr_name,
             'values': expected_values,
         }
     }
-    assert r.json() == expected_data
+    assert_1T1E1A_response(obtained, expected)
 
 
 def test_1T1E1A_lastN(reporter_dataset):
@@ -152,7 +169,8 @@ def test_1T1E1A_lastN(reporter_dataset):
     assert expected_index[-1] == "1970-01-30T00:00:00"
 
     # Assert
-    expected_data = {
+    obtained = r.json()
+    expected = {
         'data': {
             'entityId': entity_id,
             'attrName': attr_name,
@@ -160,7 +178,7 @@ def test_1T1E1A_lastN(reporter_dataset):
             'values': expected_values,
         }
     }
-    assert r.json() == expected_data
+    assert_1T1E1A_response(obtained, expected)
 
 
 def test_1T1E1A_limit(reporter_dataset):
@@ -182,7 +200,8 @@ def test_1T1E1A_limit(reporter_dataset):
     assert expected_index[-1] == "1970-01-05T00:00:00"
 
     # Assert
-    expected_data = {
+    obtained = r.json()
+    expected = {
         'data': {
             'entityId': entity_id,
             'attrName': attr_name,
@@ -190,7 +209,7 @@ def test_1T1E1A_limit(reporter_dataset):
             'values': expected_values,
         }
     }
-    assert r.json() == expected_data
+    assert_1T1E1A_response(obtained, expected)
 
 
 def test_1T1E1A_offset(reporter_dataset):
@@ -212,7 +231,8 @@ def test_1T1E1A_offset(reporter_dataset):
     assert expected_index[-1] == "1970-01-30T00:00:00"
 
     # Assert
-    expected_data = {
+    obtained = r.json()
+    expected = {
         'data': {
             'entityId': entity_id,
             'attrName': attr_name,
@@ -220,7 +240,7 @@ def test_1T1E1A_offset(reporter_dataset):
             'values': expected_values,
         }
     }
-    assert r.json() == expected_data
+    assert_1T1E1A_response(obtained, expected)
 
 
 def test_1T1E1A_combined(reporter_dataset):
@@ -244,7 +264,8 @@ def test_1T1E1A_combined(reporter_dataset):
     assert expected_index[-1] == "1970-01-20T00:00:00"
 
     # Assert
-    expected_data = {
+    obtained = r.json()
+    expected = {
         'data': {
             'entityId': entity_id,
             'attrName': attr_name,
@@ -252,7 +273,7 @@ def test_1T1E1A_combined(reporter_dataset):
             'values': expected_values,
         }
     }
-    assert r.json() == expected_data
+    assert_1T1E1A_response(obtained, expected)
 
 
 def test_1T1E1A_values_defaults(reporter_dataset):
@@ -264,17 +285,18 @@ def test_1T1E1A_values_defaults(reporter_dataset):
     assert r.status_code == 200, r.text
 
     # Assert
+    obtained = r.json()
     expected_values = list(range(n_days))
     expected_index = [
         '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
     ]
-    expected_data = {
+    expected = {
         'data': {
             'index': expected_index,
             'values': expected_values,
         }
     }
-    assert r.json() == expected_data
+    assert_1T1E1A_response(obtained, expected)
 
 
 def test_not_found():

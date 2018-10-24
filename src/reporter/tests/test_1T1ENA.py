@@ -3,6 +3,7 @@ from reporter.tests.utils import insert_test_data
 from conftest import crate_translator as translator
 import pytest
 import requests
+from utils.common import assert_equal_time_index_arrays
 
 entity_type = 'Room'
 entity_id = 'Room0'
@@ -30,6 +31,19 @@ def reporter_dataset(translator):
     yield
 
 
+def assert_1T1ENA_response(obtained, expected):
+    """
+    Check API responses for 1T1ENA
+    """
+    # Assert time index
+    obt_index = obtained['data'].pop('index')
+    exp_index = expected['data'].pop('index')
+    assert_equal_time_index_arrays(obt_index, exp_index)
+
+    # Assert rest of data
+    assert obtained == expected
+
+
 def test_1T1ENA_defaults(reporter_dataset):
     # Query
     query_params = {
@@ -44,7 +58,7 @@ def test_1T1ENA_defaults(reporter_dataset):
     expected_index = [
         '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_temperatures
     ]
-    expected_data = {
+    expected = {
         'data': {
             'entityId': entity_id,
             'index': expected_index,
@@ -61,28 +75,28 @@ def test_1T1ENA_defaults(reporter_dataset):
         }
     }
     obtained = r.json()
-    assert obtained == expected_data
+    assert_1T1ENA_response(obtained, expected)
 
 
-@pytest.mark.parametrize("aggr_method, aggr_press, aggr_temp", [
+@pytest.mark.parametrize("aggr_meth, aggr_press, aggr_temp", [
     ("count", 30, 30),
     ("sum", 4350, 435),
     ("avg", 145, 14.5),
     ("min", 0, 0),
     ("max", 290, 29),
 ])
-def test_1T1ENA_aggrMethod(reporter_dataset, aggr_method, aggr_press, aggr_temp):
+def test_1T1ENA_aggrMethod(reporter_dataset, aggr_meth, aggr_press, aggr_temp):
     # Query
     query_params = {
         'type': entity_type,
-        'aggrMethod': aggr_method,
+        'aggrMethod': aggr_meth,
         'attrs': temperature + ',' + pressure,
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
 
     # Assert
-    expected_data = {
+    expected = {
         'data': {
             'entityId': entity_id,
             'index': [],
@@ -90,14 +104,16 @@ def test_1T1ENA_aggrMethod(reporter_dataset, aggr_method, aggr_press, aggr_temp)
                 {
                     'attrName': pressure,
                     'values': [aggr_press],
-                },{
+                },
+                {
                     'attrName': temperature,
                     'values': [aggr_temp],
                 },
             ]
         }
     }
-    assert r.json() == expected_data
+    obtained = r.json()
+    assert_1T1ENA_response(obtained, expected)
 
 
 def test_1T1ENA_aggrPeriod(reporter_dataset):
@@ -141,7 +157,7 @@ def test_1T1ENA_fromDate_toDate(reporter_dataset):
     assert expected_index[-1] == "1970-01-17T00:00:00"
 
     # Assert
-    expected_data = {
+    expected = {
         'data': {
             'entityId': entity_id,
             'index': expected_index,
@@ -157,7 +173,8 @@ def test_1T1ENA_fromDate_toDate(reporter_dataset):
             ]
         }
     }
-    assert r.json() == expected_data
+    obtained = r.json()
+    assert_1T1ENA_response(obtained, expected)
 
 
 def test_1T1ENA_lastN(reporter_dataset):
@@ -180,7 +197,7 @@ def test_1T1ENA_lastN(reporter_dataset):
     assert expected_index[-1] == "1970-01-30T00:00:00"
 
     # Assert
-    expected_data = {
+    expected = {
         'data': {
             'entityId': entity_id,
             'index': expected_index,
@@ -196,7 +213,8 @@ def test_1T1ENA_lastN(reporter_dataset):
             ]
         }
     }
-    assert r.json() == expected_data
+    obtained = r.json()
+    assert_1T1ENA_response(obtained, expected)
 
 
 def test_1T1ENA_limit(reporter_dataset):
@@ -219,7 +237,7 @@ def test_1T1ENA_limit(reporter_dataset):
     assert expected_index[-1] == "1970-01-05T00:00:00"
 
     # Assert
-    expected_data = {
+    expected = {
         'data': {
             'entityId': entity_id,
             'index': expected_index,
@@ -235,7 +253,8 @@ def test_1T1ENA_limit(reporter_dataset):
             ]
         }
     }
-    assert r.json() == expected_data
+    obtained = r.json()
+    assert_1T1ENA_response(obtained, expected)
 
 
 def test_1T1ENA_offset(reporter_dataset):
@@ -258,7 +277,7 @@ def test_1T1ENA_offset(reporter_dataset):
     assert expected_index[-1] == "1970-01-30T00:00:00"
 
     # Assert
-    expected_data = {
+    expected = {
         'data': {
             'entityId': entity_id,
             'index': expected_index,
@@ -274,7 +293,8 @@ def test_1T1ENA_offset(reporter_dataset):
             ]
         }
     }
-    assert r.json() == expected_data
+    obtained = r.json()
+    assert_1T1ENA_response(obtained, expected)
 
 
 def test_1T1ENA_combined(reporter_dataset):
@@ -299,7 +319,7 @@ def test_1T1ENA_combined(reporter_dataset):
     assert expected_index[-1] == "1970-01-20T00:00:00"
 
     # Assert
-    expected_data = {
+    expected = {
         'data': {
             'entityId': entity_id,
             'index': expected_index,
@@ -315,7 +335,8 @@ def test_1T1ENA_combined(reporter_dataset):
             ]
         }
     }
-    assert r.json() == expected_data
+    obtained = r.json()
+    assert_1T1ENA_response(obtained, expected)
 
 
 def test_1T1ENA_values_defaults(reporter_dataset):
@@ -332,7 +353,7 @@ def test_1T1ENA_values_defaults(reporter_dataset):
     expected_index = [
         '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_temperatures
     ]
-    expected_data = {
+    expected = {
         'data': {
             'index': expected_index,
             'attributes': [
@@ -347,7 +368,8 @@ def test_1T1ENA_values_defaults(reporter_dataset):
             ]
         }
     }
-    assert r.json() == expected_data
+    obtained = r.json()
+    assert_1T1ENA_response(obtained, expected)
 
 
 def test_not_found():

@@ -47,7 +47,7 @@ def insert_test_data(translator, entity_types, n_entities, n_days,
     for et in entity_types:
         for ei in range(n_entities):
             for d in range(n_days):
-                dt = datetime(1970, 1, d+1).isoformat()
+                dt = datetime(1970, 1, d+1).isoformat(timespec='milliseconds')
                 n = get_notification(et, ei, temp_value=d, mod_value=dt)
                 r = requests.post(notify_url(),
                                   data=json.dumps(n),

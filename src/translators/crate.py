@@ -95,7 +95,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         health = {}
 
         op = "select health from sys.health order by severity desc limit 1"
-        health['time'] = datetime.now().isoformat()
+        health['time'] = datetime.now().isoformat(timespec='milliseconds')
         try:
             self.cursor.execute(op)
 
@@ -128,58 +128,10 @@ class CrateTranslator(base_translator.BaseTranslator):
             The equivalent datetime in ISO 8601.
         """
         if ms_since_epoch is None:
-            raise ValueError
+            return "NULL"
         d = timedelta(milliseconds=ms_since_epoch)
         utc = datetime(1970, 1, 1, 0, 0, 0, 0) + d
-        return utc.isoformat()
-
-
-    def _format_response(self, resultset, col_names, table_name, last_n):
-        """
-        :param resultset: list of query results for one entity_type
-        :param col_names: list of columns affected in the query
-        :param table_name:
-        :return: iterable(NGSI Entity)
-            Iterable over the translated NGSI entities.
-        """
-        last_n = last_n or 0
-
-        stmt = "select entity_attrs from {} " \
-               "where table_name = ?".format(METADATA_TABLE_NAME)
-        self.cursor.execute(stmt, [table_name])
-        res = self.cursor.fetchall()
-
-        if len(res) != 1:
-            msg = "Cannot have {} entries in table '{}' for PK '{}'".format(
-                len(res), METADATA_TABLE_NAME, table_name)
-            self.logger.error(msg)
-        entity_attrs = res[0][0]
-
-        response = {}
-
-        for r in resultset[-last_n:]:  # Improve last_n, use dec order + limit
-            for k, v in zip(col_names, r):
-                if k not in entity_attrs:
-                    # implementation-specific columns not representing attrs
-                    continue
-
-                original_name, original_type = entity_attrs[k]
-
-                # CrateDBs and NGSI use different geo:point coordinates order.
-                if original_type == NGSI_GEOPOINT:
-                    lon, lat = v
-                    v = "{}, {}".format(lat, lon)
-
-                if original_name in (NGSI_TYPE, NGSI_ID):
-                    response[original_name] = v
-                elif original_name == self.TIME_INDEX_NAME:
-                    v = self._get_isoformat(v)
-                    response['index'] = v
-                else:
-                    attr_dict = response.setdefault(original_name, {})
-                    attr_dict.setdefault('values', []).append(v)
-
-        return response
+        return utc.isoformat(timespec='milliseconds')
 
 
     def _et2tn(self, entity_type, fiware_service=None):
@@ -246,7 +198,8 @@ class CrateTranslator(base_translator.BaseTranslator):
                 msg = "Translating entity without TIME_INDEX. " \
                       "It should have been inserted by the 'Reporter'. {}"
                 warnings.warn(msg.format(e))
-                e[self.TIME_INDEX_NAME] = datetime.now().isoformat()
+                now_iso = datetime.now().isoformat(timespec='milliseconds')
+                e[self.TIME_INDEX_NAME] = now_iso
 
         # Define column types
         # {column_name -> crate_column_type}
@@ -404,8 +357,8 @@ class CrateTranslator(base_translator.BaseTranslator):
         """
         op = "select distinct table_name from {} ".format(METADATA_TABLE_NAME)
         if fiware_service:
-            op += "where table_name ~* '{}{}[.].*'".format(TENANT_PREFIX,
-                                                           fiware_service.lower())
+            where = "where table_name ~* '{}{}[.].*'"
+            op += where.format(TENANT_PREFIX, fiware_service.lower())
         try:
             self.cursor.execute(op)
         except exceptions.ProgrammingError as e:
@@ -545,6 +498,7 @@ class CrateTranslator(base_translator.BaseTranslator):
          'attr_1': {
              'index': [t0, t1, ..., tn], # index of this attr (if different)
              'values': [v0, v1, ..., vn],
+             'type': Number
          },
          ...,
          'attr_N': ...
@@ -558,37 +512,40 @@ class CrateTranslator(base_translator.BaseTranslator):
         'type' is the NGSI Entity Type of the response.
 
         'id' or 'ids'. id if the response contains data from a specific NGSI
-        entity (with that id) or ids in the case the response uses data from
-        multiple entities (those with those ids). You get one or the other, not
-        both.
+        entity (with that id) or ids in the case the response aggregates data
+        from multiple entities (those with those ids). You get one or the
+        other, not both.
 
         'time_index': The time index applying to the response, applies to all
         attributes included in the response. It may not be present if each
         attribute has its own time index array, in the cases where attributes
         are measured at different moments in time. Not since this is a "global"
-        time index for the entity, it may contain some NULL values where
+        time index for the entity, it may contain some NONE values where
         measurements were not available. It's an array containing time
         measured in UTC milliseconds since epoch.
 
         Each attribute in the response will be represented by a dictionary,
         with an array called 'values' containing the actual historical values
-        of the query. Additionally, it may contain an array called 'index',
-        just like time_index but for this specific attribute. Thus, this 'index'
-        will never contain NULL values.
+        of the query. An attribute 'type' will have the original
+        NGSI type of the attribute (i.e, the type of each of the elements now
+        in the values array). Additionally, it may contain an array called
+        'index', just like time_index but for this specific attribute. Thus,
+        this 'index' will never contain NONE values.
 
         If the user did not specify an aggrMethod, the response will not mix
-        measurements of different entities in the same values array. So...
-        COMPLETE THIS!!
+        measurements of different entities in the same values array. So in this
+        case, there will be many dictionaries in the response array, one for
+        each NGSI Entity.
 
         When using aggrPeriod, the index array is a completely new index,
         composed of time steps of the original index of the attribute but
         zeroing the less significant bits of time. For example, if there were
         measurements in time 2018-04-03T08:15:15 and 2018-04-03T09:01:15, with
-        aggrPeriod = minute the new index will contain at least the steps
+        aggrPeriod = minute the new index will contain, at least, the steps
         2018-04-03T08:15:00 and 2018-04-03T09:01:00 respectively.
 
         :raises:
-        ValueError in case of missuse of the attributes.
+        ValueError in case of misuse of the attributes.
         UnsupportedOption for still-to-be-implemented features.
         crate.DatabaseError in case of errors with CrateDB interaction.
         """
@@ -619,8 +576,12 @@ class CrateTranslator(base_translator.BaseTranslator):
                                                   fiware_servicepath)
 
         if aggr_method:
-            order_by = "" if select_clause == "*" else "group by entity_id"
+            if select_clause == "*":
+                order_by = ""
+            else:
+                order_by = "group by entity_type, entity_id"
         else:
+            # we could add by entity_id afterwards, no?
             order_by = "order by {} ASC".format(self.TIME_INDEX_NAME)
 
         if entity_type:
@@ -654,37 +615,107 @@ class CrateTranslator(base_translator.BaseTranslator):
             else:
                 res = self.cursor.fetchall()
                 col_names = [x[0] for x in self.cursor.description]
-                entities = self._format_response(res, col_names, tn, last_n)
-            result.append(entities)
+                entities = self._format_response(res,
+                                                 col_names,
+                                                 tn,
+                                                 last_n,
+                                                 aggr_method)
+            result.extend(entities)
         return result
 
-    # TODO: Remove this method (needs refactoring of the benchmark)
-    def average(self, attr_name, entity_type=None, entity_id=None):
-        if entity_id and not entity_type:
-            msg = "For now you must specify entity_type when stating entity_id"
-            raise NotImplementedError(msg)
 
-        if entity_type:
-            table_names = [self._et2tn(entity_type)]
-        else:
-            # The semantic correctness of this operation is up to the client.
-            table_names = self._get_et_table_names()
+    def _format_response(self, resultset, col_names, table_name, last_n,
+                         aggr_Method):
+        """
+        :param resultset: list of query results for one entity_type
+        :param col_names: list of columns affected in the query
+        :param table_name:
+        :param last_n: see last_n in query method.
+        :param aggr_method: True if used in the request, false otherwise.
 
-        values = []
-        for tn in table_names:
-            select_clause = "avg({})".format(attr_name)
-            if entity_id:
-                where_clause = ("where entity_id = '%s'" % entity_id)
-            else:
-                where_clause = ''
-            stmt = "select {} from {} {}".format(select_clause,
-                                                 tn,
-                                                 where_clause)
-            self.cursor.execute(stmt)
-            avg = self.cursor.fetchone()[0]
-            values.append(avg)
+        :return: list of dicts. Possible scenarios
 
-        return statistics.mean(values)
+        Without aggrMethod, there will be one dict per entity instance. E.g.,
+        returns [
+                {'type': 'Room',
+                'id': 'Room1',
+                'temperature': {'values': [1, 2, 3]}
+                'index: [t0, t1, t2]
+                },
+                {'type': 'Room',
+                'id': 'Room2',
+                'temperature': {'values': [5, 6, 4]}
+                'index: [t0, t1, t2]
+                }
+                ]
+
+        With aggrMethod and one specific id requested, the list has only one
+        dict. The number of values is 1 if no aggrPeriod was said,
+        or one value per period step.
+        returns [{
+                    'type': 'Room',
+                    'id': 'SpecificRoom',
+                    'temperature': {'values': [1, 2, 3]},   # aggrMethod
+                    'index': [tA, tB, tC]                   # with aggrPeriod
+                }]
+
+        With aggrMethod and many specific ids requested, the array has
+        only one dict, but instead of an 'id' attribute it will have an
+        'ids'. This is the same case when user does not give a specific id at
+        all (no ids => all ids).
+        returns [{
+                    'type': 'Room',
+                    'ids': ['Room1', 'Room2'],
+                    'temperature': {'values': [4,]},    # aggrMethod
+                    'index': [],                        # without aggrPeriod
+                }]
+
+        Indexes elements are time steps in ISO format.
+        """
+        last_n = last_n or 0
+
+        stmt = "select entity_attrs from {} " \
+               "where table_name = ?".format(METADATA_TABLE_NAME)
+        self.cursor.execute(stmt, [table_name])
+        res = self.cursor.fetchall()
+
+        if len(res) != 1:
+            msg = "Cannot have {} entries in table '{}' for PK '{}'".format(
+                len(res), METADATA_TABLE_NAME, table_name)
+            self.logger.error(msg)
+        entity_attrs = res[0][0]
+
+        entities = {}
+        for r in resultset[-last_n:]:  # Improve last_n, use dec order + limit
+            for k, v in zip(col_names, r):
+                if k not in entity_attrs:
+                    # implementation-specific columns not representing attrs
+                    # e.g. fiware-servicepath
+                    continue
+
+                e_id = r[col_names.index('entity_id')]
+                e = entities.setdefault(e_id, {})
+                original_name, original_type = entity_attrs[k]
+
+                # CrateDBs and NGSI use different geo:point coordinates order.
+                if original_type == NGSI_GEOPOINT:
+                    lon, lat = v
+                    v = "{}, {}".format(lat, lon)
+
+                if original_name in (NGSI_TYPE, NGSI_ID):
+                    e[original_name] = v
+                elif original_name == self.TIME_INDEX_NAME:
+                    v = self._get_isoformat(v)
+                    e.setdefault('index', []).append(v)
+                else:
+                    attr_dict = e.setdefault(original_name, {})
+
+                    if original_type in (NGSI_DATETIME, NGSI_ISO8601):
+                        v = self._get_isoformat(v)
+                    attr_dict.setdefault('values', []).append(v)
+                    attr_dict['type'] = original_type
+
+        return [entities[k] for k in sorted(entities.keys())]
 
 
     def delete_entity(self, entity_id, entity_type=None, from_date=None,
