@@ -44,7 +44,7 @@ def test_health_fail_redis():
     url = '{}/health'.format(QL_URL)
     r = requests.get(url)
 
-    assert r.status_code == 424, r.text
+    assert r.status_code == 503, r.text
     response = r.json()
     assert response['status'] == 'fail'
     health = response['details']['redis']
@@ -63,7 +63,7 @@ def test_health_fail_crate():
     url = '{}/health'.format(QL_URL)
     r = requests.get(url)
 
-    assert r.status_code == 424, r.text
+    assert r.status_code == 503, r.text
     response = r.json()
     assert response['status'] == 'fail'
     health = response['details']['crateDB']
