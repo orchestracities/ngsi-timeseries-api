@@ -82,6 +82,26 @@ def test_1T1E1A_aggrMethod(reporter_dataset, aggr_method, aggr_value):
     assert r.json() == expected_data
 
 
+def test_1T1E1A_aggrPeriod(reporter_dataset):
+    # GH issue https://github.com/smartsdk/ngsi-timeseries-api/issues/89
+
+    # aggrPeriod needs aggrMethod
+    query_params = {
+        'type': entity_type,
+        'aggrPeriod': 'minute',
+    }
+    r = requests.get(query_url(), params=query_params)
+    assert r.status_code == 400, r.text
+
+    query_params = {
+        'type': entity_type,
+        'aggrMethod': 'avg',
+        'aggrPeriod': 'minute',
+    }
+    r = requests.get(query_url(), params=query_params)
+    assert r.status_code == 501, r.text
+
+
 def test_1T1E1A_fromDate_toDate(reporter_dataset):
     # Query
     query_params = {

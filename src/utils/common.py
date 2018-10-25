@@ -43,7 +43,7 @@ def assert_ngsi_entity_equals(entity, other):
                 if ek == 'time_index':
                     d0 = datetime.strptime(ev, "%Y-%m-%dT%H:%M:%S.%f")
                     d1 = datetime.strptime(other[ek], "%Y-%m-%dT%H:%M:%S.%f")
-                    assert d0 == d1
+                    assert abs(d0-d1).seconds == 0
                 else:
                     assert ev == other[ek], "{} != {}".format(ev, other[ek])
 

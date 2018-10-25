@@ -19,7 +19,8 @@ def test_insert(translator):
 
 
 def test_insert_entity(translator, entity):
-    entity[BaseTranslator.TIME_INDEX_NAME] = datetime.now().isoformat()[:-3]
+    now = datetime.now().isoformat(timespec='microseconds')
+    entity[BaseTranslator.TIME_INDEX_NAME] = now
     result = translator.insert([entity])
     assert result.rowcount == 1
 
@@ -120,7 +121,7 @@ WITHIN_EAST_EMISPHERE = "within(attr_geo, 'POLYGON ((0 -90, 180 -90, 180 90, 0 9
     ("attr_bool", "= True", lambda e: e["attr_bool"]["value"]),
     ("attr_str", "> 'M'", lambda e: e["attr_str"]["value"] > "M"),
     ("attr_float", "< 0.5", lambda e: e["attr_float"]["value"] < 0.5),
-    ("attr_time", "> '1970-06-28T00:00'", lambda e: e["attr_time"]["value"] > datetime(1970, 6, 28).isoformat()[:-3]),
+    ("attr_time", "> '1970-06-28T00:00'", lambda e: e["attr_time"]["value"] > datetime(1970, 6, 28).isoformat(timespec='microseconds')),
     (WITHIN_EAST_EMISPHERE, "", lambda e: e["attr_geo"]["value"]["coordinates"][0] > 0),
 ])
 def test_query_per_attribute(translator, attr_name, clause, tester):
@@ -170,7 +171,7 @@ def test_unsupported_ngsi_type(translator):
     e = {
         "type": "SoMeWeIrDtYpE",
         "id": "sOmEwEiRdId",
-        TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
+        TIME_INDEX_NAME: datetime.now().isoformat(timespec='microseconds'),
         "foo": {
             "type": "DefinitivelyNotAValidNGSIType",
             "value": "BaR",
@@ -187,7 +188,7 @@ def test_missing_type_defaults_string(translator):
     e = {
         "type": "SoMeWeIrDtYpE",
         "id": "sOmEwEiRdId",
-        TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
+        TIME_INDEX_NAME: datetime.now().isoformat(timespec='microseconds'),
         "foo": {
             "value": "BaR",
         },
@@ -206,7 +207,7 @@ def test_capitals(translator):
     e = {
         "type": entity_type,
         "id": "sOmEwEiRdId",
-        TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
+        TIME_INDEX_NAME: datetime.now().isoformat(timespec='microseconds'),
         "Foo": {
             "type": "Text",
             "value": "FoO",
@@ -226,7 +227,7 @@ def test_capitals(translator):
     e2 = e.copy()
     e2['id'] = 'SOmEwEiRdId2'
     e2['NewAttr'] = {"type": "Text", "value": "NewAttrValue!"}
-    e2[TIME_INDEX_NAME] = datetime.now().isoformat()[:-3]
+    e2[TIME_INDEX_NAME] = datetime.now().isoformat(timespec='microseconds')
 
     translator.insert([e2])
     translator._refresh([entity_type])
@@ -260,7 +261,7 @@ def test_long_json(translator):
     big_entity = {
         'id': 'entityId1',
         'type': 'type1',
-        TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
+        TIME_INDEX_NAME: datetime.now().isoformat(timespec='microseconds'),
         'foo': {
             'type': 'Text',
             'value': "SomeTextThatWillGetLong" * 2000
@@ -279,7 +280,7 @@ def test_geo_point(translator):
     entity = {
         'id': 'Room1',
         'type': 'Room',
-        TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
+        TIME_INDEX_NAME: datetime.now().isoformat(timespec='microseconds'),
         'location': {
             'type': 'geo:point',
             'value': "19.6389474, -98.9109537"  # lat, long
@@ -306,7 +307,7 @@ def test_structured_value_to_array(translator):
     entity = {
         'id': '8906',
         'type': 'AirQualityObserved',
-        TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
+        TIME_INDEX_NAME: datetime.now().isoformat(timespec='microseconds'),
         'aqi': {'type': 'Number', 'value': 43},
         'city': {'type': 'Text', 'value': 'Antwerpen'},
         'h': {'type': 'Number', 'value': 93},
@@ -341,7 +342,7 @@ def test_ISO8601(translator):
     e = {
         "type": "MyType",
         "id": "MyId",
-        TIME_INDEX_NAME: datetime.now().isoformat()[:-3],
+        TIME_INDEX_NAME: datetime.now().isoformat(timespec='microseconds'),
         "iso_attr": {
             "type": "ISO8601",
             "value": "2018-03-20T13:26:38.722000",
@@ -361,7 +362,8 @@ def test_ISO8601(translator):
 
 def test_air_quality_observed(translator, air_quality_observed):
     # Add TIME_INDEX as Reporter would
-    air_quality_observed[TIME_INDEX_NAME] = datetime.now().isoformat()[:-3]
+    now = datetime.now().isoformat(timespec='microseconds')
+    air_quality_observed[TIME_INDEX_NAME] = now
 
     result = translator.insert([air_quality_observed])
     assert result.rowcount > 0
@@ -374,7 +376,8 @@ def test_air_quality_observed(translator, air_quality_observed):
 
 def test_traffic_flow_observed(translator, traffic_flow_observed):
     # Add TIME_INDEX as Reporter would
-    traffic_flow_observed[TIME_INDEX_NAME] = datetime.now().isoformat()[:-3]
+    now = datetime.now().isoformat(timespec='microseconds')
+    traffic_flow_observed[TIME_INDEX_NAME] = now
 
     result = translator.insert([traffic_flow_observed])
     assert result.rowcount > 0

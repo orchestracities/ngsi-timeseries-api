@@ -4,15 +4,14 @@
 [![License: MIT](https://img.shields.io/github/license/smartsdk/ngsi-timeseries-api.svg)](https://opensource.org/licenses/MIT)
 [![Docker Status](https://img.shields.io/docker/pulls/smartsdk/quantumleap.svg)](https://hub.docker.com/r/smartsdk/quantumleap/)
 [![Support](https://img.shields.io/badge/support-ask-yellowgreen.svg)](https://ask.fiware.org/questions/)
-<br/>
 [![Documentation badge](https://img.shields.io/readthedocs/quantumleap.svg)](https://quantumleap.readthedocs.io/en/latest/)
 [![Build Status](https://travis-ci.org/smartsdk/ngsi-timeseries-api.svg?branch=master)](https://travis-ci.org/smartsdk/ngsi-timeseries-api)
 ![Status](https://nexus.lab.fiware.org/static/badges/statuses/quantum-leap.svg)
-[![Swagger Validator](https://img.shields.io/swagger/valid/2.0/https/raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v2.0/json/petstore-expanded.json.svg)](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1)
+[![Swagger Validator](https://img.shields.io/swagger/valid/2.0/https/raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v2.0/json/petstore-expanded.json.svg)](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
 
 ## Introduction
 
-QuantumLeap is the first implementation of [an API](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1)
+QuantumLeap is the first implementation of [an API](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
 that supports the storage of [FIWARE NGSIv2](http://docs.orioncontextbroker.apiary.io/#)
 data into a [time series database](https://en.wikipedia.org/wiki/Time_series_database).
 
