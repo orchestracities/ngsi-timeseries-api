@@ -36,6 +36,7 @@ which will be the search term for osm. This is to cover cases where you want
 a point but don't necessary have a street + postOfficeBoxNumber. For example,
 "Eiffel Tower, Paris".
 """
+from datetime import datetime
 import geocoder
 import json
 import logging
@@ -285,3 +286,24 @@ def _get_polygon_geojson(osm_id, osm_type):
     r = requests.get(url, params=params)
     if r.ok:
         return r.json().get('geojson', None)
+
+
+def get_health():
+    """
+    :return: dictionary with geocoder service health. ::see:: reporter.health.
+    """
+    try:
+        g = geocoder.osm("New York city", maxRows=1)
+    except (requests.exceptions.RequestException, Exception) as e:
+        # geocoder docs say exception will be raised to the caller
+        time = datetime.now().isoformat()
+        output = "{}".format(e)
+        res = {'status': 'fail', 'time': time, 'output': output}
+        return res
+    else:
+        if g.ok:
+            return {'status': 'pass'}
+
+        time = datetime.now().isoformat()
+        res = {'status': 'fail', 'time': time, 'output': g.status}
+        return res

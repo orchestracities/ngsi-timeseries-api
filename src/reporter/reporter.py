@@ -170,7 +170,7 @@ def query_1TNENA():
         "error": "Not Implemented",
         "description": "This API method is not yet implemented."
     }
-    return r, 400
+    return r, 501
 
 
 def query_1TNENA_value():
@@ -178,7 +178,7 @@ def query_1TNENA_value():
         "error": "Not Implemented",
         "description": "This API method is not yet implemented."
     }
-    return r, 400
+    return r, 501
 
 
 def query_NTNE1A():
@@ -186,7 +186,7 @@ def query_NTNE1A():
         "error": "Not Implemented",
         "description": "This API method is not yet implemented."
     }
-    return r, 400
+    return r, 501
 
 
 def query_NTNE1A_value():
@@ -194,7 +194,7 @@ def query_NTNE1A_value():
         "error": "Not Implemented",
         "description": "This API method is not yet implemented."
     }
-    return r, 400
+    return r, 501
 
 
 def query_NTNENA():
@@ -202,7 +202,7 @@ def query_NTNENA():
         "error": "Not Implemented",
         "description": "This API method is not yet implemented."
     }
-    return r, 400
+    return r, 501
 
 
 def query_NTNENA_value():
@@ -210,7 +210,7 @@ def query_NTNENA_value():
         "error": "Not Implemented",
         "description": "This API method is not yet implemented."
     }
-    return r, 400
+    return r, 501
 
 
 def config():
@@ -218,7 +218,7 @@ def config():
         "error": "Not Implemented",
         "description": "This API method is not yet implemented."
     }
-    return r, 400
+    return r, 501
 
 
 def subscribe(orion_url,

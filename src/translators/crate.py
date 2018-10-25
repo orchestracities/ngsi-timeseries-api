@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 from crate import client
-from crate.client.exceptions import ProgrammingError
+from crate.client import exceptions
 from datetime import datetime, timedelta
 from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption
 from translators import base_translator
@@ -80,6 +80,40 @@ class CrateTranslator(base_translator.BaseTranslator):
     def get_db_version(self):
         self.cursor.execute("select version['number'] from sys.nodes")
         return self.cursor.fetchall()[0][0]
+
+
+    def get_health(self):
+        """
+        Return a dict of the status of crate service.
+
+        Checkout
+        https://crate.io/docs/crate/reference/en/latest/admin/system-information.html#health
+        """
+        health = {}
+
+        op = "select health from sys.health order by severity desc limit 1"
+        health['time'] = datetime.now().isoformat()
+        try:
+            self.cursor.execute(op)
+
+        except exceptions.ConnectionError as e:
+            msg = "{}".format(e)
+            logging.debug(msg)
+            health['status'] = 'fail'
+            health['output'] = msg
+
+        else:
+            res = self.cursor.fetchall()
+            if len(res) == 0 or res[0][0] == 'GREEN':
+                # (can be empty when no tables were created yet)
+                health['status'] = 'pass'
+            else:
+                c = res[0][0]
+                health['status'] = 'warn'
+                msg = "Checkout sys.health in crateDB, you have a {} status."
+                health['output'] = msg.format(c)
+
+        return health
 
 
     def _get_isoformat(self, ms_since_epoch):
@@ -374,7 +408,7 @@ class CrateTranslator(base_translator.BaseTranslator):
                                                            fiware_service.lower())
         try:
             self.cursor.execute(op)
-        except client.exceptions.ProgrammingError as e:
+        except exceptions.ProgrammingError as e:
             # Metadata table still not created
             msg = "Could not retrieve METADATA_TABLE. Empty database maybe?. {}"
             logging.debug(msg.format(e))
@@ -509,7 +543,7 @@ class CrateTranslator(base_translator.BaseTranslator):
                 )
             try:
                 self.cursor.execute(op)
-            except ProgrammingError as e:
+            except exceptions.ProgrammingError as e:
                 # Reason 1: fiware_service_path column in legacy dbs.
                 logging.debug("{}".format(e))
                 entities = []
@@ -578,7 +612,7 @@ class CrateTranslator(base_translator.BaseTranslator):
 
         try:
             self.cursor.execute(op)
-        except ProgrammingError as e:
+        except exceptions.ProgrammingError as e:
             logging.debug("{}".format(e))
             return 0
 
@@ -599,7 +633,7 @@ class CrateTranslator(base_translator.BaseTranslator):
             op = "delete from {} {}".format(table_name, where_clause)
             try:
                 self.cursor.execute(op)
-            except ProgrammingError as e:
+            except exceptions.ProgrammingError as e:
                 logging.debug("{}".format(e))
                 return 0
             return self.cursor.rowcount
@@ -607,7 +641,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         # Drop whole table
         try:
             self.cursor.execute("select count(*) from {}".format(table_name))
-        except ProgrammingError as e:
+        except exceptions.ProgrammingError as e:
             logging.debug("{}".format(e))
             return 0
         count = self.cursor.fetchone()[0]
@@ -615,7 +649,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         op = "drop table {}".format(table_name)
         try:
             self.cursor.execute(op)
-        except ProgrammingError as e:
+        except exceptions.ProgrammingError as e:
             logging.debug("{}".format(e))
             return 0
 
@@ -623,7 +657,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         op = "delete from {} where table_name = ?".format(METADATA_TABLE_NAME)
         try:
             self.cursor.execute(op, [table_name,])
-        except ProgrammingError as e:
+        except exceptions.ProgrammingError as e:
             # What if this one fails and previous didn't?
             logging.debug("{}".format(e))
 

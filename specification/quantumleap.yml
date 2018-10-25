@@ -320,8 +320,115 @@ paths:
       tags:
         - meta
       responses:
-        201:
-          description: "Successfully created record."
+        501:
+          description: "Not implemented!"
+          schema:
+            type: string
+
+  /health:
+    get:
+      operationId: reporter.health.get_health
+      summary: "Returns the health-check status of QuantumLeap and the services
+      it depends on."
+      description: "This endpoint is intended for administrators of
+      QuantumLeap. Using the information returned by this endpoint they can
+      diagnose problems in the service or its dependencies. This information is
+      also useful for cloud tools such as orchestrators and load balancers
+      with rules based on health-checks. Due to the lack of a standardized
+      response format, we base the implementation on the draft of
+       https://inadarei.github.io/rfc-healthcheck/
+
+       QuantumlLeap's dependencies are the following:
+        - CrateDB: Critical
+        - Redis:   Critical only if geocoding is enabled.
+        - OSM:     Non-critical"
+      tags:
+        - meta
+      responses:
+        200:
+          description: "QuantumLeap health is OK, the service works as
+          expected."
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+          examples:
+            application/json:
+              {
+                "status": "pass"
+              }
+        207:
+          description: "QuantumLeap health may be OK, but some of its
+          dependencies report a warning status, or some of its non-critical
+          dependencies report a fail status, so you should double-check."
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              details:
+                type: object
+          examples:
+            application/json:
+              {
+                "status": "warn",
+                "details": {
+                  "crateDB": {
+                    "status": "warn",
+                    "time": "2018-01-01T00:00:00Z",
+                    "output": "message-from-crateDB"
+                  },
+                  "redis": {
+                    "status": "warn",
+                    "time": "2018-01-01T00:00:00Z",
+                    "output": "raw-error-from-redis"
+                  }
+                }
+              }
+        424:
+          description: "QuantumLeap health is NOT OK, as some of its
+          dependencies report a failure status."
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              details:
+                type: object
+          examples:
+            application/json:
+              {
+                "status": "fail",
+                "details": {
+                  "crateDB": {
+                    "status": "fail",
+                    "time": "2018-01-01T00:00:00Z",
+                    "output": "raw-error-from-crateDB"
+                  },
+                  "orion": {
+                    "status": "fail",
+                    "time": "2018-01-01T00:00:00Z",
+                    "output": "raw-error-from-orion"
+                  },
+                  "redis": {
+                    "status": "fail",
+                    "time": "2018-01-01T00:00:00Z",
+                    "output": "raw-error-from-redis"
+                  },
+                  "OSM": {
+                    "componentType": "system",
+                    "status": "pass",
+                    "time": "2018-01-01T00:00:00Z"
+                  },
+                  "grafana": {
+                    "componentType": "system",
+                    "status": "pass",
+                    "time": "2018-01-01T00:00:00Z"
+                  }
+                }
+              }
+
 
 ################################################################################
 # PATHS: INPUT
@@ -891,6 +998,8 @@ paths:
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
       responses:
+        501:
+          description: "Not implemented!"
         200:
           description: OK
           schema:
@@ -1007,6 +1116,8 @@ paths:
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
       responses:
+        501:
+          description: "Not implemented!"
         200:
           description: OK
           schema:
@@ -1101,6 +1212,8 @@ paths:
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
       responses:
+        501:
+          description: "Not implemented!"
         200:
           description: OK
           schema:
@@ -1197,6 +1310,8 @@ paths:
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
       responses:
+        501:
+          description: "Not implemented!"
         200:
           description: OK
           schema:
@@ -1290,6 +1405,8 @@ paths:
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
       responses:
+        501:
+          description: "Not implemented!"
         200:
           description: OK
           schema:
@@ -1394,6 +1511,8 @@ paths:
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
       responses:
+        501:
+          description: "Not implemented!"
         200:
           description: OK
           schema:
