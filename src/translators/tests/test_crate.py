@@ -13,7 +13,7 @@ def test_db_version(translator):
 def test_insert(translator):
     entities = create_random_entities(1, 2, 3, use_time=True, use_geo=True)
     result = translator.insert(entities)
-    assert result.rowcount != 0
+    assert result.rowcount > 0
 
 
 def test_insert_entity(translator, entity):

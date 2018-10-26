@@ -441,11 +441,11 @@ class CrateTranslator(base_translator.BaseTranslator):
             Array of attribute names to query for.
         :param entity_type:
             (Optional). NGSI Entity Type to query about. Unique and optional
-            as long as there are no 2 equal NGSI ids for a given NGSI type.
+            as long as there are no 2 equal NGSI ids for any NGSI type.
         :param entity_id:
             NGSI Id of the entity you ask for. Cannot be used with entity_ids.
         :param entity_ids:
-            Array of NGSI Ids to consider in the response. Cannot be used with
+            Array of NGSI ids to consider in the response. Cannot be used with
             entity_id.
         :param where_clause:
             (Optional), to use a custom SQL query (not open to public API).
@@ -481,19 +481,17 @@ class CrateTranslator(base_translator.BaseTranslator):
             entities in this FIWARE Service.
         :param fiware_servicepath:
             (Optional), used to filter results, considering in the result only
-            entities in this FIWARE Service.
-
-        :param aggr_per_instance: (Not Implemented). Defaults to False.
-            If True, it would allow to request the aggrMethod being applied
+            entities in this FIWARE ServicePath.
+        :param aggr_scope: (Not Implemented). Defaults to "Global".
+            If "Local", it would allow to request the aggrMethod being applied
             N times, once for each entityId.
 
         :return:
-        The shape of the response is always like this:
+        The shape of the response is always something like this:
 
         [{
          'type': 'Room',
-         'id': 'Room1',
-         'ids': ['Room1', 'Room2'],
+         'id': 'Room1', or 'ids': ['Room1', 'Room2'],
          'time_index': [t0, t1, ..., tn],
          'attr_1': {
              'index': [t0, t1, ..., tn], # index of this attr (if different)
@@ -519,18 +517,20 @@ class CrateTranslator(base_translator.BaseTranslator):
         'time_index': The time index applying to the response, applies to all
         attributes included in the response. It may not be present if each
         attribute has its own time index array, in the cases where attributes
-        are measured at different moments in time. Not since this is a "global"
-        time index for the entity, it may contain some NONE values where
+        are measured at different moments in time. Note since this is a "global"
+        time index for the entity, it may contain some NULL values where
         measurements were not available. It's an array containing time
-        measured in UTC milliseconds since epoch.
+        measured in milliseconds since epoch (typically in the timezone the
+        Orion Notification used, or UTC if created within QL).
 
         Each attribute in the response will be represented by a dictionary,
         with an array called 'values' containing the actual historical values
-        of the query. An attribute 'type' will have the original
+        of the attributes as queried. An attribute 'type' will have the original
         NGSI type of the attribute (i.e, the type of each of the elements now
-        in the values array). Additionally, it may contain an array called
-        'index', just like time_index but for this specific attribute. Thus,
-        this 'index' will never contain NONE values.
+        in the values array). The type of an attribute is not
+        expected to change in time, it'd be an error. Additionally, it may
+        contain an array called 'index', just like time_index but for this
+        specific attribute. Thus, this 'index' will never contain NONE values.
 
         If the user did not specify an aggrMethod, the response will not mix
         measurements of different entities in the same values array. So in this
@@ -629,7 +629,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         """
         :param resultset: list of query results for one entity_type
         :param col_names: list of columns affected in the query
-        :param table_name:
+        :param table_name: name of table where the query took place.
         :param last_n: see last_n in query method.
         :param aggr_method: True if used in the request, false otherwise.
 
@@ -650,8 +650,8 @@ class CrateTranslator(base_translator.BaseTranslator):
                 ]
 
         With aggrMethod and one specific id requested, the list has only one
-        dict. The number of values is 1 if no aggrPeriod was said,
-        or one value per period step.
+        dict. The number of values is 1 if no aggrPeriod was asked for,
+        or one value per aggregation period step.
         returns [{
                     'type': 'Room',
                     'id': 'SpecificRoom',
@@ -662,7 +662,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         With aggrMethod and many specific ids requested, the array has
         only one dict, but instead of an 'id' attribute it will have an
         'ids'. This is the same case when user does not give a specific id at
-        all (no ids => all ids).
+        all (no id => all ids).
         returns [{
                     'type': 'Room',
                     'ids': ['Room1', 'Room2'],
@@ -680,12 +680,12 @@ class CrateTranslator(base_translator.BaseTranslator):
         res = self.cursor.fetchall()
 
         if len(res) != 1:
-            msg = "Cannot have {} entries in table '{}' for PK '{}'".format(
-                len(res), METADATA_TABLE_NAME, table_name)
+            msg = "Cannot have {} entries in table '{}' for PK '{}'"
+            msg = msg.format(len(res), METADATA_TABLE_NAME, table_name)
             self.logger.error(msg)
-        entity_attrs = res[0][0]
 
         entities = {}
+        entity_attrs = res[0][0]
         for r in resultset[-last_n:]:  # Improve last_n, use dec order + limit
             for k, v in zip(col_names, r):
                 if k not in entity_attrs:
@@ -704,9 +704,11 @@ class CrateTranslator(base_translator.BaseTranslator):
 
                 if original_name in (NGSI_TYPE, NGSI_ID):
                     e[original_name] = v
+
                 elif original_name == self.TIME_INDEX_NAME:
                     v = self._get_isoformat(v)
                     e.setdefault('index', []).append(v)
+
                 else:
                     attr_dict = e.setdefault(original_name, {})
 

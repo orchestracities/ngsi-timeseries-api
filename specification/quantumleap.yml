@@ -579,7 +579,6 @@ paths:
             application/json:
               {
                 "data": {
-                    # Return type!?
                     "entityId": "Kitchen1",
                     "attrName": "temperature",
                     "index": ["2018-01-05T15:44:34", "2018-01-06T15:44:59",

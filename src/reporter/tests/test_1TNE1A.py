@@ -30,7 +30,7 @@ def reporter_dataset(translator):
     yield
 
 
-def assert_1TNENA_response(obtained, expected, values_only=False):
+def assert_1TNE1A_response(obtained, expected, values_only=False):
     """
     Check API responses for 1TNE1A
     """
@@ -91,7 +91,7 @@ def test_1TNE1A_defaults(reporter_dataset):
     }
 
     obtained = r.json()
-    assert_1TNENA_response(obtained, expected)
+    assert_1TNE1A_response(obtained, expected)
 
 
 def test_1TNE1A_one_entity(reporter_dataset):
@@ -126,7 +126,7 @@ def test_1TNE1A_one_entity(reporter_dataset):
         }
     }
     obtained = r.json()
-    assert_1TNENA_response(obtained, expected)
+    assert_1TNE1A_response(obtained, expected)
 
 
 def test_1TNE1A_some_entities(reporter_dataset):
@@ -165,7 +165,7 @@ def test_1TNE1A_some_entities(reporter_dataset):
         }
     }
     obtained = r.json()
-    assert_1TNENA_response(obtained, expected)
+    assert_1TNE1A_response(obtained, expected)
 
 
 def test_1TNE1A_values_defaults(reporter_dataset):
@@ -201,7 +201,7 @@ def test_1TNE1A_values_defaults(reporter_dataset):
             'values': expected_entities,
         }
     }
-    assert_1TNENA_response(obtained, expected, values_only=True)
+    assert_1TNE1A_response(obtained, expected, values_only=True)
 
 
 def test_not_found():
@@ -256,7 +256,7 @@ def test_weird_ids(reporter_dataset):
         }
     }
     obtained = r.json()
-    assert_1TNENA_response(obtained, expected)
+    assert_1TNE1A_response(obtained, expected)
 
 
 def test_different_time_indexes(translator):
@@ -301,7 +301,7 @@ def test_different_time_indexes(translator):
         }
     }
     obtained = r.json()
-    assert_1TNENA_response(obtained, expected)
+    assert_1TNE1A_response(obtained, expected)
 
 
 def test_aggregation_is_per_instance(translator):

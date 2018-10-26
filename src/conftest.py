@@ -1,9 +1,10 @@
+from crate.client import exceptions
 import json
 import os
 import pymongo as pm
 import pytest
 import requests
-from crate.client import exceptions
+
 
 QL_HOST = os.environ.get('QL_HOST', "quantumleap")
 QL_PORT = 8668
@@ -83,7 +84,7 @@ def clean_crate():
 
 @pytest.fixture()
 def crate_translator(clean_crate):
-    from translators.crate import CrateTranslator
+    from src.translators.crate import CrateTranslator
 
     class Translator(CrateTranslator):
 
@@ -116,7 +117,6 @@ def crate_translator(clean_crate):
             except exceptions.ProgrammingError:
                 pass
             return r
-
 
     with Translator(host=CRATE_HOST, port=CRATE_PORT) as trans:
         yield trans

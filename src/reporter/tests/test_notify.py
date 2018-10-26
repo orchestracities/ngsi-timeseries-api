@@ -177,7 +177,6 @@ def test_air_quality_observed(air_quality_observed, orion_client, clean_mongo,
     orion_client.subscribe(subscription)
     orion_client.insert(entity)
 
-    import time
     time.sleep(3)  # Give time for notification to be processed.
 
     entities = crate_translator.query()
@@ -244,8 +243,6 @@ def test_no_multiple_data_elements(notification, clean_mongo, clean_crate):
 
 
 def test_time_index(notification, clean_mongo, crate_translator):
-    import time
-
     # If present, use entity-level dateModified as time_index
     global_modified = datetime(2000, 1, 2).isoformat()
     modified = {
