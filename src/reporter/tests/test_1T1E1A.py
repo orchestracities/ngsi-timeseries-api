@@ -11,7 +11,7 @@ attr_name = 'temperature'
 n_days = 30
 
 
-def query_url(values=False):
+def query_url(entity_type='Room', entity_id='Room0', values=False):
     url = "{qlUrl}/entities/{entityId}/attrs/{attrName}"
     if values:
         url += '/value'
@@ -95,7 +95,6 @@ def test_1T1E1A_aggrMethod(reporter_dataset, aggr_method, aggr_value):
         }
     }
     assert_1T1E1A_response(obtained, expected)
-
 
 
 def test_1T1E1A_aggrPeriod(reporter_dataset):

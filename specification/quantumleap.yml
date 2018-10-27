@@ -74,12 +74,12 @@ definitions:
       type: string
     description: "Array of the timestamps which are indexes of the response
     for the requested data. It's a parallel array to 'values'. The timestamp
-    will be either in the ISO format or the milliseconds in UTC since epoch,
-    depending on the format the 'time_index' was created; always respecting
-    the original format in which data was inserted. When using aggregation
-    options, the format of this remains the same, only the semantics will
-    change. For example, if aggrPeriod is day, each index will be a valid
-    timestamp of a moment in the corresponding day."
+    will be in the ISO8601 format (e.g. 2010-10-10T07:09:00.792) or in
+    milliseconds since epoch whichever format was used in the input
+    (notification), but ALWAYS in UTC.
+    When using aggregation options, the format of this remains the same, only
+     the semantics will change. For example, if aggrPeriod is day, each index
+      will be a valid timestamp of a moment in the corresponding day."
 
   ValuesArray:
     type: array
