@@ -9,8 +9,6 @@ docker build -t quantumleap .
 
 source deps.env
 
-source env/bin/activate
-
 # Aliasing so that notifications from orion container reach dev localhost
 LH=192.0.0.1
 sudo ifconfig lo0 alias $LH
@@ -24,3 +22,5 @@ export INFLUX_HOST=$LH
 export RETHINK_HOST=$LH
 
 export REDIS_HOST=$LH
+
+pipenv shell

@@ -37,11 +37,9 @@ so things will change for sure. For now, you can get started with:
 ```
 git clone https://github.com/smartsdk/ngsi-timeseries-api.git
 cd ngsi-timeseries-api
-python3 -m venv env
-source env/bin/activate
-pip install -r requirements.txt
+pipenv install
 
-# if you want to test everything locally, you'll need to...
+# if you want to set up a dev env to test everything locally, you'll need to...
 source setup_dev_env.sh
 ```
 
