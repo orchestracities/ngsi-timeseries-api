@@ -511,6 +511,21 @@ paths:
       responses:
         201:
           description: "Successfully created subscription."
+        400:
+          description: "Bad Request"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              description:
+                type: string
+          examples:
+            application/json:
+              {
+                "error": "Bad Request",
+                "description": "Orion is not reachable by QuantumLeap at http://foo"
+              }
         412:
           description: "You specified an unreachable Orion url for QuantumLeap."
         500:

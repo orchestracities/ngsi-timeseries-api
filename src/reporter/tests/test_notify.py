@@ -15,11 +15,11 @@ def test_invalid_no_body(clean_mongo, clean_crate):
     r = requests.post('{}'.format(notify_url),
                       data=json.dumps(None),
                       headers=HEADERS_PUT)
-    assert r.status_code == 415
+    assert r.status_code == 400
     assert r.json() == {
-        'detail': 'Invalid Content-type (application/json), expected JSON data',
-        'status': 415,
-        'title': 'Unsupported Media Type',
+        'detail': 'Request body is not valid JSON',
+        'status': 400,
+        'title': 'Bad Request',
         'type': 'about:blank'
     }
 
