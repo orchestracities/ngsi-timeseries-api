@@ -232,9 +232,12 @@ def subscribe(orion_url,
     except RequestException:
         r = None
     if r is None or not r.ok:
-        msg = "Orion is not reachable by QuantumLeap at {}. " \
-              "Fix your orionUrl.".format(orion_url)
-        return msg, 412
+        msg = {
+            "error": "Bad Request",
+            "description": "Orion is not reachable by QuantumLeap at {}"
+            .format(orion_url)
+        }
+        return msg, 400
 
     # Prepare subscription
     subscription = {

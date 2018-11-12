@@ -24,7 +24,7 @@ ORION_URL = "http://{}:{}/v2".format(ORION_HOST, ORION_PORT)
 
 def do_clean_mongo():
     db_client = pm.MongoClient(MONGO_HOST, MONGO_PORT)
-    for db in db_client.database_names():
+    for db in db_client.list_database_names():
         db_client.drop_database(db)
 
 

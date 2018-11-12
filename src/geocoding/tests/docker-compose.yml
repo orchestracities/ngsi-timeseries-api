@@ -3,10 +3,6 @@ version: '3.3'
 services:
   redis:
     image: redis:${REDIS_VERSION}
-    deploy:
-      # Scaling Redis requires some extra work.
-      # See https://get-reddie.com/blog/redis4-cluster-docker-compose/
-      replicas: 1
     ports:
       - "6379:6379"
     volumes:

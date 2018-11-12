@@ -10,9 +10,11 @@ def test_invalid_wrong_orion_url(clean_mongo, clean_crate):
         'quantumleapUrl': "quantumleap",
     }
     r = requests.post(subscribe_url, params=params)
-    assert r.status_code == 412
-    assert r.json() == "Orion is not reachable by QuantumLeap at blabla. " \
-                       "Fix your orionUrl."
+    assert r.status_code == 400
+    assert r.json() == {
+        "error": "Bad Request",
+        "description": "Orion is not reachable by QuantumLeap at blabla"
+    }
 
 
 def test_valid_defaults(clean_mongo, clean_crate):
