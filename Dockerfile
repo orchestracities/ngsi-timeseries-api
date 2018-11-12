@@ -1,11 +1,11 @@
 FROM python:3.6
+RUN pip install pipenv
 
 RUN mkdir -p /src/ngsi-timeseries-api
 
 COPY Pipfile /src/ngsi-timeseries-api/Pipfile
 COPY Pipfile.lock /src/ngsi-timeseries-api/Pipfile.lock
 
-RUN pip install pipenv
 RUN cd /src/ngsi-timeseries-api && pipenv lock -r > requirements.txt
 RUN pip install -r /src/ngsi-timeseries-api/requirements.txt
 
