@@ -490,6 +490,15 @@ paths:
           subscription, so as to persist historical data of entities of this
           type. ATTENTION: If not specified, all entity types will be tracked."
         - in: query
+          name: entityId
+          required: false
+          type: string
+          description: "Id of the entity to track. If specified, it takes precedence
+          over the idPattern parameter. If absent but an idPattern is given, then QL
+          will use the idPattern to determine which entities to track. If no idPattern
+          is given either, then QL will use the entityType if present. If not even an
+          entityType is given, then QL will fall back to tracking all entities."
+        - in: query
           name: idPattern
           required: false
           type: string
@@ -498,12 +507,36 @@ paths:
           specified type. This attribute is documented in orion, see
           https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions"
         - in: query
-          name: attributes
+          name: observedAttributes
           required: false
           type: string
-          description: "Comma-separated list of attribute names to keep
-          historical records. If not specified, QL will track all attributes of
-          the specified entities."
+          description: "Comma-separated list of attribute names to track. These attributes
+          are used to narrow the condition that triggers data change notifications---i.e.
+          they will be used to fill the attrs field of the subject's condition of the Orion
+          subscription QL creates. (Full details at: http://telefonicaid.github.io/fiware-orion/api/v2/stable/)
+          More specifically, call E the set of entities determined by the given combination
+          of entityType, entityId and idPattern. Then we have a set A of all attributes of
+          entities in E whose name is in observedAttributes. When the value of any of the
+          attributes in A changes, Orion will send QL the current values of the attributes
+          specified by the notifiedAttributes parameter. If observedAttributes is absent,
+          QL will be notified of any changes to the entities in E."
+        - in: query
+          name: notifiedAttributes
+          required: false
+          type: string
+          description: "Comma-separated list of attribute names to be used to restrict
+          the data of which QL will keep a history. This list will be used to set the
+          notification's attrs field of the subscription that QL creates.
+          (Full details at: http://telefonicaid.github.io/fiware-orion/api/v2/stable/)
+          If not specified, QL will keep a history of all data changes in any of the
+          entities identified by the given combination of entityType, entityId and idPattern."
+        - in: query
+          name: throttling
+          required: false
+          type: integer
+          description: "Minimal period of time in seconds which must elapse between two
+          consecutive notifications. This is the value QL will use for the throttling
+          field when creating the subscription. If not specified, it defaults to 1."
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
       tags:
