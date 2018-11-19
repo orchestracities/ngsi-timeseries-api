@@ -19,18 +19,16 @@ def test_query_multiple_ids(translator):
                                       num_ids_per_type=4,
                                       num_updates=num_updates)
     translator.insert(entities)
-    translator._refresh(['0', '1'])
 
     loaded_entities = translator.query(entity_type='0',
                                        entity_ids=['0-0', '0-2'])
+    assert len(loaded_entities) == 2
 
-    assert len(loaded_entities) == 2 * num_updates
-
-    assert any([e['id'] == '0-0' for e in loaded_entities])
-    assert any([e['id'] == '0-2' for e in loaded_entities])
     # All results are of type 0 and cannot be of a non-requested id.
-    assert all(map(lambda e: e['id'] in ('0-0', '0-2') and e['type'] == '0',
-                   loaded_entities))
+    assert loaded_entities[0]['id'] == '0-0'
+    assert loaded_entities[0]['type'] == '0'
+    assert loaded_entities[1]['id'] == '0-2'
+    assert loaded_entities[1]['type'] == '0'
 
 
 def test_query_multiple_ids_bak(translator):
@@ -40,11 +38,10 @@ def test_query_multiple_ids_bak(translator):
                                       num_ids_per_type=4,
                                       num_updates=num_updates)
     translator.insert(entities)
-    translator._refresh(['0', '1'])
 
-    loaded_entities = translator.query(entity_type='0', entity_ids=['0-1'])
-    assert len(loaded_entities) == 1 * num_updates
-    assert all([e['id'] == '0-1' for e in loaded_entities])
+    records = translator.query(entity_type='0', entity_ids=['0-1'])
+    assert len(records) == 1
+    assert records[0]['id'] == '0-1'
 
 
 def test_query_multiple_ids_with_invalids(translator):
@@ -54,7 +51,6 @@ def test_query_multiple_ids_with_invalids(translator):
                                       num_ids_per_type=4,
                                       num_updates=num_updates)
     translator.insert(entities)
-    translator._refresh(['0', '1'])
 
     loaded_entities = translator.query(entity_type='0',
                                        entity_ids=['nonexistent'])
@@ -62,5 +58,4 @@ def test_query_multiple_ids_with_invalids(translator):
 
     loaded_entities = translator.query(entity_type='0',
                                        entity_ids=['0-1', 'nonexistent'])
-
-    assert len(loaded_entities) == 1 * num_updates
+    assert len(loaded_entities) == 1

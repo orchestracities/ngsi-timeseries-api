@@ -307,4 +307,5 @@ def _validate_query_params(aggr_period, aggr_method, attr_names, options):
             "description": msg.format(aggr_method)
         }
         return r, 400
+
     return "OK", 200

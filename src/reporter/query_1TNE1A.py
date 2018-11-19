@@ -80,8 +80,7 @@ def _prepare_response(entities, attr_name, entity_type, entity_ids,
                       aggr_method, from_date, to_date):
     values = {}
     for e in entities:
-        e_values = values.setdefault(e['id'], [])
-        e_values.append(e[attr_name]['value'])
+        values[e['id']] = e[attr_name]['values']
 
     if aggr_method:
         # Use fromDate / toDate
@@ -90,8 +89,7 @@ def _prepare_response(entities, attr_name, entity_type, entity_ids,
         # Use entity's time_index
         indexes = {}
         for e in entities:
-            e_index = indexes.setdefault(e['id'], [])
-            e_index.append(str(e[CrateTranslator.TIME_INDEX_NAME]))
+            indexes[e['id']] = e['index']
 
     # Preserve given order of ids (if any)
     entries = []

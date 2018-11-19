@@ -1,6 +1,7 @@
 from conftest import QL_URL, crate_translator as translator
 from datetime import datetime
 from reporter.tests.utils import insert_test_data
+from utils.common import assert_equal_time_index_arrays
 import pytest
 import requests
 
@@ -27,6 +28,28 @@ def reporter_dataset(translator):
                      n_entities=3,
                      n_days=n_days)
     yield
+
+
+def assert_1TNE1A_response(obtained, expected, values_only=False):
+    """
+    Check API responses for 1TNE1A
+    """
+    assert isinstance(obtained, dict)
+    if not values_only:
+        assert obtained['data']['entityType'] == entity_type
+        assert obtained['data']['attrName'] == attr_name
+        obt_entities = obtained['data']['entities']
+        exp_entities = expected['data']['entities']
+    else:
+        obt_entities = obtained['data']['values']
+        exp_entities = expected['data']['values']
+
+    for oe, ee in zip(obt_entities, exp_entities):
+        obt_index = oe.pop('index')
+        exp_index = ee.pop('index')
+        assert_equal_time_index_arrays(obt_index, exp_index)
+
+    assert obtained == expected
 
 
 def test_1TNE1A_defaults(reporter_dataset):
@@ -59,12 +82,16 @@ def test_1TNE1A_defaults(reporter_dataset):
             'values': expected_values,
         }
     ]
+    expected = {
+        'data': {
+            'entityType': entity_type,
+            'attrName': attr_name,
+            'entities': expected_entities,
+        }
+    }
 
-    obtained_data = r.json()
-    assert isinstance(obtained_data, dict)
-    assert obtained_data['data']['entityType'] == entity_type
-    assert obtained_data['data']['attrName'] == attr_name
-    assert obtained_data['data']['entities'] == expected_entities
+    obtained = r.json()
+    assert_1TNE1A_response(obtained, expected)
 
 
 def test_1TNE1A_one_entity(reporter_dataset):
@@ -91,9 +118,15 @@ def test_1TNE1A_one_entity(reporter_dataset):
             'values': expected_values,
         }
     ]
-    assert obtained_data['data']['entityType'] == entity_type
-    assert obtained_data['data']['attrName'] == attr_name
-    assert obtained_data['data']['entities'] == expected_entities
+    expected = {
+        'data': {
+            'entityType': entity_type,
+            'attrName': attr_name,
+            'entities': expected_entities,
+        }
+    }
+    obtained = r.json()
+    assert_1TNE1A_response(obtained, expected)
 
 
 def test_1TNE1A_some_entities(reporter_dataset):
@@ -124,11 +157,15 @@ def test_1TNE1A_some_entities(reporter_dataset):
         }
     ]
 
-    obtained_data = r.json()
-    assert isinstance(obtained_data, dict)
-    assert obtained_data['data']['entityType'] == entity_type
-    assert obtained_data['data']['attrName'] == attr_name
-    assert obtained_data['data']['entities'] == expected_entities
+    expected = {
+        'data': {
+            'entityType': entity_type,
+            'attrName': attr_name,
+            'entities': expected_entities,
+        }
+    }
+    obtained = r.json()
+    assert_1TNE1A_response(obtained, expected)
 
 
 def test_1TNE1A_values_defaults(reporter_dataset):
@@ -158,9 +195,13 @@ def test_1TNE1A_values_defaults(reporter_dataset):
         }
     ]
 
-    obtained_data = r.json()
-    assert isinstance(obtained_data, dict)
-    assert obtained_data == {'data': {'values': expected_entities}}
+    obtained = r.json()
+    expected = {
+        'data': {
+            'values': expected_entities,
+        }
+    }
+    assert_1TNE1A_response(obtained, expected, values_only=True)
 
 
 def test_not_found():
@@ -207,11 +248,15 @@ def test_weird_ids(reporter_dataset):
         }
     ]
 
-    obtained_data = r.json()
-    assert isinstance(obtained_data, dict)
-    assert obtained_data['data']['entityType'] == entity_type
-    assert obtained_data['data']['attrName'] == attr_name
-    assert obtained_data['data']['entities'] == expected_entities
+    expected = {
+        'data': {
+            'entityType': entity_type,
+            'attrName': attr_name,
+            'entities': expected_entities,
+        }
+    }
+    obtained = r.json()
+    assert_1TNE1A_response(obtained, expected)
 
 
 def test_different_time_indexes(translator):
@@ -248,11 +293,15 @@ def test_different_time_indexes(translator):
         }
     ]
 
-    obtained_data = r.json()
-    assert isinstance(obtained_data, dict)
-    assert obtained_data['data']['entityType'] == 'Room'
-    assert obtained_data['data']['attrName'] == attr_name
-    assert obtained_data['data']['entities'] == expected_entities
+    expected = {
+        'data': {
+            'entityType': entity_type,
+            'attrName': attr_name,
+            'entities': expected_entities,
+        }
+    }
+    obtained = r.json()
+    assert_1TNE1A_response(obtained, expected)
 
 
 def test_aggregation_is_per_instance(translator):

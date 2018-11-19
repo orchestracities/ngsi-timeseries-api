@@ -1,10 +1,8 @@
 from exceptions.exceptions import AmbiguousNGSIIdError
 from translators.base_translator import BaseTranslator
-from translators.benchmark import benchmark
 from translators.crate import NGSI_TEXT
-from conftest import crate_translator as translator
+from conftest import crate_translator as translator, entity
 from utils.common import *
-import statistics
 
 
 def test_db_version(translator):
@@ -15,33 +13,37 @@ def test_db_version(translator):
 def test_insert(translator):
     entities = create_random_entities(1, 2, 3, use_time=True, use_geo=True)
     result = translator.insert(entities)
-    assert result.rowcount == len(entities)
+    assert result.rowcount > 0
 
 
 def test_insert_entity(translator, entity):
-    now = datetime.now().isoformat(timespec='microseconds')
-    entity[BaseTranslator.TIME_INDEX_NAME] = now
+    now = datetime.now()
+    now_iso = now.isoformat(timespec='milliseconds')
+    entity[BaseTranslator.TIME_INDEX_NAME] = now_iso
+
     result = translator.insert([entity])
-    assert result.rowcount == 1
+    assert result.rowcount != 0
 
-    translator._refresh([entity['type']])
+    loaded_entities = translator.query()
+    assert len(loaded_entities) == 1
 
-    loaded_entity = translator.query()
-
-    # These 2 can be ignored when empty. TODO: #12 Support attribute metadata
-    entity['temperature'].pop('metadata')
-    entity['pressure'].pop('metadata')
-
-    assert_ngsi_entity_equals(entity, loaded_entity[0])
+    check_notifications_record([entity], loaded_entities)
 
 
 def test_insert_multiple_types(translator):
-    entities = create_random_entities(num_types=3, num_ids_per_type=2, num_updates=1, use_time=True, use_geo=True)
+    args = {
+        'num_types': 3,
+        'num_ids_per_type': 2,
+        'num_updates': 1,
+        'use_time': True,
+        'use_geo': True
+    }
+    entities = create_random_entities(**args)
     result = translator.insert(entities)
     assert result.rowcount > 0
 
     # Again to check metadata handling works fine
-    entities = create_random_entities(num_types=3, num_ids_per_type=2, num_updates=1, use_time=True, use_geo=True)
+    entities = create_random_entities(**args)
     result = translator.insert(entities)
     assert result.rowcount > 0
 
@@ -52,20 +54,27 @@ def test_query_all_before_insert(translator):
 
 
 def test_query_all(translator):
-    entities = create_random_entities(2, 2, 2, use_time=True, use_geo=True)
+    num_types = 2
+    num_ids = 2
+    num_updates = 2
+    args = {
+        'num_types': num_types,
+        'num_ids_per_type': num_ids,
+        'num_updates': num_updates,
+        'use_time': True,
+        'use_geo': True
+    }
+    entities = create_random_entities(**args)
     result = translator.insert(entities)
     assert result.rowcount > 0
 
-    translator._refresh(['0', '1'])
-
     loaded_entities = translator.query()
+    assert len(loaded_entities) == 2 * 2
 
-    assert len(loaded_entities) == len(entities)
-    key = lambda e: e[BaseTranslator.TIME_INDEX_NAME]
-    a = sorted(entities, key=key)
-    b = sorted(loaded_entities, key=key)
-    for e, le in zip(a, b):
-        assert_ngsi_entity_equals(e, le)
+    for i in ['0-0', '0-1', '1-0', '1-1']:
+        notifications = [e for e in entities if e['id'] == i]
+        records = [e for e in loaded_entities if e['id'] == i]
+        check_notifications_record(notifications, records)
 
 
 def test_attrs_by_entity_id(translator):
@@ -77,19 +86,20 @@ def test_attrs_by_entity_id(translator):
                                       use_time=True,
                                       use_geo=True)
     translator.insert(entities)
-    translator._refresh(['0', '1'])
 
     # Now query by entity id
     entity_id = '0-1'
     loaded_entities = translator.query(entity_type='0', entity_id=entity_id)
-    assert len(loaded_entities) == num_updates
-    assert all(map(lambda e: e['id'] == '0-1', loaded_entities))
+    notifications = [e for e in entities
+                     if e['type'] == '0' and e['id'] == '0-1']
+    check_notifications_record(notifications, loaded_entities)
 
     # entity_type should be optional
     entity_id = '1-1'
     loaded_entities = translator.query(entity_id=entity_id)
-    assert len(loaded_entities) == num_updates
-    assert all(map(lambda e: e['id'] == '1-1', loaded_entities))
+    notifications = [e for e in entities
+                     if e['type'] == '1' and e['id'] == '1-1']
+    check_notifications_record(notifications, loaded_entities)
 
     # nonexistent id should return no data
     loaded_entities = translator.query(entity_id='some_nonexistent_id')
@@ -98,116 +108,104 @@ def test_attrs_by_entity_id(translator):
 
 def test_attrs_by_id_ambiguity(translator):
     entities = create_random_entities(num_types=2,
-                                      num_ids_per_type=2,
+                                      num_ids_per_type=1,
                                       num_updates=3)
     for e in entities:
         e['id'] = 'repeated_id'
 
     translator.insert(entities)
-    translator._refresh(['0', '1'])
 
     # OK if specifying type
     loaded_entities = translator.query(entity_type='0', entity_id='repeated_id')
-    assert len(loaded_entities) == 3 * 2
+    assert len(loaded_entities[0]['index']) == 3
+    assert len(loaded_entities) == 1
 
     # NOT OK otherwise
     with pytest.raises(AmbiguousNGSIIdError):
         translator.query(entity_id='repeated_id')
 
 
-WITHIN_EAST_EMISPHERE = "within(attr_geo, 'POLYGON ((0 -90, 180 -90, 180 90, 0 90, 0 -90))')"
+WITHIN_EAST_HEMISPHERE = "within(attr_geo, " \
+                        "'POLYGON ((0 -90, 180 -90, 180 90, 0 90, 0 -90))')"
+
+
+def within_east_hemisphere(e):
+    return e["attr_geo"]["values"][0]["coordinates"][0] > 0
+
+
+def beyond_mid_epoch(e):
+    mid_epoch = datetime(1970, 6, 28).isoformat(timespec='milliseconds')
+    return e["attr_time"]["values"][0] > mid_epoch
+
 
 @pytest.mark.parametrize("attr_name, clause, tester", [
-    ("attr_bool", "= True", lambda e: e["attr_bool"]["value"]),
-    ("attr_str", "> 'M'", lambda e: e["attr_str"]["value"] > "M"),
-    ("attr_float", "< 0.5", lambda e: e["attr_float"]["value"] < 0.5),
-    ("attr_time", "> '1970-06-28T00:00'", lambda e: e["attr_time"]["value"] > datetime(1970, 6, 28).isoformat(timespec='microseconds')),
-    (WITHIN_EAST_EMISPHERE, "", lambda e: e["attr_geo"]["value"]["coordinates"][0] > 0),
+    ("attr_bool", "= True", lambda e: e["attr_bool"]["values"][0]),
+    ("attr_str", "> 'M'", lambda e: e["attr_str"]["values"][0] > "M"),
+    ("attr_float", "< 0.5", lambda e: e["attr_float"]["values"][0] < 0.5),
+    ("attr_time", "> '1970-06-28T00:00'", beyond_mid_epoch),
+    (WITHIN_EAST_HEMISPHERE, "", within_east_hemisphere)
 ])
 def test_query_per_attribute(translator, attr_name, clause, tester):
     num_types = 1
     num_ids_per_type = 2
     num_updates = 10
 
-    entities = create_random_entities(num_types, num_ids_per_type, num_updates, use_time=True, use_geo=True)
+    entities = create_random_entities(num_types, num_ids_per_type, num_updates,
+                                      use_time=True, use_geo=True)
     translator.insert(entities)
-    translator._refresh(['0'])
 
-    entities = translator.query(entity_type='0', where_clause="where {} {}".format(attr_name, clause))
+    where_clause = "where {} {}".format(attr_name, clause)
+    entities = translator.query(entity_type='0', where_clause=where_clause)
 
     total = num_types * num_ids_per_type * num_updates
-    assert len(entities) > 0, "No entities where found with the clause: {}{}".format(attr_name, clause)
-    assert len(entities) < total, "All entities matched the clause. Not expected from an uniform random distribution"
+
+    assert len(entities) > 0, "No entities where found " \
+                              "with the clause: {}{}".format(attr_name, clause)
+    assert len(entities) < total, "All entities matched the clause. " \
+                                  "Not expected from an " \
+                                  "uniform random distribution"
     assert all(map(tester, entities))
-
-
-def test_average(translator):
-    num_updates = 10
-    entities = create_random_entities(2, 2, num_updates, use_time=True, use_geo=True)
-    translator.insert(entities)
-    translator._refresh(['0', '1'])
-
-    # Per entity_id
-    eid = '0-1'
-    entity_mean = statistics.mean(e['attr_float']['value'] for e in entities if e['id'] == eid)
-    entity_mean_read = translator.average(attr_name='attr_float', entity_type='0', entity_id=eid)
-    assert pytest.approx(entity_mean_read) == entity_mean
-
-    # Total
-    total_mean = statistics.mean(e['attr_float']['value'] for e in entities)
-    total_mean_read = translator.average(attr_name='attr_float')
-    assert pytest.approx(total_mean_read) == total_mean
-
-
-def test_benchmark(translator):
-    benchmark(translator, num_types=2, num_ids_per_type=2, num_updates=10, use_geo=False, use_time=False)
-
-
-def test_benchmark_extended(translator):
-    benchmark(translator, num_types=2, num_ids_per_type=2, num_updates=10, use_geo=True, use_time=True)
 
 
 def test_unsupported_ngsi_type(translator):
     e = {
         "type": "SoMeWeIrDtYpE",
         "id": "sOmEwEiRdId",
-        TIME_INDEX_NAME: datetime.now().isoformat(timespec='microseconds'),
+        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
         "foo": {
-            "type": "DefinitivelyNotAValidNGSIType",
+            "type": "IgnoreThisDefinitivelyNotValidNGSITypeMessage",
             "value": "BaR",
         },
     }
     translator.insert([e])
-    translator._refresh([e['type']])
     entities = translator.query()
-    assert len(entities) == 1
-    assert_ngsi_entity_equals(e, entities[0])
+    check_notifications_record([e], entities)
 
 
-def test_missing_type_defaults_string(translator):
+def test_missing_type_defaults_to_string(translator):
     e = {
         "type": "SoMeWeIrDtYpE",
         "id": "sOmEwEiRdId",
-        TIME_INDEX_NAME: datetime.now().isoformat(timespec='microseconds'),
+        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
         "foo": {
             "value": "BaR",
         },
     }
     translator.insert([e])
-    translator._refresh([e['type']])
     entities = translator.query()
     assert len(entities) == 1
+
     # Response will include the type
     e["foo"]["type"] = NGSI_TEXT
-    assert_ngsi_entity_equals(e, entities[0])
+    check_notifications_record([e], entities)
 
 
 def test_capitals(translator):
     entity_type = "SoMeWeIrDtYpE"
-    e = {
+    e1 = {
         "type": entity_type,
         "id": "sOmEwEiRdId",
-        TIME_INDEX_NAME: datetime.now().isoformat(timespec='microseconds'),
+        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
         "Foo": {
             "type": "Text",
             "value": "FoO",
@@ -217,34 +215,34 @@ def test_capitals(translator):
             "value": "bAr",
         },
     }
-    translator.insert([e])
-    translator._refresh([entity_type])
+    translator.insert([e1])
     entities = translator.query()
     assert len(entities) == 1
-    assert_ngsi_entity_equals(e, entities[0])
+    check_notifications_record([e1], entities)
 
     # If a new attribute comes later, I want it translated as well.
-    e2 = e.copy()
+    e2 = e1.copy()
     e2['id'] = 'SOmEwEiRdId2'
     e2['NewAttr'] = {"type": "Text", "value": "NewAttrValue!"}
-    e2[TIME_INDEX_NAME] = datetime.now().isoformat(timespec='microseconds')
+    e2[TIME_INDEX_NAME] = datetime.now().isoformat(timespec='milliseconds')
 
     translator.insert([e2])
-    translator._refresh([entity_type])
     entities = translator.query()
     assert len(entities) == 2
 
-    assert_ngsi_entity_equals(e2, entities[1])
+    assert entities[0]['id'] == e2['id']
+    assert entities[0]['NewAttr']['values'] == [e2['NewAttr']['value']]
+
     # Note that old entity gets None for the new attribute
-    e['NewAttr'] = {'type': 'Text', 'value': None}
-    assert_ngsi_entity_equals(e, entities[0])
+    assert entities[1]['id'] == e1['id']
+    assert entities[1]['NewAttr']['values'] == [None]
 
 
 def test_no_time_index(translator):
     """
     The Reporter is responsible for injecting the 'time_index' attribute to the
-    entity, but even if for some reason the attribute is not there, there
-    should be no problem with the insertion.
+    entity. If for some reason there's no such index, the translator will add
+    one with current_time.
     """
     e = {
         'id': 'entityId1',
@@ -252,8 +250,9 @@ def test_no_time_index(translator):
         'foo': {'type': 'Text', 'value': "SomeText"}
     }
     translator.insert([e])
-    translator._refresh([e['type']])
-    assert len(translator.query()) == 1
+    records = translator.query()
+    assert len(records) == 1
+    assert len(records[0]['index']) == 1
 
 
 def test_long_json(translator):
@@ -261,18 +260,17 @@ def test_long_json(translator):
     big_entity = {
         'id': 'entityId1',
         'type': 'type1',
-        TIME_INDEX_NAME: datetime.now().isoformat(timespec='microseconds'),
+        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
         'foo': {
             'type': 'Text',
             'value': "SomeTextThatWillGetLong" * 2000
         }
     }
     translator.insert([big_entity])
-    translator._refresh([big_entity['type']])
 
     r = translator.query()
     assert len(r) == 1
-    assert_ngsi_entity_equals(big_entity, r[0])
+    check_notifications_record([big_entity], r)
 
 
 def test_geo_point(translator):
@@ -280,14 +278,13 @@ def test_geo_point(translator):
     entity = {
         'id': 'Room1',
         'type': 'Room',
-        TIME_INDEX_NAME: datetime.now().isoformat(timespec='microseconds'),
+        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
         'location': {
             'type': 'geo:point',
             'value': "19.6389474, -98.9109537"  # lat, long
         }
     }
     translator.insert([entity])
-    translator._refresh([entity['type']])
 
     # Check location is saved as a geo_point column in crate
     op = 'select latitude(location), longitude(location) from etroom'
@@ -300,14 +297,14 @@ def test_geo_point(translator):
     assert len(entities) == 1
 
     # Check entity is retrieved as it was inserted
-    assert_ngsi_entity_equals(entity, entities[0])
+    check_notifications_record([entity], entities)
 
 
 def test_structured_value_to_array(translator):
     entity = {
         'id': '8906',
         'type': 'AirQualityObserved',
-        TIME_INDEX_NAME: datetime.now().isoformat(timespec='microseconds'),
+        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
         'aqi': {'type': 'Number', 'value': 43},
         'city': {'type': 'Text', 'value': 'Antwerpen'},
         'h': {'type': 'Number', 'value': 93},
@@ -326,13 +323,9 @@ def test_structured_value_to_array(translator):
         't': {'type': 'Number', 'value': 8.33}
     }
     translator.insert([entity])
-    translator._refresh([entity['type']])
 
     r = translator.query()
-    assert len(r) == 1
-
-    # TODO Github issue 24
-    # assert_ngsi_entity_equals(entity, r[0])
+    check_notifications_record([entity], r)
 
 
 def test_ISO8601(translator):
@@ -342,18 +335,17 @@ def test_ISO8601(translator):
     e = {
         "type": "MyType",
         "id": "MyId",
-        TIME_INDEX_NAME: datetime.now().isoformat(timespec='microseconds'),
+        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
         "iso_attr": {
             "type": "ISO8601",
-            "value": "2018-03-20T13:26:38.722000",
+            "value": "2018-03-20T13:26:38.722",
         },
     }
-    result = translator.insert([e])
-    assert result.rowcount > 0
-    translator._refresh([e['type']])
+    translator.insert([e])
+
     loaded = translator.query()
     assert len(loaded) > 0
-    assert_ngsi_entity_equals(e, loaded[0])
+    check_notifications_record([e], loaded)
 
 
 ################################################################################
@@ -362,27 +354,19 @@ def test_ISO8601(translator):
 
 def test_air_quality_observed(translator, air_quality_observed):
     # Add TIME_INDEX as Reporter would
-    now = datetime.now().isoformat(timespec='microseconds')
+    now = datetime.now().isoformat(timespec='milliseconds')
     air_quality_observed[TIME_INDEX_NAME] = now
 
-    result = translator.insert([air_quality_observed])
-    assert result.rowcount > 0
-    translator._refresh([air_quality_observed['type']])
+    translator.insert([air_quality_observed])
     loaded = translator.query()
-    assert len(loaded) > 0
-
-    assert_ngsi_entity_equals(air_quality_observed, loaded[0])
+    check_notifications_record([air_quality_observed], loaded)
 
 
 def test_traffic_flow_observed(translator, traffic_flow_observed):
     # Add TIME_INDEX as Reporter would
-    now = datetime.now().isoformat(timespec='microseconds')
+    now = datetime.now().isoformat(timespec='milliseconds')
     traffic_flow_observed[TIME_INDEX_NAME] = now
 
-    result = translator.insert([traffic_flow_observed])
-    assert result.rowcount > 0
-    translator._refresh([traffic_flow_observed['type']])
+    translator.insert([traffic_flow_observed])
     loaded = translator.query()
-    assert len(loaded) > 0
-
-    assert_ngsi_entity_equals(traffic_flow_observed, loaded[0])
+    check_notifications_record([traffic_flow_observed], loaded)

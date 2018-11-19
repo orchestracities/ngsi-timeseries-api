@@ -34,16 +34,16 @@ def query_1T1ENA(entity_id,   # In Path
     try:
         with CrateTranslatorInstance() as trans:
             entities = trans.query(attr_names=attrs,
-                               entity_type=type_,
-                               entity_id=entity_id,
-                               aggr_method=aggr_method,
-                               from_date=from_date,
-                               to_date=to_date,
-                               last_n=last_n,
-                               limit=limit,
-                               offset=offset,
-                               fiware_service=fiware_s,
-                               fiware_servicepath=fiware_sp,)
+                                   entity_type=type_,
+                                   entity_id=entity_id,
+                                   aggr_method=aggr_method,
+                                   from_date=from_date,
+                                   to_date=to_date,
+                                   last_n=last_n,
+                                   limit=limit,
+                                   offset=offset,
+                                   fiware_service=fiware_s,
+                                   fiware_servicepath=fiware_sp,)
     except AmbiguousNGSIIdError as e:
         return {
             "error": "AmbiguousNGSIIdError",
@@ -57,24 +57,28 @@ def query_1T1ENA(entity_id,   # In Path
         return msg, 500
 
     if entities:
-        if aggr_method:
-            index = []
-        else:
-            index = [str(e[CrateTranslator.TIME_INDEX_NAME]) for e in entities]
+        if len(entities) > 1:
+            import warnings
+            warnings.warn("Not expecting more than one result for a 1T1ENA.")
 
-        ignore = ('type', 'id', CrateTranslator.TIME_INDEX_NAME)
-        attrs = [at for at in sorted(entities[0].keys()) if at not in ignore]
+        if aggr_method:
+            if aggr_period:
+                # TODO #89
+                index = None
+            else:
+                index = []
+        else:
+            index = entities[0]['index']
 
         attributes = []
+        ignore = ('type', 'id', 'index')
+        attrs = [at for at in sorted(entities[0].keys()) if at not in ignore]
+
         for at in attrs:
             attributes.append({
                 'attrName': at,
-                'values': []
+                'values': entities[0][at]['values']
             })
-
-        for i, at in enumerate(attrs):
-            for e in entities:
-                attributes[i]['values'].append(e[at]['value'])
 
         res = {
             'data': {
