@@ -29,6 +29,7 @@ def test_entity_with_non_dict_address(air_quality_observed):
     assert r == old_entity
 
 
+@pytest.mark.skip(reason="See issue #105")
 def test_entity_add_point(air_quality_observed):
     air_quality_observed.pop('location')
 
@@ -137,6 +138,7 @@ def test_multiple_entities(air_quality_observed):
     assert len(r) == 2
 
 
+@pytest.mark.skip(reason="See issue #105")
 def test_caching(air_quality_observed, monkeypatch):
     air_quality_observed.pop('location')
 
