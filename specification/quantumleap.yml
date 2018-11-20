@@ -507,6 +507,26 @@ paths:
           specified type. This attribute is documented in orion, see
           https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions"
         - in: query
+          name: attributes
+          required: false
+          type: string
+          description: "Comma-separated list of attribute names to track. These attributes
+          are used to narrow the condition that triggers data change notifications---i.e.
+          they will be used to fill the attrs field of the subject's condition of the Orion
+          subscription QL creates. They will also be used to fill the attrs field of the
+          notification object in the subscription QL creates.
+          (Full details at: http://telefonicaid.github.io/fiware-orion/api/v2/stable/)
+          More specifically, call E the set of entities determined by the given combination
+          of entityType, entityId and idPattern. Then we have a set A of all attributes of
+          entities in E whose name is in attributes. When the value of any of the attributes
+          in A changes, Orion will send QL the current values of those attributes.
+          Note that when using this attributes parameter the set of attributes that Orion
+          will track for changes (observed attributes) is the same as the set of attributes
+          that determine which data Orion will put in notifications (notified attributes).
+          If the two sets need to be different, use the observedAttributes and notifiedAttributes
+          parameters below. (If you supply an attributes parameter, observedAttributes and
+          notifiedAttributes will be ignored.)"
+        - in: query
           name: observedAttributes
           required: false
           type: string

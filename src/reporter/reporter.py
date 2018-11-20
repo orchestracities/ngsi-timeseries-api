@@ -227,6 +227,7 @@ def subscribe(orion_url,
               entity_type=None,
               entity_id=None,
               id_pattern=None,
+              attributes=None,
               observed_attributes=None,
               notified_attributes=None,
               throttling=None):
@@ -244,10 +245,11 @@ def subscribe(orion_url,
         return msg, 400
 
     # Prepare subscription
-    subscription = build_subscription(quantumleap_url,
-                                      entity_type, entity_id, id_pattern,
-                                      observed_attributes, notified_attributes,
-                                      throttling)
+    subscription = build_subscription(
+        quantumleap_url,
+        entity_type, entity_id, id_pattern,
+        attributes, observed_attributes, notified_attributes,
+        throttling)
 
     # Send subscription
     endpoint = '{}/subscriptions'.format(orion_url)

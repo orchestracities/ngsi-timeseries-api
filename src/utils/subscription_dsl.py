@@ -54,3 +54,8 @@ def metadata(value):
 
 def throttling(value):
     return node('throttling', value if value else 1)
+
+
+def first_of(*xs):
+    ys = [x for x in xs if x]
+    return ys[0] if len(ys) > 0 else None
