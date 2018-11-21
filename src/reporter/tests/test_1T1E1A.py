@@ -1,4 +1,5 @@
 from conftest import QL_URL, crate_translator as translator
+from datetime import datetime
 from exceptions.exceptions import AmbiguousNGSIIdError
 from reporter.tests.utils import insert_test_data
 from utils.common import assert_equal_time_index_arrays
@@ -24,10 +25,7 @@ def query_url(entity_type='Room', entity_id='Room0', values=False):
 
 @pytest.fixture()
 def reporter_dataset(translator):
-    insert_test_data(translator,
-                     [entity_type],
-                     n_entities=1,
-                     n_days=30)
+    insert_test_data(translator, [entity_type], n_entities=1, index_size=30)
     yield
 
 
@@ -97,24 +95,56 @@ def test_1T1E1A_aggrMethod(reporter_dataset, aggr_method, aggr_value):
     assert_1T1E1A_response(obtained, expected)
 
 
-def test_1T1E1A_aggrPeriod(reporter_dataset):
-    # GH issue https://github.com/smartsdk/ngsi-timeseries-api/issues/89
+@pytest.mark.parametrize("aggr_period, exp_index, ins_period", [
+    ("year", ['1970-01-01T00:00:00.000',
+              '1971-01-01T00:00:00.000',
+              '1972-01-01T00:00:00.000'], "month"),
+    ("day",  ['1970-01-01T00:00:00.000',
+              '1970-01-02T00:00:00.000',
+              '1970-01-03T00:00:00.000'], "hour"),
+    ("second", ['1970-01-01T00:00:00.000',
+                '1970-01-01T00:00:01.000',
+                '1970-01-01T00:00:02.000'], "milli"),
+])
+def test_1T1E1A_aggrPeriod(translator, aggr_period, exp_index, ins_period):
+    # Custom index to test aggrPeriod
+    for i in exp_index:
+        base = datetime.strptime(i, "%Y-%m-%dT%H:%M:%S.%f")
+        insert_test_data(translator,
+                         [entity_type],
+                         index_size=4,
+                         index_base=base,
+                         index_period=ins_period)
 
     # aggrPeriod needs aggrMethod
     query_params = {
         'type': entity_type,
-        'aggrPeriod': 'minute',
+        'aggrPeriod': aggr_period,
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 400, r.text
 
+    # Check aggregation with aggrPeriod
     query_params = {
         'type': entity_type,
         'aggrMethod': 'avg',
-        'aggrPeriod': 'minute',
+        'aggrPeriod': aggr_period,
     }
     r = requests.get(query_url(), params=query_params)
-    assert r.status_code == 501, r.text
+    assert r.status_code == 200, r.text
+
+    # Assert Results
+    obtained = r.json()
+    exp_avg = (0 + 1 + 2 + 3) / 4.
+    expected = {
+        'data': {
+            'entityId': entity_id,
+            'attrName': attr_name,
+            'index': exp_index,
+            'values': [exp_avg, exp_avg, exp_avg],
+        }
+    }
+    assert_1T1E1A_response(obtained, expected)
 
 
 def test_1T1E1A_fromDate_toDate(reporter_dataset):
@@ -314,7 +344,7 @@ def test_no_type(translator):
     """
     Specifying entity type is optional, provided that id is unique.
     """
-    insert_test_data(translator, ['Room', 'Car'], n_entities=2, n_days=30)
+    insert_test_data(translator, ['Room', 'Car'], n_entities=2, index_size=30)
 
     # With type
     r = requests.get(query_url(), params={'type': 'Room'})
@@ -334,7 +364,7 @@ def test_no_type_not_unique(translator):
     insert_test_data(translator,
                      ['Room', 'Car'],
                      n_entities=2,
-                     n_days=30,
+                     index_size=30,
                      entity_id="repeatedId")
 
     url = "{qlUrl}/entities/{entityId}/attrs/temperature".format(

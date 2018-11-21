@@ -1,6 +1,7 @@
-from conftest import QL_URL
-from reporter.tests.utils import insert_test_data
 from conftest import crate_translator as translator
+from conftest import QL_URL
+from datetime import datetime
+from reporter.tests.utils import insert_test_data
 import pytest
 import requests
 from utils.common import assert_equal_time_index_arrays
@@ -24,10 +25,7 @@ def query_url(values=False):
 
 @pytest.fixture()
 def reporter_dataset(translator):
-    insert_test_data(translator,
-                     [entity_type],
-                     n_entities=1,
-                     n_days=30)
+    insert_test_data(translator, [entity_type], n_entities=1, index_size=30)
     yield
 
 
@@ -86,6 +84,14 @@ def test_1T1ENA_defaults(reporter_dataset):
     ("max", 290, 29),
 ])
 def test_1T1ENA_aggrMethod(reporter_dataset, aggr_meth, aggr_press, aggr_temp):
+    # attrs is compulsory when using aggrMethod
+    query_params = {
+        'type': entity_type,
+        'aggrMethod': aggr_meth,
+    }
+    r = requests.get(query_url(), params=query_params)
+    assert r.status_code == 400, r.text
+
     # Query
     query_params = {
         'type': entity_type,
@@ -116,24 +122,64 @@ def test_1T1ENA_aggrMethod(reporter_dataset, aggr_meth, aggr_press, aggr_temp):
     assert_1T1ENA_response(obtained, expected)
 
 
-def test_1T1ENA_aggrPeriod(reporter_dataset):
-    # GH issue https://github.com/smartsdk/ngsi-timeseries-api/issues/89
+@pytest.mark.parametrize("aggr_period, exp_index, ins_period", [
+    ("month",  ['1970-01-01T00:00:00.000',
+                '1970-02-01T00:00:00.000',
+                '1970-03-01T00:00:00.000'], "day"),
+    ("hour",   ['1970-01-01T00:00:00.000',
+                '1970-01-01T01:00:00.000',
+                '1970-01-01T02:00:00.000'], "minute"),
+    ("minute", ['1970-01-01T00:00:00.000',
+                '1970-01-01T00:01:00.000',
+                '1970-01-01T00:02:00.000'], "second"),
+])
+def test_1T1ENA_aggrPeriod(translator, aggr_period, exp_index, ins_period):
+    # Custom index to test aggrPeriod
+    for i in exp_index:
+        base = datetime.strptime(i, "%Y-%m-%dT%H:%M:%S.%f")
+        insert_test_data(translator,
+                         [entity_type],
+                         index_size=3,
+                         index_base=base,
+                         index_period=ins_period)
 
     # aggrPeriod needs aggrMethod
     query_params = {
         'type': entity_type,
-        'aggrPeriod': 'minute',
+        'aggrPeriod': aggr_period,
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 400, r.text
 
+    # Check aggregation with aggrPeriod
     query_params = {
         'type': entity_type,
-        'aggrMethod': 'avg',
-        'aggrPeriod': 'minute',
+        'attrs': temperature + ',' + pressure,
+        'aggrMethod': 'max',
+        'aggrPeriod': aggr_period,
     }
     r = requests.get(query_url(), params=query_params)
-    assert r.status_code == 501, r.text
+    assert r.status_code == 200, r.text
+
+    # Assert Results
+    expected = {
+        'data': {
+            'entityId': entity_id,
+            'index': exp_index,
+            'attributes': [
+                {
+                    'attrName': pressure,
+                    'values': [20., 20., 20.],
+                },
+                {
+                    'attrName': temperature,
+                    'values': [2., 2., 2.],
+                },
+            ]
+        }
+    }
+    obtained = r.json()
+    assert_1T1ENA_response(obtained, expected)
 
 
 def test_1T1ENA_fromDate_toDate(reporter_dataset):

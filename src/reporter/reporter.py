@@ -272,7 +272,8 @@ def subscribe(orion_url,
     return r.text, r.status_code
 
 
-def _validate_query_params(aggr_period, aggr_method, attr_names, options):
+def _validate_query_params(attr_names, aggr_period, aggr_method,
+                           aggr_scope=None, options=None):
     if aggr_period and not aggr_method:
         r = {
             "error": "Bad parameters use",
@@ -280,10 +281,10 @@ def _validate_query_params(aggr_period, aggr_method, attr_names, options):
         }
         return r, 400
 
-    if options or aggr_period:
+    if options or aggr_scope not in (None, 'entity'):
         r = {
             "error": "Not implemented option",
-            "description": "aggrPeriod and options are not yet implemented."
+            "description": "aggrScope and options are not yet implemented."
         }
         return r, 501
 

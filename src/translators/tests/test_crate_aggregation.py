@@ -3,7 +3,7 @@ from utils.common import create_random_entities, TIME_INDEX_NAME, add_attr
 import datetime
 
 
-def test_aggr_per_second(translator, ):
+def test_aggr_per_second(translator):
     entities = create_random_entities(num_ids_per_type=2, num_updates=17)
     assert len(entities) == 34
 

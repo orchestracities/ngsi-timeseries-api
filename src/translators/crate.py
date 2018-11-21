@@ -466,6 +466,7 @@ class CrateTranslator(base_translator.BaseTranslator):
               where_clause=None,
               aggr_method=None,
               aggr_period=None,
+              aggr_scope=None,
               from_date=None,
               to_date=None,
               last_n=None,
@@ -499,6 +500,9 @@ class CrateTranslator(base_translator.BaseTranslator):
             also the number of values that will be returned. Must be one of the
             VALID_AGGR_PERIODS (e.g, hour). I.e., querying avg per hour will
             return 24 values times the number of days of available measurements.
+        :param aggr_scope: (Not Implemented). Defaults to "Global".
+            If "Local", it would allow to request the aggrMethod being applied
+            N times, once for each entityId.
         :param from_date:
             (Optional), used to filter results, considering only from this date
             inclusive.
@@ -521,9 +525,6 @@ class CrateTranslator(base_translator.BaseTranslator):
         :param fiware_servicepath:
             (Optional), used to filter results, considering in the result only
             entities in this FIWARE ServicePath.
-        :param aggr_scope: (Not Implemented). Defaults to "Global".
-            If "Local", it would allow to request the aggrMethod being applied
-            N times, once for each entityId.
 
         :return:
         The shape of the response is always something like this:
