@@ -183,6 +183,7 @@ def test_air_quality_observed(air_quality_observed, orion_client, clean_mongo,
     assert len(entities) == 1
 
 
+@pytest.mark.skip(reason="See issue #105")
 def test_geocoding(notification, clean_mongo, crate_translator):
     # Add an address attribute to the entity
     notification['data'][0]['address'] = {

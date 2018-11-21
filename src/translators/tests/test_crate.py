@@ -238,6 +238,7 @@ def test_capitals(translator):
     assert entities[1]['NewAttr']['values'] == [None]
 
 
+@pytest.mark.filterwarnings("ignore")
 def test_no_time_index(translator):
     """
     The Reporter is responsible for injecting the 'time_index' attribute to the

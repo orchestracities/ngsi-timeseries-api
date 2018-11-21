@@ -220,9 +220,13 @@ parameters:
      function will instead be applied N times, once for each period, and all
      those results will be considered for the response. For example, a query
      asking for the average temperature of an attribute will typically return
-      1 value. However, with an aggregationPeriod of day, you get the daily
-      average of the temperature instead (more than one value assuming you
-      had measurements across many days within the scope of your search result)"
+     1 value. However, with an aggregationPeriod of day, you get the daily
+     average of the temperature instead (more than one value assuming you
+     had measurements across many days within the scope of your search result).
+     aggrPeriod must be accompanied by an aggrMethod, and the aggrMethod will
+     be applied to all the numeric attributes specified in attrs; the rest of
+     the non-numerical attrs will be ignored. By default, the response is
+     grouped by entity_id. See aggrScope to create aggregation across entities."
   aggrScope:
     in: query
     name: aggrScope

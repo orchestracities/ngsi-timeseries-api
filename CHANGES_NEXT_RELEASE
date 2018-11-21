@@ -1,3 +1,6 @@
-- Add: /health API endpoint
-- Add: aggrPeriod support in 1T1E1A
+- Add: /health API endpoint (#68)
+- Add: aggrPeriod support in 1T1E1A (#89)
+- Add: Improve orion subscription options (#69)
+- Chg: Use Pipenv, drop requirements.txt (#99)
 - Fix: some inconsistent HTTP return errors
+- Other minor fixes and adjustments
