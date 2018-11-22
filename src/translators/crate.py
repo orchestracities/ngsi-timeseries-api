@@ -369,18 +369,25 @@ class CrateTranslator(base_translator.BaseTranslator):
         return [r[0] for r in self.cursor.rows]
 
 
-    def _get_select_clause(self, attr_names, aggr_method):
+    def _get_select_clause(self, attr_names, aggr_method, aggr_period):
         if not attr_names:
             return '*'
 
+        attrs = ['entity_type', 'entity_id']
         if aggr_method:
+            if aggr_period:
+                attrs.append(
+                    "DATE_TRUNC('{}',{}) as {}".format(
+                        aggr_period, self.TIME_INDEX_NAME, self.TIME_INDEX_NAME)
+                )
+            # TODO: https://github.com/smartsdk/ngsi-timeseries-api/issues/106
             m = "{}({}) as {}"
-            attrs = [m.format(aggr_method, a, a) for a in set(attr_names)]
+            attrs.extend(m.format(aggr_method, a, a) for a in set(attr_names))
+
         else:
-            attrs = [self.TIME_INDEX_NAME]
+            attrs.append(self.TIME_INDEX_NAME)
             attrs.extend(str(a) for a in attr_names)
-        attrs.append('entity_type')
-        attrs.append('entity_id')
+
         select = ','.join(attrs)
         return select
 
@@ -419,6 +426,38 @@ class CrateTranslator(base_translator.BaseTranslator):
         return where_clause
 
 
+    def _get_order_group_clause(self, aggr_method, aggr_period, select_clause):
+        order_by = []
+        group_by = []
+
+        # Group By
+        if aggr_method:
+            if select_clause != "*":
+                group_by.extend(["entity_type", "entity_id"])
+                if aggr_period:
+                    # Note: If alias shadows a real table column,
+                    # grouping will NOT be applied on the aliased column
+                    gb = "DATE_TRUNC('{}', {})".format(
+                        aggr_period, self.TIME_INDEX_NAME)
+                    group_by.append(gb)
+
+        # Order by
+        if aggr_method:
+            if aggr_period:
+                # consider always ordering by entity_id also
+                order_by.extend(["entity_type", "entity_id"])
+                order_by.append("{} ASC".format(self.TIME_INDEX_NAME))
+        else:
+            order_by.append("{} ASC".format(self.TIME_INDEX_NAME))
+
+        clause = ""
+        if group_by:
+            clause = "GROUP BY {}".format(",".join(group_by))
+        if order_by:
+            clause += " ORDER BY {}".format(",".join(order_by))
+        return clause
+
+
     def query(self,
               attr_names=None,
               entity_type=None,
@@ -427,6 +466,7 @@ class CrateTranslator(base_translator.BaseTranslator):
               where_clause=None,
               aggr_method=None,
               aggr_period=None,
+              aggr_scope=None,
               from_date=None,
               to_date=None,
               last_n=None,
@@ -460,6 +500,9 @@ class CrateTranslator(base_translator.BaseTranslator):
             also the number of values that will be returned. Must be one of the
             VALID_AGGR_PERIODS (e.g, hour). I.e., querying avg per hour will
             return 24 values times the number of days of available measurements.
+        :param aggr_scope: (Not Implemented). Defaults to "entity", which means
+            the aggrMethod will be applied N times, once for each entityId.
+            "global" instead would allow cross-entity_id aggregations.
         :param from_date:
             (Optional), used to filter results, considering only from this date
             inclusive.
@@ -482,9 +525,6 @@ class CrateTranslator(base_translator.BaseTranslator):
         :param fiware_servicepath:
             (Optional), used to filter results, considering in the result only
             entities in this FIWARE ServicePath.
-        :param aggr_scope: (Not Implemented). Defaults to "Global".
-            If "Local", it would allow to request the aggrMethod being applied
-            N times, once for each entityId.
 
         :return:
         The shape of the response is always something like this:
@@ -492,7 +532,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         [{
          'type': 'Room',
          'id': 'Room1', or 'ids': ['Room1', 'Room2'],
-         'time_index': [t0, t1, ..., tn],
+         'index': [t0, t1, ..., tn],
          'attr_1': {
              'index': [t0, t1, ..., tn], # index of this attr (if different)
              'values': [v0, v1, ..., vn],
@@ -514,23 +554,24 @@ class CrateTranslator(base_translator.BaseTranslator):
         from multiple entities (those with those ids). You get one or the
         other, not both.
 
-        'time_index': The time index applying to the response, applies to all
+        'index': The time index applying to the response, applies to all
         attributes included in the response. It may not be present if each
         attribute has its own time index array, in the cases where attributes
         are measured at different moments in time. Note since this is a "global"
         time index for the entity, it may contain some NULL values where
         measurements were not available. It's an array containing time
-        measured in milliseconds since epoch (typically in the timezone the
-        Orion Notification used, or UTC if created within QL).
+        in ISO format representation, typically in the original timezone the
+        Orion Notification used, or UTC if created within QL.
 
         Each attribute in the response will be represented by a dictionary,
         with an array called 'values' containing the actual historical values
         of the attributes as queried. An attribute 'type' will have the original
         NGSI type of the attribute (i.e, the type of each of the elements now
         in the values array). The type of an attribute is not
-        expected to change in time, it'd be an error. Additionally, it may
-        contain an array called 'index', just like time_index but for this
-        specific attribute. Thus, this 'index' will never contain NONE values.
+        expected to change in time, that'd be an error. Additionally, it may
+        contain an array called 'index', just like the global index
+        discussed above but for this specific attribute. Thus, this 'index'
+        will never contain NONE values.
 
         If the user did not specify an aggrMethod, the response will not mix
         measurements of different entities in the same values array. So in this
@@ -553,8 +594,10 @@ class CrateTranslator(base_translator.BaseTranslator):
             raise ValueError("Cannot use both entity_id and entity_ids params "
                              "in the same call.")
 
-        if aggr_method and aggr_method not in VALID_AGGR_METHODS:
+        if aggr_method and aggr_method.lower() not in VALID_AGGR_METHODS:
             raise UnsupportedOption("aggr_method={}".format(aggr_method))
+        if aggr_period and aggr_period.lower() not in VALID_AGGR_PERIODS:
+            raise UnsupportedOption("aggr_period={}".format(aggr_period))
 
         if entity_id and not entity_type:
             entity_type = self._get_entity_type(entity_id, fiware_service)
@@ -568,21 +611,18 @@ class CrateTranslator(base_translator.BaseTranslator):
         if entity_id:
             entity_ids = tuple([entity_id])
 
-        select_clause = self._get_select_clause(attr_names, aggr_method)
+        select_clause = self._get_select_clause(attr_names,
+                                                aggr_method,
+                                                aggr_period)
         if not where_clause:
             where_clause = self._get_where_clause(entity_ids,
                                                   from_date,
                                                   to_date,
                                                   fiware_servicepath)
 
-        if aggr_method:
-            if select_clause == "*":
-                order_by = ""
-            else:
-                order_by = "group by entity_type, entity_id"
-        else:
-            # we could add by entity_id afterwards, no?
-            order_by = "order by {} ASC".format(self.TIME_INDEX_NAME)
+        order_group_clause = self._get_order_group_clause(aggr_method,
+                                                          aggr_period,
+                                                          select_clause)
 
         if entity_type:
             table_names = [self._et2tn(entity_type, fiware_service)]
@@ -597,12 +637,12 @@ class CrateTranslator(base_translator.BaseTranslator):
             op = "select {select_clause} " \
                  "from {tn} " \
                  "{where_clause} " \
-                 "{order_by} " \
+                 "{order_group_clause} " \
                  "limit {limit} offset {offset}".format(
                     select_clause=select_clause,
                     tn=tn,
                     where_clause=where_clause,
-                    order_by=order_by,
+                    order_group_clause=order_group_clause,
                     limit=limit,
                     offset=offset,
                 )
@@ -618,14 +658,12 @@ class CrateTranslator(base_translator.BaseTranslator):
                 entities = self._format_response(res,
                                                  col_names,
                                                  tn,
-                                                 last_n,
-                                                 aggr_method)
+                                                 last_n)
             result.extend(entities)
         return result
 
 
-    def _format_response(self, resultset, col_names, table_name, last_n,
-                         aggr_Method):
+    def _format_response(self, resultset, col_names, table_name, last_n):
         """
         :param resultset: list of query results for one entity_type
         :param col_names: list of columns affected in the query
@@ -639,12 +677,12 @@ class CrateTranslator(base_translator.BaseTranslator):
         returns [
                 {'type': 'Room',
                 'id': 'Room1',
-                'temperature': {'values': [1, 2, 3]}
+                'temperature': {'values': [1, 2, 3], 'type': 'Number'}
                 'index: [t0, t1, t2]
                 },
                 {'type': 'Room',
                 'id': 'Room2',
-                'temperature': {'values': [5, 6, 4]}
+                'temperature': {'values': [5, 6, 4], 'type': 'Number'}
                 'index: [t0, t1, t2]
                 }
                 ]
@@ -655,19 +693,18 @@ class CrateTranslator(base_translator.BaseTranslator):
         returns [{
                     'type': 'Room',
                     'id': 'SpecificRoom',
-                    'temperature': {'values': [1, 2, 3]},   # aggrMethod
-                    'index': [tA, tB, tC]                   # with aggrPeriod
+                    'temperature': {'values': [1, 2, 3], ...}, # aggregated
+                    'index': [tA, tB, tC]                      # aggrPeriod
                 }]
 
-        With aggrMethod and many specific ids requested, the array has
-        only one dict, but instead of an 'id' attribute it will have an
-        'ids'. This is the same case when user does not give a specific id at
-        all (no id => all ids).
+        With aggrMethod and global aggrScope (NOT YET IMPLEMENTED),
+        the array has only one dict, but instead of an 'id' attribute it will
+        have an 'ids', with all the ids that were cross-aggregated.
         returns [{
                     'type': 'Room',
                     'ids': ['Room1', 'Room2'],
-                    'temperature': {'values': [4,]},    # aggrMethod
-                    'index': [],                        # without aggrPeriod
+                    'temperature': {'values': [4,], ...},       # aggregated
+                    'index': [],                                # aggrPeriod
                 }]
 
         Indexes elements are time steps in ISO format.

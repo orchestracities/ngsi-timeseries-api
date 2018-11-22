@@ -10,6 +10,7 @@ def query_1TNE1A(attr_name,   # In Path
                  id_=None,  # In Query
                  aggr_method=None,
                  aggr_period=None,
+                 aggr_scope=None,
                  options=None,
                  from_date=None,
                  to_date=None,
@@ -20,10 +21,8 @@ def query_1TNE1A(attr_name,   # In Path
     See /types/{entityType}/attrs/{attrName} in API Specification
     quantumleap.yml
     """
-    r, c = _validate_query_params(aggr_period,
-                                  aggr_method,
-                                  [attr_name],
-                                  options)
+    r, c = _validate_query_params([attr_name],
+                                  aggr_period, aggr_method, aggr_scope, options)
     if c != 200:
         return r, c
 
@@ -40,6 +39,8 @@ def query_1TNE1A(attr_name,   # In Path
                                    entity_type=entity_type,
                                    entity_ids=entity_ids,
                                    aggr_method=aggr_method,
+                                   aggr_period=aggr_period,
+                                   aggr_scope=aggr_scope,
                                    from_date=from_date,
                                    to_date=to_date,
                                    last_n=last_n,
@@ -65,6 +66,7 @@ def query_1TNE1A(attr_name,   # In Path
                                 entity_type,
                                 entity_ids,
                                 aggr_method,
+                                aggr_period,
                                 from_date,
                                 to_date,)
         return res
@@ -77,16 +79,15 @@ def query_1TNE1A(attr_name,   # In Path
 
 
 def _prepare_response(entities, attr_name, entity_type, entity_ids,
-                      aggr_method, from_date, to_date):
+                      aggr_method, aggr_period, from_date, to_date):
     values = {}
     for e in entities:
         values[e['id']] = e[attr_name]['values']
 
-    if aggr_method:
+    if aggr_method and not aggr_period:
         # Use fromDate / toDate
         indexes = [from_date or '', to_date or '']
     else:
-        # Use entity's time_index
         indexes = {}
         for e in entities:
             indexes[e['id']] = e['index']
@@ -96,7 +97,10 @@ def _prepare_response(entities, attr_name, entity_type, entity_ids,
     if entity_ids:
         for ei in entity_ids:
             if ei in values:
-                index = indexes if aggr_method else indexes[ei]
+                if aggr_method and not aggr_period:
+                    index = indexes
+                else:
+                    index = indexes[ei]
                 i = {
                     'entityId': ei,
                     'index': index,
@@ -107,7 +111,7 @@ def _prepare_response(entities, attr_name, entity_type, entity_ids,
 
     # Proceed with the rest of the values in order of keys
     for e_id in sorted(values.keys()):
-        index = [] if aggr_method else indexes[e_id]
+        index = [] if aggr_method and not aggr_period else indexes[e_id]
         i = {
             'entityId': e_id,
             'index': index,

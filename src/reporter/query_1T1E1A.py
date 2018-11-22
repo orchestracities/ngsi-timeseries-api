@@ -20,10 +20,8 @@ def query_1T1E1A(attr_name,   # In Path
     See /entities/{entityId}/attrs/{attrName} in API Specification
     quantumleap.yml
     """
-    r, c = _validate_query_params(aggr_period,
-                                  aggr_method,
-                                  [attr_name],
-                                  options)
+    r, c = _validate_query_params([attr_name], aggr_period, aggr_method,
+                                  options=options)
     if c != 200:
         return r, c
 
@@ -37,6 +35,7 @@ def query_1T1E1A(attr_name,   # In Path
                                    entity_type=type_,
                                    entity_id=entity_id,
                                    aggr_method=aggr_method,
+                                   aggr_period=aggr_period,
                                    from_date=from_date,
                                    to_date=to_date,
                                    last_n=last_n,
@@ -63,8 +62,7 @@ def query_1T1E1A(attr_name,   # In Path
 
         if aggr_method:
             if aggr_period:
-                # TODO #89
-                index = None
+                index = entities[0]['index']
             else:
                 index = []
         else:

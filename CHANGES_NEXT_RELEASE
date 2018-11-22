@@ -1,3 +1,0 @@
-- Add: /health API endpoint
-- Add: aggrPeriod support in 1T1E1A
-- Fix: some inconsistent HTTP return errors
