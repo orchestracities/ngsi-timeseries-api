@@ -436,7 +436,7 @@ class CrateTranslator(base_translator.BaseTranslator):
                 group_by.extend(["entity_type", "entity_id"])
                 if aggr_period:
                     # Note: If alias shadows a real table column,
-                    # grouping will NOTbe applied on the aliased column
+                    # grouping will NOT be applied on the aliased column
                     gb = "DATE_TRUNC('{}', {})".format(
                         aggr_period, self.TIME_INDEX_NAME)
                     group_by.append(gb)
@@ -500,9 +500,9 @@ class CrateTranslator(base_translator.BaseTranslator):
             also the number of values that will be returned. Must be one of the
             VALID_AGGR_PERIODS (e.g, hour). I.e., querying avg per hour will
             return 24 values times the number of days of available measurements.
-        :param aggr_scope: (Not Implemented). Defaults to "Global".
-            If "Local", it would allow to request the aggrMethod being applied
-            N times, once for each entityId.
+        :param aggr_scope: (Not Implemented). Defaults to "entity", which means
+            the aggrMethod will be applied N times, once for each entityId.
+            "global" instead would allow cross-entity_id aggregations.
         :param from_date:
             (Optional), used to filter results, considering only from this date
             inclusive.
