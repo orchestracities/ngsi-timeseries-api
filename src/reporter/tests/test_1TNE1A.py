@@ -1,6 +1,7 @@
 from conftest import QL_URL, crate_translator as translator
 from datetime import datetime
 from reporter.tests.utils import insert_test_data
+from utils.common import assert_equal_time_index_arrays
 import pytest
 import requests
 
@@ -22,11 +23,30 @@ def query_url(values=False):
 
 @pytest.fixture()
 def reporter_dataset(translator):
-    insert_test_data(translator,
-                     [entity_type],
-                     n_entities=3,
-                     n_days=n_days)
+    insert_test_data(translator, [entity_type], n_entities=3, index_size=n_days)
     yield
+
+
+def assert_1TNE1A_response(obtained, expected, values_only=False):
+    """
+    Check API responses for 1TNE1A
+    """
+    assert isinstance(obtained, dict)
+    if not values_only:
+        assert obtained['data']['entityType'] == entity_type
+        assert obtained['data']['attrName'] == attr_name
+        obt_entities = obtained['data']['entities']
+        exp_entities = expected['data']['entities']
+    else:
+        obt_entities = obtained['data']['values']
+        exp_entities = expected['data']['values']
+
+    for oe, ee in zip(obt_entities, exp_entities):
+        obt_index = oe.pop('index')
+        exp_index = ee.pop('index')
+        assert_equal_time_index_arrays(obt_index, exp_index)
+
+    assert obtained == expected
 
 
 def test_1TNE1A_defaults(reporter_dataset):
@@ -59,12 +79,16 @@ def test_1TNE1A_defaults(reporter_dataset):
             'values': expected_values,
         }
     ]
+    expected = {
+        'data': {
+            'entityType': entity_type,
+            'attrName': attr_name,
+            'entities': expected_entities,
+        }
+    }
 
-    obtained_data = r.json()
-    assert isinstance(obtained_data, dict)
-    assert obtained_data['data']['entityType'] == entity_type
-    assert obtained_data['data']['attrName'] == attr_name
-    assert obtained_data['data']['entities'] == expected_entities
+    obtained = r.json()
+    assert_1TNE1A_response(obtained, expected)
 
 
 def test_1TNE1A_one_entity(reporter_dataset):
@@ -91,9 +115,15 @@ def test_1TNE1A_one_entity(reporter_dataset):
             'values': expected_values,
         }
     ]
-    assert obtained_data['data']['entityType'] == entity_type
-    assert obtained_data['data']['attrName'] == attr_name
-    assert obtained_data['data']['entities'] == expected_entities
+    expected = {
+        'data': {
+            'entityType': entity_type,
+            'attrName': attr_name,
+            'entities': expected_entities,
+        }
+    }
+    obtained = r.json()
+    assert_1TNE1A_response(obtained, expected)
 
 
 def test_1TNE1A_some_entities(reporter_dataset):
@@ -124,11 +154,15 @@ def test_1TNE1A_some_entities(reporter_dataset):
         }
     ]
 
-    obtained_data = r.json()
-    assert isinstance(obtained_data, dict)
-    assert obtained_data['data']['entityType'] == entity_type
-    assert obtained_data['data']['attrName'] == attr_name
-    assert obtained_data['data']['entities'] == expected_entities
+    expected = {
+        'data': {
+            'entityType': entity_type,
+            'attrName': attr_name,
+            'entities': expected_entities,
+        }
+    }
+    obtained = r.json()
+    assert_1TNE1A_response(obtained, expected)
 
 
 def test_1TNE1A_values_defaults(reporter_dataset):
@@ -158,9 +192,13 @@ def test_1TNE1A_values_defaults(reporter_dataset):
         }
     ]
 
-    obtained_data = r.json()
-    assert isinstance(obtained_data, dict)
-    assert obtained_data == {'data': {'values': expected_entities}}
+    obtained = r.json()
+    expected = {
+        'data': {
+            'values': expected_entities,
+        }
+    }
+    assert_1TNE1A_response(obtained, expected, values_only=True)
 
 
 def test_not_found():
@@ -207,11 +245,15 @@ def test_weird_ids(reporter_dataset):
         }
     ]
 
-    obtained_data = r.json()
-    assert isinstance(obtained_data, dict)
-    assert obtained_data['data']['entityType'] == entity_type
-    assert obtained_data['data']['attrName'] == attr_name
-    assert obtained_data['data']['entities'] == expected_entities
+    expected = {
+        'data': {
+            'entityType': entity_type,
+            'attrName': attr_name,
+            'entities': expected_entities,
+        }
+    }
+    obtained = r.json()
+    assert_1TNE1A_response(obtained, expected)
 
 
 def test_different_time_indexes(translator):
@@ -219,9 +261,9 @@ def test_different_time_indexes(translator):
     Each entity should have its time_index array.
     """
     t = 'Room'
-    insert_test_data(translator, [t], n_entities=1, entity_id='Room1', n_days=2)
-    insert_test_data(translator, [t], n_entities=1, entity_id='Room3', n_days=4)
-    insert_test_data(translator, [t], n_entities=1, entity_id='Room2', n_days=3)
+    insert_test_data(translator, [t], entity_id='Room1', index_size=2)
+    insert_test_data(translator, [t], entity_id='Room3', index_size=4)
+    insert_test_data(translator, [t], entity_id='Room2', index_size=3)
 
     query_params = {
         'type': 'Room',
@@ -248,11 +290,15 @@ def test_different_time_indexes(translator):
         }
     ]
 
-    obtained_data = r.json()
-    assert isinstance(obtained_data, dict)
-    assert obtained_data['data']['entityType'] == 'Room'
-    assert obtained_data['data']['attrName'] == attr_name
-    assert obtained_data['data']['entities'] == expected_entities
+    expected = {
+        'data': {
+            'entityType': entity_type,
+            'attrName': attr_name,
+            'entities': expected_entities,
+        }
+    }
+    obtained = r.json()
+    assert_1TNE1A_response(obtained, expected)
 
 
 def test_aggregation_is_per_instance(translator):
@@ -262,8 +308,8 @@ def test_aggregation_is_per_instance(translator):
     It would change the shape of the response.
     """
     t = 'Room'
-    insert_test_data(translator, [t], n_entities=1, entity_id='Room0', n_days=3)
-    insert_test_data(translator, [t], n_entities=1, entity_id='Room1', n_days=9)
+    insert_test_data(translator, [t], entity_id='Room0', index_size=3)
+    insert_test_data(translator, [t], entity_id='Room1', index_size=9)
 
     query_params = {
         'type': t,
@@ -317,7 +363,6 @@ def test_aggregation_is_per_instance(translator):
             'values': [5],
         }
     ]
-
     obtained_data = r.json()
     assert isinstance(obtained_data, dict)
     assert obtained_data['data']['entityType'] == t
@@ -325,21 +370,66 @@ def test_aggregation_is_per_instance(translator):
     assert obtained_data['data']['entities'] == expected_entities
 
 
-def test_1T1ENA_aggrPeriod(reporter_dataset):
-    # GH issue https://github.com/smartsdk/ngsi-timeseries-api/issues/89
+@pytest.mark.parametrize("aggr_period, exp_index, ins_period", [
+    ("day",    ['1970-01-01T00:00:00.000',
+                '1970-01-02T00:00:00.000',
+                '1970-01-03T00:00:00.000'], "hour"),
+    ("hour",   ['1970-01-01T00:00:00.000',
+                '1970-01-01T01:00:00.000',
+                '1970-01-01T02:00:00.000'], "minute"),
+    ("minute", ['1970-01-01T00:00:00.000',
+                '1970-01-01T00:01:00.000',
+                '1970-01-01T00:02:00.000'], "second"),
+])
+def test_1T1ENA_aggrPeriod(translator, aggr_period, exp_index, ins_period):
+    # Custom index to test aggrPeriod
+    for i in exp_index:
+        base = datetime.strptime(i, "%Y-%m-%dT%H:%M:%S.%f")
+        insert_test_data(translator,
+                         [entity_type],
+                         index_size=5,
+                         index_base=base,
+                         index_period=ins_period)
 
     # aggrPeriod needs aggrMethod
     query_params = {
         'type': entity_type,
-        'aggrPeriod': 'minute',
+        'aggrPeriod': aggr_period,
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 400, r.text
 
+    # Check aggregation with aggrPeriod
+    query_params = {
+        'type': entity_type,
+        'aggrMethod': 'sum',
+        'aggrPeriod': aggr_period,
+    }
+    r = requests.get(query_url(), params=query_params)
+    assert r.status_code == 200, r.text
+
+    # Assert Results
+    exp_sum = 0 + 1 + 2 + 3 + 4
+    expected_entities = [
+        {
+            'entityId': 'Room0',
+            'index': exp_index,
+            'values': [exp_sum, exp_sum, exp_sum],
+        }
+    ]
+    obtained_data = r.json()
+    assert isinstance(obtained_data, dict)
+    assert obtained_data['data']['entityType'] == entity_type
+    assert obtained_data['data']['attrName'] == attr_name
+    assert obtained_data['data']['entities'] == expected_entities
+
+
+def test_1T1E1A_aggrScope(reporter_dataset):
+    # Notify users when not yet implemented
     query_params = {
         'type': entity_type,
         'aggrMethod': 'avg',
-        'aggrPeriod': 'minute',
+        'aggrScope': 'global',
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 501, r.text

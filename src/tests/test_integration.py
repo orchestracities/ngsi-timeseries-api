@@ -101,7 +101,7 @@ def test_integration():
 
     # Create Subscription
     sub_id = create_orion_subscription(ORION_URL, QL_URL, entity_type)
-    time.sleep(1)
+    time.sleep(5)
 
     try:
         # Insert Data in ORION
@@ -111,7 +111,7 @@ def test_integration():
         res = requests.post(url, data=data, params=params, headers=HEADERS_PUT)
         assert res.ok
 
-        time.sleep(2)
+        time.sleep(5)
 
         # Update values in Orion
         patch = {
@@ -124,14 +124,15 @@ def test_integration():
         res = requests.patch(url, data=json.dumps(patch), headers=HEADERS_PUT)
         assert res.ok
 
-        time.sleep(2)
+        time.sleep(5)
 
         # Query records in QuantumLeap
         url = "{}/v2/entities/{}/attrs/precipitation".format(QL_URL, entity_id)
         res = requests.get(url, params={'type': entity_type})
         assert res.ok
 
-        index = res.json()['data']['index']
+        obtained = res.json()
+        index = obtained['data']['index']
         assert len(index) > 1
         assert index[0] != index[-1]
 

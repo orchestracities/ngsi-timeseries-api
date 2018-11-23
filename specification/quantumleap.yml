@@ -1,7 +1,7 @@
 swagger: '2.0'  # For 3.0 see (https://github.com/zalando/connexion/issues/420)
 info:
   title: "QuantumLeap API"
-  version: "0.1.1"
+  version: "0.1.2"
 host: "localhost:8668"  # it'll run in the same container, hence localhost.
 basePath: /v2
 produces:
@@ -74,12 +74,12 @@ definitions:
       type: string
     description: "Array of the timestamps which are indexes of the response
     for the requested data. It's a parallel array to 'values'. The timestamp
-    will be either in the ISO format or the milliseconds in UTC since epoch,
-    depending on the format the 'time_index' was created; always respecting
-    the original format in which data was inserted. When using aggregation
-    options, the format of this remains the same, only the semantics will
-    change. For example, if aggrPeriod is day, each index will be a valid
-    timestamp of a moment in the corresponding day."
+    will be in the ISO8601 format (e.g. 2010-10-10T07:09:00.792) or in
+    milliseconds since epoch whichever format was used in the input
+    (notification), but ALWAYS in UTC.
+    When using aggregation options, the format of this remains the same, only
+     the semantics will change. For example, if aggrPeriod is day, each index
+      will be a valid timestamp of a moment in the corresponding day."
 
   ValuesArray:
     type: array
@@ -215,16 +215,18 @@ parameters:
     name: aggrPeriod
     type: string
     enum: [year, month, day, hour, minute, second]
-    description: "(This parameter is not yet supported) Optional. If not
-    defined, the aggregation will apply to all the values contained in the
-    search result.
-    If defined, the aggregation function will instead be applied N times,
-    once for each period, and all those results will be considered for the
-    result. For example, a query asking for the average temperature of an
-    attribute will typically return 1 value.
-    However, with an aggregationPeriod of day, you get the daily average of
-    the temperature instead (more than one value assuming you had
-    measurements across many days within the scope of your search result)"
+    description: "Optional. If not defined, the aggregation will apply to all
+     the values contained in the search result. If defined, the aggregation
+     function will instead be applied N times, once for each period, and all
+     those results will be considered for the response. For example, a query
+     asking for the average temperature of an attribute will typically return
+     1 value. However, with an aggregationPeriod of day, you get the daily
+     average of the temperature instead (more than one value assuming you
+     had measurements across many days within the scope of your search result).
+     aggrPeriod must be accompanied by an aggrMethod, and the aggrMethod will
+     be applied to all the numeric attributes specified in attrs; the rest of
+     the non-numerical attrs will be ignored. By default, the response is
+     grouped by entity_id. See aggrScope to create aggregation across entities."
   aggrScope:
     in: query
     name: aggrScope
@@ -490,6 +492,15 @@ paths:
           subscription, so as to persist historical data of entities of this
           type. ATTENTION: If not specified, all entity types will be tracked."
         - in: query
+          name: entityId
+          required: false
+          type: string
+          description: "Id of the entity to track. If specified, it takes precedence
+          over the idPattern parameter. If absent but an idPattern is given, then QL
+          will use the idPattern to determine which entities to track. If no idPattern
+          is given either, then QL will use the entityType if present. If not even an
+          entityType is given, then QL will fall back to tracking all entities."
+        - in: query
           name: idPattern
           required: false
           type: string
@@ -501,9 +512,53 @@ paths:
           name: attributes
           required: false
           type: string
-          description: "Comma-separated list of attribute names to keep
-          historical records. If not specified, QL will track all attributes of
-          the specified entities."
+          description: "Comma-separated list of attribute names to track. These attributes
+          are used to narrow the condition that triggers data change notifications---i.e.
+          they will be used to fill the attrs field of the subject's condition of the Orion
+          subscription QL creates. They will also be used to fill the attrs field of the
+          notification object in the subscription QL creates.
+          (Full details at: http://telefonicaid.github.io/fiware-orion/api/v2/stable/)
+          More specifically, call E the set of entities determined by the given combination
+          of entityType, entityId and idPattern. Then we have a set A of all attributes of
+          entities in E whose name is in attributes. When the value of any of the attributes
+          in A changes, Orion will send QL the current values of those attributes.
+          Note that when using this attributes parameter the set of attributes that Orion
+          will track for changes (observed attributes) is the same as the set of attributes
+          that determine which data Orion will put in notifications (notified attributes).
+          If the two sets need to be different, use the observedAttributes and notifiedAttributes
+          parameters below. (If you supply an attributes parameter, observedAttributes and
+          notifiedAttributes will be ignored.)"
+        - in: query
+          name: observedAttributes
+          required: false
+          type: string
+          description: "Comma-separated list of attribute names to track. These attributes
+          are used to narrow the condition that triggers data change notifications---i.e.
+          they will be used to fill the attrs field of the subject's condition of the Orion
+          subscription QL creates. (Full details at: http://telefonicaid.github.io/fiware-orion/api/v2/stable/)
+          More specifically, call E the set of entities determined by the given combination
+          of entityType, entityId and idPattern. Then we have a set A of all attributes of
+          entities in E whose name is in observedAttributes. When the value of any of the
+          attributes in A changes, Orion will send QL the current values of the attributes
+          specified by the notifiedAttributes parameter. If observedAttributes is absent,
+          QL will be notified of any changes to the entities in E."
+        - in: query
+          name: notifiedAttributes
+          required: false
+          type: string
+          description: "Comma-separated list of attribute names to be used to restrict
+          the data of which QL will keep a history. This list will be used to set the
+          notification's attrs field of the subscription that QL creates.
+          (Full details at: http://telefonicaid.github.io/fiware-orion/api/v2/stable/)
+          If not specified, QL will keep a history of all data changes in any of the
+          entities identified by the given combination of entityType, entityId and idPattern."
+        - in: query
+          name: throttling
+          required: false
+          type: integer
+          description: "Minimal period of time in seconds which must elapse between two
+          consecutive notifications. This is the value QL will use for the throttling
+          field when creating the subscription. If not specified, it defaults to 1."
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
       tags:
@@ -711,7 +766,8 @@ paths:
               {
                 "data": {
                   "entityId": "Kitchen1",
-                  "index": ["1510826981388", "1510826990438", "1510826999725"],
+                  "index": ["2018-01-05T15:44:34", "2018-01-06T15:44:59",
+                            "2018-01-07T15:44:59"],
                   "attributes": [
                     {
                       "attrName": "temperature",
@@ -823,7 +879,8 @@ paths:
             application/json:
               {
                 "data": {
-                  "index": ["1510826981388", "1510826990438", "1510826999725"],
+                  "index": ["2018-01-05T15:44:34", "2018-01-06T15:44:59",
+                            "2018-01-07T15:44:59"],
                   "values": [
                     {
                       "attrName": "temperature",
@@ -872,6 +929,7 @@ paths:
         - $ref: '#/parameters/id'
         - $ref: '#/parameters/aggrMethod'
         - $ref: '#/parameters/aggrPeriod'
+        - $ref: '#/parameters/aggrScope'
         - $ref: '#/parameters/options'
         - $ref: '#/parameters/fromDate'
         - $ref: '#/parameters/toDate'
@@ -908,14 +966,14 @@ paths:
                   "entities": [
                     {
                       "entityId": "Kitchen1",
-                      "index": ["1510826981388", "1510826990438",
-                      "1510826999725"],
+                      "index": ["2018-01-05T15:44:34", "2018-01-06T15:44:59",
+                                "2018-01-07T15:44:59"],
                       "values": [24.1, 25.3, 26.7]
                     },
                     {
                       "entityId": "Room2",
-                      "index": ["1510826981388", "1510826990438",
-                      "1510826999725"],
+                      "index": ["2018-01-05T15:44:34", "2018-01-06T15:44:59",
+                                "2018-01-07T15:44:59"],
                       "values": [21.01, 20.9, 21.02]
                     }
                   ]
@@ -940,6 +998,7 @@ paths:
         - $ref: '#/parameters/id'
         - $ref: '#/parameters/aggrMethod'
         - $ref: '#/parameters/aggrPeriod'
+        - $ref: '#/parameters/aggrScope'
         - $ref: '#/parameters/options'
         - $ref: '#/parameters/fromDate'
         - $ref: '#/parameters/toDate'
@@ -970,14 +1029,14 @@ paths:
                   "values": [
                     {
                       "entityId": "Kitchen1",
-                      "index": ["1510826981388", "1510826990438",
-                      "1510826999725"],
+                      "index": ["2018-01-05T15:44:34", "2018-01-06T15:44:59",
+                                "2018-01-07T15:44:59"],
                       "values": [24.1, 25.3, 26.7]
                     },
                     {
                       "entityId": "Room2",
-                      "index": ["1510826981388", "1510826990438",
-                      "1510826999725"],
+                      "index": ["2018-01-05T15:44:34", "2018-01-06T15:44:59",
+                                "2018-01-07T15:44:59"],
                       "values": [21.01, 20.9, 21.02]
                     }
                   ]
@@ -1047,8 +1106,8 @@ paths:
                   "entities": [
                     {
                       "entityId": "Room1",
-                      "index": ["1510826981388", "1510826990438",
-                      "1510826999725"],
+                      "index": ["2018-01-05T15:44:34", "2018-01-06T15:44:59",
+                                "2018-01-07T15:44:59"],
                       "attributes": [
                         {
                           # TODO: How about defining the attrs order once?
@@ -1063,8 +1122,8 @@ paths:
                     },
                     {
                       "entityId": "Room2",
-                      "index": ["1510826981388", "1510826990438",
-                      "1510826999725"],
+                      "index": ["2018-01-05T15:44:34", "2018-01-06T15:44:59",
+                                "2018-01-07T15:44:59"],
                       "attributes": [
                         {
                           "attrName": "temperature",
@@ -1164,8 +1223,8 @@ paths:
                   "values": [
                     {
                       "entityId": "Room1",
-                      "index": ["1510826981388", "1510826990438",
-                      "1510826999725"],
+                      "index": ["2018-01-05T15:44:34", "2018-01-06T15:44:59",
+                                "2018-01-07T15:44:59"],
                       "attributes": [
                         {
                           # TODO: How about defining the attrs order once?
@@ -1180,8 +1239,8 @@ paths:
                     },
                     {
                       "entityId": "Room2",
-                      "index": ["1510826981388", "1510826990438",
-                      "1510826999725"],
+                      "index": ["2018-01-05T15:44:34", "2018-01-06T15:44:59",
+                                "2018-01-07T15:44:59"],
                       "attributes": [
                         {
                           "attrName": "temperature",
@@ -1262,14 +1321,16 @@ paths:
                       "entities": [
                         {
                           "entityId": "Room1",
-                          "index": ["1510826981388", "1510826990438",
-                          "1510826999725"],
+                          "index": ["2018-01-05T15:44:34",
+                                    "2018-01-06T15:44:59",
+                                    "2018-01-07T15:44:59"],
                           "values": [24.1, 25.3, 26.7]
                         },
                         {
                           "entityId": "Room2",
-                          "index": ["1510826981388", "1510826990438",
-                          "1510826999725"],
+                          "index": ["2018-01-05T15:44:34",
+                                    "2018-01-06T15:44:59",
+                                    "2018-01-07T15:44:59"],
                           "values": [22.1, 23.3, 25.7]
                         }
                       ]
@@ -1279,14 +1340,16 @@ paths:
                       "entities": [
                         {
                           "entityId": "DeviceInRoom1",
-                          "index": ["1510826981388", "1510826990438",
-                          "1510826999725"],
+                          "index": ["2018-01-05T15:44:34",
+                                    "2018-01-06T15:44:59",
+                                    "2018-01-07T15:44:59"],
                           "values": [24.1, 25.3, 26.7]
                         },
                         {
                           "entityId": "DeviceInRoom2",
-                          "index": ["1510826981388", "1510826990438",
-                          "1510826999725"],
+                          "index": ["2018-01-05T15:44:34",
+                                    "2018-01-06T15:44:59",
+                                    "2018-01-07T15:44:59"],
                           "values": [22.1, 23.3, 25.7]
                         }
                       ]
@@ -1359,14 +1422,16 @@ paths:
                       "entities": [
                         {
                           "entityId": "Room1",
-                          "index": ["1510826981388", "1510826990438",
-                          "1510826999725"],
+                          "index": ["2018-01-05T15:44:34",
+                                    "2018-01-06T15:44:59",
+                                    "2018-01-07T15:44:59"],
                           "values": [24.1, 25.3, 26.7]
                         },
                         {
                           "entityId": "Room2",
-                          "index": ["1510826981388", "1510826990438",
-                          "1510826999725"],
+                          "index": ["2018-01-05T15:44:34",
+                                    "2018-01-06T15:44:59",
+                                    "2018-01-07T15:44:59"],
                           "values": [22.1, 23.3, 25.7]
                         }
                       ]
@@ -1376,14 +1441,16 @@ paths:
                       "entities": [
                         {
                           "entityId": "DeviceInRoom1",
-                          "index": ["1510826981388", "1510826990438",
-                          "1510826999725"],
+                          "index": ["2018-01-05T15:44:34",
+                                    "2018-01-06T15:44:59",
+                                    "2018-01-07T15:44:59"],
                           "values": [24.1, 25.3, 26.7]
                         },
                         {
                           "entityId": "DeviceInRoom2",
-                          "index": ["1510826981388", "1510826990438",
-                          "1510826999725"],
+                          "index": ["2018-01-05T15:44:34",
+                                    "2018-01-06T15:44:59",
+                                    "2018-01-07T15:44:59"],
                           "values": [22.1, 23.3, 25.7]
                         }
                       ]
@@ -1462,14 +1529,16 @@ paths:
                           "entities": [
                             {
                               "entityId": "Room1",
-                              "index": ["1510826981388", "1510826990438",
-                              "1510826999725"],
+                              "index": ["2018-01-05T15:44:34",
+                                        "2018-01-06T15:44:59",
+                                        "2018-01-07T15:44:59"],
                               "values": [24.1, 25.3, 26.7]
                             },
                             {
                               "entityId": "Room2",
-                              "index": ["1510826981388", "1510826990438",
-                              "1510826999725"],
+                              "index": ["2018-01-05T15:44:34",
+                                        "2018-01-06T15:44:59",
+                                        "2018-01-07T15:44:59"],
                               "values": [22.1, 23.3, 25.7]
                             }
                           ]
@@ -1479,14 +1548,16 @@ paths:
                           "entities": [
                             {
                               "entityId": "DeviceInRoom1",
-                              "index": ["1510826981388", "1510826990438",
-                              "1510826999725"],
+                              "index": ["2018-01-05T15:44:34",
+                                        "2018-01-06T15:44:59",
+                                        "2018-01-07T15:44:59"],
                               "values": [24.1, 25.3, 26.7]
                             },
                             {
                               "entityId": "DeviceInRoom2",
-                              "index": ["1510826981388", "1510826990438",
-                              "1510826999725"],
+                              "index": ["2018-01-05T15:44:34",
+                                        "2018-01-06T15:44:59",
+                                        "2018-01-07T15:44:59"],
                               "values": [22.1, 23.3, 25.7]
                             }
                           ]
@@ -1568,14 +1639,16 @@ paths:
                           "entities": [
                             {
                               "entityId": "Room1",
-                              "index": ["1510826981388", "1510826990438",
-                              "1510826999725"],
+                              "index": ["2018-01-05T15:44:34",
+                                        "2018-01-06T15:44:59",
+                                        "2018-01-07T15:44:59"],
                               "values": [24.1, 25.3, 26.7]
                             },
                             {
                               "entityId": "Room2",
-                              "index": ["1510826981388", "1510826990438",
-                              "1510826999725"],
+                              "index": ["2018-01-05T15:44:34",
+                                        "2018-01-06T15:44:59",
+                                        "2018-01-07T15:44:59"],
                               "values": [22.1, 23.3, 25.7]
                             }
                           ]
@@ -1585,14 +1658,16 @@ paths:
                           "entities": [
                             {
                               "entityId": "DeviceInRoom1",
-                              "index": ["1510826981388", "1510826990438",
-                              "1510826999725"],
+                              "index": ["2018-01-05T15:44:34",
+                                        "2018-01-06T15:44:59",
+                                        "2018-01-07T15:44:59"],
                               "values": [24.1, 25.3, 26.7]
                             },
                             {
                               "entityId": "DeviceInRoom2",
-                              "index": ["1510826981388", "1510826990438",
-                              "1510826999725"],
+                              "index": ["2018-01-05T15:44:34",
+                                        "2018-01-06T15:44:59",
+                                        "2018-01-07T15:44:59"],
                               "values": [22.1, 23.3, 25.7]
                             }
                           ]

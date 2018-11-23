@@ -36,6 +36,7 @@ import json
 import logging
 import os
 import requests
+from reporter.subscription_builder import build_subscription
 
 
 def _validate_payload(payload):
@@ -224,8 +225,12 @@ def config():
 def subscribe(orion_url,
               quantumleap_url,
               entity_type=None,
-              id_pattern=".*",
-              attributes=None):
+              entity_id=None,
+              id_pattern=None,
+              attributes=None,
+              observed_attributes=None,
+              notified_attributes=None,
+              throttling=None):
     # Validate Orion
     try:
         r = requests.get(orion_url)
@@ -240,29 +245,11 @@ def subscribe(orion_url,
         return msg, 400
 
     # Prepare subscription
-    subscription = {
-        "description": "Created by QuantumLeap {}.".format(quantumleap_url),
-        "subject": {
-            "entities": [
-              {
-                "idPattern": id_pattern,
-              }
-            ],
-            "condition": {
-              "attrs": attributes.split(',') if attributes else []
-            }
-          },
-        "notification": {
-            "http": {
-              "url": "{}/notify".format(quantumleap_url)
-            },
-            "attrs": attributes.split(',') if attributes else [],
-            "metadata": ["dateCreated", "dateModified"],
-        },
-        "throttling": 1,
-    }
-    if entity_type:
-        subscription['subject']['entities'][0]['type'] = entity_type
+    subscription = build_subscription(
+        quantumleap_url,
+        entity_type, entity_id, id_pattern,
+        attributes, observed_attributes, notified_attributes,
+        throttling)
 
     # Send subscription
     endpoint = '{}/subscriptions'.format(orion_url)
@@ -285,7 +272,8 @@ def subscribe(orion_url,
     return r.text, r.status_code
 
 
-def _validate_query_params(aggr_period, aggr_method, attr_names, options):
+def _validate_query_params(attr_names, aggr_period, aggr_method,
+                           aggr_scope=None, options=None):
     if aggr_period and not aggr_method:
         r = {
             "error": "Bad parameters use",
@@ -293,10 +281,10 @@ def _validate_query_params(aggr_period, aggr_method, attr_names, options):
         }
         return r, 400
 
-    if options or aggr_period:
+    if options or aggr_scope not in (None, 'entity'):
         r = {
             "error": "Not implemented option",
-            "description": "aggrPeriod and options are not yet implemented."
+            "description": "aggrScope and options are not yet implemented."
         }
         return r, 501
 
@@ -307,4 +295,5 @@ def _validate_query_params(aggr_period, aggr_method, attr_names, options):
             "description": msg.format(aggr_method)
         }
         return r, 400
+
     return "OK", 200

@@ -14,7 +14,6 @@ def test_default_replication(translator):
     e_type = entity['type']
 
     translator.insert(entities)
-    translator._refresh([e_type])
 
     op = "select number_of_replicas from information_schema.tables where " \
          "table_name = '{}'"
@@ -26,4 +25,3 @@ def test_default_replication(translator):
     translator.cursor.execute(op.format(METADATA_TABLE_NAME))
     res = translator.cursor.fetchall()
     assert res[0] == ['2-all']
-

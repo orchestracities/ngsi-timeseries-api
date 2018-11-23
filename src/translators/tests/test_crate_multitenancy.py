@@ -35,7 +35,6 @@ def test_fiware_tenant(translator):
     fs = "tenant"
     fsp = "/"
     translator.insert([e], fiware_service=fs, fiware_servicepath=fsp)
-    translator._refresh([e['type']], fiware_service=fs)
 
     # Query NO tenant -> No results
     entities = translator.query()
@@ -50,12 +49,10 @@ def test_fiware_tenant_services(translator):
     # Insert in tenant A
     e = entity("X")
     translator.insert([e], fiware_service="A", fiware_servicepath="/")
-    translator._refresh([e['type']], fiware_service="A")
 
     # Insert in tenant B
     e = entity("Y")
     translator.insert([e], fiware_service="B", fiware_servicepath="/")
-    translator._refresh([e['type']], fiware_service="B")
 
     # Query tenant A
     entities = translator.query(fiware_service="A", fiware_servicepath="/")
@@ -71,7 +68,6 @@ def test_fiware_tenant_services(translator):
 def test_fiware_tenant_servicepath(translator):
     def insert_with_tenant(e, path):
         translator.insert([e], fiware_service="EU", fiware_servicepath=path)
-        translator._refresh([e['type']], fiware_service="EU")
 
     # Insert entities with different tenant paths
     insert_with_tenant(entity("Rome"), "/eu/italy")
@@ -107,7 +103,6 @@ def test_fiware_empty_tenant_is_no_tenant(translator):
     fs = ""
     fsp = ""
     translator.insert([e], fiware_service=fs, fiware_servicepath=fsp)
-    translator._refresh([e['type']], fiware_service=fs)
 
     # Query WITHOUT tenant -> get results
     entities = translator.query()
@@ -116,7 +111,6 @@ def test_fiware_empty_tenant_is_no_tenant(translator):
     # Insert WITHOUT tenant
     e = entity("Room2")
     translator.insert([e])
-    translator._refresh([e['type']])
 
     # Query with EMPTY tenant -> get results
     entities = translator.query()
@@ -128,7 +122,6 @@ def test_fiware_tenant_reserved_word(translator):
     fs = "default"
     fsp = "/"
     translator.insert([e], fiware_service=fs, fiware_servicepath=fsp)
-    translator._refresh([e['type']], fiware_service=fs)
 
     entities = translator.query(fiware_service=fs, fiware_servicepath=fsp)
     assert len(entities) == 1

@@ -57,7 +57,9 @@ def test_valid_customs(clean_mongo, clean_crate):
         'quantumleapUrl': QL_URL,
         'entityType': "Room",
         'idPattern': "Room1",
-        'attributes': "temperature,pressure",
+        'observedAttributes': "temperature,pressure",
+        'notifiedAttributes': "pressure",
+        'throttling': 30
     }
     r = requests.post(subscribe_url, params=params, headers=headers)
     assert r.status_code == 201
@@ -76,12 +78,12 @@ def test_valid_customs(clean_mongo, clean_crate):
         'condition': {'attrs': ["temperature", "pressure"]}
     }
     assert subscription['notification'] == {
-        'attrs': ["temperature", "pressure"],
+        'attrs': ["pressure"],
         'attrsFormat': 'normalized',
         'http': {'url': "{}/notify".format(QL_URL)},
         'metadata': ['dateCreated', 'dateModified'],
     }
-    assert subscription['throttling'] == 1
+    assert subscription['throttling'] == 30
 
 
 def test_use_multitenancy_headers(clean_mongo, clean_crate):
@@ -94,7 +96,7 @@ def test_use_multitenancy_headers(clean_mongo, clean_crate):
         'quantumleapUrl': QL_URL,
         'entityType': "Room",
         'idPattern': "Room1",
-        'attributes': "temperature,pressure",
+        'observedAttributes': "temperature,pressure",
     }
     # Post with FIWARE headers
     r = requests.post(subscribe_url, params=params, headers=headers)

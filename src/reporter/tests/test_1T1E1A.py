@@ -1,6 +1,8 @@
 from conftest import QL_URL, crate_translator as translator
+from datetime import datetime
 from exceptions.exceptions import AmbiguousNGSIIdError
 from reporter.tests.utils import insert_test_data
+from utils.common import assert_equal_time_index_arrays
 import pytest
 import requests
 
@@ -10,7 +12,7 @@ attr_name = 'temperature'
 n_days = 30
 
 
-def query_url(values=False):
+def query_url(entity_type='Room', entity_id='Room0', values=False):
     url = "{qlUrl}/entities/{entityId}/attrs/{attrName}"
     if values:
         url += '/value'
@@ -23,11 +25,21 @@ def query_url(values=False):
 
 @pytest.fixture()
 def reporter_dataset(translator):
-    insert_test_data(translator,
-                     [entity_type],
-                     n_entities=1,
-                     n_days=30)
+    insert_test_data(translator, [entity_type], n_entities=1, index_size=30)
     yield
+
+
+def assert_1T1E1A_response(obtained, expected):
+    """
+    Check API responses for 1T1E1A
+    """
+    # Assert time index
+    obt_index = obtained['data'].pop('index')
+    exp_index = expected['data'].pop('index')
+    assert_equal_time_index_arrays(obt_index, exp_index)
+
+    # Assert rest of data
+    assert obtained == expected
 
 
 def test_1T1E1A_defaults(reporter_dataset):
@@ -38,20 +50,21 @@ def test_1T1E1A_defaults(reporter_dataset):
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
 
-    # Assert
-    expected_values = list(range(n_days))
-    expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
+    obtained = r.json()
+
+    exp_values = list(range(n_days))
+    exp_index = [
+        '1970-01-{:02}T00:00:00.00'.format(i+1) for i in exp_values
     ]
-    expected_data = {
+    expected = {
         'data': {
             'entityId': entity_id,
             'attrName': attr_name,
-            'index': expected_index,
-            'values': expected_values,
+            'index': exp_index,
+            'values': exp_values,
         }
     }
-    assert r.json() == expected_data
+    assert_1T1E1A_response(obtained, expected)
 
 
 @pytest.mark.parametrize("aggr_method, aggr_value", [
@@ -70,8 +83,8 @@ def test_1T1E1A_aggrMethod(reporter_dataset, aggr_method, aggr_value):
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
 
-    # Assert
-    expected_data = {
+    obtained = r.json()
+    expected = {
         'data': {
             'entityId': entity_id,
             'attrName': attr_name,
@@ -79,27 +92,59 @@ def test_1T1E1A_aggrMethod(reporter_dataset, aggr_method, aggr_value):
             'values': [aggr_value],
         }
     }
-    assert r.json() == expected_data
+    assert_1T1E1A_response(obtained, expected)
 
 
-def test_1T1E1A_aggrPeriod(reporter_dataset):
-    # GH issue https://github.com/smartsdk/ngsi-timeseries-api/issues/89
+@pytest.mark.parametrize("aggr_period, exp_index, ins_period", [
+    ("year", ['1970-01-01T00:00:00.000',
+              '1971-01-01T00:00:00.000',
+              '1972-01-01T00:00:00.000'], "month"),
+    ("day",  ['1970-01-01T00:00:00.000',
+              '1970-01-02T00:00:00.000',
+              '1970-01-03T00:00:00.000'], "hour"),
+    ("second", ['1970-01-01T00:00:00.000',
+                '1970-01-01T00:00:01.000',
+                '1970-01-01T00:00:02.000'], "milli"),
+])
+def test_1T1E1A_aggrPeriod(translator, aggr_period, exp_index, ins_period):
+    # Custom index to test aggrPeriod
+    for i in exp_index:
+        base = datetime.strptime(i, "%Y-%m-%dT%H:%M:%S.%f")
+        insert_test_data(translator,
+                         [entity_type],
+                         index_size=4,
+                         index_base=base,
+                         index_period=ins_period)
 
     # aggrPeriod needs aggrMethod
     query_params = {
         'type': entity_type,
-        'aggrPeriod': 'minute',
+        'aggrPeriod': aggr_period,
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 400, r.text
 
+    # Check aggregation with aggrPeriod
     query_params = {
         'type': entity_type,
         'aggrMethod': 'avg',
-        'aggrPeriod': 'minute',
+        'aggrPeriod': aggr_period,
     }
     r = requests.get(query_url(), params=query_params)
-    assert r.status_code == 501, r.text
+    assert r.status_code == 200, r.text
+
+    # Assert Results
+    obtained = r.json()
+    exp_avg = (0 + 1 + 2 + 3) / 4.
+    expected = {
+        'data': {
+            'entityId': entity_id,
+            'attrName': attr_name,
+            'index': exp_index,
+            'values': [exp_avg, exp_avg, exp_avg],
+        }
+    }
+    assert_1T1E1A_response(obtained, expected)
 
 
 def test_1T1E1A_fromDate_toDate(reporter_dataset):
@@ -122,15 +167,16 @@ def test_1T1E1A_fromDate_toDate(reporter_dataset):
     assert expected_index[-1] == "1970-01-17T00:00:00"
 
     # Assert
-    expected_data = {
+    obtained = r.json()
+    expected = {
         'data': {
             'entityId': entity_id,
-            'attrName': attr_name,
             'index': expected_index,
+            'attrName': attr_name,
             'values': expected_values,
         }
     }
-    assert r.json() == expected_data
+    assert_1T1E1A_response(obtained, expected)
 
 
 def test_1T1E1A_lastN(reporter_dataset):
@@ -152,7 +198,8 @@ def test_1T1E1A_lastN(reporter_dataset):
     assert expected_index[-1] == "1970-01-30T00:00:00"
 
     # Assert
-    expected_data = {
+    obtained = r.json()
+    expected = {
         'data': {
             'entityId': entity_id,
             'attrName': attr_name,
@@ -160,7 +207,7 @@ def test_1T1E1A_lastN(reporter_dataset):
             'values': expected_values,
         }
     }
-    assert r.json() == expected_data
+    assert_1T1E1A_response(obtained, expected)
 
 
 def test_1T1E1A_limit(reporter_dataset):
@@ -182,7 +229,8 @@ def test_1T1E1A_limit(reporter_dataset):
     assert expected_index[-1] == "1970-01-05T00:00:00"
 
     # Assert
-    expected_data = {
+    obtained = r.json()
+    expected = {
         'data': {
             'entityId': entity_id,
             'attrName': attr_name,
@@ -190,7 +238,7 @@ def test_1T1E1A_limit(reporter_dataset):
             'values': expected_values,
         }
     }
-    assert r.json() == expected_data
+    assert_1T1E1A_response(obtained, expected)
 
 
 def test_1T1E1A_offset(reporter_dataset):
@@ -212,7 +260,8 @@ def test_1T1E1A_offset(reporter_dataset):
     assert expected_index[-1] == "1970-01-30T00:00:00"
 
     # Assert
-    expected_data = {
+    obtained = r.json()
+    expected = {
         'data': {
             'entityId': entity_id,
             'attrName': attr_name,
@@ -220,7 +269,7 @@ def test_1T1E1A_offset(reporter_dataset):
             'values': expected_values,
         }
     }
-    assert r.json() == expected_data
+    assert_1T1E1A_response(obtained, expected)
 
 
 def test_1T1E1A_combined(reporter_dataset):
@@ -244,7 +293,8 @@ def test_1T1E1A_combined(reporter_dataset):
     assert expected_index[-1] == "1970-01-20T00:00:00"
 
     # Assert
-    expected_data = {
+    obtained = r.json()
+    expected = {
         'data': {
             'entityId': entity_id,
             'attrName': attr_name,
@@ -252,7 +302,7 @@ def test_1T1E1A_combined(reporter_dataset):
             'values': expected_values,
         }
     }
-    assert r.json() == expected_data
+    assert_1T1E1A_response(obtained, expected)
 
 
 def test_1T1E1A_values_defaults(reporter_dataset):
@@ -264,17 +314,18 @@ def test_1T1E1A_values_defaults(reporter_dataset):
     assert r.status_code == 200, r.text
 
     # Assert
+    obtained = r.json()
     expected_values = list(range(n_days))
     expected_index = [
         '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
     ]
-    expected_data = {
+    expected = {
         'data': {
             'index': expected_index,
             'values': expected_values,
         }
     }
-    assert r.json() == expected_data
+    assert_1T1E1A_response(obtained, expected)
 
 
 def test_not_found():
@@ -293,7 +344,7 @@ def test_no_type(translator):
     """
     Specifying entity type is optional, provided that id is unique.
     """
-    insert_test_data(translator, ['Room', 'Car'], n_entities=2, n_days=30)
+    insert_test_data(translator, ['Room', 'Car'], n_entities=2, index_size=30)
 
     # With type
     r = requests.get(query_url(), params={'type': 'Room'})
@@ -313,7 +364,7 @@ def test_no_type_not_unique(translator):
     insert_test_data(translator,
                      ['Room', 'Car'],
                      n_entities=2,
-                     n_days=30,
+                     index_size=30,
                      entity_id="repeatedId")
 
     url = "{qlUrl}/entities/{entityId}/attrs/temperature".format(

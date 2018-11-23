@@ -20,7 +20,8 @@ def query_1T1ENA(entity_id,   # In Path
     See /entities/{entityId}/attrs/{attrName} in API Specification
     quantumleap.yml
     """
-    r, c = _validate_query_params(aggr_period, aggr_method, attrs, options)
+    r, c = _validate_query_params(attrs, aggr_period, aggr_method,
+                                  options=options)
     if c != 200:
         return r, c
 
@@ -34,16 +35,17 @@ def query_1T1ENA(entity_id,   # In Path
     try:
         with CrateTranslatorInstance() as trans:
             entities = trans.query(attr_names=attrs,
-                               entity_type=type_,
-                               entity_id=entity_id,
-                               aggr_method=aggr_method,
-                               from_date=from_date,
-                               to_date=to_date,
-                               last_n=last_n,
-                               limit=limit,
-                               offset=offset,
-                               fiware_service=fiware_s,
-                               fiware_servicepath=fiware_sp,)
+                                   entity_type=type_,
+                                   entity_id=entity_id,
+                                   aggr_method=aggr_method,
+                                   aggr_period=aggr_period,
+                                   from_date=from_date,
+                                   to_date=to_date,
+                                   last_n=last_n,
+                                   limit=limit,
+                                   offset=offset,
+                                   fiware_service=fiware_s,
+                                   fiware_servicepath=fiware_sp,)
     except AmbiguousNGSIIdError as e:
         return {
             "error": "AmbiguousNGSIIdError",
@@ -57,25 +59,20 @@ def query_1T1ENA(entity_id,   # In Path
         return msg, 500
 
     if entities:
-        if aggr_method:
-            index = []
-        else:
-            index = [str(e[CrateTranslator.TIME_INDEX_NAME]) for e in entities]
-
-        ignore = ('type', 'id', CrateTranslator.TIME_INDEX_NAME)
-        attrs = [at for at in sorted(entities[0].keys()) if at not in ignore]
+        if len(entities) > 1:
+            import warnings
+            warnings.warn("Not expecting more than one result for a 1T1ENA.")
 
         attributes = []
+        ignore = ('type', 'id', 'index')
+        attrs = [at for at in sorted(entities[0].keys()) if at not in ignore]
         for at in attrs:
             attributes.append({
                 'attrName': at,
-                'values': []
+                'values': entities[0][at]['values']
             })
 
-        for i, at in enumerate(attrs):
-            for e in entities:
-                attributes[i]['values'].append(e[at]['value'])
-
+        index = [] if aggr_method and not aggr_period else entities[0]['index']
         res = {
             'data': {
                 'entityId': entity_id,

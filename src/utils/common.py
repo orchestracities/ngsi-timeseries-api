@@ -41,9 +41,7 @@ def assert_ngsi_entity_equals(entity, other):
                 assert ev == pytest.approx(other[ek])
             else:
                 if ek == 'time_index':
-                    d0 = datetime.strptime(ev, "%Y-%m-%dT%H:%M:%S.%f")
-                    d1 = datetime.strptime(other[ek], "%Y-%m-%dT%H:%M:%S.%f")
-                    assert abs(d0-d1).seconds == 0
+                    assert_equal_time_index_arrays([ev], [other[ek]])
                 else:
                     assert ev == other[ek], "{} != {}".format(ev, other[ek])
 
@@ -71,7 +69,18 @@ def pick_random_entity_id(num_types, num_ids_per_type):
     return "{}-{}".format(int(random.uniform(0, num_types)), int(random.uniform(0, num_ids_per_type)))
 
 
-def create_random_entities(num_types, num_ids_per_type, num_updates, use_time=False, use_geo=False):
+def add_attr(ent, attr_name, attr_value):
+    ent[attr_name] = {
+        "value": attr_value,
+        "type": ATTR_TO_TYPE[attr_name]
+    }
+
+
+def create_random_entities(num_types=1,
+                           num_ids_per_type=1,
+                           num_updates=1,
+                           use_time=False,
+                           use_geo=False):
     """
     :param num_types:
     :param num_ids_per_type:
@@ -83,35 +92,33 @@ def create_random_entities(num_types, num_ids_per_type, num_updates, use_time=Fa
     :param use_geo:
     :return: Iter NGSI entities in JSON Entity Representation format.
     """
-    def add_attr(ent, attr_name, attr_value):
-        ent[attr_name] = {
-            "value": attr_value,
-            "type": ATTR_TO_TYPE[attr_name]
-        }
 
     # TODO: Rewrite with np and pandas
     entities = []
     for u in range(num_updates):
         for nt in range(num_types):
             for ni in range(num_ids_per_type):
-                t = datetime.now().isoformat(timespec='microseconds')[:-3]
+                t = datetime.now().isoformat(timespec='milliseconds')
                 entity = {
                     "type": "{}".format(nt),
                     "id": "{}-{}".format(nt, ni),
                     TIME_INDEX_NAME: t,
                 }
-                # This is to guarantee significant differences among entities for the TIME_INDEX_NAME attribute.
+                # Guarantee significant differences for TIME_INDEX_NAME.
                 import time; time.sleep(0.001)
 
-                add_attr(entity, "attr_str", ''.join(random.choices(string.ascii_uppercase + string.digits, k=10)),)
-                add_attr(entity, "attr_float", random.uniform(0, 1))
-                add_attr(entity, "attr_bool", bool(random.choice((0, 1))))
+                a = random.choices(string.ascii_uppercase + string.digits, k=10)
+                add_attr(entity, "attr_str", ''.join(a))
+                a = float(format(random.uniform(0, 1), '.6f'))
+                add_attr(entity, "attr_float", a)
+                a = bool(random.choice((0, 1)))
+                add_attr(entity, "attr_bool", a)
 
                 if use_time:
                     month = round(random.uniform(1, 12))
                     day = round(random.uniform(1, 28))
                     dt = datetime(1970, month, day, 0, 0, 0, 0)
-                    v_iso = dt.isoformat()
+                    v_iso = dt.isoformat(timespec='milliseconds')
                     add_attr(entity, "attr_time", v_iso)
 
                 if use_geo:
@@ -182,3 +189,58 @@ def create_simple_subscription_v1(notify_url):
         ],
     }
     return subscription
+
+
+def assert_equal_time_index_arrays(index1, index2):
+    """
+    check both time_index are almost equal within QL's time tolerance.
+    """
+    assert len(index1) == len(index2)
+    for d0, d1 in zip(index1, index2):
+        try:
+            d0 = datetime.strptime(d0, "%Y-%m-%dT%H:%M:%S.%f")
+        except ValueError:
+            d0 = datetime.strptime(d0, "%Y-%m-%dT%H:%M:%S")
+        try:
+            d1 = datetime.strptime(d1, "%Y-%m-%dT%H:%M:%S.%f")
+        except ValueError:
+            d1 = datetime.strptime(d1, "%Y-%m-%dT%H:%M:%S")
+        assert abs(d0-d1).microseconds < 1000
+
+
+def check_notifications_record(notifications, records):
+    """
+    Check that the given NGSI notifications like those sent by Orion
+    (Translator Input) are correctly transformed to a set of records
+    (Translator Output).
+    """
+    from translators.crate import NGSI_DATETIME, NGSI_ISO8601
+    assert len(notifications) > 0
+    assert len(records) == 1
+
+    record = records[0]
+    expected_type = record['type']
+    expected_id = record['id']
+
+    # all notifications and records should have same type and id
+    assert all(map(lambda x: x['type'] == expected_type, notifications))
+    assert all(map(lambda x: x['id'] == expected_id, notifications))
+
+    index = [n[TIME_INDEX_NAME] for n in notifications]
+    assert_equal_time_index_arrays(index, record['index'])
+
+    for a in iter_entity_attrs(record):
+        if a == 'index':
+            continue
+
+        r_values = record[a]['values']
+        n_values = [e[a]['value'] for e in notifications]
+
+        if any(isinstance(x, float) for x in n_values):
+            assert pytest.approx(r_values, n_values)
+        else:
+            if record[a].get('type', None) in (NGSI_DATETIME, NGSI_ISO8601):
+                assert_equal_time_index_arrays(r_values, n_values)
+            else:
+                assert r_values == n_values, "{} != {}".format(r_values,
+                                                               n_values)
