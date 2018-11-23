@@ -24,7 +24,7 @@ Grafana は、[CrateDB](./crate.md) データベースからデータを読み�
 
 次の図は、*yourentity* というエンティティタイプのデータソース設定の例を示しています :
 
-![alt text](../rsrc/crate_datasource.png "Configuring the DataSource")
+![alt text](../../manuals/rsrc/crate_datasource.png "Configuring the DataSource")
 
 ## グラフ内のデータソースの使用
 
@@ -32,4 +32,4 @@ Grafana は、[CrateDB](./crate.md) データベースからデータを読み�
 
 以下は、CrateDB データソースを使用したグラフの例です。データソース (この場合は、CrateDB) の選択、および *from* フィールドのテーブルの指定に注意してください。テーブルは *schema.tablename* として参照されていることに注意してください。たとえば、*doc.etairqualityobserved* です。
 
-![alt text](../rsrc/graph_example.png "Using the DataSource in your Graph")
+![alt text](../../manuals/rsrc/graph_example.png "Using the DataSource in your Graph")

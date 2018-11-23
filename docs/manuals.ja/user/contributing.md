@@ -18,17 +18,24 @@
    - 承認まで繰り返す
 1. 完了:) あなたのリポジトリ内のブランチを削除できます
 
+最終的に、コントリビューション・ガイドは、FIWARE が提案したガイドと一貫していなければなりません。
+([ここ](https://github.com/Fiware/developmentGuidelines/blob/master/external_contributions.mediawiki)
+をご覧ください).
+
 ## 開発のセットアップ
 
 開発は今のところほとんどが *python3* に基づいており、実際には初期段階にありますので、事態は確実に変わります。今のところ、あなたは以下から始めることができます :
 
-    git clone https://github.com/smartsdk/ngsi-timeseries-api.git
-    cd ngsi-timeseries-api
-    python3 -m venv env
-    pip install -r requirements.txt
+```
+git clone https://github.com/smartsdk/ngsi-timeseries-api.git
+cd ngsi-timeseries-api
+python3 -m venv env
+source env/bin/activate
+pip install -r requirements.txt
 
-    # if you want to test everything locally, you'll need to...
-    source setup_dev_env.sh
+# if you want to test everything locally, you'll need to...
+source setup_dev_env.sh
+```
 
 [pytest](https://docs.pytest.org/en/latest/) はテストフレームワークとして使用されますが、QuantumLeap の機能のほとんどはコンポーネントの統合であるため、テスト・フォルダの `docker-compose.yml` ファイルがテストのセットアップとして実行されます。`.travis.yml` ファイルが表示されている場合は、それらのファイルがどのように動作しているかが分かりますが、*pytest-docker* プラグインを調べる価値があります。
 
@@ -39,9 +46,14 @@
 現在のプロジェクト・ツリー構造では、次のとおりです：
 
 - `ngsi-timeseries-api`
-    - `client`: 統合テストを容易にするために、単純な Orion Context Broker クライアントを保持しています。ある時点でここから移動します
+    - `docs`: ドキュメント・ファイルを保持します
+    - `docker`: プロジェクトのスコープのために Docker 関連のファイルを保持します
     - `experiments`: サンドボックスを使用して迅速な手動テストを行い、新しいテストケースを導き出します
-    - `python-flask`: swagger で定義された API コントローラーの実装を保持します
-    - `reporter`: このモジュールは通知のレシーバーとして動作し、トランスレーターに処理される前に "解析/検証"されます
-    - `translators`: 時系列データベースのための特定のトランスレーター
-    - `utils`: 住みやすい場所を探している共通の共有物
+    - `specification`: QL が実装する OpenAPI 定義を含みます
+    - `src`: ソース・コード・フォルダー
+        - `geocoding`: OSMと対話し、ジオ関連の処理を行うためのコードを保持します
+        - `reporter`: 通知および API リクエストのレシーバーとして機能するモジュール。
+        トランスレータにタスクをハンドリングする前に、それらを "解析/検証" します
+        - `translators`: 各時系列データベースの特定のトランスレータ。
+        下位レベルのデータベースの詳細とのやり取りを行います
+        - `utils`: 住みやすい場所を探している共通の共有物

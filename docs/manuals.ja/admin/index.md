@@ -73,3 +73,7 @@ docker run -d -p 8668:8668 -e "CRATE_HOST=http://your_crate_location" smartsdk/q
 ```
 
 環境変数 `CRATE_HOST` は、QuantumLeap に CrateDB に到達する場所を通知するので、CrateDB が実行されている到達可能なホスト名を指定する必要があります。デフォルトでは、QuantumLeap は ポート `4200` をホスト名に追加します。もちろん、`-e` で必要な環境変数を追加することもできます。他のオプションについては、[docker run reference](https://docs.docker.com/engine/reference/run/) を参照してください。
+
+## FIWARE Releases の互換性
+現在のバージョンの QuantumLeap は、FIWARE release `6.3.1` 以上で互換性があります。FIWARE releases の詳細は[こちら](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Releases_and_Sprints_numbering,_with_mapping_to_calendar_dates)をご覧ください。
+Generic Enabler と外部依存関係の QL がどのバージョンで使用され、テストされているかを確認するには、展開に使用される [docker-compose-dev.yml](https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/docker/docker-compose-dev.yml) ファイルをチェックアウトします。
