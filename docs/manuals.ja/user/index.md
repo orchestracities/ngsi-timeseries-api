@@ -32,7 +32,7 @@ Orion の専門家ではないのですか？問題はありません。QuantumL
 前述のように、Orion と QuantumLeap のリンクは、
 作成する必要があるサブスクリプションによって確立されます。 したがって、NGSIv2
 サブスクリプションのメカニズムがどのように機能するかを
-よく理解することが重要です。これは 
+よく理解することが重要です。これは
 [Orionのドキュメント](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions)
 の対応するセクションで詳しく説明されています。
 
@@ -78,6 +78,7 @@ Orion-QuantumLeap リンクを確立するために Orion
 サブスクリプションから注目すべき重要なことは :
 
 -  通知は完全な
+
 [NGSI JSON エンティティ](http://docs.orioncontextbroker.apiary.io/#introduction/specification/json-attribute-representation)
 の表現形式で行われなければなりません。
 [簡略化されたエンティティ表現](http://docs.orioncontextbroker.apiary.io/#introduction/specification/simplified-entity-representation)
@@ -87,6 +88,7 @@ Orion-QuantumLeap リンクを確立するために Orion
 のようなオプションを使用しないことを意味します。
 
 - `"url"` サブスクリプションのフィールドは、Orion
+
 が通知を送信する場所を指定します。つまり、これは QuantumLeap の `/v2/notify`
 エンドポイントでなければなりません。デフォルトでは、QuantumLeap はポート `8668`
 で待機します。この URL は Orion のコンテナから解決できる必要があるため、Docker、
@@ -94,6 +96,7 @@ Orion-QuantumLeap リンクを確立するために Orion
 によい変換されないものや  *localhost* などを使用しないでください
 
 -  必須ではありません が、サブスクリプションの `notification` 部分に、
+
 `"metadata": ["dateCreated", "dateModified"]`
 の部分を含めることを強くお勧めします。これは Orion
 に通知の属性の変更時刻を含めるよう指示します。
@@ -102,6 +105,7 @@ Orion-QuantumLeap リンクを確立するために Orion
 は通知が届いた現在のシステム時刻を使用します
 
 -  以前のルールに従っているエンティティに対して、有効な NGSI
+
 サブスクリプションを作成できます
 
 ## データの挿入
@@ -176,6 +180,7 @@ NGSI エンティティが属性に有効な NGSI 型を使用していること
 ### 制約と制限
 
 - 同じ名前で、大文字とは異なる2つのエンティティ型を持つことはできません。
+
 例 : `Preprocessor` と `preProcessor`。特定のエンティティの属性名についても
 同様です。すなわち、`hotSpot` 属性と `hotspot` 属性は、同じように扱われます。
 これらはまれなコーナー・ケースですが、これに留意する価値があります。
@@ -184,6 +189,7 @@ NGSI エンティティが属性に有効な NGSI 型を使用していること
 で説明する命名ガイドラインを遵守する必要があります
 
 - 属性メタデータは依然として永続化されていません。
+
 [Issue 12](https://github.com/smartsdk/ngsi-timeseries-api/issues/12)
 を参照してください
 
@@ -226,10 +232,12 @@ QuantumLeap は、`time_index` という特別な列に、各通知のタイム�
 QuantumLeap から履歴データを削除する方法は2通りあります。
 
 - 特定のエンティティのすべてのレコードを削除するには、この
+
 [API エンドポイント](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1#/input/reporter.delete.delete_entity)
 を使用します
 
 - 指定した型のすべてのエンティティのすべてのレコードを削除するには、この
+
 [API エンドポイント](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1#/input/reporter.delete.delete_entities)
 を使用します
 
@@ -290,7 +298,7 @@ address が都市名、番地、郵便番号を含む完全な住所であれば
 [Redis](https://redis.io/) を使用します。
 
 したがって、この機能を有効にするには、初期化時に、QuantumLeap
-コンテナに環境変数 `USE_GEOCODING` を `True` に設定し、環境変数` REDIS_HOST` と
+コンテナに環境変数 `USE_GEOCODING` を `True` に設定し、環境変数 `REDIS_HOST` と
 `REDIS_PORT` をそれぞれ REDIS
 インスタンスとそのアクセスポートの場所に設定する必要があります。 たとえば、
 [docker-compose-dev.yml](https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)

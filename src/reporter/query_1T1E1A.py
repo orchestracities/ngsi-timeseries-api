@@ -60,13 +60,7 @@ def query_1T1E1A(attr_name,   # In Path
             import warnings
             warnings.warn("Not expecting more than one result for a 1T1E1A.")
 
-        if aggr_method:
-            if aggr_period:
-                index = entities[0]['index']
-            else:
-                index = []
-        else:
-            index = entities[0]['index']
+        index = [] if aggr_method and not aggr_period else entities[0]['index']
         res = {
             'data': {
                 'entityId': entities[0]['id'],

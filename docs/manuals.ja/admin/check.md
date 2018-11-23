@@ -112,7 +112,7 @@ Postman を使用しない場合は、以下の同等の curl コマンドを使
 
 1. 最後に、整理するために、作成したすべてのレコードを削除することができます。
 
-    QuantumLeap からレコードを削除します 
+    QuantumLeap からレコードを削除します
 
         curl -X DELETE http://0.0.0.0:8668/v2/types/AirQualityObserved
 
@@ -149,7 +149,7 @@ Postman を使用しない場合は、以下の同等の curl コマンドを使
 次のように、コンテナ内でテストをすばやく実行できます。
 もちろん、デプロイされたサービスを指すように、URLを調整する必要があります。
 次の例では、Orion と QuantumLeap にテスト・コンテナによって、`192.0.0.1`
-に到達可能であり、Orion と QuantumLeap は、デフォルトで、` orion` と
+に到達可能であり、Orion と QuantumLeap は、デフォルトで、`orion` と
 `quantumleap` エンドポイントで検索されます。なぜなら両方が同じ Docker
 ネットワークにデプロイされているからです。
 

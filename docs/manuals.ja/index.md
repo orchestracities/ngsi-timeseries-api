@@ -20,8 +20,8 @@ QuantumLeapは、NGSI [FIWARE NGSIv2](http://docs.orioncontextbroker.apiary.io/#
 時系列データベースを提供する新しい方法を探ることに過ぎません。
 
 アイデアは、さまざま時系列データベースをサポートすることを望んでいることです。
-[InfluxDB](https://docs.influxdata.com/influxdb/), 
-[RethinkDB](https://www.rethinkdb.com/docs/), 
+[InfluxDB](https://docs.influxdata.com/influxdb/),
+[RethinkDB](https://www.rethinkdb.com/docs/),
 [CrateDB](http://www.crate.io) のテストを開始しました。
 しかし、私たちは、現在、次の利点のために、[CrateDB](http://www.crate.io)
 のトランスレータにその開発を集中させることを決めました :

@@ -431,15 +431,14 @@ class CrateTranslator(base_translator.BaseTranslator):
         group_by = []
 
         # Group By
-        if aggr_method:
-            if select_clause != "*":
-                group_by.extend(["entity_type", "entity_id"])
-                if aggr_period:
-                    # Note: If alias shadows a real table column,
-                    # grouping will NOT be applied on the aliased column
-                    gb = "DATE_TRUNC('{}', {})".format(
-                        aggr_period, self.TIME_INDEX_NAME)
-                    group_by.append(gb)
+        if aggr_method and select_clause != "*":
+            group_by.extend(["entity_type", "entity_id"])
+            if aggr_period:
+                # Note: If alias shadows a real table column,
+                # grouping will NOT be applied on the aliased column
+                gb = "DATE_TRUNC('{}', {})".format(
+                    aggr_period, self.TIME_INDEX_NAME)
+                group_by.append(gb)
 
         # Order by
         if aggr_method:
@@ -499,7 +498,7 @@ class CrateTranslator(base_translator.BaseTranslator):
             scope on to which the aggr_method will be applied, hence defines
             also the number of values that will be returned. Must be one of the
             VALID_AGGR_PERIODS (e.g, hour). I.e., querying avg per hour will
-            return 24 values times the number of days of available measurements.
+            return 24 values times the number of days of available measurements
         :param aggr_scope: (Not Implemented). Defaults to "entity", which means
             the aggrMethod will be applied N times, once for each entityId.
             "global" instead would allow cross-entity_id aggregations.
@@ -507,8 +506,8 @@ class CrateTranslator(base_translator.BaseTranslator):
             (Optional), used to filter results, considering only from this date
             inclusive.
         :param to_date:
-            (Optional), used to filter results, considering only up to this date
-            inclusive.
+            (Optional), used to filter results,
+            considering only up to this date inclusive.
         :param last_n:
             (Optional), used to filter results, return only the last_n elements
             of what would be the result of the query once all filters where
@@ -557,17 +556,17 @@ class CrateTranslator(base_translator.BaseTranslator):
         'index': The time index applying to the response, applies to all
         attributes included in the response. It may not be present if each
         attribute has its own time index array, in the cases where attributes
-        are measured at different moments in time. Note since this is a "global"
-        time index for the entity, it may contain some NULL values where
-        measurements were not available. It's an array containing time
+        are measured at different moments in time. Note since this is a
+        "global" time index for the entity, it may contain some NULL values
+        where measurements were not available. It's an array containing time
         in ISO format representation, typically in the original timezone the
         Orion Notification used, or UTC if created within QL.
 
         Each attribute in the response will be represented by a dictionary,
         with an array called 'values' containing the actual historical values
-        of the attributes as queried. An attribute 'type' will have the original
-        NGSI type of the attribute (i.e, the type of each of the elements now
-        in the values array). The type of an attribute is not
+        of the attributes as queried. An attribute 'type' will have the
+        original NGSI type of the attribute (i.e, the type of each of the
+        elements now in the values array). The type of an attribute is not
         expected to change in time, that'd be an error. Additionally, it may
         contain an array called 'index', just like the global index
         discussed above but for this specific attribute. Thus, this 'index'
@@ -596,6 +595,7 @@ class CrateTranslator(base_translator.BaseTranslator):
 
         if aggr_method and aggr_method.lower() not in VALID_AGGR_METHODS:
             raise UnsupportedOption("aggr_method={}".format(aggr_method))
+
         if aggr_period and aggr_period.lower() not in VALID_AGGR_PERIODS:
             raise UnsupportedOption("aggr_period={}".format(aggr_period))
 

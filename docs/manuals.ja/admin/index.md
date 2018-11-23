@@ -111,6 +111,7 @@ CrateDB が実行されている到達可能なホスト名を指定する必要
 を参照してください。
 
 ## FIWARE Releases の互換性
+
 現在のバージョンの QuantumLeap は、FIWARE release `6.3.1`
 以上で互換性があります。FIWARE releases の詳細は
 [こちら](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Releases_and_Sprints_numbering,_with_mapping_to_calendar_dates)

@@ -22,7 +22,10 @@ def query_1TNE1A(attr_name,   # In Path
     quantumleap.yml
     """
     r, c = _validate_query_params([attr_name],
-                                  aggr_period, aggr_method, aggr_scope, options)
+                                  aggr_period,
+                                  aggr_method,
+                                  aggr_scope,
+                                  options)
     if c != 200:
         return r, c
 

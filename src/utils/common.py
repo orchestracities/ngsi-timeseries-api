@@ -104,7 +104,7 @@ def create_random_entities(num_types=1,
                     "id": "{}-{}".format(nt, ni),
                     TIME_INDEX_NAME: t,
                 }
-                # This is to guarantee significant differences among entities for the TIME_INDEX_NAME attribute.
+                # Guarantee significant differences for TIME_INDEX_NAME.
                 import time; time.sleep(0.001)
 
                 a = random.choices(string.ascii_uppercase + string.digits, k=10)

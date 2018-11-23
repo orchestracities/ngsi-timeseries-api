@@ -45,7 +45,7 @@ class KVTree(ToDict):
         node(key, merged-forest[t1,...,tn]) ~>
                 { key: to_dict(t1) + ... + to_dict(tn) }
 
-    where the ``t``s stand for ``KVTree``s and ``+`` is merging of dictionaries.
+    where the ``t``s stand for ``KVTree``s and ``+`` is merging of dictionaries
     """
     pass
 

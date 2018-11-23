@@ -63,24 +63,16 @@ def query_1T1ENA(entity_id,   # In Path
             import warnings
             warnings.warn("Not expecting more than one result for a 1T1ENA.")
 
-        if aggr_method:
-            if aggr_period:
-                index = entities[0]['index']
-            else:
-                index = []
-        else:
-            index = entities[0]['index']
-
         attributes = []
         ignore = ('type', 'id', 'index')
         attrs = [at for at in sorted(entities[0].keys()) if at not in ignore]
-
         for at in attrs:
             attributes.append({
                 'attrName': at,
                 'values': entities[0][at]['values']
             })
 
+        index = [] if aggr_method and not aggr_period else entities[0]['index']
         res = {
             'data': {
                 'entityId': entity_id,
