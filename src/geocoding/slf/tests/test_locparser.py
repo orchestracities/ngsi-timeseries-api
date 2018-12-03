@@ -205,3 +205,18 @@ def test_parse_no_location():
     actual = from_location_attribute(entity)
 
     assert actual is None
+
+
+def test_parse_geojson_location():
+    entity = {
+        'location': {
+            'value': {
+                'type': 'Point',
+                'coordinates': [2.186447514, 41.3763726]
+            },
+            'type': 'geo:json'
+        }
+    }
+    actual = from_location_attribute(entity)
+
+    assert actual is None

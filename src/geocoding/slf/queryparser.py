@@ -1,3 +1,11 @@
+"""
+This module provides various parsers to transform an NGSI geographical query
+string into an AST. The only function you're likely to ever need is
+``from_geo_params`` which takes care of orchestrating the parsers to produce
+one of the data type instances from the ``querytypes`` module.
+"""
+
+
 import re
 from typing import Callable
 from .geotypes import *

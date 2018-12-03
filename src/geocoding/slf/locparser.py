@@ -1,3 +1,13 @@
+"""
+This module provides the functionality to convert dictionary representations of
+Simple Location Format geometries to instances of the data types from the
+``geotypes`` module. The only function you're likely to ever need is
+``from_location_attribute`` which extracts the content of an NGSI entity's
+location attribute and instantiates an ``SlfGeometry`` with that data as long
+as the location attribute contains Simple Location Format data.
+"""
+
+
 from typing import Optional
 from .geotypes import *
 
@@ -68,12 +78,14 @@ def lookup_parser(ngsi_geom_type: str):
 
 def from_location_attribute(entity: dict) -> Optional[SlfGeometry]:
     """
-    Convert the entity's location attribute (if any) into the corresponding
+    Convert the entity's location attribute (if any) to the corresponding
     instance of a Simple Location Format type.
 
     :param entity: an NGSI entity.
     :return: the corresponding Simple Location Format geometry if the entity
-        contains a valid location attribute; ``None`` otherwise.
+        contains a valid location attribute with a Simple Location Format
+        geometry; ``None`` otherwise. In particular, return ``None`` if the
+        entity already has a location attribute with GeoJSON geometry.
     """
     entity = {} if entity is None else entity
     location = entity.get('location', {})

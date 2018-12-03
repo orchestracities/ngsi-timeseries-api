@@ -1,3 +1,11 @@
+"""
+This module provides types to represent the NGSI Simple Location Format
+geometries: point, line, box, and polygon. Each type implements a common
+interface (defined by ``SlfGeometry``) to enumerate the points that define
+the geometry. ``Iterables`` are used throughout so to be able to handle
+large set of points in *constant* space.
+"""
+
 from typing import List, Iterable, Iterator
 from utils.streams import ensure_min_items
 

@@ -1,3 +1,8 @@
+"""
+This module provides types to represent NGSI geographical query terms.
+"""
+
+
 from typing import List, Optional
 from .geotypes import SlfGeometry
 from .jsoncodec import encode
@@ -49,7 +54,7 @@ class NearQuery(SlfQuery):
 class ShapeQuery(SlfQuery):
     """
     Factors out functionality shared by all queries that involve determining
-    in which relationship two shape stand.
+    in which relationship two shapes stand.
     """
     def __init__(self, geometry: SlfGeometry):
         self._reference_shape = encode(geometry)
