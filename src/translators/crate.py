@@ -855,8 +855,15 @@ class CrateTranslator(base_translator.BaseTranslator):
             METADATA_TABLE_NAME,
             wc
         )
-        self.cursor.execute(stmt)
-        all_types = [et[0] for et in self.cursor.fetchall()]
+        try:
+            self.cursor.execute(stmt)
+
+        except exceptions.ProgrammingError as e:
+            logging.debug("{}".format(e))
+            return None
+
+        else:
+            all_types = [et[0] for et in self.cursor.fetchall()]
 
         matching_types = []
         for et in all_types:

@@ -49,7 +49,20 @@ def test_insert_multiple_types(translator):
 
 
 def test_query_all_before_insert(translator):
+    # Query all
     loaded_entities = translator.query()
+    assert len(loaded_entities) == 0
+
+    # Query Some
+    loaded_entities = translator.query(entity_type="Lamp",
+                                       fiware_service="openiot",
+                                       fiware_servicepath="/")
+    assert len(loaded_entities) == 0
+
+    # Query one
+    loaded_entities = translator.query(entity_id="Lamp:001",
+                                       fiware_service="openiot",
+                                       fiware_servicepath="/")
     assert len(loaded_entities) == 0
 
 
