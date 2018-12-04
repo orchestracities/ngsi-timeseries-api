@@ -2,13 +2,12 @@
 This module provides the functionality to convert dictionary representations of
 Simple Location Format geometries to instances of the data types from the
 ``geotypes`` module. The only function you're likely to ever need is
-``from_location_attribute`` which extracts the content of an NGSI entity's
-location attribute and instantiates an ``SlfGeometry`` with that data as long
-as the location attribute contains Simple Location Format data.
+``from_location_attribute`` which instantiates an ``SlfGeometry`` from Simple
+Location Format data contained in an NGSI entity's location attribute.
 """
 
 
-from typing import Optional
+from typing import Optional, Union, List
 from .geotypes import *
 
 
@@ -76,22 +75,18 @@ def lookup_parser(ngsi_geom_type: str):
     return parsers.get(ngsi_geom_type, unknown_type_parser)
 
 
-def from_location_attribute(entity: dict) -> Optional[SlfGeometry]:
+def from_location_attribute(geom_type: Optional[str],
+                            geom: Optional[Union[str, List[str], dict]])\
+        -> Optional[SlfGeometry]:
     """
-    Convert the entity's location attribute (if any) to the corresponding
-    instance of a Simple Location Format type.
+    Instantiates an ``SlfGeometry`` from Simple Location Format data.
 
-    :param entity: an NGSI entity.
-    :return: the corresponding Simple Location Format geometry if the entity
-        contains a valid location attribute with a Simple Location Format
-        geometry; ``None`` otherwise. In particular, return ``None`` if the
-        entity already has a location attribute with GeoJSON geometry.
+    :param geom_type: the Simple Location Format geometry type.
+    :param geom: a shape of ``geom_type``.
+    :return: the corresponding Simple Location Format geometry if the input
+        data is a valid Simple Location Format geometry; ``None`` otherwise.
+        In particular, return ``None`` in the case of a GeoJSON geometry.
     """
-    entity = {} if entity is None else entity
-    location = entity.get('location', {})
-    geom_type = location.get('type', None)
-    geom = location.get('value', None)
-
     try:
         return lookup_parser(geom_type)(geom)
     except (TypeError, ValueError):

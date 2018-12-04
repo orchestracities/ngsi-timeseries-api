@@ -61,13 +61,7 @@ def test_points_from_wgs84():
 
 
 def test_parse_ngsi_point():
-    entity = {
-        'location': {
-            'value': '1, 2',
-            'type': 'geo:point'
-        }
-    }
-    actual = from_location_attribute(entity)
+    actual = from_location_attribute('geo:point', '1, 2')
 
     assert actual is not None
     assert isinstance(actual, SlfPoint)
@@ -76,13 +70,7 @@ def test_parse_ngsi_point():
 
 
 def test_parse_ngsi_line():
-    entity = {
-        'location': {
-            'value': ['1, 2', '3,4'],
-            'type': 'geo:line'
-        }
-    }
-    actual = from_location_attribute(entity)
+    actual = from_location_attribute('geo:line', ['1, 2', '3,4'])
 
     assert actual is not None
     assert isinstance(actual, SlfLine)
@@ -98,13 +86,8 @@ def test_parse_ngsi_line():
 
 
 def test_parse_ngsi_polygon():
-    entity = {
-        'location': {
-            'value': ['1, 2', '3,4', '-1,-1', '1,2'],
-            'type': 'geo:polygon'
-        }
-    }
-    actual = from_location_attribute(entity)
+    actual = from_location_attribute('geo:polygon',
+                                     ['1, 2', '3,4', '-1,-1', '1,2'])
 
     assert actual is not None
     assert isinstance(actual, SlfPolygon)
@@ -124,13 +107,7 @@ def test_parse_ngsi_polygon():
 
 
 def test_parse_ngsi_box():
-    entity = {
-        'location': {
-            'value': ['1, 2', '3,4'],
-            'type': 'geo:box'
-        }
-    }
-    actual = from_location_attribute(entity)
+    actual = from_location_attribute('geo:box', ['1, 2', '3,4'])
 
     assert actual is not None
     assert isinstance(actual, SlfBox)
@@ -141,82 +118,37 @@ def test_parse_ngsi_box():
 
 
 def test_parse_unknown_location_type():
-    entity = {
-        'location': {
-            'value': ['1, 2', '3,4'],
-            'type': 'geo:???'
-        }
-    }
-    actual = from_location_attribute(entity)
-
+    actual = from_location_attribute('geo:???', ['1, 2', '3,4'])
     assert actual is None
 
 
 def test_parse_unsupported_location_value():
-    entity = {
-        'location': {
-            'value': {'start': '1, 2', 'end': '3,4'},
-            'type': 'geo:line'
-        }
-    }
-    actual = from_location_attribute(entity)
-
+    actual = from_location_attribute('geo:line',
+                                     {'start': '1, 2', 'end': '3,4'})
     assert actual is None
 
 
 def test_parse_invalid_location_value():
-    entity = {
-        'location': {
-            'value': ['1, 2', '3, wrong!'],
-            'type': 'geo:line'
-        }
-    }
-    actual = from_location_attribute(entity)
-
+    actual = from_location_attribute('geo:line', ['1, 2', '3, wrong!'])
     assert actual is None
 
 
 def test_parse_empty_location_value():
-    entity = {
-        'location': {
-            'value': [],
-            'type': 'geo:line'
-        }
-    }
-    actual = from_location_attribute(entity)
-
+    actual = from_location_attribute('geo:line', [])
     assert actual is None
 
 
 def test_parse_empty_location_coords():
-    entity = {
-        'location': {
-            'value': ['', '1,2'],
-            'type': 'geo:line'
-        }
-    }
-    actual = from_location_attribute(entity)
-
-    assert actual is None
-
-
-def test_parse_no_location():
-    entity = {}
-    actual = from_location_attribute(entity)
-
+    actual = from_location_attribute('geo:line', ['', '1,2'])
     assert actual is None
 
 
 def test_parse_geojson_location():
-    entity = {
-        'location': {
-            'value': {
-                'type': 'Point',
-                'coordinates': [2.186447514, 41.3763726]
-            },
-            'type': 'geo:json'
-        }
-    }
-    actual = from_location_attribute(entity)
+    actual = from_location_attribute(
+        'geo:json',
+        {
+         'type': 'Point',
+         'coordinates': [2.186447514, 41.3763726]
+        })
 
     assert actual is None
