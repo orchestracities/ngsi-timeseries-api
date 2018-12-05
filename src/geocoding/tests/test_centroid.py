@@ -1,5 +1,5 @@
 import pytest
-from geocoding.centroid import centroid2d, maybe_centroid2d, geojson_centroid
+from geocoding.centroid import *
 
 
 def test_centroid_of_none_should_fail():
@@ -7,9 +7,8 @@ def test_centroid_of_none_should_fail():
         centroid2d(None)
 
 
-def test_centroid_of_empty_list_should_fail():
-    with pytest.raises(ZeroDivisionError):
-        centroid2d([])
+def test_centroid_of_empty_list_should_be_none():
+    assert centroid2d([]) is None
 
 
 def test_centroid_of_missing_coord_should_fail():
@@ -31,19 +30,16 @@ def test_centroid_of_ill_typed_coord_should_fail():
     [[0, 0]], [[1, 0]], [[0, 1]], [[2, 2]]
 ])
 def test_centroid_of_point_is_point_itself(points):
-    p = points[0]
-    assert p == centroid2d(points)
+    point = points[0]
+    assert point == centroid2d(points)
 
 
-@pytest.mark.parametrize('fixture', [
+@pytest.mark.parametrize('points, expected', [
     ([[0, 0], [2, 0]], [1, 0]),
     ([[1, 1], [3, 3]], [2, 2]),
     ([[1, 2], [2, 4], [3, 6]], [2, 4])
 ])
-def test_centroid_of_list_of_points(fixture):
-    points = fixture[0]
-    expected = fixture[1]
-
+def test_centroid_of_list_of_points(points, expected):
     assert expected == centroid2d(points)
 
 
@@ -73,6 +69,46 @@ def test_maybe_centroid_of_valid_inputs_same_as_centroid2d(points):
     actual = maybe_centroid2d(points)
     expected = centroid2d(points)
     assert expected == actual
+
+
+def test_best_effort_centroid_of_none_is_none():
+    assert best_effort_centroid2d(None) is None
+
+
+def test_best_effort_centroid_of_empty_is_none():
+    assert best_effort_centroid2d([]) is None
+
+
+@pytest.mark.parametrize('points', [
+    [[1, '2']],
+    [['0', 0], [2, ]],
+    [[1, None], ['', 3]],
+    [[None, 2], ['2', 4], [3, '6z']]
+])
+def test_best_effort_centroid_of_input_with_no_points_is_none(points):
+    assert best_effort_centroid2d(points) is None
+
+
+@pytest.mark.parametrize('points', [
+    [[1, 2]],
+    [[0, 0], [2, 0]],
+    [[1, 1], [3, 3]],
+    [[1, 2], [2, 4], [3, 6]]
+])
+def test_best_effort_centroid_of_valid_input_same_as_centroid2d(points):
+    expected = centroid2d(points)
+    assert expected == best_effort_centroid2d(points)
+
+
+@pytest.mark.parametrize('points', [
+    [[1, 2], []], [[], [1, 2]], [None, [1, 2]],
+    [[1, '2'], [1, 2]],
+    [[None, 0], [2, ], [1, 2]],
+    [[1, None], [1, 2], ['', 3]],
+    [[1, 2], ['2', 4], [3, '6z']]
+])
+def test_best_effort_centroid_filters_out_invalid_points(points):
+    assert [1, 2] == best_effort_centroid2d(points)
 
 
 def test_geojson_centroid_of_feature_collection():

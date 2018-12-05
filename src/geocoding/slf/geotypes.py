@@ -106,7 +106,7 @@ class SlfLine(SlfGeometry):
 
 class SlfPolygon(SlfGeometry):
     """
-    Represents an NGSI Simple Location Format line.
+    Represents an NGSI Simple Location Format polygon.
     """
 
     def __init__(self, points: Iterable['SlfPoint']):

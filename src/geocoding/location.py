@@ -1,5 +1,5 @@
 from typing import Optional, List
-from .centroid import maybe_centroid2d, geojson_centroid
+from .centroid import best_effort_centroid2d, geojson_centroid
 from .slf import from_location_attribute
 from .slf.jsoncodec import lookup_encoder
 
@@ -33,7 +33,7 @@ class LocationAttribute:
         geom = from_location_attribute(self.geometry_type(),
                                        self.geometry_value())
         if geom:
-            return maybe_centroid2d(geom.enum_points())
+            return best_effort_centroid2d(geom.enum_points())
 
         return None
 

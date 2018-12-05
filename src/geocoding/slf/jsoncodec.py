@@ -36,9 +36,6 @@ def box_to_json_rep(box: SlfBox) -> Polygon:
 
 
 def lookup_encoder(geom: SlfGeometry):
-    def unknown_type_encoder(_):
-        return None
-
     if isinstance(geom, SlfPoint):
         return point_to_json_rep
     if isinstance(geom, SlfLine):
@@ -48,7 +45,7 @@ def lookup_encoder(geom: SlfGeometry):
     if isinstance(geom, SlfBox):
         return box_to_json_rep
 
-    return unknown_type_encoder
+    return lambda _: None  # unknown type encoder
 # gosh, I wish there were algebraic data types in Python...
 
 

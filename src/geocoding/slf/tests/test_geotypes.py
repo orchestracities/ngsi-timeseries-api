@@ -2,12 +2,12 @@ import pytest
 from geocoding.slf.geotypes import *
 
 
-@pytest.mark.parametrize('lat_lon', [
+@pytest.mark.parametrize('lat, lon', [
     (None, 2), (1, None), (None, None)
 ])
-def test_point_should_fail_if_none_args(lat_lon):
+def test_point_should_fail_if_none_args(lat, lon):
     with pytest.raises(ValueError):
-        SlfPoint(lat_lon[0], lat_lon[1])
+        SlfPoint(latitude=lat, longitude=lon)
 
 
 def test_point_ngsi_type():
