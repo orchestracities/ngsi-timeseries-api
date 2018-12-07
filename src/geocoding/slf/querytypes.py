@@ -3,10 +3,9 @@ This module provides types to represent NGSI geographical query terms.
 """
 
 
-from typing import List, Optional
-from .geotypes import SlfGeometry
+from typing import Optional
+from .geotypes import SlfGeometry, SlfPoint
 from .jsoncodec import encode
-from geocoding.centroid import best_effort_centroid2d
 
 
 class SlfQuery:
@@ -25,11 +24,11 @@ class NearQuery(SlfQuery):
                  geometry: SlfGeometry,
                  min_distance: Optional[float],
                  max_distance: Optional[float]):
-        self._centroid = best_effort_centroid2d(geometry.enum_points())
+        self._centroid = geometry.centroid2d()
         self._min = min_distance
         self._max = max_distance
 
-    def centroid(self) -> Optional[List[float]]:
+    def centroid(self) -> Optional[SlfPoint]:
         return self._centroid
 
     def min_distance(self) -> Optional[float]:

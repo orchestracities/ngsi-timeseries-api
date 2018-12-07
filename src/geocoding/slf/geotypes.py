@@ -6,7 +6,8 @@ the geometry. ``Iterables`` are used throughout so to be able to handle
 large set of points in *constant* space.
 """
 
-from typing import List, Iterable, Iterator
+from typing import List, Iterable, Iterator, Optional
+from geocoding.centroid import best_effort_centroid2d
 from utils.streams import ensure_min_items
 
 
@@ -22,14 +23,45 @@ class SlfGeometry:
         stream of points that define the shape.
 
         :return: an iterable of coordinate pairs, where each pair is a list
-        of two numbers ``[longitude, latitude]``---note the numbers are in
-        the same order as in GeoJSON.
+            of two numbers ``[longitude, latitude]``---note the numbers are
+            in the same order as in GeoJSON.
         """
         for p in self._points():
             yield [p.longitude(), p.latitude()]
 
     def _points(self) -> Iterable['SlfPoint']:
         pass
+
+    def to_ngsi_attribute(self) -> dict:
+        """
+        Convert this geometry to the NGSI location attribute dictionary
+        representation.
+        :return: the NGSI location attribute.
+        """
+        ps = [p.wgs84_coords() for p in self._points()]
+        return {
+            'type': self.__class__.ngsi_type(),
+            'value': ps[0] if isinstance(self, SlfPoint) else ps
+        }
+
+    @staticmethod
+    def ngsi_type():
+        """
+        :return: this geometry's NGSI type.
+        """
+        pass
+
+    def centroid2d(self) -> Optional['SlfPoint']:
+        """
+        Same as ``best_effort_centroid2d`` but converts the returned centroid
+        coordinates (if any) to an ``SlfPoint``.
+        """
+        centroid = best_effort_centroid2d(self.enum_points())
+        # enum_points returns [lon, lat] points, so centroid coords will be in
+        # the same order.
+        if centroid:
+            return SlfPoint(longitude=centroid[0], latitude=centroid[1])
+        return None
 
 # NOTE. Performance.
 # We could implement _points so that it always produces a fresh stream.
@@ -73,6 +105,13 @@ class SlfPoint(SlfGeometry):
         :return: this point's longitude.
         """
         return self._longitude
+
+    def wgs84_coords(self):
+        """
+        :return: this point's coordinates in the WSG84 format:
+            "latitude, longitude"
+        """
+        return '{}, {}'.format(self.latitude(), self.longitude())
 
     def _points(self) -> Iterable['SlfPoint']:
         yield self

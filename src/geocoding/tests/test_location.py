@@ -67,7 +67,10 @@ def test_normalize_leave_json_be_but_add_or_update_centroid(entity):
         }
     }
 
-    assert entity['location_centroid'] == [2, 1]
+    assert entity['location_centroid'] == {
+        'type': 'geo:point',
+        'value': '1.0, 2.0'
+    }
 
 
 @pytest.mark.parametrize('entity', [
@@ -90,7 +93,10 @@ def test_normalize_get_json_point_and_add_or_update_centroid(entity):
         }
     }
 
-    assert entity['location_centroid'] == [2, 1]
+    assert entity['location_centroid'] == {
+        'type': 'geo:point',
+        'value': '1.0, 2.0'
+    }
 
 
 @pytest.mark.parametrize('entity', [
@@ -113,7 +119,10 @@ def test_normalize_get_json_line_and_add_or_update_centroid(entity):
         }
     }
 
-    assert entity['location_centroid'] == [3, 1]
+    assert entity['location_centroid'] == {
+        'type': 'geo:point',
+        'value': '1.0, 3.0'
+    }
 
 
 @pytest.mark.parametrize('entity', [
@@ -142,7 +151,10 @@ def test_normalize_get_json_polygon_and_add_or_update_centroid(entity):
         }
     }
 
-    assert entity['location_centroid'] == [3, 0]
+    assert entity['location_centroid'] == {
+        'type': 'geo:point',
+        'value': '0.0, 3.0'
+    }
 
 
 @pytest.mark.parametrize('entity', [
@@ -165,4 +177,7 @@ def test_normalize_get_json_from_box_and_add_or_update_centroid(entity):
         }
     }
 
-    assert entity['location_centroid'] == [3, 0]
+    assert entity['location_centroid'] == {
+        'type': 'geo:point',
+        'value': '0.0, 3.0'
+    }

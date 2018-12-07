@@ -152,3 +152,29 @@ def test_parse_geojson_location():
         })
 
     assert actual is None
+
+
+@pytest.mark.parametrize('location', [
+    {
+        'type': 'geo:point',
+        'value': '1.2, -3.045'
+    },
+    {
+        'type': 'geo:line',
+        'value': ['1.2, -3.045', '-2.0, 100.0']
+    },
+    {
+        'type': 'geo:polygon',
+        'value': ['1.2, -3.045', '-2.0, 100.0', '0.0, 100.0', '2.0005, 100.1',
+                  '1.2, -3.045']
+    },
+    {
+        'type': 'geo:box',
+        'value': ['1.2, -3.045', '-2.0, 100.0']
+    },
+])
+def test_parse_followed_by_to_attr_is_identity(location):
+    parsed = from_location_attribute(location['type'], location['value'])
+
+    assert parsed is not None
+    assert location == parsed.to_ngsi_attribute()

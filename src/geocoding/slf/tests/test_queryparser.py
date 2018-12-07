@@ -30,7 +30,9 @@ def test_near_parser(parser_class, georel_value):
 
     assert query is not None
     assert isinstance(query, NearQuery)
-    assert query.centroid() == [2, 1]
+    assert query.centroid() is not None
+    assert query.centroid().longitude() == geometry.longitude()
+    assert query.centroid().latitude() == geometry.latitude()
     if 'min' in georel_value:
         assert query.min_distance() == 1.2
     else:

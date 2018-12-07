@@ -30,6 +30,16 @@ def test_point_can_enum_points_many_times():
     assert expected == list(point.enum_points())
 
 
+def test_point_ngsi_attribute():
+    point = SlfPoint(1, 2)
+    expected = {
+        'type': 'geo:point',
+        'value': '1, 2'
+    }
+
+    assert expected == point.to_ngsi_attribute()
+
+
 @pytest.mark.parametrize('points', [
     None, [], [SlfPoint(1, 2)]
 ])
@@ -58,6 +68,17 @@ def test_line_cannot_enum_points_many_times():
     assert expected == list(line.enum_points())
     assert [] == list(line.enum_points())
     assert [] == list(line.enum_points())
+
+
+def test_line_ngsi_attribute():
+    points = [SlfPoint(1, 2), SlfPoint(3, 4), SlfPoint(5, 6)]
+    line = SlfLine(points)
+    expected = {
+        'type': 'geo:line',
+        'value': ['1, 2', '3, 4', '5, 6']
+    }
+
+    assert expected == line.to_ngsi_attribute()
 
 
 @pytest.mark.parametrize('points', [
@@ -89,6 +110,17 @@ def test_polygon_cannot_enum_points_many_times():
     assert expected == list(polygon.enum_points())
     assert [] == list(polygon.enum_points())
     assert [] == list(polygon.enum_points())
+
+
+def test_polygon_ngsi_attribute():
+    points = [SlfPoint(1, 2), SlfPoint(3, 4), SlfPoint(-1, 0), SlfPoint(1, 2)]
+    polygon = SlfPolygon(points)
+    expected = {
+        'type': 'geo:polygon',
+        'value': ['1, 2', '3, 4', '-1, 0', '1, 2']
+    }
+
+    assert expected == polygon.to_ngsi_attribute()
 
 
 @pytest.mark.parametrize('points', [
@@ -128,3 +160,14 @@ def test_box_to_polygon():
 
     expected = [[0, 1], [1, 1], [1, 0], [0, 0]]
     assert expected == list(box.to_polygon().enum_points())
+
+
+def test_box_ngsi_attribute():
+    points = [SlfPoint(1, 2), SlfPoint(3, 4)]
+    box = SlfBox(points)
+    expected = {
+        'type': 'geo:box',
+        'value': ['1, 2', '3, 4']
+    }
+
+    assert expected == box.to_ngsi_attribute()

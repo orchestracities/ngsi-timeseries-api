@@ -1,6 +1,6 @@
-from typing import Optional, List
-from .centroid import best_effort_centroid2d, geojson_centroid
-from .slf import from_location_attribute
+from typing import Optional
+from .centroid import geojson_centroid
+from .slf import from_location_attribute, SlfPoint
 from .slf.jsoncodec import lookup_encoder
 
 
@@ -26,16 +26,20 @@ class LocationAttribute:
     def is_geojson(self):
         return self.geometry_type() == _GEOJSON_TYPE
 
-    def compute_centroid(self) -> Optional[List[float]]:
-        if self.is_geojson():
-            return geojson_centroid(self.geometry_value())
+    def _compute_geojson_centroid(self):
+        lon_lat = geojson_centroid(self.geometry_value())
+        return SlfPoint(longitude=lon_lat[0], latitude=lon_lat[1]) if lon_lat \
+            else None
 
+    def _compute_slf_centroid(self):
         geom = from_location_attribute(self.geometry_type(),
                                        self.geometry_value())
-        if geom:
-            return best_effort_centroid2d(geom.enum_points())
+        return geom.centroid2d() if geom else None
 
-        return None
+    def compute_centroid(self) -> Optional[SlfPoint]:
+        if self.is_geojson():
+            return self._compute_geojson_centroid()
+        return self._compute_slf_centroid()
 
     def geometry_value_as_geojson(self) -> Optional[dict]:
         if self.is_geojson():
@@ -69,8 +73,13 @@ def normalize_location(entity: Optional[dict]):
     """
     location = LocationAttribute(entity)
     geojson_location = location.as_geojson()
+
     if geojson_location:
         entity[_LOC_ATTR_NAME] = geojson_location
-        entity[_CENTROID_ATTR_NAME] = location.compute_centroid()
+
+        centroid = location.compute_centroid()
+        if centroid:
+            entity[_CENTROID_ATTR_NAME] = centroid.to_ngsi_attribute()
+
     elif entity:
         entity.pop(_CENTROID_ATTR_NAME, None)
