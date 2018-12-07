@@ -14,7 +14,6 @@ def test_simple_query_parser(parser_class, query_class):
     assert query is not None
     assert isinstance(query, query_class)
     assert query.reference_shape() is not None
-    assert len(query.reference_shape()) > 1
 
 
 @pytest.mark.parametrize('parser_class, georel_value', [

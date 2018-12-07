@@ -5,7 +5,6 @@ This module provides types to represent NGSI geographical query terms.
 
 from typing import Optional
 from .geotypes import SlfGeometry, SlfPoint
-from .jsoncodec import encode
 
 
 class SlfQuery:
@@ -56,9 +55,9 @@ class ShapeQuery(SlfQuery):
     in which relationship two shapes stand.
     """
     def __init__(self, geometry: SlfGeometry):
-        self._reference_shape = encode(geometry)
+        self._reference_shape = geometry
 
-    def reference_shape(self) -> Optional[str]:
+    def reference_shape(self) -> SlfGeometry:
         return self._reference_shape
 
 

@@ -4,8 +4,8 @@ from .slf import from_location_attribute, SlfPoint
 from .slf.jsoncodec import lookup_encoder
 
 
-_LOC_ATTR_NAME = 'location'
-_CENTROID_ATTR_NAME = 'location_centroid'
+LOCATION_ATTR_NAME = 'location'
+CENTROID_ATTR_NAME = 'location_centroid'
 _TYPE_ATTR_NAME = 'type'
 _VALUE_ATTR_NAME = 'value'
 _GEOJSON_TYPE = 'geo:json'
@@ -15,7 +15,7 @@ class LocationAttribute:
 
     def __init__(self, entity: Optional[dict]):
         entity = {} if entity is None else entity
-        self._location = entity.get(_LOC_ATTR_NAME, {})
+        self._location = entity.get(LOCATION_ATTR_NAME, {})
 
     def geometry_type(self) -> Optional[str]:
         return self._location.get(_TYPE_ATTR_NAME, None)
@@ -75,11 +75,11 @@ def normalize_location(entity: Optional[dict]):
     geojson_location = location.as_geojson()
 
     if geojson_location:
-        entity[_LOC_ATTR_NAME] = geojson_location
+        entity[LOCATION_ATTR_NAME] = geojson_location
 
         centroid = location.compute_centroid()
         if centroid:
-            entity[_CENTROID_ATTR_NAME] = centroid.to_ngsi_attribute()
+            entity[CENTROID_ATTR_NAME] = centroid.to_ngsi_attribute()
 
     elif entity:
-        entity.pop(_CENTROID_ATTR_NAME, None)
+        entity.pop(CENTROID_ATTR_NAME, None)
