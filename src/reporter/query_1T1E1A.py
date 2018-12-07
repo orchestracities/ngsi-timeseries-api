@@ -3,6 +3,7 @@ from flask import request
 from reporter.reporter import _validate_query_params
 from translators.crate import CrateTranslatorInstance, CrateTranslator
 import logging
+from geocoding.slf import from_geo_params
 
 
 def query_1T1E1A(attr_name,   # In Path
@@ -15,7 +16,10 @@ def query_1T1E1A(attr_name,   # In Path
                  to_date=None,
                  last_n=None,
                  limit=10000,
-                 offset=0):
+                 offset=0,
+                 georel=None,
+                 geometry=None,
+                 coords=None):
     """
     See /entities/{entityId}/attrs/{attrName} in API Specification
     quantumleap.yml
@@ -30,6 +34,7 @@ def query_1T1E1A(attr_name,   # In Path
 
     entities = None
     try:
+        geo_query = from_geo_params(georel, geometry, coords)
         with CrateTranslatorInstance() as trans:
             entities = trans.query(attr_names=[attr_name],
                                    entity_type=type_,
@@ -42,12 +47,19 @@ def query_1T1E1A(attr_name,   # In Path
                                    limit=limit,
                                    offset=offset,
                                    fiware_service=fiware_s,
-                                   fiware_servicepath=fiware_sp,)
+                                   fiware_servicepath=fiware_sp,
+                                   geo_query=geo_query)
     except AmbiguousNGSIIdError as e:
         return {
             "error": "AmbiguousNGSIIdError",
             "description": str(e)
         }, 409
+
+    except ValueError:
+        return {
+           "error": "ValueError",
+           "description": "Invalid geographical query parameters"
+        }, 400
 
     except Exception as e:
         # Temp workaround to debug test_not_found
