@@ -58,7 +58,7 @@ def test_box():
     box = SlfBox([brc, tlc])
     expected = {
         'type': 'Polygon',
-        'coordinates': [[0, 1], [1, 1], [1, 0], [0, 0]]
+        'coordinates': [[0, 1], [1, 1], [1, 0], [0, 0], [0, 1]]
     }
 
     json_str = encode(box)

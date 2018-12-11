@@ -201,7 +201,8 @@ class SlfBox(SlfGeometry):
                                       self._top_left_corner.longitude())
         return SlfPolygon([
             self._top_left_corner, top_right_corner,
-            self._bottom_right_corner, bottom_left_corner
+            self._bottom_right_corner, bottom_left_corner,
+            self._top_left_corner
         ])
 
     @staticmethod

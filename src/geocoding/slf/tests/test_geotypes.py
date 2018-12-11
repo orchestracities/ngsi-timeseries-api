@@ -158,7 +158,7 @@ def test_box_to_polygon():
     tlc = SlfPoint(1, 0)
     box = SlfBox([brc, tlc])
 
-    expected = [[0, 1], [1, 1], [1, 0], [0, 0]]
+    expected = [[0, 1], [1, 1], [1, 0], [0, 0], [0, 1]]
     assert expected == list(box.to_polygon().enum_points())
 
 

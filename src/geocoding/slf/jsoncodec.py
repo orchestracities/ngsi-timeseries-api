@@ -5,7 +5,6 @@ which serialises an SLF geometry to a GeoJSON string. The other functions
 translate SLF geometries to geometry types from the ``geojson`` library.
 """
 
-from typing import Optional
 from geojson import dumps, LineString, Point, Polygon
 from .geotypes import *
 
