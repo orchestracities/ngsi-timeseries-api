@@ -1,5 +1,5 @@
 from enum import Enum
-from geocoding.slf import SlfGeometry, SlfPoint, encode
+from geocoding.slf import SlfGeometry, SlfPoint, encode_as_wkt
 from .terms import *
 
 
@@ -7,6 +7,11 @@ class GeoMatchType(Enum):
     DISJOINT = 'disjoint'
     INTERSECTS = 'intersects'
     WITHIN = 'within'
+
+
+def geo_shape_term(geometry: SlfGeometry) -> str:
+    geo_shape = encode_as_wkt(geometry)
+    return lit(geo_shape).eval()
 
 
 class GeoMatchTerm(Term):
@@ -21,7 +26,7 @@ class GeoMatchTerm(Term):
     def eval(self):
         return 'match ({}, {}) using {}'.format(
             self.column_name,
-            encode(self.geometry),
+            geo_shape_term(self.geometry),
             self.match_type.value
         )
 
@@ -33,7 +38,7 @@ class GeoEqualTerm(Term):
         self.geometry = geometry
 
     def eval(self):
-        geo_shape = encode(self.geometry)
+        geo_shape = geo_shape_term(self.geometry)
         return 'match ({}, {}) using {} and within({}, {})'.format(
             self.column_name,
             geo_shape,
@@ -51,11 +56,7 @@ class GeoDistanceTerm(Term):
 
     def eval(self):
         return 'distance({}, {})'.format(
-            self.column_name, GeoDistanceTerm.to_wkt_point(self.point_from))
-
-    @staticmethod
-    def to_wkt_point(point: SlfPoint) -> str:
-        return "'POINT({} {})'".format(point.longitude(), point.latitude())
+            self.column_name, geo_shape_term(self.point_from))
 
 
 def intersects(column: str, geometry: SlfGeometry) -> GeoMatchTerm:

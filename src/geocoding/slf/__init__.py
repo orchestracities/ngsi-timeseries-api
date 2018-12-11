@@ -15,10 +15,10 @@ coordinate of a point is the longitude and the second is the latitude.
 The ``geotypes`` module provides data types for all the SLF figures and the
 ``querytypes`` module builds on those types to provide data types to represent
 NGSI geographical queries. The ``queryparser`` module provides parsing of NGSI
-query strings into ASTs of SLF data types whereas the ``jsoncodec`` module
-serialises SLF data type instances to GeoJSON. Additionally, the ``locparser``
-module extracts location information from NGSI entities to build SLF data type
-instances.
+query strings into ASTs of SLF data types. The ``jsoncodec`` module serialises
+SLF data type instances to GeoJSON whereas ``wktcodec`` serialises to WKT.
+Additionally, the ``locparser`` module extracts location information from NGSI
+entities to build SLF data type instances.
 
 Below is bird-eye view of the components in the ``slf`` package.
 
@@ -31,3 +31,4 @@ from .jsoncodec import encode
 from .locparser import from_location_attribute
 from .queryparser import from_geo_params
 from .querytypes import *
+from .wktcodec import encode_as_wkt

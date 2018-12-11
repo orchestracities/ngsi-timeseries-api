@@ -55,7 +55,8 @@ def query_1TNE1A(attr_name,   # In Path
                                    limit=limit,
                                    offset=offset,
                                    fiware_service=fiware_s,
-                                   fiware_servicepath=fiware_sp,)
+                                   fiware_servicepath=fiware_sp,
+                                   geo_query=geo_query)
     except AmbiguousNGSIIdError as e:
         return {
             "error": "AmbiguousNGSIIdError",
