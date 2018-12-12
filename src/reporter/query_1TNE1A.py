@@ -3,7 +3,7 @@ from flask import request
 from reporter.reporter import _validate_query_params
 from translators.crate import CrateTranslatorInstance, CrateTranslator
 import logging
-from geocoding.slf import from_geo_params
+from .geo_query_handler import handle_geo_query
 
 
 def query_1TNE1A(attr_name,   # In Path
@@ -33,6 +33,10 @@ def query_1TNE1A(attr_name,   # In Path
     if c != 200:
         return r, c
 
+    r, c, geo_query = handle_geo_query(georel, geometry, coords)
+    if r:
+        return r, c
+
     fiware_s = request.headers.get('fiware-service', None)
     fiware_sp = request.headers.get('fiware-servicepath', None)
 
@@ -41,7 +45,6 @@ def query_1TNE1A(attr_name,   # In Path
     if id_:
         entity_ids = [s.strip() for s in id_.split(',') if s]
     try:
-        geo_query = from_geo_params(georel, geometry, coords)
         with CrateTranslatorInstance() as trans:
             entities = trans.query(attr_names=[attr_name],
                                    entity_type=entity_type,
@@ -62,12 +65,6 @@ def query_1TNE1A(attr_name,   # In Path
             "error": "AmbiguousNGSIIdError",
             "description": str(e)
         }, 409
-
-    except ValueError:
-        return {
-            "error": "ValueError",
-            "description": "Invalid geographical query parameters"
-        }, 400
 
     except Exception as e:
         # Temp workaround to debug test_not_found

@@ -3,7 +3,7 @@ from flask import request
 from reporter.reporter import _validate_query_params
 from translators.crate import CrateTranslatorInstance, CrateTranslator
 import logging
-from geocoding.slf import from_geo_params
+from .geo_query_handler import handle_geo_query
 
 
 def query_1T1ENA(entity_id,   # In Path
@@ -29,6 +29,10 @@ def query_1T1ENA(entity_id,   # In Path
     if c != 200:
         return r, c
 
+    r, c, geo_query = handle_geo_query(georel, geometry, coords)
+    if r:
+        return r, c
+
     if attrs is not None:
         attrs = attrs.split(',')
 
@@ -37,7 +41,6 @@ def query_1T1ENA(entity_id,   # In Path
 
     entities = None
     try:
-        geo_query = from_geo_params(georel, geometry, coords)
         with CrateTranslatorInstance() as trans:
             entities = trans.query(attr_names=attrs,
                                    entity_type=type_,
@@ -57,12 +60,6 @@ def query_1T1ENA(entity_id,   # In Path
             "error": "AmbiguousNGSIIdError",
             "description": str(e)
         }, 409
-
-    except ValueError:
-        return {
-            "error": "ValueError",
-            "description": "Invalid geographical query parameters"
-        }, 400
 
     except Exception as e:
         # Temp workaround to debug test_not_found
