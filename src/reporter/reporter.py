@@ -37,6 +37,7 @@ import logging
 import os
 import requests
 from reporter.subscription_builder import build_subscription
+from geocoding.location import normalize_location
 
 
 def _validate_payload(payload):
@@ -131,6 +132,9 @@ def notify():
 
     # Add GEO-DATE if enabled
     add_geodata(payload)
+
+    # Always normalize location if there's one
+    normalize_location(payload)
 
     # Define FIWARE tenant
     fiware_s = request.headers.get('fiware-service', None)

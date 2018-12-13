@@ -41,7 +41,6 @@ import geocoder
 import json
 import logging
 import requests
-from .location import normalize_location
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +87,6 @@ def add_location(entity, raise_error=False, session=None, cache=None):
         raise TypeError
 
     if 'location' in entity:
-        normalize_location(entity)
         return entity
 
     if 'address' not in entity:
@@ -193,7 +191,6 @@ def _do_add_location(entity, location):
     else:
         entity['location'] = location
 
-    normalize_location(entity)
     return entity
 
 
