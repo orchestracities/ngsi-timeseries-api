@@ -280,6 +280,38 @@ parameters:
     example, if the query was to return 10 results and you use an offset of
     1, the response will return the last 9 values. Make sure you don't give
     more offset than the number of results."
+  georel:
+    in: query
+    name: georel
+    type: string
+    pattern: '^coveredBy$|^intersects$|^equals$|^disjoint$|^near;maxDistance:(0|([1-9][0-9]*))(\.[0-9]+)?$|^near;minDistance:(0|([1-9][0-9]*))(\.[0-9]+)?$|^near;maxDistance:(0|([1-9][0-9]*))(\.[0-9]+)?;minDistance:(0|([1-9][0-9]*))(\.[0-9]+)?$|^near;minDistance:(0|([1-9][0-9]*))(\.[0-9]+)?;maxDistance:(0|([1-9][0-9]*))(\.[0-9]+)?$'
+    description: "Optional. It specifies a spatial relationship between matching
+    entities and a reference shape (geometry). This parameter is used to perform
+    geographical queries with the same semantics as in the FIWARE-NGSI v2 Specification.
+    Full details can be found in the Geographical Queries section of the specification:
+    http://fiware.github.io/specifications/ngsiv2/stable/."
+  geometry:
+    in: query
+    name: geometry
+    type: string
+    enum: [point, line, polygon, box]
+    description: "Optional but required if georel is specified. This parameter
+    defines the reference shape to be used for geographical queries and has the
+    same semantics as in the FIWARE-NGSI v2 Specification.
+    Full details can be found in the Geographical Queries section of the specification:
+    http://fiware.github.io/specifications/ngsiv2/stable/."
+  coords:
+    in: query
+    name: coords
+    type: string
+    pattern: '^[+,-]?(0|([1-9][0-9]*))(\.[0-9]+)?,[+,-]?(0|([1-9][0-9]*))(\.[0-9]+)?(;[+,-]?(0|([1-9][0-9]*))(\.[0-9]+)?,[+,-]?(0|([1-9][0-9]*))(\.[0-9]+)?)*$'
+    description: "Optional but required if georel is specified. This parameter
+    defines the reference shape (geometry) in terms of WGS 84 coordinates and has
+    the same semantics as in the FIWARE-NGSI v2 Specification, except we only
+    accept coordinates in decimal degrees---e.g. `40.714,-74.006` is okay, but not
+    `40 42' 51'',74 0' 21''`.
+    Full details can be found in the Geographical Queries section of the specification:
+    http://fiware.github.io/specifications/ngsiv2/stable/."
 
 ################################################################################
 # PATHS: META
@@ -612,6 +644,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/georel'
+        - $ref: '#/parameters/geometry'
+        - $ref: '#/parameters/coords'
         # In Header...
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
@@ -683,6 +718,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/georel'
+        - $ref: '#/parameters/geometry'
+        - $ref: '#/parameters/coords'
         # In Header...
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
@@ -741,6 +779,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/georel'
+        - $ref: '#/parameters/geometry'
+        - $ref: '#/parameters/coords'
         # In Header...
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
@@ -857,6 +898,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/georel'
+        - $ref: '#/parameters/geometry'
+        - $ref: '#/parameters/coords'
         # In Header...
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
@@ -936,6 +980,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/georel'
+        - $ref: '#/parameters/geometry'
+        - $ref: '#/parameters/coords'
         # In Header...
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
@@ -1005,6 +1052,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/georel'
+        - $ref: '#/parameters/geometry'
+        - $ref: '#/parameters/coords'
         # In Header...
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
@@ -1068,6 +1118,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/georel'
+        - $ref: '#/parameters/geometry'
+        - $ref: '#/parameters/coords'
         # In Header...
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
@@ -1186,6 +1239,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/georel'
+        - $ref: '#/parameters/geometry'
+        - $ref: '#/parameters/coords'
         # In Header...
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
@@ -1384,6 +1440,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/georel'
+        - $ref: '#/parameters/geometry'
+        - $ref: '#/parameters/coords'
         # In Header...
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
@@ -1483,6 +1542,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/georel'
+        - $ref: '#/parameters/geometry'
+        - $ref: '#/parameters/coords'
         # In Header...
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
@@ -1593,6 +1655,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/georel'
+        - $ref: '#/parameters/geometry'
+        - $ref: '#/parameters/coords'
         # In Header...
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'

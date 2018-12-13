@@ -15,6 +15,13 @@ def test_entity_with_location(air_quality_observed):
 
     r = geocoding.add_location(air_quality_observed)
     assert r is air_quality_observed
+
+    assert r['location_centroid'] == {
+        'type': 'geo:point',
+        'value': '19.6389474, -98.9109537'
+    }
+
+    r.pop('location_centroid')
     assert r == old_entity
 
 
@@ -65,11 +72,11 @@ def test_entity_add_point_negative_coord(air_quality_observed):
     assert r is air_quality_observed
 
     assert 'location' in r
-    assert r['location']['type'] == 'geo:point'
+    assert r['location']['type'] == 'geo:json'
 
-    lon, lat = r['location']['value'].split(',')
-    assert float(lon) == pytest.approx(19.6389474, abs=1e-2)
-    assert float(lat) == pytest.approx(-98.9109537, abs=1e-2)
+    lon, lat = r['location']['value']['coordinates']
+    assert float(lat) == pytest.approx(19.6389474, abs=1e-2)
+    assert float(lon) == pytest.approx(-98.9109537, abs=1e-2)
 
 
 def test_entity_add_street_line(air_quality_observed):
