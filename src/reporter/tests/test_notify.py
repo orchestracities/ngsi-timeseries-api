@@ -1,6 +1,5 @@
 from datetime import datetime
 from conftest import QL_URL
-from translators.crate import CrateTranslator
 from utils.common import assert_equal_time_index_arrays
 import copy
 import json
@@ -62,9 +61,7 @@ def test_invalid_no_attr(notification, clean_mongo, clean_crate):
     r = requests.post('{}'.format(notify_url),
                       data=json.dumps(notification),
                       headers=HEADERS_PUT)
-    assert r.status_code == 400
-    msg = "Received notification without attributes other than 'type' and 'id'"
-    assert r.json() == msg
+    assert r.status_code == 200
 
 
 def test_invalid_no_value(notification, clean_mongo, clean_crate):
@@ -72,8 +69,7 @@ def test_invalid_no_value(notification, clean_mongo, clean_crate):
     r = requests.post('{}'.format(notify_url),
                       data=json.dumps(notification),
                       headers=HEADERS_PUT)
-    assert r.status_code == 400
-    assert r.json() == 'Payload is missing value for attribute temperature'
+    assert r.status_code == 200
 
 
 def test_valid_notification(notification, clean_mongo, clean_crate):
@@ -319,8 +315,7 @@ def test_no_value_in_notification(notification):
     }
     url = '{}'.format(notify_url)
     r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
-    assert r.status_code == 400
-    assert 'Payload is missing value for attribute pm10' in r.text
+    assert r.status_code == 200
 
     # Empty value
     notification['data'][0] = {
@@ -332,5 +327,4 @@ def test_no_value_in_notification(notification):
     }
     url = '{}'.format(notify_url)
     r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
-    assert r.status_code == 400
-    assert 'Payload is missing value for attribute pm25' in r.text
+    assert r.status_code == 200
