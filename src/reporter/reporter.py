@@ -30,7 +30,8 @@ from datetime import datetime
 from flask import request
 from geocoding.geocache import GeoCodingCache
 from requests import RequestException
-from translators.crate import CrateTranslator, CrateTranslatorInstance
+from translators.crate import CrateTranslator, CrateTranslatorInstance,\
+    NGSI_TO_CRATE, NGSI_TEXT
 from utils.common import iter_entity_attrs
 import json
 import logging
@@ -38,6 +39,32 @@ import os
 import requests
 from reporter.subscription_builder import build_subscription
 from geocoding.location import normalize_location
+
+
+def log():
+    logging.basicConfig(level=logging.INFO)
+    return logging.getLogger(__name__)
+
+
+def is_text(attr_type):
+    return attr_type is NGSI_TEXT or attr_type not in NGSI_TO_CRATE
+    # TODO: same logic in two different places!
+    # The above kinda reproduces the tests done by the translator, we should
+    # factor this logic out and keep it in just one place!
+
+
+def has_value(entity, attr_name):
+    attr = entity.get(attr_name, {})
+    if attr is None:
+        attr = {}
+    attr_value = attr.get('value', None)
+    attr_type = attr.get('type', None)
+
+    if is_text(attr_type):
+        return attr_value is not None  # yes, '' is a text value in this case!
+    return attr_value not in [None, '']  # (*)
+# (*) if the type isn't Text, then we assume '' means "no value" which is kinda
+# debatable, but is the best we can do for now...
 
 
 def _validate_payload(payload):
@@ -57,17 +84,19 @@ def _validate_payload(payload):
     if 'id' not in payload:
         return 'Entity id is required in notifications'
 
-    # There must be at least one attribute other than id and type
+    # There should be at least one attribute other than id and type
     # (i.e, the changed value)
     attrs = list(iter_entity_attrs(payload))
     if len(attrs) == 0:
-        return "Received notification without attributes " \
-               "other than 'type' and 'id'"
+        log().warning("Received notification without attributes " +
+                      "other than 'type' and 'id'")
 
-    # Attributes must have a value and the modification time
+    # Attributes should have a value and the modification time
     for attr in attrs:
-        if 'value' not in payload[attr] or payload[attr]['value'] == '':
-            return 'Payload is missing value for attribute {}'.format(attr)
+        if not has_value(payload, attr):
+            payload[attr].update({'value': None})
+            log().warning(
+                'Payload is missing value for attribute {}'.format(attr))
 
 
 def _get_time_index(payload):
@@ -118,9 +147,7 @@ def notify():
         return 'Multiple data elements in notifications not supported yet', 400
     payload = payload[0]
 
-    logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger(__name__)
-    logger.info('Received payload: {}'.format(payload))
+    log().info('Received payload: {}'.format(payload))
 
     # Validate notification
     error = _validate_payload(payload)
@@ -152,7 +179,7 @@ def notify():
         trans.insert([payload], fiware_s, fiware_sp)
 
     msg = 'Notification successfully processed'
-    logger.info(msg)
+    log().info(msg)
     return msg
 
 
@@ -270,8 +297,7 @@ def subscribe(orion_url,
 
     r = requests.post(endpoint, data=data, headers=headers)
     if not r.ok:
-        logger = logging.getLogger(__name__)
-        logger.debug("subscribing to {} with headers: {} and data: {}")
+        log().debug("subscribing to {} with headers: {} and data: {}")
 
     return r.text, r.status_code
 
