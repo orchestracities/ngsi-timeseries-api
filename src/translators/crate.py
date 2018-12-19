@@ -8,6 +8,8 @@ from utils.common import iter_entity_attrs
 import logging
 import os
 import statistics
+from geocoding.slf import SlfQuery
+from .crate_geo_query import from_ngsi_query
 
 # NGSI TYPES
 # Based on Orion output because official docs don't say much about these :(
@@ -403,7 +405,8 @@ class CrateTranslator(base_translator.BaseTranslator):
         return min(default, limit)
 
 
-    def _get_where_clause(self, entity_ids, from_date, to_date, fiware_sp=None):
+    def _get_where_clause(self, entity_ids, from_date, to_date, fiware_sp=None,
+                          geo_query=None):
         clauses = []
 
         if entity_ids:
@@ -421,6 +424,10 @@ class CrateTranslator(base_translator.BaseTranslator):
         else:
             # Match prefix of fiware service path
             clauses.append(" "+FIWARE_SERVICEPATH+" = ''")
+
+        geo_clause = from_ngsi_query(geo_query)
+        if geo_clause:
+            clauses.append(geo_clause)
 
         where_clause = "where " + "and ".join(clauses)
         return where_clause
@@ -472,7 +479,8 @@ class CrateTranslator(base_translator.BaseTranslator):
               limit=10000,
               offset=0,
               fiware_service=None,
-              fiware_servicepath=None):
+              fiware_servicepath=None,
+              geo_query: SlfQuery=None):
         """
         This translator method is used by all API query endpoints.
 
@@ -524,6 +532,8 @@ class CrateTranslator(base_translator.BaseTranslator):
         :param fiware_servicepath:
             (Optional), used to filter results, considering in the result only
             entities in this FIWARE ServicePath.
+        :param geo_query:
+            (Optional), filters results with an NGSI geo query.
 
         :return:
         The shape of the response is always something like this:
@@ -618,7 +628,8 @@ class CrateTranslator(base_translator.BaseTranslator):
             where_clause = self._get_where_clause(entity_ids,
                                                   from_date,
                                                   to_date,
-                                                  fiware_servicepath)
+                                                  fiware_servicepath,
+                                                  geo_query)
 
         order_group_clause = self._get_order_group_clause(aggr_method,
                                                           aggr_period,
@@ -855,8 +866,15 @@ class CrateTranslator(base_translator.BaseTranslator):
             METADATA_TABLE_NAME,
             wc
         )
-        self.cursor.execute(stmt)
-        all_types = [et[0] for et in self.cursor.fetchall()]
+        try:
+            self.cursor.execute(stmt)
+
+        except exceptions.ProgrammingError as e:
+            logging.debug("{}".format(e))
+            return None
+
+        else:
+            all_types = [et[0] for et in self.cursor.fetchall()]
 
         matching_types = []
         for et in all_types:

@@ -1,8 +1,8 @@
 site_name: QuantumLeap
 site_url: https://quantumleap.readthedocs.org
 site_description: A NGSI to TSDB adapter to allow processing of Historical Data.
-repo_url: https://github.com/smartsdk/ngsi-timeseries-api.git
-edit_uri: 'edit/master/docs/'
+repo_url: https://github.com/smartsdk/ngsi-timeseries-api
+edit_uri: 'edit/master/docs/manuals'
 docs_dir: docs/manuals
 theme: readthedocs
 markdown_extensions: [toc,fenced_code]
