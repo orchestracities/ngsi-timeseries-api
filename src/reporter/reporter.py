@@ -47,7 +47,7 @@ def log():
 
 
 def is_text(attr_type):
-    return attr_type is NGSI_TEXT or attr_type not in NGSI_TO_CRATE
+    return attr_type == NGSI_TEXT or attr_type not in NGSI_TO_CRATE
     # TODO: same logic in two different places!
     # The above kinda reproduces the tests done by the translator, we should
     # factor this logic out and keep it in just one place!

@@ -893,7 +893,8 @@ def _adjust_gh_44(attr_t, attr, db_version):
     """
     crate_t = NGSI_TO_CRATE[attr_t]
     if attr_t == NGSI_TEXT:
-        is_long = len(attr.get('value', '')) > 32765
+        attr_v = attr.get('value', '')
+        is_long = attr_v is not None and len(attr_v) > 32765
         if is_long:
             # Before Crate v2.3
             crate_t += ' INDEX OFF'
