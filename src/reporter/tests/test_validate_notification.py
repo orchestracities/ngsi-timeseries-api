@@ -93,12 +93,31 @@ def test_valid_no_attr_type():
     assert data['temperature']['value'] == 50
 
 
-def test_valid_no_attr_value():
+def test_valid_no_attr_numeric_value():
     data = {
         'id': 'Room:001',
         'type': 'Room',
         'temperature': {
             'type': 'Number',
+            'metadata': {
+                'dateModified': {
+                    'type': 'DateTime',
+                    'value': '2018-01-01T11:46:45.000Z'
+                }
+            }
+        }
+    }
+    assert _validate_payload(data) is None
+    assert 'value' in data['temperature']
+    assert data['temperature']['value'] is None
+
+
+def test_valid_no_attr_text_value():
+    data = {
+        'id': 'Room:001',
+        'type': 'Room',
+        'temperature': {
+            'type': 'Text',
             'metadata': {
                 'dateModified': {
                     'type': 'DateTime',
