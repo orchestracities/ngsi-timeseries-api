@@ -234,14 +234,18 @@ class CrateTranslator(base_translator.BaseTranslator):
                 original_attrs[col] = (attr, attr_t)
 
                 if attr_t not in NGSI_TO_CRATE:
-                    supported_types = ', '.join(NGSI_TO_CRATE.keys())
-                    msg = ("'{}' is not a supported NGSI type. "
-                           "Please use any of the following: {}. "
-                           "Falling back to {}.")
-                    self.logger.warning(msg.format(
-                        attr_t, supported_types, NGSI_TEXT))
+                    # if attribute is complex assume it as 
+                    if attr:
+                        table[col] = NGSI_TO_CRATE[NGSI_STRUCTURED_VALUE]
+                    else:
+                        supported_types = ', '.join(NGSI_TO_CRATE.keys())
+                        msg = ("'{}' is not a supported NGSI type. "
+                               "Please use any of the following: {}. "
+                               "Falling back to {}.")
+                        self.logger.warning(msg.format(
+                            attr_t, supported_types, NGSI_TEXT))
 
-                    table[col] = NGSI_TO_CRATE[NGSI_TEXT]
+                        table[col] = NGSI_TO_CRATE[NGSI_TEXT]
 
                 else:
                     # Github issue 44: Disable indexing for long string
