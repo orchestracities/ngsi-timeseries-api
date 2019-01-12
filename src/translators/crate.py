@@ -234,8 +234,8 @@ class CrateTranslator(base_translator.BaseTranslator):
                 original_attrs[col] = (attr, attr_t)
 
                 if attr_t not in NGSI_TO_CRATE:
-                    # if attribute is complex assume it as 
-                    if attr:
+                    # if attribute is complex assume it as an NGSI StructuredValue
+                    if self.attrValIsStructured(e[attr]):
                         table[col] = NGSI_TO_CRATE[NGSI_STRUCTURED_VALUE]
                     else:
                         supported_types = ', '.join(NGSI_TO_CRATE.keys())
@@ -284,7 +284,9 @@ class CrateTranslator(base_translator.BaseTranslator):
         stmt = "insert into {} ({}) values ({})".format(p1, p2, p3)
         self.cursor.executemany(stmt, entries)
         return self.cursor
-
+    
+    def attrValIsStructured(self, a)
+        return False
 
     def _preprocess_values(self, e, col_names, fiware_servicepath):
         values = []
