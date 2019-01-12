@@ -284,8 +284,8 @@ class CrateTranslator(base_translator.BaseTranslator):
         stmt = "insert into {} ({}) values ({})".format(p1, p2, p3)
         self.cursor.executemany(stmt, entries)
         return self.cursor
-    
-    def attrValIsStructured(self, a)
+
+    def attrValIsStructured(self, a):
         return False
 
     def _preprocess_values(self, e, col_names, fiware_servicepath):
