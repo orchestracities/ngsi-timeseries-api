@@ -8,6 +8,7 @@ from utils.common import iter_entity_attrs
 import logging
 import os
 import statistics
+import sys
 from geocoding.slf import SlfQuery
 from .crate_geo_query import from_ngsi_query
 
@@ -286,7 +287,19 @@ class CrateTranslator(base_translator.BaseTranslator):
         return self.cursor
 
     def attrValIsStructured(self, a):
-        return False
+        # isinstance(a, object)
+        isdict = False
+        msg = (" dir(a) return: '{}' \n"
+               " type(a) is: '{}'")
+        self.logger.info(msg.format(dir(a),type(a)))
+        msg = (" a: '{}'")
+        self.logger.info(msg.format(a))
+
+        if isinstance(a['value'], dict):
+            self.logger.info("a has 'value' attribute of type dict")
+            isdict = True
+
+        return isdict
 
     def _preprocess_values(self, e, col_names, fiware_servicepath):
         values = []
