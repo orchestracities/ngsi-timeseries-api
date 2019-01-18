@@ -265,7 +265,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         self._update_metadata_table(table_name, original_attrs)
 
         # Create Data Table
-        columns = ', '.join('{} {}'.format(cn, ct) for cn, ct in table.items())
+        columns = ', '.join('{} {}'.format("\"" + cn + "\"", ct) for cn, ct in table.items())
         stmt = "create table if not exists {} ({}) with " \
                "(number_of_replicas = '2-all')".format(table_name, columns)
         self.cursor.execute(stmt)
@@ -277,11 +277,14 @@ class CrateTranslator(base_translator.BaseTranslator):
         for e in entities:
             values = self._preprocess_values(e, col_names, fiware_servicepath)
             entries.append(values)
-
+        # quote field name in case
+        col_names_q = []
+        for cn in col_names:
+             col_names_q.append("\"" + cn + "\"")
         # Insert entities data
         p1 = table_name
-        p2 = ', '.join(col_names)
-        p3 = ','.join(['?'] * len(col_names))
+        p2 = ', '.join(col_names_q)
+        p3 = ','.join(['?'] * len(col_names_q))
         stmt = "insert into {} ({}) values ({})".format(p1, p2, p3)
         self.cursor.executemany(stmt, entries)
         return self.cursor
@@ -808,7 +811,7 @@ class CrateTranslator(base_translator.BaseTranslator):
                                               from_date,
                                               to_date,
                                               fiware_servicepath)
-        op = "delete from {} {}".format(table_name, where_clause)
+        op = "delete from \"{}\" {}".format(table_name, where_clause)
 
         try:
             self.cursor.execute(op)
@@ -830,7 +833,7 @@ class CrateTranslator(base_translator.BaseTranslator):
                                                   from_date,
                                                   to_date,
                                                   fiware_servicepath)
-            op = "delete from {} {}".format(table_name, where_clause)
+            op = "delete from \"{}\" {}".format(table_name, where_clause)
             try:
                 self.cursor.execute(op)
             except exceptions.ProgrammingError as e:
@@ -840,7 +843,7 @@ class CrateTranslator(base_translator.BaseTranslator):
 
         # Drop whole table
         try:
-            self.cursor.execute("select count(*) from {}".format(table_name))
+            self.cursor.execute("select count(*) from \"{}\"".format(table_name))
         except exceptions.ProgrammingError as e:
             logging.debug("{}".format(e))
             return 0
@@ -897,8 +900,10 @@ class CrateTranslator(base_translator.BaseTranslator):
 
         matching_types = []
         for et in all_types:
-            stmt = "select distinct(entity_type) from {} " \
+            stmt = "select distinct(entity_type) from \"{}\" " \
                    "where entity_id = ?".format(et)
+
+            self.logger.warn(">>>>>>>>>>>>>>>> query :" + stmt)
             self.cursor.execute(stmt, [entity_id,])
             types = [t[0] for t in self.cursor.fetchall()]
             matching_types.extend(types)
