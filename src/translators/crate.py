@@ -267,7 +267,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         # Create Data Table
         columns = ', '.join('{} {}'.format("\"" + cn + "\"", ct) for cn, ct in table.items())
         stmt = "create table if not exists {} ({}) with " \
-               "(number_of_replicas = '2-all')".format(table_name, columns)
+               "(number_of_replicas = '2-all')".format("\"" + table_name.replace(".", "\".\"") + "\"", columns)
         self.cursor.execute(stmt)
 
         # Gather attribute values
@@ -282,7 +282,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         for cn in col_names:
              col_names_q.append("\"" + cn + "\"")
         # Insert entities data
-        p1 = table_name
+        p1 = "\"" + table_name + "\""
         p2 = ', '.join(col_names_q)
         p3 = ','.join(['?'] * len(col_names_q))
         stmt = "insert into {} ({}) values ({})".format(p1, p2, p3)
@@ -292,15 +292,13 @@ class CrateTranslator(base_translator.BaseTranslator):
     def attrValIsStructured(self, a):
         # isinstance(a, object)
         isdict = False
-        msg = (" dir(a) return: '{}' \n"
-               " type(a) is: '{}'")
-        self.logger.info(msg.format(dir(a),type(a)))
-        msg = (" a: '{}'")
-        self.logger.info(msg.format(a))
 
-        if isinstance(a['value'], dict):
-            self.logger.info("a has 'value' attribute of type dict")
+        if a['value'] != None and isinstance(a['value'], dict):
+            self.logger.info("attribute {} has 'value' attribute of type dict".format(a))
             isdict = True
+        if isinstance(a, dict) and a['type'] == None and a['value'] == None:
+            isdict = True
+            self.logger.info("attribute {} is of type dict".format(a))
 
         return isdict
 
@@ -668,7 +666,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         result = []
         for tn in table_names:
             op = "select {select_clause} " \
-                 "from {tn} " \
+                 "from \"{tn}\" " \
                  "{where_clause} " \
                  "{order_group_clause} " \
                  "limit {limit} offset {offset}".format(
@@ -903,7 +901,6 @@ class CrateTranslator(base_translator.BaseTranslator):
             stmt = "select distinct(entity_type) from \"{}\" " \
                    "where entity_id = ?".format(et)
 
-            self.logger.warn(">>>>>>>>>>>>>>>> query :" + stmt)
             self.cursor.execute(stmt, [entity_id,])
             types = [t[0] for t in self.cursor.fetchall()]
             matching_types.extend(types)
