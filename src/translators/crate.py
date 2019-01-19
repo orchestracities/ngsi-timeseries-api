@@ -236,7 +236,7 @@ class CrateTranslator(base_translator.BaseTranslator):
 
                 if attr_t not in NGSI_TO_CRATE:
                     # if attribute is complex assume it as an NGSI StructuredValue
-                    if self.attrValIsStructured(e[attr]):
+                    if self._attr_is_structured(e[attr]):
                         table[col] = NGSI_TO_CRATE[NGSI_STRUCTURED_VALUE]
                     else:
                         supported_types = ', '.join(NGSI_TO_CRATE.keys())
@@ -289,7 +289,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         self.cursor.executemany(stmt, entries)
         return self.cursor
 
-    def attrValIsStructured(self, a):
+    def _attr_is_structured(self, a):
         # isinstance(a, object)
         isdict = False
 
