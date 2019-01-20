@@ -295,7 +295,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         if a['value'] is not None and isinstance(a['value'], dict):
             self.logger.info("attribute {} has 'value' attribute of type dict".format(a))
             isdict = True
-        # the next test is probably unuseful 
+        # the next test is probably unuseful
         # since if 'type' is not present in attribute in the request
         # it fallback to NGSI_TEXT
         if isinstance(a, dict) and a['type'] is None and a['value'] is None:
@@ -849,7 +849,7 @@ class CrateTranslator(base_translator.BaseTranslator):
             return 0
         count = self.cursor.fetchone()[0]
 
-        op = "drop table {}".format(table_name)
+        op = "drop table \"{}\"".format(table_name)
         try:
             self.cursor.execute(op)
         except exceptions.ProgrammingError as e:
