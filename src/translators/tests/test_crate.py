@@ -221,7 +221,7 @@ def test_accept_unknown_ngsi_type(translator):
 def test_accept_special_chars(translator):
     """
     test to validate issue #128
-    attributes names and entity type containing '-' are not accepted by crateDB    
+    attributes names and entity type containing '-' are not accepted by crateDB
     https://github.com/smartsdk/ngsi-timeseries-api/issues/128
     """
     e = {
@@ -291,11 +291,11 @@ def test_capitals(translator):
     assert len(entities) == 2
 
     assert entities[0]['id'] == e2['id']
-    assert entities[0]['NewAttr']['values'] == [e2['NewAttr']['value']]
+    assert entities[0]['NewAttr']['value'] == [e2['NewAttr']['value']]
 
     # Note that old entity gets None for the new attribute
     assert entities[1]['id'] == e1['id']
-    assert entities[1]['NewAttr']['values'] == [None]
+    assert entities[1]['NewAttr']['value'] == [None]
 
 
 @pytest.mark.filterwarnings("ignore")
