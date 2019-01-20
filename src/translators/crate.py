@@ -79,7 +79,11 @@ class CrateTranslator(base_translator.BaseTranslator):
         """
         table_names = [self._et2tn(et, fiware_service) for et in entity_types]
         table_names.append(METADATA_TABLE_NAME)
-        self.cursor.execute("refresh table {}".format(','.join(table_names)))
+        # quote tables tables names
+        tn = []
+        for tname in table_names:
+            tn.append("\"" + tname + "\"")
+        self.cursor.execute("refresh table {}".format(','.join(tn)))
 
 
     def get_db_version(self):
