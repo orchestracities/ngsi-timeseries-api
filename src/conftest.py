@@ -71,7 +71,7 @@ def do_clean_crate():
                        "where table_schema not in ('sys', "
                        "'information_schema', 'pg_catalog')")
         for (ts, tn) in cursor.rows:
-            cursor.execute("DROP TABLE IF EXISTS \"{}.{}\"".format(ts, tn))
+            cursor.execute("DROP TABLE IF EXISTS \"{}\".\"{}\"".format(ts, tn))
     finally:
         cursor.close()
 
