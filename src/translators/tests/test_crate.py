@@ -195,12 +195,41 @@ def test_unsupported_ngsi_type(translator):
     check_notifications_record([e], entities)
 
 def test_accept_unknown_ngsi_type(translator):
+    """
+    test to validate issue #129
+    automatic casting to NGSI data type
+    https://github.com/smartsdk/ngsi-timeseries-api/issues/129
+    """
     e = {
         "type": "SoMeWeIrDtYpE",
         "id": "sOmEwEiRdId",
         TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
         "address": {
             "type": "PostalAddress",
+            "value": {
+                "streetAddress": "18 Avenue Félix Faure",
+                "postalCode": "06000",
+                "addressLocality": "Nice",
+                "addressCountry": "France"
+            },
+        },
+    }
+    translator.insert([e])
+    entities = translator.query()
+    check_notifications_record([e], entities)
+
+def test_accept_special_chars(translator):
+    """
+    test to validate issue #128
+    attributes names and entity type containing '-' are not accepted by crateDB    
+    https://github.com/smartsdk/ngsi-timeseries-api/issues/128
+    """
+    e = {
+        "type": "SoMe-WeIrD-tYpE",
+        "id": "sOmE:wEiRd.Id",
+        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
+        "address": {
+            "type": "Address-Type",
             "value": {
                 "streetAddress": "18 Avenue Félix Faure",
                 "postalCode": "06000",
