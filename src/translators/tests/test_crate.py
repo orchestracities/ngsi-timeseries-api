@@ -291,7 +291,7 @@ def test_capitals(translator):
     assert len(entities) == 2
 
     assert entities[0]['id'] == e2['id']
-    assert entities[0]['NewAttr']['value'] == [e2['NewAttr']['value']]
+    assert entities[0]['NewAttr']['value'] == e2['NewAttr']['value']
 
     # Note that old entity gets None for the new attribute
     assert entities[1]['id'] == e1['id']
