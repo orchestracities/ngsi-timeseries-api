@@ -8,7 +8,6 @@ from utils.common import iter_entity_attrs
 import logging
 import os
 import statistics
-import sys
 from geocoding.slf import SlfQuery
 from .crate_geo_query import from_ngsi_query
 
@@ -280,7 +279,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         # quote field name in case
         col_names_q = []
         for cn in col_names:
-             col_names_q.append("\"" + cn + "\"")
+            col_names_q.append("\"" + cn + "\"")
         # Insert entities data
         p1 = "\"" + table_name + "\""
         p2 = ', '.join(col_names_q)
@@ -293,10 +292,13 @@ class CrateTranslator(base_translator.BaseTranslator):
         # isinstance(a, object)
         isdict = False
 
-        if a['value'] != None and isinstance(a['value'], dict):
+        if a['value'] is not None and isinstance(a['value'], dict):
             self.logger.info("attribute {} has 'value' attribute of type dict".format(a))
             isdict = True
-        if isinstance(a, dict) and a['type'] == None and a['value'] == None:
+        # the next test is probably unuseful 
+        # since if 'type' is not present in attribute in the request
+        # it fallback to NGSI_TEXT
+        if isinstance(a, dict) and a['type'] is None and a['value'] is None:
             isdict = True
             self.logger.info("attribute {} is of type dict".format(a))
 
