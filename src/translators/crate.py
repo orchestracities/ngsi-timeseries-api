@@ -234,7 +234,7 @@ class CrateTranslator(base_translator.BaseTranslator):
                     # Won't guess the type if used did't specify the type.
                     attr_t = NGSI_TEXT
 
-                col = attr #self._ea2cn(attr)
+                col = self._ea2cn(attr)
                 original_attrs[col] = (attr, attr_t)
 
                 if attr_t not in NGSI_TO_CRATE:
@@ -268,7 +268,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         self._update_metadata_table(table_name, original_attrs)
 
         # Create Data Table
-        columns = ', '.join('{} {}'.format("\"" + cn + "\"", ct) for cn, ct in table.items())
+        columns = ', '.join('{} {}'.format("\"" + self._ea2cn(cn) + "\"", ct) for cn, ct in table.items())
         stmt = "create table if not exists {} ({}) with " \
                "(number_of_replicas = '2-all')".format("\"" + table_name.replace(".", "\".\"") + "\"", columns)
         self.cursor.execute(stmt)
@@ -283,7 +283,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         # quote field name in case
         col_names_q = []
         for cn in col_names:
-            col_names_q.append("\"" + cn + "\"")
+            col_names_q.append("\"" + self._ea2cn(cn) + "\"")
         # Insert entities data
         p1 = "\"" + table_name + "\""
         p2 = ', '.join(col_names_q)
