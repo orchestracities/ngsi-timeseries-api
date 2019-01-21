@@ -234,7 +234,7 @@ class CrateTranslator(base_translator.BaseTranslator):
                     # Won't guess the type if used did't specify the type.
                     attr_t = NGSI_TEXT
 
-                col = self._ea2cn(attr)
+                col = attr #self._ea2cn(attr)
                 original_attrs[col] = (attr, attr_t)
 
                 if attr_t not in NGSI_TO_CRATE:
@@ -302,10 +302,11 @@ class CrateTranslator(base_translator.BaseTranslator):
         # the next test is probably unuseful
         # since if 'type' is not present in attribute in the request
         # it fallback to NGSI_TEXT
+        """
         if isinstance(a, dict) and a['type'] is None and a['value'] is None:
             isdict = True
             self.logger.info("attribute {} is of type dict".format(a))
-
+        """
         return isdict
 
     def _preprocess_values(self, e, col_names, fiware_servicepath):

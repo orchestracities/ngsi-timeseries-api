@@ -2,7 +2,6 @@ from datetime import datetime
 from conftest import crate_translator as translator
 from utils.common import create_random_entities, TIME_INDEX_NAME
 
-
 def test_delete_entity_defaults(translator):
     num_types = 2
     num_ids_per_type = 2
