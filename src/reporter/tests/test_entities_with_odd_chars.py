@@ -54,11 +54,10 @@ def run_test(entity_type, attr_name):
     delete_entities(entity['type'])
 
 
-odd_chars = ['-', '+', '@']
-# TODO: test other chars too, e.g. ':'
-# Note that you can't use certain chars at all, even if quoted. Two
-# such chars are '.' and  ' '. So for example, CrateDB bombs out on
-# `create table "x.y" (...)` or `create table "x y" (...)`
+odd_chars = ['-', '+', '@', ':']
+# Note that you can't use certain chars at all, even if quoted. Three
+# such chars are '.', '#' and  ' '. So for example, CrateDB bombs out
+# on `create table "x.y" (...)` or `create table "x y" (...)`
 
 
 @pytest.mark.parametrize('char', odd_chars)
