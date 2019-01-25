@@ -234,14 +234,18 @@ class CrateTranslator(base_translator.BaseTranslator):
                 original_attrs[col] = (attr, attr_t)
 
                 if attr_t not in NGSI_TO_CRATE:
-                    supported_types = ', '.join(NGSI_TO_CRATE.keys())
-                    msg = ("'{}' is not a supported NGSI type. "
-                           "Please use any of the following: {}. "
-                           "Falling back to {}.")
-                    self.logger.warning(msg.format(
-                        attr_t, supported_types, NGSI_TEXT))
+                    # if attribute is complex assume it as an NGSI StructuredValue
+                    if self._attr_is_structured(e[attr]):
+                        table[col] = NGSI_TO_CRATE[NGSI_STRUCTURED_VALUE]
+                    else:
+                        supported_types = ', '.join(NGSI_TO_CRATE.keys())
+                        msg = ("'{}' is not a supported NGSI type. "
+                               "Please use any of the following: {}. "
+                               "Falling back to {}.")
+                        self.logger.warning(msg.format(
+                            attr_t, supported_types, NGSI_TEXT))
 
-                    table[col] = NGSI_TO_CRATE[NGSI_TEXT]
+                        table[col] = NGSI_TO_CRATE[NGSI_TEXT]
 
                 else:
                     # Github issue 44: Disable indexing for long string
@@ -284,6 +288,22 @@ class CrateTranslator(base_translator.BaseTranslator):
         self.cursor.executemany(stmt, entries)
         return self.cursor
 
+    def _attr_is_structured(self, a):
+        # isinstance(a, object)
+        isdict = False
+
+        if a['value'] is not None and isinstance(a['value'], dict):
+            self.logger.info("attribute {} has 'value' attribute of type dict".format(a))
+            isdict = True
+        # the next test is probably unuseful
+        # since if 'type' is not present in attribute in the request
+        # it fallback to NGSI_TEXT
+        """
+        if isinstance(a, dict) and a['type'] is None and a['value'] is None:
+            isdict = True
+            self.logger.info("attribute {} is of type dict".format(a))
+        """
+        return isdict
 
     def _preprocess_values(self, e, col_names, fiware_servicepath):
         values = []
