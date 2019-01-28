@@ -1,6 +1,7 @@
 # QuantumLeap Release Notes
 
 ## 0.5
+
 Release 0.5 of QuantumLeap adds support for geographical queries and features
 a streamlined, much smaller docker image as well as several bug fixes.
 
