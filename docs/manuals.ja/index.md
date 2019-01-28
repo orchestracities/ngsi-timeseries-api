@@ -6,7 +6,7 @@
 ## 概要
 
 QuantumLeapは、NGSI [FIWARE NGSIv2](http://docs.orioncontextbroker.apiary.io/#)
-を [ngsi-tsdb](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1)と呼ばれる
+を [ngsi-tsdb](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)と呼ばれる
 [時系列データベース](https://en.wikipedia.org/wiki/Time_series_database)
 に格納することをサポートする API の最初の実装です。
 
@@ -57,7 +57,7 @@ QuantumLeap の一般的な使用シナリオは次のとおりです
 対象となるエンティティの新しい値が
 *[Orion Context Broker](https://fiware-orion.readthedocs.io)** **(2)**
 に到着します。その結果、通知は
-QuantumLeap の [/v2/notify](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1#/input/reporter.reporter.notify)
+QuantumLeap の [/v2/notify](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
 エンドポイント **(3)** に届きます。
 
 QuantumLeap の**レポーター**・サブモジュールは、受信した通知を解析して検証し、
@@ -69,7 +69,7 @@ QuantumLeap の**レポーター**・サブモジュールは、受信した通�
 集約データ検索用 **(4)** のいくつかのエンドポイントが含まれています。
 また、履歴レコードの削除もサポートしています。現在、すべてのエンドポイントが
 QuantumLeap で実装されているわけではありません。API の詳細については、
-[NGSI-TSDB specification](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1)
+[NGSI-TSDB specification](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
 の仕様を参照してください 。
 
 
