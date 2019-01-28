@@ -135,11 +135,7 @@ def add_location(entity, raise_error=False, session=None, cache=None):
     # Extract location from result.
     loc = None
     if osm_type == TYPE_POINT:
-        # We are looking for a point
-        for i in info:
-            if i.osm_type == 'node':
-                loc = i.geojson
-                break
+        loc = _extract_point(info)
 
     elif osm_type == TYPE_WAY:
         # We are looking for a street
@@ -168,6 +164,25 @@ def add_location(entity, raise_error=False, session=None, cache=None):
         cache.put(key, json.dumps(loc))
 
     return _do_add_location(entity, loc)
+
+
+def _osm_result_geom_type(result):
+    if hasattr(result, 'geojson') and isinstance(result.geojson, dict):
+        return result.geojson.get('geometry', {}).get('type', '')
+    return None
+
+
+def _extract_most_accurate_osm_result(osm_response, geom_type):
+    results = sorted(osm_response, key=lambda r: r.accuracy)
+    results_of_specified_type = [r for r in results
+                                 if geom_type == _osm_result_geom_type(r)]
+    if len(results_of_specified_type) > 0:
+        return results_of_specified_type[0].geojson
+    return None
+
+
+def _extract_point(osm_response):
+    return _extract_most_accurate_osm_result(osm_response, 'Point')
 
 
 def _do_add_location(entity, location):

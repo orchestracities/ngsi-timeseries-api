@@ -5,6 +5,7 @@ openstreetmap services.
 from conftest import REDIS_HOST, REDIS_PORT
 from geocoding import geocoding
 import copy
+import geojson
 import pytest
 
 
@@ -29,7 +30,6 @@ def test_entity_with_non_dict_address(air_quality_observed):
     assert r == old_entity
 
 
-@pytest.mark.skip(reason="See issue #105")
 def test_entity_add_point(air_quality_observed):
     air_quality_observed.pop('location')
 
@@ -68,8 +68,8 @@ def test_entity_add_point_negative_coord(air_quality_observed):
     assert r['location']['type'] == 'geo:point'
 
     lon, lat = r['location']['value'].split(',')
-    assert float(lon) == pytest.approx(19.6389474, abs=1e-2)
-    assert float(lat) == pytest.approx(-98.9109537, abs=1e-2)
+    assert float(lon) == pytest.approx(19.5115112, abs=1e-2)
+    assert float(lat) == pytest.approx(-99.0883494, abs=1e-2)
 
 
 def test_entity_add_street_line(air_quality_observed):
@@ -108,8 +108,8 @@ def test_entity_add_city_shape(air_quality_observed):
 
     geo = r['location']['value']
     assert geo['type'] == 'Polygon'
-    assert len(geo['coordinates']) == 1
-    assert len(geo['coordinates'][0]) == pytest.approx(2186, abs=100)
+    polygon = geojson.Polygon(geo['coordinates'])
+    assert polygon.is_valid
 
 
 def test_entity_add_country_shape(air_quality_observed):
@@ -138,7 +138,6 @@ def test_multiple_entities(air_quality_observed):
     assert len(r) == 2
 
 
-@pytest.mark.skip(reason="See issue #105")
 def test_caching(air_quality_observed, monkeypatch):
     air_quality_observed.pop('location')
 
