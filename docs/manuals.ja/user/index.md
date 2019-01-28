@@ -37,7 +37,7 @@ Orion の専門家ではないのですか？問題はありません。QuantumL
 の対応するセクションで詳しく説明されています。
 
 サブスクリプションを作成するために、QuantumLeap は
-[ここ](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1#/input/reporter.reporter.subscribe)
+[ここ](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
 にドキュメント化された API エンドポイントを提供します。
 
 また、Orion
@@ -196,7 +196,7 @@ NGSI エンティティが属性に有効な NGSI 型を使用していること
 ## データ検索
 
 QuantumLeap から履歴データを取得するには、
-[ここ](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1#/queries)
+[ここ](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
 で説明する API エンドポイントを使用します。可能性はたくさんありますが、
 それらのすべてがまだ完全に実装されているわけではありません。
 
@@ -233,12 +233,12 @@ QuantumLeap から履歴データを削除する方法は2通りあります。
 
 - 特定のエンティティのすべてのレコードを削除するには、この
 
-[API エンドポイント](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1#/input/reporter.delete.delete_entity)
+[API エンドポイント](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
 を使用します
 
 - 指定した型のすべてのエンティティのすべてのレコードを削除するには、この
 
-[API エンドポイント](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1#/input/reporter.delete.delete_entities)
+[API エンドポイント](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
 を使用します
 
 フィルターを使用して、特定の時間間隔でレコードのみを削除します。

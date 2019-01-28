@@ -33,7 +33,7 @@ understand well how the NGSIv2 Subscription mechanism works. This is carefully
 explained in the corresponding section of [Orion docs](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions).
 
 To create the subscription, QuantumLeap offers an API endpoint documented
-[here](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1#/input/reporter.reporter.subscribe).
+[here at /subscribe](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
 
 Alternatively, you can directly talk to Orion and create the subscription as you
 prefer. Here's an example of the payload of the subscription you need to create
@@ -179,7 +179,7 @@ should respect the naming guidelines explained
 ## Data Retrieval
 
 To retrieve historical data from QuantumLeap, you can use the API endpoints
-documented [here](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1#/queries).
+documented [here](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
 Note there are a lot of possibilities, but not all of them are fully
 implemented yet.
 
@@ -214,9 +214,9 @@ In the future, this could be more flexible and allow users to define any
 
 You can remove historical data from QuantumLeap in two different ways.
 
-To remove all records of a given entity, use [this API endpoint](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1#/input/reporter.delete.delete_entity).
+To remove all records of a given entity, use [this /entities delete API endpoint](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
 
-To remove all records of all entities of a given type, use [this API endpoint](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.1#/input/reporter.delete.delete_entities).
+To remove all records of all entities of a given type, use [this /types delete API endpoint](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
 
 Use the filters to delete only records in certain intervals of time.
 
