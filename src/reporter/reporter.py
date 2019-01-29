@@ -30,8 +30,8 @@ from datetime import datetime
 from flask import request
 from geocoding.geocache import GeoCodingCache
 from requests import RequestException
-from translators.crate import CrateTranslator, CrateTranslatorInstance,\
-    NGSI_TO_CRATE, NGSI_TEXT
+from translators.crate import CrateTranslator, CrateTranslatorInstance, \
+    NGSI_TO_CRATE, NGSI_TEXT, NGSI_DATETIME, NGSI_ISO8601
 from utils.common import iter_entity_attrs
 import json
 import logging
@@ -60,8 +60,16 @@ def has_value(entity, attr_name):
     attr_value = attr.get('value', None)
     attr_type = attr.get('type', None)
 
+    if attr_value is None:
+        return False
+
+    # GH Issue #145
+    if attr_type in (NGSI_DATETIME, NGSI_ISO8601):
+        return attr_value.strip() != ''
+
     if is_text(attr_type):
         return attr_value is not None  # yes, '' is a text value in this case!
+
     return attr_value not in [None, '']  # (*)
 # (*) if the type isn't Text, then we assume '' means "no value" which is kinda
 # debatable, but is the best we can do for now...

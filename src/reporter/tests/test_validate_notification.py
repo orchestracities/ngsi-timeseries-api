@@ -125,11 +125,18 @@ def test_valid_empty_numeric_attr_value():
                     'value': '2018-01-01T11:46:45.000Z'
                 }
             }
+        },
+        'TimeInstant': {
+            'type': 'DateTime',
+            'value': ' ',
+            'metadata': {}
         }
     }
     assert _validate_payload(data) is None
     assert 'value' in data['temperature']
     assert data['temperature']['value'] is None
+    assert 'value' in data['TimeInstant']
+    assert data['TimeInstant']['value'] is None
 
 
 def test_valid_empty_textual_attr_value():
