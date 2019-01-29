@@ -63,16 +63,14 @@ def has_value(entity, attr_name):
     if attr_value is None:
         return False
 
-    # GH Issue #145
-    if attr_type in (NGSI_DATETIME, NGSI_ISO8601):
-        return attr_value.strip() != ''
-
     if is_text(attr_type):
-        return attr_value is not None  # yes, '' is a text value in this case!
+        return True
 
-    return attr_value not in [None, '']  # (*)
-# (*) if the type isn't Text, then we assume '' means "no value" which is kinda
-# debatable, but is the best we can do for now...
+    if isinstance(attr_value, str):
+        attr_value = attr_value.strip()
+
+    # If type != Text and value == '', make value = null
+    return attr_value != ''
 
 
 def _validate_payload(payload):
