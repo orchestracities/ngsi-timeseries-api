@@ -9,6 +9,15 @@ import geojson
 import pytest
 
 
+def assert_lon_lat(entity, expected_lon, expected_lat):
+    assert 'location' in entity
+    assert entity['location']['type'] == 'geo:point'
+
+    lon, lat = entity['location']['value'].split(',')
+    assert float(lon) == pytest.approx(expected_lon, abs=1e-2)
+    assert float(lat) == pytest.approx(expected_lat, abs=1e-2)
+
+
 def test_entity_with_location(air_quality_observed):
     # Adding location to an entity with location does nothing
     assert 'location' in air_quality_observed
@@ -43,12 +52,7 @@ def test_entity_add_point(air_quality_observed):
     r = geocoding.add_location(air_quality_observed)
     assert r is air_quality_observed
 
-    assert 'location' in r
-    assert r['location']['type'] == 'geo:point'
-
-    lon, lat = r['location']['value'].split(',')
-    assert float(lon) == pytest.approx(51.2358357, abs=1e-2)
-    assert float(lat) == pytest.approx(4.4201911, abs=1e-2)
+    assert_lon_lat(r, expected_lon=51.23, expected_lat=4.42)
 
 
 def test_entity_add_point_negative_coord(air_quality_observed):
@@ -64,12 +68,7 @@ def test_entity_add_point_negative_coord(air_quality_observed):
     r = geocoding.add_location(air_quality_observed)
     assert r is air_quality_observed
 
-    assert 'location' in r
-    assert r['location']['type'] == 'geo:point'
-
-    lon, lat = r['location']['value'].split(',')
-    assert float(lon) == pytest.approx(19.5115112, abs=1e-2)
-    assert float(lat) == pytest.approx(-99.0883494, abs=1e-2)
+    assert_lon_lat(r, expected_lon=19.51, expected_lat=-99.08)
 
 
 def test_entity_add_street_line(air_quality_observed):
@@ -127,7 +126,8 @@ def test_entity_add_country_shape(air_quality_observed):
 
     geo = r['location']['value']
     assert geo['type'] == 'MultiPolygon'
-    assert len(geo['coordinates']) == pytest.approx(12, abs=2)
+    multi_polygon = geojson.MultiPolygon(geo['coordinates'])
+    assert multi_polygon.is_valid
 
 
 def test_multiple_entities(air_quality_observed):
@@ -157,9 +157,6 @@ def test_caching(air_quality_observed, monkeypatch):
         assert r is air_quality_observed
         assert 'location' in r
         assert r['location']['type'] == 'geo:point'
-        lon, lat = r['location']['value'].split(',')
-        assert float(lon) == pytest.approx(51.2358357, abs=1e-2)
-        assert float(lat) == pytest.approx(4.4201911, abs=1e-2)
         assert len(cache.redis.keys('*')) == 1
 
         # Make sure no external calls are made
@@ -169,9 +166,6 @@ def test_caching(air_quality_observed, monkeypatch):
         r = geocoding.add_location(air_quality_observed, cache=cache)
         assert 'location' in r
         assert r['location']['type'] == 'geo:point'
-        lon, lat = r['location']['value'].split(',')
-        assert float(lon) == pytest.approx(51.2358357, abs=1e-2)
-        assert float(lat) == pytest.approx(4.4201911, abs=1e-2)
         assert len(cache.redis.keys('*')) == 1
 
     finally:
