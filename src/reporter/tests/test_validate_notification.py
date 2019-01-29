@@ -113,6 +113,7 @@ def test_valid_no_attr_value():
 
 
 def test_valid_empty_numeric_attr_value():
+    # See also GH Issue #145
     data = {
         'id': 'Room:001',
         'type': 'Room',
@@ -126,16 +127,27 @@ def test_valid_empty_numeric_attr_value():
                 }
             }
         },
+        'proximity': {
+            'type': 'Number',
+            'value': ' ',
+            'metadata': {}
+        },
+        'TimeStep': {
+            'type': 'DateTime',
+            'value': '',
+            'metadata': {}
+        },
         'TimeInstant': {
             'type': 'DateTime',
             'value': ' ',
             'metadata': {}
-        }
+        },
     }
+
     assert _validate_payload(data) is None
-    assert 'value' in data['temperature']
     assert data['temperature']['value'] is None
-    assert 'value' in data['TimeInstant']
+    assert data['proximity']['value'] is None
+    assert data['TimeStep']['value'] is None
     assert data['TimeInstant']['value'] is None
 
 
