@@ -125,14 +125,14 @@ definitions:
 parameters:
   fiwareService:
     in: header
-    name: fiware-Service
+    name: fiwareService
     required: false
     type: string
     description: "The corresponding 'fiware-service' header.
     See http://fiware-orion.readthedocs.io/en/latest/user/multitenancy/index.html#multi-tenancy"
   fiwareServicePath:
     in: header
-    name: fiware-ServicePath
+    name: fiwareServicePath
     required: false
     type: string
     description: "The corresponding 'fiware-servicepath' header.
