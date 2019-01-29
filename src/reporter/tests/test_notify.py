@@ -310,6 +310,7 @@ def test_no_value_in_notification(notification):
         'id': '299531',
         'type': 'AirQualityObserved',
         'p': {'type': 'string', 'value': '994', 'metadata': {}},
+        'ti': {'type': 'ISO8601', 'value': ' ', 'metadata': {}},
         'pm10': {'type': 'string', 'metadata': {}},
         'pm25': {'type': 'string', 'value': '5', 'metadata': {}},
     }
