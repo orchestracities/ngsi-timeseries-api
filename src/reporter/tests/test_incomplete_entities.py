@@ -186,3 +186,17 @@ def test_store_empty_numeric_value_as_null():
     attr_values_map = get_all_stored_attributes(entity['id'])
     assert len(attr_values_map) == 1
     assert attr_values_map['x'] == [None]
+
+
+def test_store_empty_attribute_as_null_text():
+    entity = {
+        'id': 't7:1',
+        'type': 't7',
+        'x': {
+        }
+    }
+    notify(entity)
+
+    attr_values_map = get_all_stored_attributes(entity['id'])
+    assert len(attr_values_map) == 1
+    assert attr_values_map['x'] == [None]
