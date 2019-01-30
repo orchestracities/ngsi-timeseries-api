@@ -289,21 +289,11 @@ class CrateTranslator(base_translator.BaseTranslator):
         return self.cursor
 
     def _attr_is_structured(self, a):
-        # isinstance(a, object)
-        isdict = False
-
         if a['value'] is not None and isinstance(a['value'], dict):
-            self.logger.info("attribute {} has 'value' attribute of type dict".format(a))
-            isdict = True
-        # the next test is probably unuseful
-        # since if 'type' is not present in attribute in the request
-        # it fallback to NGSI_TEXT
-        """
-        if isinstance(a, dict) and a['type'] is None and a['value'] is None:
-            isdict = True
-            self.logger.info("attribute {} is of type dict".format(a))
-        """
-        return isdict
+            self.logger.info("attribute {} has 'value' attribute of type dict"
+                             .format(a))
+            return True
+        return False
 
     def _preprocess_values(self, e, col_names, fiware_servicepath):
         values = []
