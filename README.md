@@ -20,9 +20,8 @@ or checkout the Extra Resources below.
 This project is part of [FIWARE](https://www.fiware.org). You can find more
 FIWARE components in the [FIWARE catalogue](https://catalogue.fiware.org).
 
-|  :books: [Documentation](https://quantumleap.rtfd.io/) | :mortar_board: [Academy](https://fiware-academy.readthedocs.io/en/latest/core/quantum-leap) |  :whale: [Docker Hub](https://hub.docker.com/r/smartsdk/quantumleap/) |
-| --- | --- | --- |
-
+|  :books: [Documentation](https://quantumleap.rtfd.io/) | :mortar_board: [Academy](https://fiware-academy.readthedocs.io/en/latest/core/quantum-leap) |  :whale: [Docker Hub](https://hub.docker.com/r/smartsdk/quantumleap/) | :dart: [Roadmap](https://github.com/smartsdk/ngsi-timeseries-api/blob/master/docs/roadmap.md) |
+|---|---|---|---|
 
 ## Contents
 
@@ -32,7 +31,6 @@ FIWARE components in the [FIWARE catalogue](https://catalogue.fiware.org).
 -   [Contributing](#contributing)
 -   [Extra resources](#extra-resources)
 -   [License](#license)
-
 
 ## Install
 
