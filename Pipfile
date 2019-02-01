@@ -19,6 +19,12 @@ numpy = "~=1.12"
 pymongo = "~=3.4"
 pytest-flask = "~=0.10"
 
+# Indirect dependencies needing special handling.
+# See #157 for the details.
+# Note. Run `pipenv lock --pre` to generate the lock file.
+pyyaml = ">=4.2b1"
+certifi = "==2018.10.15"
+
 [dev-packages]
 
 [requires]
