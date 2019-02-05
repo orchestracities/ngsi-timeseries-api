@@ -10,7 +10,7 @@ QuantumLeap が保存したすべてのデータをクエリすることもで�
 これとインタラクションする最も簡単な方法は、
 [ここ](https://crate.io/docs/crate/guide/getting_started/connect/admin_ui.html)
 で説明するように、管理インターフェースを使用することです。または、
-[HTTP api](https://crate.io/docs/crate/guide/getting_started/connect/rest.html)
+[HTTP api](https://crate.io/docs/crate/getting-started/en/latest/first-use/query.html#the-cratedb-http-endpoint)
 またはその
 [サポートされているクライアント](https://crate.io/docs/crate/guide/getting_started/clients/index.html)
 を使用できます。
@@ -18,7 +18,7 @@ QuantumLeap が保存したすべてのデータをクエリすることもで�
 CrateDB と操作する最も簡単な方法は、
 [ここ](https://crate.io/docs/crate/guide/getting_started/connect/admin_ui.html)
 で説明しているように、管理インターフェースを使用します。または、
-[HTTP api](https://crate.io/docs/crate/guide/getting_started/connect/rest.html)
+[HTTP api](https://crate.io/docs/crate/getting-started/en/latest/first-use/query.html#the-cratedb-http-endpoint)
 または
 [サポートされているクライアント](https://crate.io/docs/crate/guide/getting_started/clients/index.html)
 を使用できます。
