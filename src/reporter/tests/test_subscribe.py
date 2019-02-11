@@ -1,5 +1,6 @@
 from conftest import QL_URL, ORION_URL, clean_mongo, clean_crate
 import requests
+from reporter.timex import TIME_INDEX_HEADER_NAME
 
 subscribe_url = "{}/subscribe".format(QL_URL)
 
@@ -42,7 +43,7 @@ def test_valid_defaults(clean_mongo, clean_crate):
         'attrs': [],
         'attrsFormat': 'normalized',
         'http': {'url': "{}/notify".format(QL_URL)},
-        'metadata': ['dateCreated', 'dateModified'],
+        'metadata': ['dateCreated', 'dateModified', 'TimeInstant'],
     }
     assert subscription['throttling'] == 1
 
@@ -81,7 +82,7 @@ def test_valid_customs(clean_mongo, clean_crate):
         'attrs': ["pressure"],
         'attrsFormat': 'normalized',
         'http': {'url': "{}/notify".format(QL_URL)},
-        'metadata': ['dateCreated', 'dateModified'],
+        'metadata': ['dateCreated', 'dateModified', 'TimeInstant'],
     }
     assert subscription['throttling'] == 30
 
@@ -117,3 +118,42 @@ def test_use_multitenancy_headers(clean_mongo, clean_crate):
     assert r.ok
     res = r.json()
     assert len(res) == 0
+
+
+def test_custom_time_index(clean_mongo, clean_crate):
+    params = {
+        'orionUrl': ORION_URL,
+        'quantumleapUrl': QL_URL,
+        'entityType': 'Room',
+        'idPattern': 'Room1',
+        'observedAttributes': 'temperature,pressure',
+        'notifiedAttributes': 'pressure',
+        'timeIndexAttribute': 'my-time-index'
+    }
+    r = requests.post(subscribe_url, params=params)
+    assert r.status_code == 201
+
+    # Check created subscription
+    r = requests.get("{}/subscriptions".format(ORION_URL))
+    assert r.ok
+    res = r.json()
+    assert len(res) == 1
+    subscription = res[0]
+
+    description = 'Created by QuantumLeap {}.'.format(QL_URL)
+    assert subscription['description'] == description
+    assert subscription['subject'] == {
+        'entities': [{'idPattern': 'Room1', 'type': 'Room'}],
+        'condition': {'attrs': ['temperature', 'pressure']}
+    }
+    assert subscription['notification'] == {
+        'attrs': ['pressure'],
+        'attrsFormat': 'normalized',
+        'httpCustom': {
+            'url': "{}/notify".format(QL_URL),
+            'headers': {
+                TIME_INDEX_HEADER_NAME: 'my-time-index'
+            }
+        },
+        'metadata': ['dateCreated', 'dateModified', 'TimeInstant'],
+    }

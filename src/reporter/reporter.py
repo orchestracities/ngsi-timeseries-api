@@ -261,7 +261,8 @@ def subscribe(orion_url,
               attributes=None,
               observed_attributes=None,
               notified_attributes=None,
-              throttling=None):
+              throttling=None,
+              time_index_attribute=None):
     # Validate Orion
     try:
         r = requests.get(orion_url)
@@ -280,7 +281,7 @@ def subscribe(orion_url,
         quantumleap_url,
         entity_type, entity_id, id_pattern,
         attributes, observed_attributes, notified_attributes,
-        throttling)
+        throttling, time_index_attribute)
 
     # Send subscription
     endpoint = '{}/subscriptions'.format(orion_url)

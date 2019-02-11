@@ -1,6 +1,7 @@
 import pytest
 
 from reporter.subscription_builder import build_subscription
+from reporter.timex import TIME_INDEX_HEADER_NAME
 
 
 def test_bare_subscription():
@@ -20,7 +21,7 @@ def test_bare_subscription():
             'http': {
                 'url': 'http://ql/notify'
             },
-            'metadata': ['dateCreated', 'dateModified']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
         },
         'throttling': 1
     }
@@ -46,7 +47,7 @@ def test_entity_type():
             'http': {
                 'url': 'http://ql/notify'
             },
-            'metadata': ['dateCreated', 'dateModified']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
         },
         'throttling': 1
     }
@@ -71,7 +72,7 @@ def test_entity_id():
             'http': {
                 'url': 'http://ql/notify'
             },
-            'metadata': ['dateCreated', 'dateModified']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
         },
         'throttling': 1
     }
@@ -101,7 +102,7 @@ def test_attributes(attrs):
                 'url': 'http://ql/notify'
             },
             'attrs': attrs.split(','),
-            'metadata': ['dateCreated', 'dateModified']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
         },
         'throttling': 1
     }
@@ -130,7 +131,7 @@ def test_observed_attributes(attrs):
             'http': {
                 'url': 'http://ql/notify'
             },
-            'metadata': ['dateCreated', 'dateModified']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
         },
         'throttling': 1
     }
@@ -157,7 +158,7 @@ def test_notified_attributes(attrs):
                 'url': 'http://ql/notify'
             },
             'attrs': attrs.split(','),
-            'metadata': ['dateCreated', 'dateModified']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
         },
         'throttling': 1
     }
@@ -182,7 +183,7 @@ def test_throttling():
             'http': {
                 'url': 'http://ql/notify'
             },
-            'metadata': ['dateCreated', 'dateModified']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
         },
         'throttling': 123
     }
@@ -207,7 +208,7 @@ def test_entity_id_overrides_pattern():
             'http': {
                 'url': 'http://ql/notify'
             },
-            'metadata': ['dateCreated', 'dateModified']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
         },
         'throttling': 1
     }
@@ -236,7 +237,7 @@ def test_all_attributes():
                 'url': 'http://ql/notify'
             },
             'attrs': ['b', 'c'],
-            'metadata': ['dateCreated', 'dateModified']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
         },
         'throttling': 1
     }
@@ -270,7 +271,36 @@ def test_attributes_overrides_other_attributes(observed, notified):
                 'url': 'http://ql/notify'
             },
             'attrs': ['x'],
-            'metadata': ['dateCreated', 'dateModified']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
+        },
+        'throttling': 1
+    }
+
+    assert actual == expected
+
+
+def test_subscription_with_time_index():
+    actual = build_subscription(
+        quantumleap_url='http://ql',
+        etype=None, eid=None, eid_pattern=None,
+        attributes=None, observed_attributes=None, notified_attributes=None,
+        throttling_secs=None,
+        time_index_attribute='my-time-index-attr-name')
+    expected = {
+        'description': 'Created by QuantumLeap http://ql.',
+        'subject': {
+            'entities': [{
+                'idPattern': '.*'
+            }]
+        },
+        'notification': {
+            'httpCustom': {
+                'url': 'http://ql/notify',
+                'headers': {
+                    TIME_INDEX_HEADER_NAME: 'my-time-index-attr-name'
+                }
+            },
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
         },
         'throttling': 1
     }
