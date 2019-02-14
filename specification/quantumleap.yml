@@ -591,6 +591,14 @@ paths:
           description: "Minimal period of time in seconds which must elapse between two
           consecutive notifications. This is the value QL will use for the throttling
           field when creating the subscription. If not specified, it defaults to 1."
+        - in: query
+          name: timeIndexAttribute
+          required: false
+          type: string
+          description: "The name of a custom attribute to be used as a time index. On
+          receiving notifications containing this attribute, QL will use its value as
+          a time series index for the entity being notified. If specified, it should
+          refer to an entity attribute whose value is an ISO 8601 timestamp."
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
       tags:

@@ -26,7 +26,6 @@ attributes.
 interest and make QL actually perform the corresponding subscription to orion.
 I.e, QL must be told where orion is.
 """
-from datetime import datetime
 from flask import request
 from geocoding.geocache import GeoCodingCache
 from requests import RequestException
@@ -38,6 +37,7 @@ import logging
 import os
 import requests
 from reporter.subscription_builder import build_subscription
+from reporter.timex import select_time_index_value_as_iso
 from geocoding.location import normalize_location
 
 
@@ -105,40 +105,6 @@ def _validate_payload(payload):
                 'Payload is missing value for attribute {}'.format(attr))
 
 
-def _get_time_index(payload):
-    """
-    :param payload:
-        The received json data in the notification.
-
-    :return: str
-        The notification time index. E.g: '2017-06-29T14:47:50.844'
-
-    The strategy for now is simple. Received notifications are expected to have
-    the dateModified field
-    (http://docs.orioncontextbroker.apiary.io/#introduction/specification/virtual-attributes)
-    If the notification lacks this attribute, we try using the "latest" of the
-    modification times of any of the attributes in the notification. If there
-    isn't any, the notification received time will be assumed.
-
-    In future, this could be enhanced with customs notifications where user
-    specifies which attribute is to be used as "time index".
-    """
-    if 'dateModified' in payload:
-        return payload['dateModified']['value']
-
-    # Orion did not include dateModified at the entity level.
-    # Let's use the newest of the changes in any of the attributes.
-    dates = set([])
-    for attr in iter_entity_attrs(payload):
-        if 'dateModified' in payload[attr].get('metadata', {}):
-            dates.add(payload[attr]['metadata']['dateModified']['value'])
-    if dates:
-        return sorted(dates)[-1]
-
-    # Finally, assume current timestamp as dateModified
-    return datetime.now().isoformat()
-
-
 def notify():
     if request.json is None:
         return 'Discarding notification due to lack of request body. ' \
@@ -161,7 +127,8 @@ def notify():
         return error, 400
 
     # Add TIME_INDEX attribute
-    payload[CrateTranslator.TIME_INDEX_NAME] = _get_time_index(payload)
+    payload[CrateTranslator.TIME_INDEX_NAME] = \
+        select_time_index_value_as_iso(request.headers, payload)
 
     # Add GEO-DATE if enabled
     add_geodata(payload)
@@ -267,7 +234,8 @@ def subscribe(orion_url,
               attributes=None,
               observed_attributes=None,
               notified_attributes=None,
-              throttling=None):
+              throttling=None,
+              time_index_attribute=None):
     # Validate Orion
     try:
         r = requests.get(orion_url)
@@ -286,7 +254,7 @@ def subscribe(orion_url,
         quantumleap_url,
         entity_type, entity_id, id_pattern,
         attributes, observed_attributes, notified_attributes,
-        throttling)
+        throttling, time_index_attribute)
 
     # Send subscription
     endpoint = '{}/subscriptions'.format(orion_url)
