@@ -10,7 +10,7 @@ whose historical data you are interested in.
 
 Not an Orion expert yet? No problem, you can create the subscription through
 QuantumLeap's API. However, you will still need to understand the basics of
-how subscriptions and notifications work, so take a time to read
+how subscriptions and notifications work, so take your time to read
 [the docs](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#ubscriptions).
 
 Historical data for each entity type will be persisted as long as the
@@ -20,7 +20,7 @@ is NGSI compliant.
 So, summing up, the usage flow is therefore the following...
 
 - Create an Orion subscription for each entity type of your interest
-- Insert/Update your data in Orion as usual
+- Insert/Update your entities in Orion as usual
 - Your historical data will be persisted in QuantumLeap's database
 
 Let's take a closer look at each step.
@@ -86,10 +86,9 @@ QuantumLeap is running.
 - Though not compulsory, it is highly recommended to include the
 `"metadata": ["dateCreated", "dateModified"]` part in the `notification`
 part of the subscription. This instructs Orion to include the modification time
-of the attributes in the notification. This timestamp will be used as the time
-index in the database. If this is somehow missing, QuantumLeap will use its
-current system time at which the notification arrived, which might not be
-exactly what you want.
+of the attributes in the notification. This timestamp will be used as the
+**time index** in the database if possible. See the *Time Index* section for
+more details.
 
 - You can create any valid NGSI subscription for your entities respecting the
 previous rules.
@@ -197,51 +196,72 @@ See the [Grafana](../admin/grafana.md) section of the docs to see how.
 
 ### Time Index
 
-A fundamental element in the time-series database is the time index. You may be
-wondering... where is it stored?
+A fundamental element in the time-series database is the **time index**.
+You may be wondering... where is it stored? QuantumLeap will persist the
+*time index* for each notification in a special column called `time_index`.
 
-QuantumLeap will persist the *time index* for each notification in a special
-column called `time_index`.  If you payed attention in the
-[Orion Subscription section](#orion-subscription), you know at least which
-value is used as the time index. This is, the `"dateModified"` value notified
-by Orion or, if you missed that option in the subscription, the notification
-arrival time.
+The value that is used for the *time index* of a received notification is
+defined according to the following policy, which choses the first present and
+valid time value chosen from the following ordered list of options.
 
-In the future, this could be more flexible and allow users to define any
-`DateTime` attribute to be used as the time index.
+1. Custom **time index**. The value of the `Fiware-TimeIndex-Attribute` http
+header. Note that for a notification to contain such header, the corresponding
+subscription has to be created with an `httpCustom` block, as detailed in the
+*Subscriptions and Custom Notifications* section of the [NGSI spec](http://fiware.github.io/specifications/ngsiv2/stable/).
+This is the way you can instruct QL to use custom attributes of the
+notification payload to be taken as *time index* indicators.
+
+1. **TimeInstant** attribute. As specified in the [FIWARE IoT agent documentation](https://github.com/telefonicaid/iotagent-node-lib#the-timeinstant-element).
+
+1. **TimeInstant** metadata. The most recent `TimeInstant` attribute value
+found in any of the attribute metadata sections in the notification.
+(Again, refer to the [FIWARE IoT agent documentation](https://github.com/telefonicaid/iotagent-node-lib#the-timeinstant-element).)
+
+1. **dateModified** attribute. If you payed attention in the
+[Orion Subscription section](#orion-subscription), this is the `"dateModified"`
+value notified by Orion.
+
+1. **dateModified** metadata. The most recent dateModified attribute value
+found in any of the attribute metadata sections in the notification.
+
+1. Finally, QL will use the **Current Time** (the time of notification
+reception) if none of the above options is present or none of the values found
+can actually be converted to a `datetime`.
 
 ## Data Removal
 
 You can remove historical data from QuantumLeap in two different ways.
 
-To remove all records of a given entity, use [this /entities delete API endpoint](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
+- To remove all records of a given entity, use [this /entities delete API endpoint](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
 
-To remove all records of all entities of a given type, use [this /types delete API endpoint](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
+- To remove all records of all entities of a given type, use [this /types delete API endpoint](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
 
 Use the filters to delete only records in certain intervals of time.
 
 ## Multi-tenancy
 
 QuantumLeap supports the use of different tenants, just like Orion does with
-the usage FIWARE headers documented [here](https://fiware-orion.readthedocs.io/en/master/user/multitenancy/index.html).
+the usage FIWARE headers documented
+[here](https://fiware-orion.readthedocs.io/en/master/user/multitenancy/index.html).
 
 Recall the use of tenancy headers (`Fiware-Service` and `Fiware-ServicePath`) is
 optional. Data insertion and retrieval will work by default without those.
 However, if you use headers for the insertion, you need to specify the same ones
 when querying data.
 
-Note in the case of QuantumLeap, the headers at the time of "insertion" should
+Note in the case of QuantumLeap, the headers at the time of insertion should
 actually be used by the client at the time of creating the
-[Subscription to Orion]() and also by the device when pushing data to Orion.
-As mentioned, the same headers will have to be used in order to retrieve such
-data.
+[Subscription to Orion](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions)
+and also by the device when pushing data to Orion. As mentioned, the same
+headers will have to be used in order to retrieve such data.
 
 In case you are interacting directly with the database, you need to know that
-QuantumLeap will use the `FIWARE-Service` as the [database scheme]() for crate,
-with a specific prefix. This way, if you insert an entity of type `Room` in the
-using the `Fiware-Service: magic` header, you should expect to find your table
-at `mtmagic.etroom`. This information is also useful for example if you are
-configuring the Grafana datasource, as explained in the
+QuantumLeap will use the `FIWARE-Service` as the
+[database schema](https://crate.io/docs/crate/reference/en/latest/general/ddl/create-table.html?highlight=scheme#schemas)
+for crate, with a specific prefix. This way, if you insert an entity of type
+`Room` using the `Fiware-Service: magic` header, you should expect to find your
+table as `mtmagic.etroom`. This information is also useful for example if you
+are configuring the Grafana datasource, as explained in the
 [Grafana section](../admin/grafana.md) of the docs.
 
 ## GeoCoding
@@ -254,23 +274,24 @@ The idea is that if entities arrive in QuantumLeap with an attribute of type
 field typically found in the [FIWARE Data Models](https://github.com/fiware/dataModels).
 It then adds to the entity an attribute called `location` of the corresponding
 geo-type. This means, if the address is a complete address with city,
-street name and postal number it maps to a point and hence the generated
+street name and postal number, it maps that to a point and hence the generated
 attribute will be of type `geo:point`. Without a postal number, the address
 will represent the street (if any) or the city boundaries (if any) or even the
 country boundaries. In these cases the generated location will be of the
-`geo:json` form and will contain the values of such shape.
+`geo:json` form and will contain the values of such shapes.
 
 **WARNING:** This feature uses [OpenStreetMap](https://www.openstreetmap.org)
 and its Nominatim service. As such, you need to be aware of its
 [copyright notes](https://www.openstreetmap.org/copyright) and most importantly
 of their Usage Policies ([API Usage Policy](https://operations.osmfoundation.org/policies/api/)
-, [Nominatim Usage Policy](https://operations.osmfoundation.org/policies/nominatim/)
+and [Nominatim Usage Policy](https://operations.osmfoundation.org/policies/nominatim/)).
 You should not abuse of this free service and you should cache your requests.
 This is why you need to specify a cache in order to enable the geocoding.
-QuantumLeap uses [Redis](https://redis.io/).
+QuantumLeap uses [Redis](https://redis.io/) for that.
 
 So, to enable this feature, you need to pass (at initialisation time) to the
 QuantumLeap container the environment variable `USE_GEOCODING` set to `True`
 and the environment variables `REDIS_HOST` and `REDIS_PORT` respectively set to
-the location of your REDIS instance and its access port. See the [docker-compose-dev.yml](https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
+the location of your REDIS instance and its access port. See the
+[docker-compose-dev.yml](https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
 for example.

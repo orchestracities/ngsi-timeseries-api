@@ -3,7 +3,7 @@ version: '3'
 services:
 
   orion:
-    image: fiware/orion:${ORION_VERSION:-1.15.1}
+    image: fiware/orion:${ORION_VERSION:-2.0.0}
     ports:
       - "1026:1026"
     command: -logLevel DEBUG -noCache -dbhost mongo
@@ -16,7 +16,7 @@ services:
       retries: 3
 
   mongo:
-    image: mongo:3.2
+    image: mongo:3.2.19
     ports:
       - "27017:27017"
     volumes:
@@ -37,7 +37,7 @@ services:
       - REDIS_PORT=6379
 
   crate:
-    image: crate:${CRATE_VERSION:-3.0.5}
+    image: crate:${CRATE_VERSION:-3.1.2}
     command: crate -Clicense.enterprise=false -Cauth.host_based.enabled=false
       -Ccluster.name=democluster -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*"
     ports:

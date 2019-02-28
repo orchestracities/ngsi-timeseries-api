@@ -21,4 +21,5 @@ are used within the cluster.
 |TCP                | 6379          |  Redis cache (used by geocoding) |
 
 For more info on ports numbers, you can always inspect the ports being exposed
-in the `docker-compose.yml` files of this repo.
+in the [docker-compose-dev.yml](https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
+file of this repo (actually the one you used to deploy, of course).

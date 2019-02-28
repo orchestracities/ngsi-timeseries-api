@@ -140,7 +140,7 @@ Postman を使用しない場合は、以下の同等の curl コマンドを使
 データが失われたりする可能性があります。
 常にそうであるように、自動化は慎重に使用してください。
 
-[ここ](https://github.com/smartsdk/ngsi-timeseries-api/blob/master/tests/test_integration.py)
+[ここ](https://github.com/smartsdk/ngsi-timeseries-api/blob/master/src/tests/test_integration.py)
 にテストスクリプトがあります。デプロイに応じて、設定する必要のある入力変数に
 注意してください。これらは、コア・サービスを見つけるための URL を示します。
 デフォルトでは、すべてのサービスはローカルの Docker ベースのデプロイで
