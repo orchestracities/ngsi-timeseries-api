@@ -26,14 +26,13 @@ If you don't use Postman, you can use the equivalent curl commands bellow.
     You should get a return status `200 OK`.
 
 1. Create an Orion Subscription via "QuantumLeap Subscribe"
+
         curl -X POST \
         'http://0.0.0.0:8668/v2/subscribe?orionUrl=http://orion:1026/v2&quantumleapUrl=http://quantumleap:8668/v2&entityType=AirQualityObserved' \
         -H 'Accept: application/json'
 
     Note we've just created a subscription for any change in any attribute of
-    entities of type [AirQualityObserved](https://github.com/Fiware/dataModels/tree/master/Environment/AirQualityObserved)
-
-    You should get a return status `201 Created`.
+    entities of type [AirQualityObserved](https://github.com/Fiware/dataModels/tree/master/Environment/AirQualityObserved). You should get a return status `201 Created`.
 
 1. Check you cat get such subscription from Orion
 
@@ -129,11 +128,11 @@ If you are already familiar with the flow and just want a quick way to check
 the essential services are correctly deployed, you can make use of one of the
 integration tests that checks exactly this connection among core components.
 
-*IMPORTANT:* It is not suggested to run this script in production deployments
+**IMPORTANT:** It is not suggested to run this script in production deployments
 with valuable data. If things go wrong in the test, it may leave garbage data
 or can lead to data loses. As always, use automation with caution.
 
-You can see the test script [here](https://github.com/smartsdk/ngsi-timeseries-api/blob/master/tests/test_integration.py).
+You can see the test script [here](https://github.com/smartsdk/ngsi-timeseries-api/blob/master/src/tests/test_integration.py).
 Pay attention to the input variables that, depending on your deployment, you
 may need to configure. These indicate the URLs where to find the core services.
 By default, it assumes all services run in a local docker-based deployment.

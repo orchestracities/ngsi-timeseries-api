@@ -2,6 +2,7 @@
 
 ## 0.6
 
+- Update documentation (#168)
 - Add curl to Docker image (#167)
 - Enhanced Time Index selection policy (#161)
 - Update vulnerable dependency (#158)

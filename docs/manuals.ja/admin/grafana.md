@@ -49,7 +49,7 @@ Grafana が実行されています。
 次の図は、*yourentity*
 というエンティティタイプのデータソース設定の例を示しています :
 
-![alt text](../../manuals/rsrc/crate_datasource.png "Configuring the DataSource")
+![alt text](../../manuals/rsrc/postgres_datasource.png "Configuring the DataSource")
 
 ## グラフ内のデータソースの使用
 

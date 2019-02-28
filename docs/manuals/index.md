@@ -30,7 +30,7 @@ out of the box.
 support out of the box
 - Nice [SQL-like querying language](https://crate.io/docs/crate/reference/en/latest/sql/index.html)
 to work with
-- [Supported integration](https://grafana.com/plugins/crate-datasource/installation)
+- [Supported integration](http://docs.grafana.org/features/datasources/postgres/)
 with visualisation tools like [Grafana](http://www.grafana.com)
 
 ## Typical Usage and How it works
@@ -49,14 +49,19 @@ explained in the [Orion Subscription part of the User Manual](user/index.md#orio
 Then, new values arrive in [Orion Context Broker](https://fiware-orion.readthedocs.io)
 **(2)** for the entities of interest, for example from a whole **IoT layer**
 governed by 1 or more [IoT Agents](https://catalogue.fiware.org/enablers/backend-device-management-idas)
-pushing data in NGSI format. Consequently, notifications will arrive to
-QuantumLeap's API [/v2/notify](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
+pushing data in NGSI format. Consequently, notifications will arrive from Orion
+to QuantumLeap's API [/v2/notify](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
 endpoint **(3)**.
 
 QuantumLeap's **Reporter** submodule will parse and validate the received
-notification and eventually feed it to the configured **Translator**. The
+notification. If configured, it can do some preprocessing, for example
+supported by the **Geocoder** such as harmonising the location representation
+of the different entities. Eventually, the **Reporter** will pass a validated
+NGSI representation of received entities to the configured **Translator**. The
 Translator is ultimately responsible for persisting the NGSI information to the
-configured times-series database cluster.
+configured times-series database cluster. In the same way, the **Translator**
+supports the **Reporter** at the time to respond to queries of historical
+records.
 
 The current API includes some endpoints for raw and aggregated data retrieval
 **(4)** for clients to query historical data. It also supports deletion of
@@ -66,8 +71,8 @@ QL. For more info about the API, you can refer to the
 
 For the visualisation of data **(5)**, at the time being we are using
 [Grafana](http://grafana.com/), complemented with open source plugins for the
-databases. In the future, we could envision a grafana plugin for direct
-interaction with QL's API.
+databases (known as data-sources). In the future, we could envision a Grafana
+plugin for direct interaction with QL's API.
 
 ## More information
 
@@ -77,3 +82,4 @@ QuantumLeap and getting it running.
 and connect it to other complementary services.
 - Have a look at the [SmartSDK guided tour](http://guided-tour-smartsdk.readthedocs.io/en/latest/)
 for more examples of QuantumLeap usage.
+- Have a look at the [FIWARE Step by Step](https://fiware-tutorials.readthedocs.io/en/latest/time-series-data/index.html) 

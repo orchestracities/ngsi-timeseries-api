@@ -40,20 +40,11 @@ These are flagged in the API specification.
 - Have a look at the message in the returned body for hints of what could have
 gone wrong. You may be missing an important parameter in your request.
 
+#### I got no errors but I cannot see data in my Dashboards
 
-#### CrateDB Datasource is not available in Grafana.
-
-By default, QuantumLeap recipes deploy Grafana with crate's plugin already
-installed. See []().
-
-If you don't see crate as an option while creating the datasource as explained
-in [Grafana section](../admin/grafana.md), either the grafana container failed
-to get internet connectivity (to download and install the plugin) or you are
-using an external grafana instance that needs to get the plugin installed.
-
-Go [here]() for documentation on crate's datasource plugin or
-[here](http://docs.grafana.org/plugins/installation/) for documentation on
-installing grafana plugins in general.
+Make sure you have enough data points in your database and that your selection
+of time slice (on the top-right corner of grafana) is actually covering a time
+range in which you have data.
 
 ## Bug reporting
 
@@ -61,7 +52,7 @@ Bugs should be reported in the form of
 [issues](https://github.com/smartsdk/ngsi-timeseries-api/issues) in the github
 repository.
 
-Please, look through the open issues before opening a repeated one :)
+Please, look through the open issues before opening a duplicated one :)
 
 Include as much context info as possible, also ideally the following things:
 
@@ -76,6 +67,7 @@ Include as much context info as possible, also ideally the following things:
 
 - The payload of the subscription(s) that you created. See [this section](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions)
 of Orion documentation.
+
 - The logs of the QuantumLeap container.
 
     The logs can be retrieved with the [docker logs command](https://docs.docker.com/engine/reference/commandline/logs/#options)
