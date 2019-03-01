@@ -5,7 +5,17 @@ openstreetmap services.
 from conftest import REDIS_HOST, REDIS_PORT
 from geocoding import geocoding
 import copy
+import geojson
 import pytest
+
+
+def assert_lon_lat(entity, expected_lon, expected_lat):
+    assert 'location' in entity
+    assert entity['location']['type'] == 'geo:point'
+
+    lon, lat = entity['location']['value'].split(',')
+    assert float(lon) == pytest.approx(expected_lon, abs=1e-2)
+    assert float(lat) == pytest.approx(expected_lat, abs=1e-2)
 
 
 def test_entity_with_location(air_quality_observed):
@@ -29,7 +39,6 @@ def test_entity_with_non_dict_address(air_quality_observed):
     assert r == old_entity
 
 
-@pytest.mark.skip(reason="See issue #105")
 def test_entity_add_point(air_quality_observed):
     air_quality_observed.pop('location')
 
@@ -43,12 +52,7 @@ def test_entity_add_point(air_quality_observed):
     r = geocoding.add_location(air_quality_observed)
     assert r is air_quality_observed
 
-    assert 'location' in r
-    assert r['location']['type'] == 'geo:point'
-
-    lon, lat = r['location']['value'].split(',')
-    assert float(lon) == pytest.approx(51.2358357, abs=1e-2)
-    assert float(lat) == pytest.approx(4.4201911, abs=1e-2)
+    assert_lon_lat(r, expected_lon=51.23, expected_lat=4.42)
 
 
 def test_entity_add_point_negative_coord(air_quality_observed):
@@ -64,12 +68,7 @@ def test_entity_add_point_negative_coord(air_quality_observed):
     r = geocoding.add_location(air_quality_observed)
     assert r is air_quality_observed
 
-    assert 'location' in r
-    assert r['location']['type'] == 'geo:point'
-
-    lon, lat = r['location']['value'].split(',')
-    assert float(lon) == pytest.approx(19.6389474, abs=1e-2)
-    assert float(lat) == pytest.approx(-98.9109537, abs=1e-2)
+    assert_lon_lat(r, expected_lon=19.51, expected_lat=-99.08)
 
 
 def test_entity_add_street_line(air_quality_observed):
@@ -92,7 +91,6 @@ def test_entity_add_street_line(air_quality_observed):
     assert len(geo['coordinates']) > 1
 
 
-@pytest.mark.skip(reason="See issue #105")
 def test_entity_add_city_shape(air_quality_observed):
     air_quality_observed.pop('location')
 
@@ -109,8 +107,8 @@ def test_entity_add_city_shape(air_quality_observed):
 
     geo = r['location']['value']
     assert geo['type'] == 'Polygon'
-    assert len(geo['coordinates']) == 1
-    assert len(geo['coordinates'][0]) == pytest.approx(2186, abs=100)
+    polygon = geojson.Polygon(geo['coordinates'])
+    assert polygon.is_valid
 
 
 def test_entity_add_country_shape(air_quality_observed):
@@ -128,7 +126,8 @@ def test_entity_add_country_shape(air_quality_observed):
 
     geo = r['location']['value']
     assert geo['type'] == 'MultiPolygon'
-    assert len(geo['coordinates']) == pytest.approx(12, abs=2)
+    multi_polygon = geojson.MultiPolygon(geo['coordinates'])
+    assert multi_polygon.is_valid
 
 
 def test_multiple_entities(air_quality_observed):
@@ -139,7 +138,6 @@ def test_multiple_entities(air_quality_observed):
     assert len(r) == 2
 
 
-@pytest.mark.skip(reason="See issue #105")
 def test_caching(air_quality_observed, monkeypatch):
     air_quality_observed.pop('location')
 
@@ -157,11 +155,7 @@ def test_caching(air_quality_observed, monkeypatch):
     try:
         r = geocoding.add_location(air_quality_observed, cache=cache)
         assert r is air_quality_observed
-        assert 'location' in r
-        assert r['location']['type'] == 'geo:point'
-        lon, lat = r['location']['value'].split(',')
-        assert float(lon) == pytest.approx(51.2358357, abs=1e-2)
-        assert float(lat) == pytest.approx(4.4201911, abs=1e-2)
+        assert_lon_lat(r, expected_lon=51.23, expected_lat=4.42)
         assert len(cache.redis.keys('*')) == 1
 
         # Make sure no external calls are made
@@ -169,11 +163,7 @@ def test_caching(air_quality_observed, monkeypatch):
 
         r.pop('location')
         r = geocoding.add_location(air_quality_observed, cache=cache)
-        assert 'location' in r
-        assert r['location']['type'] == 'geo:point'
-        lon, lat = r['location']['value'].split(',')
-        assert float(lon) == pytest.approx(51.2358357, abs=1e-2)
-        assert float(lat) == pytest.approx(4.4201911, abs=1e-2)
+        assert_lon_lat(r, expected_lon=51.23, expected_lat=4.42)
         assert len(cache.redis.keys('*')) == 1
 
     finally:

@@ -1,5 +1,18 @@
 # QuantumLeap Release Notes
 
+## 0.6
+
+- Update documentation (#168)
+- Add curl to Docker image (#167)
+- Enhanced Time Index selection policy (#161)
+- Update vulnerable dependency (#158)
+- Bugfix in crate translator (#136)
+- Bugfixes in geocoder (#105)
+
+## 0.5.1
+
+- Minor bugfix (#163)
+
 ## 0.5
 
 Release 0.5 of QuantumLeap adds support for geographical queries and features

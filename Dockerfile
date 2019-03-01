@@ -12,6 +12,7 @@ RUN cd /src/ngsi-timeseries-api && { pipenv lock -r > /requirements.txt; }
 RUN pip install --install-option="--prefix=/install" -r /requirements.txt
 
 FROM base
+RUN apk --no-cache add curl
 COPY --from=builder /install /usr/local
 COPY . /src/ngsi-timeseries-api/
 WORKDIR /src/ngsi-timeseries-api/src

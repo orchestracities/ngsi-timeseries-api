@@ -48,6 +48,19 @@ def url(value):
     return node('http', mforest(node('url', value)))
 
 
+def custom(notification_url, *children):
+    return node('httpCustom',
+                mforest(node('url', notification_url), *children))
+
+
+def headers(*children):
+    return node('headers', mforest(*children))
+
+
+def http_header(name, value):
+    return node(name, value)
+
+
 def metadata(value):
     return node('metadata', value)
 

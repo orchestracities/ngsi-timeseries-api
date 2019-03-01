@@ -144,9 +144,9 @@ class CrateTranslator(base_translator.BaseTranslator):
         https://crate.io/docs/crate/reference/en/latest/sql/general/lexical-structure.html#key-words-and-identifiers
         ), both schema and table name are prefixed.
         """
-        et = "{}{}".format(TYPE_PREFIX, entity_type.lower())
+        et = '"{}{}"'.format(TYPE_PREFIX, entity_type.lower())
         if fiware_service:
-            return "{}{}.{}".format(TENANT_PREFIX, fiware_service.lower(), et)
+            return '"{}{}".{}'.format(TENANT_PREFIX, fiware_service.lower(), et)
         return et
 
 
@@ -234,14 +234,18 @@ class CrateTranslator(base_translator.BaseTranslator):
                 original_attrs[col] = (attr, attr_t)
 
                 if attr_t not in NGSI_TO_CRATE:
-                    supported_types = ', '.join(NGSI_TO_CRATE.keys())
-                    msg = ("'{}' is not a supported NGSI type. "
-                           "Please use any of the following: {}. "
-                           "Falling back to {}.")
-                    self.logger.warning(msg.format(
-                        attr_t, supported_types, NGSI_TEXT))
+                    # if attribute is complex assume it as an NGSI StructuredValue
+                    if self._attr_is_structured(e[attr]):
+                        table[col] = NGSI_TO_CRATE[NGSI_STRUCTURED_VALUE]
+                    else:
+                        supported_types = ', '.join(NGSI_TO_CRATE.keys())
+                        msg = ("'{}' is not a supported NGSI type. "
+                               "Please use any of the following: {}. "
+                               "Falling back to {}.")
+                        self.logger.warning(msg.format(
+                            attr_t, supported_types, NGSI_TEXT))
 
-                    table[col] = NGSI_TO_CRATE[NGSI_TEXT]
+                        table[col] = NGSI_TO_CRATE[NGSI_TEXT]
 
                 else:
                     # Github issue 44: Disable indexing for long string
@@ -260,7 +264,10 @@ class CrateTranslator(base_translator.BaseTranslator):
         self._update_metadata_table(table_name, original_attrs)
 
         # Create Data Table
-        columns = ', '.join('{} {}'.format(cn, ct) for cn, ct in table.items())
+        # NOTE. CrateDB identifiers (like column and table names) become case
+        # sensitive when quoted like we do below in the CREATE TABLE statement.
+        columns = ', '.join('"{}" {}'.format(cn.lower(), ct)
+                            for cn, ct in table.items())
         stmt = "create table if not exists {} ({}) with " \
                "(number_of_replicas = '2-all')".format(table_name, columns)
         self.cursor.execute(stmt)
@@ -275,12 +282,18 @@ class CrateTranslator(base_translator.BaseTranslator):
 
         # Insert entities data
         p1 = table_name
-        p2 = ', '.join(col_names)
+        p2 = ', '.join(['"{}"'.format(c.lower()) for c in col_names])
         p3 = ','.join(['?'] * len(col_names))
         stmt = "insert into {} ({}) values ({})".format(p1, p2, p3)
         self.cursor.executemany(stmt, entries)
         return self.cursor
 
+    def _attr_is_structured(self, a):
+        if a['value'] is not None and isinstance(a['value'], dict):
+            self.logger.info("attribute {} has 'value' attribute of type dict"
+                             .format(a))
+            return True
+        return False
 
     def _preprocess_values(self, e, col_names, fiware_servicepath):
         values = []
@@ -359,7 +372,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         """
         op = "select distinct table_name from {} ".format(METADATA_TABLE_NAME)
         if fiware_service:
-            where = "where table_name ~* '{}{}[.].*'"
+            where = "where table_name ~* '\"{}{}\"[.].*'"
             op += where.format(TENANT_PREFIX, fiware_service.lower())
         try:
             self.cursor.execute(op)
@@ -383,12 +396,12 @@ class CrateTranslator(base_translator.BaseTranslator):
                         aggr_period, self.TIME_INDEX_NAME, self.TIME_INDEX_NAME)
                 )
             # TODO: https://github.com/smartsdk/ngsi-timeseries-api/issues/106
-            m = "{}({}) as {}"
+            m = '{}("{}") as "{}"'
             attrs.extend(m.format(aggr_method, a, a) for a in set(attr_names))
 
         else:
             attrs.append(self.TIME_INDEX_NAME)
-            attrs.extend(str(a) for a in attr_names)
+            attrs.extend('"{}"'.format(a) for a in attr_names)
 
         select = ','.join(attrs)
         return select
@@ -856,10 +869,10 @@ class CrateTranslator(base_translator.BaseTranslator):
         """
         # Filter using tenant information
         if fiware_service is None:
-            wc = "where table_name NOT like '{}%.%'".format(TENANT_PREFIX)
+            wc = "where table_name NOT like '\"{}%.%'".format(TENANT_PREFIX)
         else:
             # See _et2tn
-            prefix = "{}{}".format(TENANT_PREFIX, fiware_service.lower())
+            prefix = '"{}{}"'.format(TENANT_PREFIX, fiware_service.lower())
             wc = "where table_name like '{}.%'".format(prefix)
 
         stmt = "select distinct(table_name) from {} {}".format(
