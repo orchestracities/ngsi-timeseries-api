@@ -1,15 +1,16 @@
 Authors
 =======
 
-Major contributing authors according to `git shortlog -sn` include:
+Major contributing authors (with help of `git shortlog -sn`) include:
 
-- Tomas Aliaga
-- Federico M. Facca
+- taliaga
+- chicco785
 - c0c0n3
-- Jason Fox
+- jason-fox
 - fisuda
+- agaldemas
 
-For a complete list of contributors, see
+For a complete list, see
 https://github.com/smartsdk/ngsi-timeseries-api/graphs/contributors
 
 We would like to thank everyone who contributed to QuantumLeap, also to those who helped discuss and mature the core ideas.
