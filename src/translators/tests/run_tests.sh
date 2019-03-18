@@ -8,5 +8,5 @@ sleep 16
 docker run -ti --rm --network tests_translatorstests quantumleap pytest translators/tests
 r=$?
 
-docker-compose down
+docker-compose down -v
 exit $r
