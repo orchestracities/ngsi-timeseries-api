@@ -7,7 +7,6 @@ from translators import base_translator
 from utils.common import iter_entity_attrs
 import logging
 import os
-import statistics
 from geocoding.slf import SlfQuery
 from .crate_geo_query import from_ngsi_query
 
@@ -48,7 +47,7 @@ METADATA_TABLE_NAME = "md_ets_metadata"
 FIWARE_SERVICEPATH = 'fiware_servicepath'
 TENANT_PREFIX = 'mt'
 TYPE_PREFIX = 'et'
-VALID_AGGR_METHODS = ['count', 'sum', 'avg', 'min', 'max',]
+VALID_AGGR_METHODS = ['count', 'sum', 'avg', 'min', 'max']
 VALID_AGGR_PERIODS = ['year', 'month', 'day', 'hour', 'minute', 'second']
 
 
@@ -351,7 +350,8 @@ class CrateTranslator(base_translator.BaseTranslator):
         else:
             # Bring translation table!
             stmt = "select entity_attrs from {} where table_name = ?"
-            self.cursor.execute(stmt.format(METADATA_TABLE_NAME), [table_name,])
+            self.cursor.execute(stmt.format(METADATA_TABLE_NAME), [table_name])
+            # TODO: Make test_bc break, here we don't consider old table_name
 
             # By design, one entry per table_name
             res = self.cursor.fetchall()
@@ -374,6 +374,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         if fiware_service:
             where = "where table_name ~* '\"{}{}\"[.].*'"
             op += where.format(TENANT_PREFIX, fiware_service.lower())
+            # TODO: Make test_bc break, here we don't consider old table_name
         try:
             self.cursor.execute(op)
         except exceptions.ProgrammingError as e:
@@ -740,10 +741,17 @@ class CrateTranslator(base_translator.BaseTranslator):
         self.cursor.execute(stmt, [table_name])
         res = self.cursor.fetchall()
 
+        if len(res) == 0:
+            # See GH #173
+            tn = ".".join([x.strip('"') for x in table_name.split('.')])
+            self.cursor.execute(stmt, [tn])
+            res = self.cursor.fetchall()
+
         if len(res) != 1:
             msg = "Cannot have {} entries in table '{}' for PK '{}'"
             msg = msg.format(len(res), METADATA_TABLE_NAME, table_name)
             self.logger.error(msg)
+            raise RuntimeError(msg)
 
         entities = {}
         entity_attrs = res[0][0]
