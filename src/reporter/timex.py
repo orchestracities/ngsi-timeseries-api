@@ -17,43 +17,19 @@ def _first_not_none(xs: Iterable):
 # value != None.
 
 
-def _custom_time_index_attribute(headers: dict, notification: dict) \
-        -> MaybeString:
-    attr_name = maybe_value(headers, TIME_INDEX_HEADER_NAME)
-    if attr_name:
-        return maybe_value(notification, attr_name, 'value')
-    return None
+def _attribute(notification: dict, attr_name: str) -> MaybeString:
+    return maybe_value(notification, attr_name, 'value')
 
 
-def _time_instant_attribute(notification: dict) -> MaybeString:
-    return maybe_value(notification, 'TimeInstant', 'value')
-
-
-def _meta_time_instant_attribute(notification: dict, attr_name: str) \
+def _meta_attribute(notification: dict, attr_name: str, meta_name: str) \
         -> MaybeString:
     return maybe_value(notification,
-                       attr_name, 'metadata', 'TimeInstant', 'value')
+                       attr_name, 'metadata', meta_name, 'value')
 
 
-def _date_modified_attribute(notification: dict) -> MaybeString:
-    return maybe_value(notification, 'dateModified', 'value')
-
-
-def _meta_date_modified_attribute(notification: dict, attr_name: str) \
-        -> MaybeString:
-    return maybe_value(notification,
-                       attr_name, 'metadata', 'dateModified', 'value')
-
-
-def _iter_time_instant_in_metadata(notification: dict) -> Iterable[MaybeString]:
+def _iter_metadata(notification: dict, meta_name: str) -> Iterable[MaybeString]:
     for attr_name in iter_entity_attrs(notification):
-        yield _meta_time_instant_attribute(notification, attr_name)
-
-
-def _iter_date_modified_in_metadata(notification: dict) \
-        -> Iterable[MaybeString]:
-    for attr_name in iter_entity_attrs(notification):
-        yield _meta_date_modified_attribute(notification, attr_name)
+        yield _meta_attribute(notification, attr_name, meta_name)
 
 
 def select_time_index_value(headers: dict, notification: dict) -> datetime:
@@ -70,8 +46,13 @@ def select_time_index_value(headers: dict, notification: dict) -> datetime:
       subscription has to be created with an ``httpCustom`` block as detailed
       in the *Subscriptions* and *Custom Notifications* sections of the NGSI
       spec.
+    - Custom time inde metadata. The most recent custom time index attribute value
+      found in any of the attribute metadata sections in the notification.
     - ``TimeInstant`` attribute.
     - ``TimeInstant`` metadata. The most recent ``TimeInstant`` attribute value
+      found in any of the attribute metadata sections in the notification.
+    - ``timestamp`` attribute.
+    - ``timestamp`` metadata. The most recent ``timestamp`` attribute value
       found in any of the attribute metadata sections in the notification.
     - ``dateModified`` attribute.
     - ``dateModified`` metadata. The most recent ``dateModified`` attribute
@@ -84,23 +65,27 @@ def select_time_index_value(headers: dict, notification: dict) -> datetime:
     :param notification: the notification JSON payload as received from Orion.
     :return: the value to be used as time index.
     """
-    custom_index = to_datetime(
-                            _custom_time_index_attribute(headers, notification))
-    time_instant = to_datetime(_time_instant_attribute(notification))
-    meta_time_instant = latest_from_str_rep(
-                                _iter_time_instant_in_metadata(notification))
-    date_modified = to_datetime(_date_modified_attribute(notification))
-    meta_date_modified = latest_from_str_rep(
-                                _iter_date_modified_in_metadata(notification))
-    default_value = datetime.now()
-
-    priority_list = [
-        custom_index, time_instant, meta_time_instant, date_modified,
-        meta_date_modified, default_value
+    considered_attributes = [
+        maybe_value(headers, TIME_INDEX_HEADER_NAME),
+        "TimeInstant",
+        "timestamp",
+        "dateModified"
     ]
 
-    return [d for d in priority_list if d][0]
-    # Note. Index will never be out of bounds since we added a default value.
+    for attr_name in considered_attributes:
+        if not attr_name:
+            continue
+
+        attr_value = to_datetime(_attribute(notification, attr_name))
+        if attr_value:
+            return attr_value
+
+        meta_value = latest_from_str_rep(
+            _iter_metadata(notification, attr_name))
+        if meta_value:
+            return meta_value
+
+    return datetime.now()
 
 
 def select_time_index_value_as_iso(headers: dict, notification: dict) -> str:
