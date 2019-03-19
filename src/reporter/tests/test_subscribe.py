@@ -43,7 +43,7 @@ def test_valid_defaults(clean_mongo, clean_crate):
         'attrs': [],
         'attrsFormat': 'normalized',
         'http': {'url': "{}/notify".format(QL_URL)},
-        'metadata': ['dateCreated', 'dateModified', 'TimeInstant'],
+        'metadata': ['dateCreated', 'dateModified', 'TimeInstant', 'timestamp']
     }
     assert subscription['throttling'] == 1
 
@@ -82,7 +82,7 @@ def test_valid_customs(clean_mongo, clean_crate):
         'attrs': ["pressure"],
         'attrsFormat': 'normalized',
         'http': {'url': "{}/notify".format(QL_URL)},
-        'metadata': ['dateCreated', 'dateModified', 'TimeInstant'],
+        'metadata': ['dateCreated', 'dateModified', 'TimeInstant', 'timestamp']
     }
     assert subscription['throttling'] == 30
 
@@ -155,5 +155,5 @@ def test_custom_time_index(clean_mongo, clean_crate):
                 TIME_INDEX_HEADER_NAME: 'my-time-index'
             }
         },
-        'metadata': ['dateCreated', 'dateModified', 'TimeInstant'],
+        'metadata': ['dateCreated', 'dateModified', 'TimeInstant', 'timestamp', 'my-time-index']
     }
