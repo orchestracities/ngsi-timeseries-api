@@ -211,11 +211,20 @@ subscription has to be created with an `httpCustom` block, as detailed in the
 This is the way you can instruct QL to use custom attributes of the
 notification payload to be taken as *time index* indicators.
 
-1. **TimeInstant** attribute. As specified in the [FIWARE IoT agent documentation](https://github.com/telefonicaid/iotagent-node-lib#the-timeinstant-element).
+1. Custom **time index** metadata. The most recent custom time index (the value of the `Fiware-TimeIndex-Attribute`)
+attribute value found in any of the attribute metadata sections in the notification.
+See the previous option about the details regarding subscriptions.
+
+1. **TimeInstant** attribute. As specified in the
+[FIWARE IoT agent documentation](https://github.com/telefonicaid/iotagent-node-lib#the-timeinstant-element).
 
 1. **TimeInstant** metadata. The most recent `TimeInstant` attribute value
 found in any of the attribute metadata sections in the notification.
 (Again, refer to the [FIWARE IoT agent documentation](https://github.com/telefonicaid/iotagent-node-lib#the-timeinstant-element).)
+
+1. **timestamp** attribute.
+
+1. **timestamp** metadata. The most recent `timestamp` attribute value found in any of the attribute metadata sections in the notification. As specified in the [FIWARE data models documentation](https://fiware-datamodels.readthedocs.io/en/latest/guidelines/index.html#dynamic-attributes).
 
 1. **dateModified** attribute. If you payed attention in the
 [Orion Subscription section](#orion-subscription), this is the `"dateModified"`
