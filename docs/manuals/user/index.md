@@ -224,7 +224,9 @@ found in any of the attribute metadata sections in the notification.
 
 1. **timestamp** attribute.
 
-1. **timestamp** metadata. The most recent `timestamp` attribute value found in any of the attribute metadata sections in the notification. As specified in the [FIWARE data models documentation](https://fiware-datamodels.readthedocs.io/en/latest/guidelines/index.html#dynamic-attributes).
+1. **timestamp** metadata. The most recent `timestamp` attribute value found in any of the attribute metadata sections
+in the notification. As specified in the
+[FIWARE data models documentation](https://fiware-datamodels.readthedocs.io/en/latest/guidelines/index.html#dynamic-attributes).
 
 1. **dateModified** attribute. If you payed attention in the
 [Orion Subscription section](#orion-subscription), this is the `"dateModified"`
