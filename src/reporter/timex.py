@@ -46,7 +46,7 @@ def select_time_index_value(headers: dict, notification: dict) -> datetime:
       subscription has to be created with an ``httpCustom`` block as detailed
       in the *Subscriptions* and *Custom Notifications* sections of the NGSI
       spec.
-    - Custom time inde metadata. The most recent custom time index attribute value
+    - Custom time index metadata. The most recent custom time index attribute value
       found in any of the attribute metadata sections in the notification.
     - ``TimeInstant`` attribute.
     - ``TimeInstant`` metadata. The most recent ``TimeInstant`` attribute value
@@ -65,6 +65,8 @@ def select_time_index_value(headers: dict, notification: dict) -> datetime:
     :param notification: the notification JSON payload as received from Orion.
     :return: the value to be used as time index.
     """
+    current_time = datetime.now()
+
     considered_attributes = [
         maybe_value(headers, TIME_INDEX_HEADER_NAME),
         "TimeInstant",
@@ -76,16 +78,18 @@ def select_time_index_value(headers: dict, notification: dict) -> datetime:
         if not attr_name:
             continue
 
+        # check for the attribute <attr_name>
         attr_value = to_datetime(_attribute(notification, attr_name))
         if attr_value:
             return attr_value
 
+        # check for the latest meta attribute <attr_name>
         meta_value = latest_from_str_rep(
             _iter_metadata(notification, attr_name))
         if meta_value:
             return meta_value
 
-    return datetime.now()
+    return current_time
 
 
 def select_time_index_value_as_iso(headers: dict, notification: dict) -> str:
