@@ -856,9 +856,9 @@ class CrateTranslator(base_translator.BaseTranslator):
             return 0
 
         # Delete entry from metadata table
-        op = "delete from {} where table_name = ?".format(METADATA_TABLE_NAME)
+        op = "delete from {} where table_name = ?".format(METADATA_TABLE_NAME) # TODO: Make test_bc break, here we don't consider old table_name
         try:
-            self.cursor.execute(op, [table_name,])
+            self.cursor.execute(op, [table_name])
         except exceptions.ProgrammingError as e:
             # What if this one fails and previous didn't?
             logging.debug("{}".format(e))
@@ -881,7 +881,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         else:
             # See _et2tn
             prefix = '"{}{}"'.format(TENANT_PREFIX, fiware_service.lower())
-            wc = "where table_name like '{}.%'".format(prefix)
+            wc = "where table_name like '{}.%'".format(prefix) # TODO: Make test_bc break, here we don't consider old table_name
 
         stmt = "select distinct(table_name) from {} {}".format(
             METADATA_TABLE_NAME,

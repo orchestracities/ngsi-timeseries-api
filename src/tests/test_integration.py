@@ -2,8 +2,8 @@ from src.tests.common import load_data, check_data, unload_data
 
 
 def test_integration():
-    load_data()
     try:
-        check_data()
+        entities = load_data()
+        check_data(entities)
     finally:
-        unload_data()
+        unload_data(entities)
