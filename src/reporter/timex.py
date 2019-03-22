@@ -32,6 +32,38 @@ def _iter_metadata(notification: dict, meta_name: str) -> Iterable[MaybeString]:
         yield _meta_attribute(notification, attr_name, meta_name)
 
 
+def time_index_priority_list(headers: dict, notification: dict) -> datetime:
+    """
+    Returns the next possible time_index value using the strategy described in
+    the function select_time_index_value.
+    """
+    custom_attribute = maybe_value(headers, TIME_INDEX_HEADER_NAME)
+
+    # Custom time index attribute
+    yield to_datetime(_attribute(notification, custom_attribute))
+
+    # The most recent custom time index metadata
+    yield latest_from_str_rep(_iter_metadata(notification, custom_attribute))
+
+    # TimeInstant attribute
+    yield to_datetime(_attribute(notification, "TimeInstant"))
+
+    # The most recent TimeInstant metadata
+    yield latest_from_str_rep(_iter_metadata(notification, "TimeInstant"))
+
+    # timestamp attribute
+    yield to_datetime(_attribute(notification, "timestamp"))
+
+    # The most recent timestamp metadata
+    yield latest_from_str_rep(_iter_metadata(notification, "timestamp"))
+
+    # dateModified attribute
+    yield to_datetime(_attribute(notification, "dateModified"))
+
+    # The most recent dateModified metadata
+    yield latest_from_str_rep(_iter_metadata(notification, "dateModified"))
+
+
 def select_time_index_value(headers: dict, notification: dict) -> datetime:
     """
     Determine which attribute or metadata value to use as a time index for the
@@ -67,28 +99,11 @@ def select_time_index_value(headers: dict, notification: dict) -> datetime:
     """
     current_time = datetime.now()
 
-    considered_attributes = [
-        maybe_value(headers, TIME_INDEX_HEADER_NAME),
-        "TimeInstant",
-        "timestamp",
-        "dateModified"
-    ]
+    for time_index_candidate in time_index_priority_list(headers, notification):
+        if time_index_candidate:
+            return time_index_candidate
 
-    for attr_name in considered_attributes:
-        if not attr_name:
-            continue
-
-        # check for the attribute <attr_name>
-        attr_value = to_datetime(_attribute(notification, attr_name))
-        if attr_value:
-            return attr_value
-
-        # check for the latest meta attribute <attr_name>
-        meta_value = latest_from_str_rep(
-            _iter_metadata(notification, attr_name))
-        if meta_value:
-            return meta_value
-
+    # use the current time as a last resort
     return current_time
 
 
