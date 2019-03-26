@@ -21,7 +21,7 @@ def test_bare_subscription():
             'http': {
                 'url': 'http://ql/notify'
             },
-            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant', 'timestamp']
         },
         'throttling': 1
     }
@@ -47,7 +47,7 @@ def test_entity_type():
             'http': {
                 'url': 'http://ql/notify'
             },
-            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant', 'timestamp']
         },
         'throttling': 1
     }
@@ -72,7 +72,7 @@ def test_entity_id():
             'http': {
                 'url': 'http://ql/notify'
             },
-            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant', 'timestamp']
         },
         'throttling': 1
     }
@@ -102,7 +102,7 @@ def test_attributes(attrs):
                 'url': 'http://ql/notify'
             },
             'attrs': attrs.split(','),
-            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant', 'timestamp']
         },
         'throttling': 1
     }
@@ -131,7 +131,7 @@ def test_observed_attributes(attrs):
             'http': {
                 'url': 'http://ql/notify'
             },
-            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant', 'timestamp']
         },
         'throttling': 1
     }
@@ -158,7 +158,7 @@ def test_notified_attributes(attrs):
                 'url': 'http://ql/notify'
             },
             'attrs': attrs.split(','),
-            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant', 'timestamp']
         },
         'throttling': 1
     }
@@ -183,7 +183,7 @@ def test_throttling():
             'http': {
                 'url': 'http://ql/notify'
             },
-            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant', 'timestamp']
         },
         'throttling': 123
     }
@@ -208,7 +208,7 @@ def test_entity_id_overrides_pattern():
             'http': {
                 'url': 'http://ql/notify'
             },
-            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant', 'timestamp']
         },
         'throttling': 1
     }
@@ -237,7 +237,7 @@ def test_all_attributes():
                 'url': 'http://ql/notify'
             },
             'attrs': ['b', 'c'],
-            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant', 'timestamp']
         },
         'throttling': 1
     }
@@ -271,7 +271,7 @@ def test_attributes_overrides_other_attributes(observed, notified):
                 'url': 'http://ql/notify'
             },
             'attrs': ['x'],
-            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant', 'timestamp']
         },
         'throttling': 1
     }
@@ -300,7 +300,7 @@ def test_subscription_with_time_index():
                     TIME_INDEX_HEADER_NAME: 'my-time-index-attr-name'
                 }
             },
-            'metadata': ['dateCreated', 'dateModified', 'TimeInstant']
+            'metadata': ['dateCreated', 'dateModified', 'TimeInstant', 'timestamp', 'my-time-index-attr-name']
         },
         'throttling': 1
     }
