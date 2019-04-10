@@ -137,6 +137,20 @@ parameters:
     type: string
     description: "The corresponding 'fiware-servicepath' header.
     See http://fiware-orion.readthedocs.io/en/latest/user/multitenancy/index.html#multi-tenancy"
+  fiware-Service:
+    in: header
+    name: fiware-Service
+    required: false
+    type: string
+    description: "The corresponding 'fiware-service' header.
+    See http://fiware-orion.readthedocs.io/en/latest/user/multitenancy/index.html#multi-tenancy"
+  fiware-ServicePath:
+    in: header
+    name: fiware-ServicePath
+    required: false
+    type: string
+    description: "The corresponding 'fiware-servicepath' header.
+    See http://fiware-orion.readthedocs.io/en/latest/user/multitenancy/index.html#multi-tenancy"
 
 ################################################################################
 # PARAMETERS: IN PATH
