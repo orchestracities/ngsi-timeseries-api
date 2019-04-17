@@ -2,6 +2,9 @@
 
 ## 0.6.1
 
+- Time_index enhancement (#172)
+- Bugfix (#177)
+
 ## 0.6
 
 - Update documentation (#168)
