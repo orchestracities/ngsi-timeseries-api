@@ -1,19 +1,28 @@
 #!/usr/bin/env bash
+
+# Prepare Docker Images
+docker pull ${QL_PREV_IMAGE}
 docker build -t quantumleap ../../.
+docker-compose -f ../../docker/docker-compose-dev.yml pull
 
-# Load data with previous QL version
-docker pull smartsdk/quantumleap:0.5.1
-QL_IMAGE=smartsdk/quantumleap:0.5.1 docker-compose -f ../../docker/docker-compose-dev.yml up -d
-sleep 60
+tot=0
+
+# Launch services with previous QL version
+QL_IMAGE=${QL_PREV_IMAGE} docker-compose -f ../../docker/docker-compose-dev.yml up -d
+sleep 10
+
+# Load data
 docker run -ti --rm --network docker_default \
-    -e ORION_URL="http://orion:1026" \
-    -e QL_URL="http://quantumleap:8668" \
-    quantumleap python tests/common.py
+           -e ORION_URL="http://orion:1026" \
+           -e QL_URL="http://quantumleap:8668" \
+           quantumleap python tests/common.py
 
-# Backwards Compatibility Test
+# Restart QL on development version
 docker-compose -f ../../docker/docker-compose-dev.yml stop quantumleap
 QL_IMAGE=quantumleap docker-compose -f ../../docker/docker-compose-dev.yml up -d quantumleap
 sleep 10
+
+# Backwards Compatibility Test
 docker run -ti --rm --network docker_default \
     -e ORION_URL="http://orion:1026" \
     -e QL_URL="http://quantumleap:8668" \
@@ -31,4 +40,4 @@ if [ "$tot" -eq 0 ]; then
 fi
 
 docker-compose -f ../../docker/docker-compose-dev.yml down -v
-exit $tot
+exit ${tot}

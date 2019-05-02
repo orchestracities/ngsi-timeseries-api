@@ -351,7 +351,6 @@ class CrateTranslator(base_translator.BaseTranslator):
             # Bring translation table!
             stmt = "select entity_attrs from {} where table_name = ?"
             self.cursor.execute(stmt.format(METADATA_TABLE_NAME), [table_name])
-            # TODO: Make test_bc break, here we don't consider old table_name
 
             # By design, one entry per table_name
             res = self.cursor.fetchall()
@@ -374,7 +373,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         if fiware_service:
             where = "where table_name ~* '\"{}{}\"[.].*'"
             op += where.format(TENANT_PREFIX, fiware_service.lower())
-            # TODO: Make test_bc break, here we don't consider old table_name
+
         try:
             self.cursor.execute(op)
         except exceptions.ProgrammingError as e:
@@ -856,12 +855,19 @@ class CrateTranslator(base_translator.BaseTranslator):
             return 0
 
         # Delete entry from metadata table
-        op = "delete from {} where table_name = ?".format(METADATA_TABLE_NAME) # TODO: Make test_bc break, here we don't consider old table_name
+        op = "delete from {} where table_name = ?".format(METADATA_TABLE_NAME)
         try:
             self.cursor.execute(op, [table_name])
         except exceptions.ProgrammingError as e:
-            # What if this one fails and previous didn't?
             logging.debug("{}".format(e))
+
+        if self.cursor.rowcount == 0 and table_name.startswith('"'):
+            # See GH #173
+            old_tn = ".".join([x.strip('"') for x in table_name.split('.')])
+            try:
+                self.cursor.execute(op, [old_tn])
+            except exceptions.ProgrammingError as e:
+                logging.debug("{}".format(e))
 
         return count
 
@@ -879,9 +885,11 @@ class CrateTranslator(base_translator.BaseTranslator):
         if fiware_service is None:
             wc = "where table_name NOT like '\"{}%.%'".format(TENANT_PREFIX)
         else:
-            # See _et2tn
-            prefix = '"{}{}"'.format(TENANT_PREFIX, fiware_service.lower())
-            wc = "where table_name like '{}.%'".format(prefix) # TODO: Make test_bc break, here we don't consider old table_name
+            # Old is prior QL 0.6.0. GH #173
+            old_prefix = '{}{}'.format(TENANT_PREFIX, fiware_service.lower())
+            prefix = self._et2tn("FooType", fiware_service).split('.')[0]
+            wc = "where table_name like '{}.%' " \
+                 "or table_name like '{}.%'".format(old_prefix, prefix)
 
         stmt = "select distinct(table_name) from {} {}".format(
             METADATA_TABLE_NAME,

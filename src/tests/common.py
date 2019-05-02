@@ -17,6 +17,7 @@ ENTITY_TYPE = "IntegrationTestEntity"
 
 class IntegrationTestEntity:
     def __init__(self, e_id, fiware_service=None, fiware_servicepath=None):
+        self.FIWARE_SERVICEPATH_KEY = 'Fiware-ServicePath'
         self.id = e_id
         self.type = ENTITY_TYPE
 
@@ -36,7 +37,7 @@ class IntegrationTestEntity:
         if self.fiware_service:
             h['Fiware-Service'] = self.fiware_service
         if self.fiware_servicepath:
-            h['Fiware-ServicePath'] = self.fiware_servicepath
+            h[self.FIWARE_SERVICEPATH_KEY] = self.fiware_servicepath
         return h
 
     def payload(self):
@@ -50,6 +51,9 @@ class IntegrationTestEntity:
             "type": "Number"
           }
         }
+
+    def __repr__(self):
+        return "{}:{}".format(self.type, self.id)
 
 
 def check_orion_url():
@@ -80,6 +84,7 @@ def post_orion_subscriptions(entities):
         'orionUrl': '{}/v2'.format(ORION_URL_4QL),
         'quantumleapUrl': '{}/v2'.format(QL_URL_4ORION),
         'entityType': ENTITY_TYPE,
+        'throttling': 0,
     }
 
     for e in entities:
@@ -96,7 +101,7 @@ def load_data():
 
     # Post Subscriptions in Orion
     post_orion_subscriptions(entities)
-    time.sleep(5)
+    time.sleep(2)
 
     # Post Entities in Orion
     url = "{}/v2/entities".format(ORION_URL)
@@ -109,13 +114,14 @@ def load_data():
         time.sleep(3)
 
     # Update Entities in Orion
-    for e in entities:
-        url = "{}/v2/entities/{}/attrs".format(ORION_URL, e.id)
-        h = {'Content-Type': 'application/json', **e.headers()}
-        patch = e.update()
-        res = requests.patch(url, data=json.dumps(patch), headers=h)
-        assert res.ok, res.text
-        time.sleep(3)
+    for i in range(3):
+        for e in entities:
+            url = "{}/v2/entities/{}/attrs".format(ORION_URL, e.id)
+            h = {'Content-Type': 'application/json', **e.headers()}
+            patch = e.update()
+            res = requests.patch(url, data=json.dumps(patch), headers=h)
+            assert res.ok, res.text
+            time.sleep(3)
 
     return entities
 
@@ -126,17 +132,27 @@ def check_data(entities):
 
     # Query records in QuantumLeap
     for e in entities:
+        # Query specific entity and check values
         url = "{}/v2/entities/{}/attrs/int_attr".format(QL_URL, e.id)
-        res = requests.get(url, headers=e.headers())
-        assert res.ok, res.text
-
         res = requests.get(url, params={'type': e.type}, headers=e.headers())
         assert res.ok, res.text
 
         obtained = res.json()
+        assert obtained['data']['entityId'] == e.id
+        assert obtained['data']['entityId'] == e.id
+
         index = obtained['data']['index']
+        values = obtained['data']['values']
         assert len(index) > 1
         assert index[0] != index[-1]
+        assert len(index) == len(values)
+
+        # Now without explicit type to trigger type search in metadata table
+        res = requests.get(url, headers=e.headers())
+        assert res.ok, res.text
+
+        new_obtained = res.json()
+        assert new_obtained == obtained
 
 
 def unload_data(entities):
@@ -160,13 +176,34 @@ def unload_data(entities):
             errors.append(r.text)
 
     # Cleanup Historical Records
-    for t in set(e.type for e in entities):
-        r = requests.delete("{}/v2/types/{}".format(QL_URL, t),
-                            headers=e.headers())
+    deleted = set([])
+    for e in entities:
+        uid = (e.fiware_service, e.type)
+        if uid in deleted:
+            continue
+
+        # Remove fiware-servicepath so the whole table gets deleted
+        h = e.headers()
+        if e.FIWARE_SERVICEPATH_KEY in h:
+            h.pop(e.FIWARE_SERVICEPATH_KEY)
+        url = "{}/v2/types/{}".format(QL_URL, e.type)
+
+        r = requests.delete(url, headers=h)
         if not r.ok:
             errors.append(r.text)
+        else:
+            deleted.add(uid)
 
     assert not errors, errors
+
+
+def check_deleted_data(entities):
+    # Check all records removed from QL
+    for e in entities:
+        url = "{}/v2/entities/{}/attrs/int_attr".format(QL_URL, e.id)
+        res = requests.get(url, params={'type': e.type}, headers=e.headers())
+        assert not res.ok
+        assert res.status_code == 404
 
 
 if __name__ == '__main__':
