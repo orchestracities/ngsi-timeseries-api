@@ -2,8 +2,8 @@
 
 # Prepare Docker Images
 docker pull ${QL_PREV_IMAGE}
-docker build -t quantumleap ../../.
-docker-compose -f ../../docker/docker-compose-dev.yml pull
+docker build -t quantumleap ../../
+docker-compose -f ../../docker/docker-compose-dev.yml pull --ignore-pull-failures
 
 tot=0
 

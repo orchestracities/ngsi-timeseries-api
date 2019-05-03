@@ -121,7 +121,7 @@ def load_data():
             patch = e.update()
             res = requests.patch(url, data=json.dumps(patch), headers=h)
             assert res.ok, res.text
-            time.sleep(3)
+            time.sleep(1)
 
     return entities
 
