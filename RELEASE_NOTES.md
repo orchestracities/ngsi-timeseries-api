@@ -2,7 +2,9 @@
 
 ## 0.6.1
 
+- Fix CI issues (#186)
 - Update package dependencies (#157)
+- Added Backwards Compatibility testing (#173)
 - Time_index enhancement (#172)
 - Bugfix (#177)
 
