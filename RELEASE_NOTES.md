@@ -2,6 +2,7 @@
 
 ## 0.6.1
 
+- Update package dependencies (#157)
 - Time_index enhancement (#172)
 - Bugfix (#177)
 

@@ -9,11 +9,6 @@ services:
 
 install:
   - docker --version
-  - docker build -t quantumleap .
-  - docker-compose -f src/translators/tests/docker-compose.yml pull --ignore-pull-failures
-  - docker-compose -f src/reporter/tests/docker-compose.yml pull --ignore-pull-failures
-  - docker-compose -f src/geocoding/tests/docker-compose.yml pull --ignore-pull-failures
-  - docker-compose -f docker/docker-compose-dev.yml pull --ignore-pull-failures
 
 script:
   - source deps.env
