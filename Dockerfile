@@ -1,6 +1,6 @@
 FROM python:3.6-alpine as base
 FROM base as builder
-RUN apk --no-cache --update-cache add gcc gfortran python python-dev py-pip build-base wget freetype-dev libpng-dev openblas-dev
+RUN apk --no-cache --update-cache add gcc python python-dev py-pip build-base wget
 RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
 RUN pip install pipenv
 RUN mkdir -p /src/ngsi-timeseries-api
