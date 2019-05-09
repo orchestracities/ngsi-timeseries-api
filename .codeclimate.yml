@@ -1,6 +1,0 @@
-engines:
-  sonar-python:
-    enabled: true
-    config:
-      exclude_patterns:
-        - "*.png"
