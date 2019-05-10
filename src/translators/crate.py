@@ -7,7 +7,6 @@ from translators import base_translator
 from utils.common import iter_entity_attrs
 import logging
 import os
-import statistics
 from geocoding.slf import SlfQuery
 from .crate_geo_query import from_ngsi_query
 
@@ -48,7 +47,7 @@ METADATA_TABLE_NAME = "md_ets_metadata"
 FIWARE_SERVICEPATH = 'fiware_servicepath'
 TENANT_PREFIX = 'mt'
 TYPE_PREFIX = 'et'
-VALID_AGGR_METHODS = ['count', 'sum', 'avg', 'min', 'max',]
+VALID_AGGR_METHODS = ['count', 'sum', 'avg', 'min', 'max']
 VALID_AGGR_PERIODS = ['year', 'month', 'day', 'hour', 'minute', 'second']
 
 
@@ -351,7 +350,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         else:
             # Bring translation table!
             stmt = "select entity_attrs from {} where table_name = ?"
-            self.cursor.execute(stmt.format(METADATA_TABLE_NAME), [table_name,])
+            self.cursor.execute(stmt.format(METADATA_TABLE_NAME), [table_name])
 
             # By design, one entry per table_name
             res = self.cursor.fetchall()
@@ -374,6 +373,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         if fiware_service:
             where = "where table_name ~* '\"{}{}\"[.].*'"
             op += where.format(TENANT_PREFIX, fiware_service.lower())
+
         try:
             self.cursor.execute(op)
         except exceptions.ProgrammingError as e:
@@ -740,10 +740,17 @@ class CrateTranslator(base_translator.BaseTranslator):
         self.cursor.execute(stmt, [table_name])
         res = self.cursor.fetchall()
 
+        if len(res) == 0:
+            # See GH #173
+            tn = ".".join([x.strip('"') for x in table_name.split('.')])
+            self.cursor.execute(stmt, [tn])
+            res = self.cursor.fetchall()
+
         if len(res) != 1:
             msg = "Cannot have {} entries in table '{}' for PK '{}'"
             msg = msg.format(len(res), METADATA_TABLE_NAME, table_name)
             self.logger.error(msg)
+            raise RuntimeError(msg)
 
         entities = {}
         entity_attrs = res[0][0]
@@ -850,10 +857,17 @@ class CrateTranslator(base_translator.BaseTranslator):
         # Delete entry from metadata table
         op = "delete from {} where table_name = ?".format(METADATA_TABLE_NAME)
         try:
-            self.cursor.execute(op, [table_name,])
+            self.cursor.execute(op, [table_name])
         except exceptions.ProgrammingError as e:
-            # What if this one fails and previous didn't?
             logging.debug("{}".format(e))
+
+        if self.cursor.rowcount == 0 and table_name.startswith('"'):
+            # See GH #173
+            old_tn = ".".join([x.strip('"') for x in table_name.split('.')])
+            try:
+                self.cursor.execute(op, [old_tn])
+            except exceptions.ProgrammingError as e:
+                logging.debug("{}".format(e))
 
         return count
 
@@ -871,9 +885,11 @@ class CrateTranslator(base_translator.BaseTranslator):
         if fiware_service is None:
             wc = "where table_name NOT like '\"{}%.%'".format(TENANT_PREFIX)
         else:
-            # See _et2tn
-            prefix = '"{}{}"'.format(TENANT_PREFIX, fiware_service.lower())
-            wc = "where table_name like '{}.%'".format(prefix)
+            # Old is prior QL 0.6.0. GH #173
+            old_prefix = '{}{}'.format(TENANT_PREFIX, fiware_service.lower())
+            prefix = self._et2tn("FooType", fiware_service).split('.')[0]
+            wc = "where table_name like '{}.%' " \
+                 "or table_name like '{}.%'".format(old_prefix, prefix)
 
         stmt = "select distinct(table_name) from {} {}".format(
             METADATA_TABLE_NAME,

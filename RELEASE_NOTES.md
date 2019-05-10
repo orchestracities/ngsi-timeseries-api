@@ -1,12 +1,20 @@
 # QuantumLeap Release Notes
 
+## 0.6.1
+
+- Fix CI issues (#186)
+- Update package dependencies (#157)
+- Added Backwards Compatibility testing (#173)
+- Time_index enhancement (#172)
+- Bugfix (#177)
+
 ## 0.6
 
 - Update documentation (#168)
 - Add curl to Docker image (#167)
 - Enhanced Time Index selection policy (#161)
 - Update vulnerable dependency (#158)
-- Bugfix in crate translator (#136)
+- Bugfixes in crate translator (#136)
 - Bugfixes in geocoder (#105)
 
 ## 0.5.1

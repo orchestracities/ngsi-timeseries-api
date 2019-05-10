@@ -231,7 +231,6 @@ def test_no_multiple_data_elements(notification, clean_mongo, clean_crate):
                         }
                     }
     notification['data'].append(second_element)
-    print(json.dumps(notification))
     r = requests.post('{}'.format(notify_url), data=json.dumps(notification),
                       headers=HEADERS_PUT)
     assert r.status_code == 400
