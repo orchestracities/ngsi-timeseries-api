@@ -313,10 +313,9 @@ class CrateTranslator(base_translator.BaseTranslator):
                         values.append([float(lon), float(lat)])
                     else:
                         values.append(e[cn]['value'])
-                except KeyError as e:
-                    msg = ("Seems like not all entities of same type came "
-                           "with the same set of attributes. {}").format(e)
-                    raise NotImplementedError(msg)
+                except KeyError:
+                    # this entity update does not have a value for the column so use None which will be inserted as NULL to the db.
+                    values.append( None )
         return values
 
 
