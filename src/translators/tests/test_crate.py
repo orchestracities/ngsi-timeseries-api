@@ -7,7 +7,7 @@ from utils.common import *
 
 def test_db_version(translator):
     version = translator.get_db_version()
-    assert version == '3.0.5'
+    assert version == '3.3.2'
 
 
 def test_insert(translator):

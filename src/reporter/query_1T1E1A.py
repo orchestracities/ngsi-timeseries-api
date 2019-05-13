@@ -1,7 +1,7 @@
 from exceptions.exceptions import AmbiguousNGSIIdError
 from flask import request
 from reporter.reporter import _validate_query_params
-from translators.crate import CrateTranslatorInstance, CrateTranslator
+from translators.crate import CrateTranslatorInstance
 import logging
 from .geo_query_handler import handle_geo_query
 

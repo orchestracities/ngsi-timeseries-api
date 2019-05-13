@@ -3,10 +3,10 @@
 docker build -t quantumleap ../../../
 
 docker-compose up -d
-sleep 16
+sleep 20
 
 docker run -ti --rm --network tests_translatorstests quantumleap pytest translators/tests
 r=$?
 
-docker-compose down
+docker-compose down -v
 exit $r

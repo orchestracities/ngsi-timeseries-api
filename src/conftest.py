@@ -72,6 +72,13 @@ def do_clean_crate():
                        "'information_schema', 'pg_catalog')")
         for (ts, tn) in cursor.rows:
             cursor.execute('DROP TABLE IF EXISTS "{}"."{}"'.format(ts, tn))
+            try:
+                # Just for bc test
+                cursor.execute('DROP TABLE IF EXISTS {}.{}'.format(ts, tn))
+            except exceptions.ProgrammingError:
+                # tests like test_accept_special_chars may break
+                pass
+
     finally:
         cursor.close()
 
