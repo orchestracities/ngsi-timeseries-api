@@ -220,7 +220,6 @@ def test_multiple_data_elements(notification, sameEntityWithDifferentAttrs, clea
     Test that the notify API can process notifications containing multiple elements in the data array.
     """
     notification['data'] = sameEntityWithDifferentAttrs
-    print(json.dumps(notification))
     r = requests.post('{}'.format(notify_url), data=json.dumps(notification),
                       headers=HEADERS_PUT)
     assert r.status_code == 200
