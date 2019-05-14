@@ -29,21 +29,21 @@ def test_insert_entity(translator, entity):
 
     check_notifications_record([entity], loaded_entities)
 
-def test_insert_same_type_entities_with_different_attrs( translator, sameTypeEntitiesWithDifferentAttrs ):
+def test_insert_same_entity_with_different_attrs( translator, sameEntityWithDifferentAttrs ):
     """
     Test that the CrateTranslator can insert entity updates  that are of the same type but have different attributes.
     """
     # Add time index to the updates. Use the dateModified meta data attribute of temperature.
-    for entity in sameTypeEntitiesWithDifferentAttrs:
+    for entity in sameEntityWithDifferentAttrs:
         entity[BaseTranslator.TIME_INDEX_NAME] = entity['temperature']['metadata']['dateModified']['value']
         
-    result = translator.insert( sameTypeEntitiesWithDifferentAttrs )
+    result = translator.insert( sameEntityWithDifferentAttrs )
     assert result.rowcount != 0
     
     loaded_entities = translator.query()
     assert len(loaded_entities) == 1
 
-    check_notifications_record( sameTypeEntitiesWithDifferentAttrs, loaded_entities)
+    check_notifications_record( sameEntityWithDifferentAttrs, loaded_entities)
 
 def test_insert_multiple_types(translator):
     args = {

@@ -148,7 +148,7 @@ def entity():
     return entity
 
 @pytest.fixture
-def sameTypeEntitiesWithDifferentAttrs():
+def sameEntityWithDifferentAttrs():
     """
     Two updates for the same entity with different attributes.
     The first update has temperature and pressure but the second update has only temperature.
