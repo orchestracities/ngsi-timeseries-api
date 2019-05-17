@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 certifi = "==2018.10.15"
-connexion = "~=1.1"
+connexion = "~=2.2"
 crate = "~=0.22"
 flask = "~=0.12"
 geocoder = "~=1.33"
