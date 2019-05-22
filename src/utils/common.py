@@ -234,7 +234,9 @@ def check_notifications_record(notifications, records):
             continue
 
         r_values = record[a]['values']
-        n_values = [e[a]['value'] for e in notifications]
+        # collect values for the attribute a from the entities in the notification
+        # if an entity does not have a value for the attribute use None
+        n_values = [e[a]['value'] if a in e else None for e in notifications]
 
         if any(isinstance(x, float) for x in n_values):
             assert pytest.approx(r_values, n_values)
