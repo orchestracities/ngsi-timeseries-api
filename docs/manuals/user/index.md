@@ -13,9 +13,9 @@ QuantumLeap's API. However, you will still need to understand the basics of
 how subscriptions and notifications work, so take your time to read
 [the docs](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#ubscriptions).
 
-Historical data for each entity type will be persisted as long as the
-subscription is active, correctly configured and the entity in the notification
-is NGSI compliant.
+Historical data for each entity type will be added in the QuantumLeap's database as long as the subscription is active, correctly configured and the entity in the notification is NGSI compliant.
+
+In case the subscription is removed or its status is changed, no data will be added after that. Although the previous data stored in QuantumLeap's database will persist until it is removed externally using APIs to delete data stored in QuantumLeap.
 
 So, summing up, the usage flow is therefore the following...
 
