@@ -766,8 +766,9 @@ class CrateTranslator(base_translator.BaseTranslator):
 
                 # CrateDBs and NGSI use different geo:point coordinates order.
                 if original_type == NGSI_GEOPOINT:
-                    lon, lat = v
-                    v = "{}, {}".format(lat, lon)
+                    if v is not None:
+                        lon, lat = v
+                        v = "{}, {}".format(lat, lon)
 
                 if original_name in (NGSI_TYPE, NGSI_ID):
                     e[original_name] = v
