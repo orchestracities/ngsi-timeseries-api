@@ -221,7 +221,7 @@ should respect the naming guidelines explained
 - Attributes metadata are still not being persisted. See [Issue 12](https://github.com/smartsdk/ngsi-timeseries-api/issues/12)
 
 - While support for multiple data in a single notification as been recently introduced
-  (See [PR 191](https://github.com/smartsdk/ngsi-timeseries-api/pull/191)), 
+  (See [PR 191](https://github.com/smartsdk/ngsi-timeseries-api/pull/191)),
   The following limitations still apply: a error in a single data entity will invalidate
   the all set. There is not optimisation for large message size.
 
