@@ -38,7 +38,7 @@ NGSI_TO_CRATE = {
     NGSI_TEXT: 'string',
     NGSI_STRUCTURED_VALUE: 'object'
 }
-CRATE_TO_NGSI = dict((v, k) for (k,v) in NGSI_TO_CRATE.items())
+CRATE_TO_NGSI = dict((v, k) for (k, v) in NGSI_TO_CRATE.items())
 CRATE_TO_NGSI['string_array'] = 'Array'
 
 # QUANTUMLEAP Internals
@@ -53,21 +53,20 @@ VALID_AGGR_PERIODS = ['year', 'month', 'day', 'hour', 'minute', 'second']
 
 class CrateTranslator(base_translator.BaseTranslator):
 
-    def __init__(self, host, port=4200, db_name="ngsi-tsdb"):
+    def __init__(self, host, port=4200, db_name="ngsi-tsdb", username=None, password=None):
         super(CrateTranslator, self).__init__(host, port, db_name)
         self.logger = logging.getLogger(__name__)
-
+        self.password = password
+        self.username = username
 
     def setup(self):
         url = "{}:{}".format(self.host, self.port)
-        self.conn = client.connect([url], error_trace=True)
+        self.conn = client.connect([url], username=self.username, password=self.password, error_trace=True)
         self.cursor = self.conn.cursor()
-
 
     def dispose(self):
         self.cursor.close()
         self.conn.close()
-
 
     def _refresh(self, entity_types, fiware_service=None):
         """
@@ -80,11 +79,9 @@ class CrateTranslator(base_translator.BaseTranslator):
         table_names.append(METADATA_TABLE_NAME)
         self.cursor.execute("refresh table {}".format(','.join(table_names)))
 
-
     def get_db_version(self):
         self.cursor.execute("select version['number'] from sys.nodes")
         return self.cursor.fetchall()[0][0]
-
 
     def get_health(self):
         """
@@ -119,7 +116,6 @@ class CrateTranslator(base_translator.BaseTranslator):
 
         return health
 
-
     def _get_isoformat(self, ms_since_epoch):
         """
         :param ms_since_epoch:
@@ -134,7 +130,6 @@ class CrateTranslator(base_translator.BaseTranslator):
         utc = datetime(1970, 1, 1, 0, 0, 0, 0) + d
         return utc.isoformat(timespec='milliseconds')
 
-
     def _et2tn(self, entity_type, fiware_service=None):
         """
         Return table name based on entity type.
@@ -147,7 +142,6 @@ class CrateTranslator(base_translator.BaseTranslator):
         if fiware_service:
             return '"{}{}".{}'.format(TENANT_PREFIX, fiware_service.lower(), et)
         return et
-
 
     def _ea2cn(self, entity_attr):
         """
@@ -163,7 +157,6 @@ class CrateTranslator(base_translator.BaseTranslator):
         # This will break users connecting to db directly.
         # Implement when that becomes a real problem.
         return "{}".format(entity_attr.lower())
-
 
     def insert(self, entities, fiware_service=None, fiware_servicepath=None):
         if not isinstance(entities, list):
@@ -181,7 +174,6 @@ class CrateTranslator(base_translator.BaseTranslator):
                                                 fiware_service,
                                                 fiware_servicepath)
         return res
-
 
     def _insert_entities_of_type(self,
                                  entity_type,
@@ -315,9 +307,8 @@ class CrateTranslator(base_translator.BaseTranslator):
                         values.append(e[cn]['value'])
                 except KeyError:
                     # this entity update does not have a value for the column so use None which will be inserted as NULL to the db.
-                    values.append( None )
+                    values.append(None)
         return values
-
 
     def _update_metadata_table(self, table_name, metadata):
         """
@@ -358,10 +349,9 @@ class CrateTranslator(base_translator.BaseTranslator):
         if metadata.keys() - persisted_metadata.keys():
             persisted_metadata.update(metadata)
             stmt = "insert into {} (table_name, entity_attrs) values (?,?) " \
-               "on duplicate key update entity_attrs = values(entity_attrs)"
+                   "on duplicate key update entity_attrs = values(entity_attrs)"
             stmt = stmt.format(METADATA_TABLE_NAME)
             self.cursor.execute(stmt, (table_name, persisted_metadata))
-
 
     def _get_et_table_names(self, fiware_service=None):
         """
@@ -381,7 +371,6 @@ class CrateTranslator(base_translator.BaseTranslator):
             logging.debug(msg.format(e))
             return []
         return [r[0] for r in self.cursor.rows]
-
 
     def _get_select_clause(self, attr_names, aggr_method, aggr_period):
         if not attr_names:
@@ -405,7 +394,6 @@ class CrateTranslator(base_translator.BaseTranslator):
         select = ','.join(attrs)
         return select
 
-
     def _get_limit(self, limit):
         # https://crate.io/docs/crate/reference/en/latest/general/dql/selects.html#limits
         default = 10000
@@ -415,7 +403,6 @@ class CrateTranslator(base_translator.BaseTranslator):
         if limit < 1:
             raise ValueError("Limit should be >=1 and <= 10000.")
         return min(default, limit)
-
 
     def _get_where_clause(self, entity_ids, from_date, to_date, fiware_sp=None,
                           geo_query=None):
@@ -432,10 +419,10 @@ class CrateTranslator(base_translator.BaseTranslator):
 
         if fiware_sp:
             # Match prefix of fiware service path
-            clauses.append(" "+FIWARE_SERVICEPATH+" ~* '"+fiware_sp+"($|/.*)'")
+            clauses.append(" " + FIWARE_SERVICEPATH + " ~* '" + fiware_sp + "($|/.*)'")
         else:
             # Match prefix of fiware service path
-            clauses.append(" "+FIWARE_SERVICEPATH+" = ''")
+            clauses.append(" " + FIWARE_SERVICEPATH + " = ''")
 
         geo_clause = from_ngsi_query(geo_query)
         if geo_clause:
@@ -443,7 +430,6 @@ class CrateTranslator(base_translator.BaseTranslator):
 
         where_clause = "where " + "and ".join(clauses)
         return where_clause
-
 
     def _get_order_group_clause(self, aggr_method, aggr_period, select_clause):
         order_by = []
@@ -475,7 +461,6 @@ class CrateTranslator(base_translator.BaseTranslator):
             clause += " ORDER BY {}".format(",".join(order_by))
         return clause
 
-
     def query(self,
               attr_names=None,
               entity_type=None,
@@ -492,7 +477,7 @@ class CrateTranslator(base_translator.BaseTranslator):
               offset=0,
               fiware_service=None,
               fiware_servicepath=None,
-              geo_query: SlfQuery=None):
+              geo_query: SlfQuery = None):
         """
         This translator method is used by all API query endpoints.
 
@@ -662,13 +647,13 @@ class CrateTranslator(base_translator.BaseTranslator):
                  "{where_clause} " \
                  "{order_group_clause} " \
                  "limit {limit} offset {offset}".format(
-                    select_clause=select_clause,
-                    tn=tn,
-                    where_clause=where_clause,
-                    order_group_clause=order_group_clause,
-                    limit=limit,
-                    offset=offset,
-                )
+                select_clause=select_clause,
+                tn=tn,
+                where_clause=where_clause,
+                order_group_clause=order_group_clause,
+                limit=limit,
+                offset=offset,
+            )
             try:
                 self.cursor.execute(op)
             except exceptions.ProgrammingError as e:
@@ -684,7 +669,6 @@ class CrateTranslator(base_translator.BaseTranslator):
                                                  last_n)
             result.extend(entities)
         return result
-
 
     def _format_response(self, resultset, col_names, table_name, last_n):
         """
@@ -786,7 +770,6 @@ class CrateTranslator(base_translator.BaseTranslator):
 
         return [entities[k] for k in sorted(entities.keys())]
 
-
     def delete_entity(self, entity_id, entity_type=None, from_date=None,
                       to_date=None, fiware_service=None,
                       fiware_servicepath=None):
@@ -804,7 +787,7 @@ class CrateTranslator(base_translator.BaseTranslator):
 
         # First delete entries from table
         table_name = self._et2tn(entity_type, fiware_service)
-        where_clause = self._get_where_clause([entity_id,],
+        where_clause = self._get_where_clause([entity_id, ],
                                               from_date,
                                               to_date,
                                               fiware_servicepath)
@@ -817,7 +800,6 @@ class CrateTranslator(base_translator.BaseTranslator):
             return 0
 
         return self.cursor.rowcount
-
 
     def delete_entities(self, entity_type, from_date=None, to_date=None,
                         fiware_service=None, fiware_servicepath=None):
@@ -870,7 +852,6 @@ class CrateTranslator(base_translator.BaseTranslator):
 
         return count
 
-
     def _get_entity_type(self, entity_id, fiware_service):
         """
         Find the type of the given entity_id.
@@ -908,7 +889,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         for et in all_types:
             stmt = "select distinct(entity_type) from {} " \
                    "where entity_id = ?".format(et)
-            self.cursor.execute(stmt, [entity_id,])
+            self.cursor.execute(stmt, [entity_id, ])
             types = [t[0] for t in self.cursor.fetchall()]
             matching_types.extend(types)
 
@@ -939,6 +920,8 @@ def _adjust_gh_44(attr_t, attr, db_version):
 def CrateTranslatorInstance():
     DB_HOST = os.environ.get('CRATE_HOST', 'crate')
     DB_PORT = 4200
+    DB_USERNAME = os.environ.get('CRATE_USERNAME', None)
+    DB_PASSWORD = os.environ.get('CRATE_PASSWORD', None)
     DB_NAME = "ngsi-tsdb"
-    with CrateTranslator(DB_HOST, DB_PORT, DB_NAME) as trans:
+    with CrateTranslator(DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD) as trans:
         yield trans
