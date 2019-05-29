@@ -375,6 +375,42 @@ def test_geo_point(translator):
     # Check entity is retrieved as it was inserted
     check_notifications_record([entity], entities)
 
+def test_geo_point_null_values(translator):
+    # Github PR #198: Support geo:point null values
+    entity = {
+        'id': 'Room1',
+        'type': 'Room',
+        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
+        'location': {
+            'type': 'geo:point',
+            'value': "19.6389474, -98.9109537"  # lat, long
+        }
+    }
+    translator.insert([entity])
+    entities = translator.query()
+    assert len(entities) == 1
+    check_notifications_record([entity], entities)
+
+    entity_new = {
+        'id': 'Room1',
+        'type': 'Room',
+        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
+        'temperature': {
+            'type': 'Number',
+            'value': "19"
+        }
+    }
+    translator.insert([entity_new])
+    entities = translator.query()
+    assert len(entities) == 1
+
+    # Check location's None is saved as a geo_point column in crate
+    op = 'select latitude(location), longitude(location), temperature from etroom'
+    translator.cursor.execute(op)
+    res = translator.cursor.fetchall()
+    assert len(res) == 2
+    assert res[0] == [19.6389474, -98.9109537, None]
+    assert res[1] == [None, None, '19']
 
 def test_structured_value_to_array(translator):
     entity = {
