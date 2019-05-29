@@ -163,37 +163,6 @@ If the type of any of the received attributes is not present in the column
 internally as a string. So, if you use `Float` for your attribute type (not
 valid), your attribute will be stored as a `string`.
 
-### Restrictions and Limitations
-
-- You cannot have two entity types with the same name but different
-capitalisation. E.g: `Preprocessor` and `preProcessor`. The same applies for
-attribute names of a given entity. I.e, attributes `hotSpot` and `hotspot`
-will be treated as the same. These are rare corner-cases, but it is worth
-keeping in mind this. Ultimately, the correct naming of types and attributes
-should respect the naming guidelines explained
-[here](http://fiware-datamodels.readthedocs.io/en/latest/guidelines/index.html).
-
-- Attributes metadata are still not being persisted. See [Issue 12](https://github.com/smartsdk/ngsi-timeseries-api/issues/12)
-
-## Data Retrieval
-
-To retrieve historical data from QuantumLeap, you can use the API endpoints
-documented [here](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
-Note there are a lot of possibilities, but not all of them are fully
-implemented yet.
-
-If you want to, you can interact directly with the database. For more details
-refer to the [CrateDB](../admin/crate.md) section of the docs. What you need to
-know in this case is that QuantumLeap will create one table per each entity
-type. Table names are formed with a prefix (et) plus the lowercase version of
-the entity type. I.e, if your entity type is *AirQualityObserved*, the
-corresponding table name will be *etairqualityobserved*. Table names should be
-prefixed also with the schema where they are defined. See the
-[Multi-tenancy](#multi-tenancy) section below.
-
-Finally, you can interact with your data visually using [Grafana](https://grafana.com/).
-See the [Grafana](../admin/grafana.md) section of the docs to see how.
-
 ### Time Index
 
 A fundamental element in the time-series database is the **time index**.
@@ -238,6 +207,48 @@ found in any of the attribute metadata sections in the notification.
 1. Finally, QL will use the **Current Time** (the time of notification
 reception) if none of the above options is present or none of the values found
 can actually be converted to a `datetime`.
+
+### Restrictions and Limitations
+
+- You cannot have two entity types with the same name but different
+capitalisation. E.g: `Preprocessor` and `preProcessor`. The same applies for
+attribute names of a given entity. I.e, attributes `hotSpot` and `hotspot`
+will be treated as the same. These are rare corner-cases, but it is worth
+keeping in mind this. Ultimately, the correct naming of types and attributes
+should respect the naming guidelines explained
+[here](http://fiware-datamodels.readthedocs.io/en/latest/guidelines/index.html).
+
+- Attributes metadata are still not being persisted. See [Issue 12](https://github.com/smartsdk/ngsi-timeseries-api/issues/12)
+
+- While support for multiple data in a single notification as been recently introduced
+  (See [PR 191](https://github.com/smartsdk/ngsi-timeseries-api/pull/191)),
+  The following limitations still apply: a error in a single data entity will invalidate
+  the all set. There is not optimisation for large message size.
+
+- Data are assumed to be consistent. I.e., if the first data notification for
+  an entity type use a given set of data types for the attributes, the following
+  data notifications must be consistent, or they will be rejected. E.g. if
+  the data type of attribute `speed` of entity type `car` is set initially
+  to `Number`, later on it cannot be set to `Text`.
+
+## Data Retrieval
+
+To retrieve historical data from QuantumLeap, you can use the API endpoints
+documented [here](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
+Note there are a lot of possibilities, but not all of them are fully
+implemented yet.
+
+If you want to, you can interact directly with the database. For more details
+refer to the [CrateDB](../admin/crate.md) section of the docs. What you need to
+know in this case is that QuantumLeap will create one table per each entity
+type. Table names are formed with a prefix (et) plus the lowercase version of
+the entity type. I.e, if your entity type is *AirQualityObserved*, the
+corresponding table name will be *etairqualityobserved*. Table names should be
+prefixed also with the schema where they are defined. See the
+[Multi-tenancy](#multi-tenancy) section below.
+
+Finally, you can interact with your data visually using [Grafana](https://grafana.com/).
+See the [Grafana](../admin/grafana.md) section of the docs to see how.
 
 ## Data Removal
 
