@@ -225,9 +225,11 @@ should respect the naming guidelines explained
   The following limitations still apply: a error in a single data entity will invalidate
   the all set. There is not optimisation for large message size.
 
-- Data are assumed to be consistent. If in your first notification
-  you used a given type of an attribute, following ones will be rejected if
-  use a different attribute.
+- Data are assumed to be consistent. I.e., if the first data notification for
+  an entity type use a given set of data types for the attributes, the following
+  data notifications must be consistent, or they will be rejected. E.g. if
+  the data type of attribute `speed` of entity type `car` is set initially
+  to `Number`, later on it cannot be set to `Text`.
 
 ## Data Retrieval
 
