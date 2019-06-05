@@ -375,6 +375,7 @@ def test_geo_point(translator):
     # Check entity is retrieved as it was inserted
     check_notifications_record([entity], entities)
 
+
 def test_geo_point_null_values(translator):
     # Github PR #198: Support geo:point null values
     entity = {
@@ -405,12 +406,14 @@ def test_geo_point_null_values(translator):
     assert len(entities) == 1
 
     # Check location's None is saved as a geo_point column in crate
-    op = 'select latitude(location), longitude(location), temperature from etroom'
+    op = 'select latitude(location), longitude(location), temperature from ' \
+         'etroom order by time_index ASC'
     translator.cursor.execute(op)
     res = translator.cursor.fetchall()
     assert len(res) == 2
     assert res[0] == [19.6389474, -98.9109537, None]
     assert res[1] == [None, None, '19']
+
 
 def test_structured_value_to_array(translator):
     entity = {
