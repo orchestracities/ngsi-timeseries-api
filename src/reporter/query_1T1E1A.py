@@ -4,6 +4,7 @@ from reporter.reporter import _validate_query_params
 from translators.crate import CrateTranslatorInstance
 import logging
 from .geo_query_handler import handle_geo_query
+from utils.dicts import lookup_string_match
 
 
 def query_1T1E1A(attr_name,   # In Path
@@ -70,12 +71,13 @@ def query_1T1E1A(attr_name,   # In Path
             warnings.warn("Not expecting more than one result for a 1T1E1A.")
 
         index = [] if aggr_method and not aggr_period else entities[0]['index']
+        matched_attr = lookup_string_match(entities[0], attr_name)
         res = {
             'data': {
                 'entityId': entities[0]['id'],
                 'attrName': attr_name,
                 'index': index,
-                'values': entities[0][attr_name]['values']
+                'values': matched_attr['values']
             }
         }
         return res
