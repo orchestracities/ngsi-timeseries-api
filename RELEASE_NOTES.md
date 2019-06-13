@@ -1,5 +1,13 @@
 # QuantumLeap Release Notes
 
+## 0.6.2
+
+- Update connexion version (#203)
+- Support nulls in NGSI_GEOPOINT values (#198)
+- Documentation fixes (#195) (#200)
+- Remove deprecated crate grafana plugin (#190)
+- Support multiple data elements in notifications (#185)
+
 ## 0.6.1
 
 - Fix CI issues (#186)
