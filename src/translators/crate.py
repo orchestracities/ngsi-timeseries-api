@@ -633,7 +633,8 @@ class CrateTranslator(base_translator.BaseTranslator):
         if entity_id:
             entity_ids = tuple([entity_id])
 
-        lower_attr_names = [a.lower() for a in attr_names]
+        lower_attr_names = [a.lower() for a in attr_names]\
+            if attr_names else attr_names
         select_clause = self._get_select_clause(lower_attr_names,
                                                 aggr_method,
                                                 aggr_period)
