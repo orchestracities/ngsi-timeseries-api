@@ -1,4 +1,4 @@
-from conftest import QL_URL
+from conftest import QL_URL, do_clean_crate
 import pytest
 import requests
 import time
@@ -6,30 +6,53 @@ import urllib
 from .utils import send_notifications
 
 
+entity_type = 'TestDevice'
+
 attr1 = 'AtTr1'
 attr2 = 'aTtr_2'
+
+attr1_value = '1'
+attr2_value = 2
+
+entity1_id = 'd1'
+entity2_id = 'd2'
 
 
 def mk_entity(eid):
     return {
         'id': eid,
-        'type': 'TestDevice',
+        'type': entity_type,
         attr1: {
             'type': 'Text',
-            'value': '1'
+            'value': attr1_value
         },
         attr2: {
             'type': 'Number',
-            'value': 2
+            'value': attr2_value
         }
     }
 
 
-def insert_entities(entities):
-    notification_data = [{'data': entities}]
+def mk_entities():
+    return [
+        mk_entity(entity1_id), mk_entity(entity1_id),
+        mk_entity(entity2_id), mk_entity(entity2_id)
+    ]
+
+
+def insert_entities():
+    notification_data = [{'data': mk_entities()}]
     send_notifications(notification_data)
 
+
+@pytest.fixture(scope='module')
+def manage_db_entities():
+    insert_entities()
     time.sleep(2)
+
+    yield
+
+    do_clean_crate()
 
 
 def query_1t1e1a(entity_id, attr_name):
@@ -43,17 +66,11 @@ def query_1t1e1a(entity_id, attr_name):
 @pytest.mark.parametrize('attr_name', [
     attr1, 'attr1', 'atTr1'
 ])
-def test_1t1e1a(attr_name, clean_crate):
-    entity = mk_entity('d1')
-
-    insert_entities([entity])
-
-    query_result = query_1t1e1a(entity['id'], attr_name)
+def test_1t1e1a(attr_name, manage_db_entities):
+    query_result = query_1t1e1a(entity1_id, attr_name)
     query_result.pop('index', None)
     assert query_result == {
         'attrName': attr_name,
-        'entityId': entity['id'],
-        'values': [entity[attr1]['value']]
+        'entityId': entity1_id,
+        'values': [attr1_value, attr1_value]
     }
-
-
