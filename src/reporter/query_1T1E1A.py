@@ -77,7 +77,7 @@ def query_1T1E1A(attr_name,   # In Path
                 'entityId': entities[0]['id'],
                 'attrName': attr_name,
                 'index': index,
-                'values': matched_attr['values']
+                'values': matched_attr['values'] if matched_attr else []
             }
         }
         return res
