@@ -63,6 +63,24 @@ def query_1t1e1a(entity_id, attr_name):
     return response.json().get('data', {})
 
 
+def query_1tne1a(attr_name):
+    escaped_attr_name = urllib.parse.quote(attr_name)
+    url = "{}/types/{}/attrs/{}".format(QL_URL, entity_type, escaped_attr_name)
+    response = requests.get(url)
+    assert response.status_code == 200
+    return response.json().get('data', {})
+
+
+def query_1t1ena(entity_id, attr1_name, attr2_name):
+    url = "{}/entities/{}".format(QL_URL, entity_id)
+    query_params = {
+        'attrs': attr1_name + ',' + attr2_name,
+    }
+    response = requests.get(url, query_params)
+    assert response.status_code == 200
+    return response.json().get('data', {})
+
+
 @pytest.mark.parametrize('attr_name', [
     attr1, 'attr1', 'atTr1'
 ])
@@ -73,4 +91,50 @@ def test_1t1e1a(attr_name, manage_db_entities):
         'attrName': attr_name,
         'entityId': entity1_id,
         'values': [attr1_value, attr1_value]
+    }
+
+
+@pytest.mark.parametrize('attr_name', [
+    attr1, 'attr1', 'atTr1'
+])
+def test_1tne1a(attr_name, manage_db_entities):
+    query_result = query_1tne1a(attr_name)
+    for e in query_result['entities']:
+        e.pop('index', None)
+
+    assert query_result == {
+        'entityType': entity_type,
+        'attrName': attr_name,
+        'entities': [
+            {
+                'entityId': entity1_id,
+                'values': [attr1_value, attr1_value]
+            },
+            {
+                'entityId': entity2_id,
+                'values': [attr1_value, attr1_value]
+            }
+        ]
+    }
+
+
+@pytest.mark.parametrize('attr1_name, attr2_name', [
+    (attr1, attr2), ('attr1', 'attr_2'), ('atTr1', 'ATtr_2')
+])
+def test_1t1ena(attr1_name, attr2_name, manage_db_entities):
+    query_result = query_1t1ena(entity2_id, attr1_name, attr2_name)
+    query_result.pop('index', None)
+
+    assert query_result == {
+        'entityId': entity2_id,
+        'attributes': [
+            {
+                'attrName': attr1,
+                'values': [attr1_value, attr1_value]
+            },
+            {
+                'attrName': attr2,
+                'values': [attr2_value, attr2_value]
+            }
+        ]
     }
