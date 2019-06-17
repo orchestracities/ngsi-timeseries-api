@@ -1,5 +1,9 @@
 # QuantumLeap Release Notes
 
+## 0.6.3
+
+- Fix queries involving attribute names (#206)
+
 ## 0.6.2
 
 - Update connexion version (#203)
