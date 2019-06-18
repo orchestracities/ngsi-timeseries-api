@@ -55,7 +55,7 @@ def test_integration_with_orion(clean_mongo, clean_crate, entity):
     r = requests.get(url, params=query_params, headers=h)
     assert r.status_code == 200, r.text
     obtained = r.json()
-    assert obtained['data']['entityId'] == entity['id']
+    assert obtained['entityId'] == entity['id']
 
     # Query WITHOUT headers
     r = requests.get(url, params=query_params)

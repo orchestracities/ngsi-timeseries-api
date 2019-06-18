@@ -14,7 +14,7 @@ def get_all_stored_attributes(entity_id):
 
     url = "{}/entities/{}".format(QL_URL, entity_id)
     response = requests.get(url)
-    attrs = response.json().get('data', {}).get('attributes', [])
+    attrs = response.json().get('attributes', [])
 
     attr_values_map = {}
     for a in attrs:
@@ -24,7 +24,6 @@ def get_all_stored_attributes(entity_id):
 # e.g. curl -v http://0.0.0.0:8668/v2/entities/d:1
 # returns
 # {
-#   "data": {
 #     "attributes": [
 #       {
 #         "attrName": "a1",
@@ -49,7 +48,6 @@ def get_all_stored_attributes(entity_id):
 #       "2018-12-20T10:56:38.654",
 #       "2018-12-20T11:46:21.303"
 #     ]
-#   }
 # }
 
 

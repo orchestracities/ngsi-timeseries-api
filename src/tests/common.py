@@ -138,11 +138,11 @@ def check_data(entities):
         assert res.ok, res.text
 
         obtained = res.json()
-        assert obtained['data']['entityId'] == e.id
-        assert obtained['data']['entityId'] == e.id
+        assert obtained['entityId'] == e.id
+        assert obtained['entityId'] == e.id
 
-        index = obtained['data']['index']
-        values = obtained['data']['values']
+        index = obtained['index']
+        values = obtained['values']
         assert len(index) > 1
         assert index[0] != index[-1]
         assert len(index) == len(values)

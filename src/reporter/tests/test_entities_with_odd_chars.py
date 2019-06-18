@@ -29,7 +29,7 @@ def query_entity(entity_id, attr_name):
     url = "{}/entities/{}/attrs/{}".format(QL_URL, entity_id, escaped_attr_name)
     response = requests.get(url)
     assert response.status_code == 200
-    return response.json().get('data', {})
+    return response.json()
 
 
 def delete_entities(entity_type):

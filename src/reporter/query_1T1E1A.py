@@ -73,12 +73,10 @@ def query_1T1E1A(attr_name,   # In Path
         index = [] if aggr_method and not aggr_period else entities[0]['index']
         matched_attr = lookup_string_match(entities[0], attr_name)
         res = {
-            'data': {
-                'entityId': entities[0]['id'],
-                'attrName': attr_name,
-                'index': index,
-                'values': matched_attr['values'] if matched_attr else []
-            }
+            'entityId': entities[0]['id'],
+            'attrName': attr_name,
+            'index': index,
+            'values': matched_attr['values'] if matched_attr else []
         }
         return res
 
@@ -91,7 +89,7 @@ def query_1T1E1A(attr_name,   # In Path
 
 def query_1T1E1A_value(*args, **kwargs):
     res = query_1T1E1A(*args, **kwargs)
-    if isinstance(res, dict) and 'data' in res:
-        res['data'].pop('entityId')
-        res['data'].pop('attrName')
+    if isinstance(res, dict):
+        res.pop('entityId', None)
+        res.pop('attrName', None)
     return res

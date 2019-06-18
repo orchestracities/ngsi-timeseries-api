@@ -34,8 +34,8 @@ def assert_1T1E1A_response(obtained, expected):
     Check API responses for 1T1E1A
     """
     # Assert time index
-    obt_index = obtained['data'].pop('index')
-    exp_index = expected['data'].pop('index')
+    obt_index = obtained.pop('index')
+    exp_index = expected.pop('index')
     assert_equal_time_index_arrays(obt_index, exp_index)
 
     # Assert rest of data
@@ -57,12 +57,10 @@ def test_1T1E1A_defaults(reporter_dataset):
         '1970-01-{:02}T00:00:00.00'.format(i+1) for i in exp_values
     ]
     expected = {
-        'data': {
-            'entityId': entity_id,
-            'attrName': attr_name,
-            'index': exp_index,
-            'values': exp_values,
-        }
+        'entityId': entity_id,
+        'attrName': attr_name,
+        'index': exp_index,
+        'values': exp_values
     }
     assert_1T1E1A_response(obtained, expected)
 
@@ -85,12 +83,10 @@ def test_1T1E1A_aggrMethod(reporter_dataset, aggr_method, aggr_value):
 
     obtained = r.json()
     expected = {
-        'data': {
-            'entityId': entity_id,
-            'attrName': attr_name,
-            'index': [],
-            'values': [aggr_value],
-        }
+        'entityId': entity_id,
+        'attrName': attr_name,
+        'index': [],
+        'values': [aggr_value]
     }
     assert_1T1E1A_response(obtained, expected)
 
@@ -137,12 +133,10 @@ def test_1T1E1A_aggrPeriod(translator, aggr_period, exp_index, ins_period):
     obtained = r.json()
     exp_avg = (0 + 1 + 2 + 3) / 4.
     expected = {
-        'data': {
-            'entityId': entity_id,
-            'attrName': attr_name,
-            'index': exp_index,
-            'values': [exp_avg, exp_avg, exp_avg],
-        }
+        'entityId': entity_id,
+        'attrName': attr_name,
+        'index': exp_index,
+        'values': [exp_avg, exp_avg, exp_avg]
     }
     assert_1T1E1A_response(obtained, expected)
 
@@ -169,12 +163,10 @@ def test_1T1E1A_fromDate_toDate(reporter_dataset):
     # Assert
     obtained = r.json()
     expected = {
-        'data': {
-            'entityId': entity_id,
-            'index': expected_index,
-            'attrName': attr_name,
-            'values': expected_values,
-        }
+        'entityId': entity_id,
+        'index': expected_index,
+        'attrName': attr_name,
+        'values': expected_values
     }
     assert_1T1E1A_response(obtained, expected)
 
@@ -200,12 +192,10 @@ def test_1T1E1A_lastN(reporter_dataset):
     # Assert
     obtained = r.json()
     expected = {
-        'data': {
-            'entityId': entity_id,
-            'attrName': attr_name,
-            'index': expected_index,
-            'values': expected_values,
-        }
+        'entityId': entity_id,
+        'attrName': attr_name,
+        'index': expected_index,
+        'values': expected_values
     }
     assert_1T1E1A_response(obtained, expected)
 
@@ -231,12 +221,10 @@ def test_1T1E1A_limit(reporter_dataset):
     # Assert
     obtained = r.json()
     expected = {
-        'data': {
-            'entityId': entity_id,
-            'attrName': attr_name,
-            'index': expected_index,
-            'values': expected_values,
-        }
+        'entityId': entity_id,
+        'attrName': attr_name,
+        'index': expected_index,
+        'values': expected_values
     }
     assert_1T1E1A_response(obtained, expected)
 
@@ -262,12 +250,10 @@ def test_1T1E1A_offset(reporter_dataset):
     # Assert
     obtained = r.json()
     expected = {
-        'data': {
-            'entityId': entity_id,
-            'attrName': attr_name,
-            'index': expected_index,
-            'values': expected_values,
-        }
+        'entityId': entity_id,
+        'attrName': attr_name,
+        'index': expected_index,
+        'values': expected_values
     }
     assert_1T1E1A_response(obtained, expected)
 
@@ -295,12 +281,10 @@ def test_1T1E1A_combined(reporter_dataset):
     # Assert
     obtained = r.json()
     expected = {
-        'data': {
-            'entityId': entity_id,
-            'attrName': attr_name,
-            'index': expected_index,
-            'values': expected_values,
-        }
+        'entityId': entity_id,
+        'attrName': attr_name,
+        'index': expected_index,
+        'values': expected_values
     }
     assert_1T1E1A_response(obtained, expected)
 
@@ -320,10 +304,8 @@ def test_1T1E1A_values_defaults(reporter_dataset):
         '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
     ]
     expected = {
-        'data': {
-            'index': expected_index,
-            'values': expected_values,
-        }
+        'index': expected_index,
+        'values': expected_values
     }
     assert_1T1E1A_response(obtained, expected)
 

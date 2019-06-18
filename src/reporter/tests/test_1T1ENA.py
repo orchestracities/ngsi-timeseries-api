@@ -34,8 +34,8 @@ def assert_1T1ENA_response(obtained, expected):
     Check API responses for 1T1ENA
     """
     # Assert time index
-    obt_index = obtained['data'].pop('index')
-    exp_index = expected['data'].pop('index')
+    obt_index = obtained.pop('index')
+    exp_index = expected.pop('index')
     assert_equal_time_index_arrays(obt_index, exp_index)
 
     # Assert rest of data
@@ -57,20 +57,18 @@ def test_1T1ENA_defaults(reporter_dataset):
         '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_temperatures
     ]
     expected = {
-        'data': {
-            'entityId': entity_id,
-            'index': expected_index,
-            'attributes': [
-                {
-                    'attrName': pressure,
-                    'values': expected_pressures,
-                },
-                {
-                    'attrName': temperature,
-                    'values': expected_temperatures,
-                },
-            ]
-        }
+        'entityId': entity_id,
+        'index': expected_index,
+        'attributes': [
+            {
+                'attrName': pressure,
+                'values': expected_pressures,
+            },
+            {
+                'attrName': temperature,
+                'values': expected_temperatures,
+            }
+        ]
     }
     obtained = r.json()
     assert_1T1ENA_response(obtained, expected)
@@ -103,20 +101,18 @@ def test_1T1ENA_aggrMethod(reporter_dataset, aggr_meth, aggr_press, aggr_temp):
 
     # Assert
     expected = {
-        'data': {
-            'entityId': entity_id,
-            'index': [],
-            'attributes': [
-                {
-                    'attrName': pressure,
-                    'values': [aggr_press],
-                },
-                {
-                    'attrName': temperature,
-                    'values': [aggr_temp],
-                },
-            ]
-        }
+        'entityId': entity_id,
+        'index': [],
+        'attributes': [
+            {
+                'attrName': pressure,
+                'values': [aggr_press],
+            },
+            {
+                'attrName': temperature,
+                'values': [aggr_temp],
+            }
+        ]
     }
     obtained = r.json()
     assert_1T1ENA_response(obtained, expected)
@@ -163,20 +159,18 @@ def test_1T1ENA_aggrPeriod(translator, aggr_period, exp_index, ins_period):
 
     # Assert Results
     expected = {
-        'data': {
-            'entityId': entity_id,
-            'index': exp_index,
-            'attributes': [
-                {
-                    'attrName': pressure,
-                    'values': [20., 20., 20.],
-                },
-                {
-                    'attrName': temperature,
-                    'values': [2., 2., 2.],
-                },
-            ]
-        }
+        'entityId': entity_id,
+        'index': exp_index,
+        'attributes': [
+            {
+                'attrName': pressure,
+                'values': [20., 20., 20.],
+            },
+            {
+                'attrName': temperature,
+                'values': [2., 2., 2.],
+            }
+        ]
     }
     obtained = r.json()
     assert_1T1ENA_response(obtained, expected)
@@ -204,20 +198,18 @@ def test_1T1ENA_fromDate_toDate(reporter_dataset):
 
     # Assert
     expected = {
-        'data': {
-            'entityId': entity_id,
-            'index': expected_index,
-            'attributes': [
-                {
-                    'attrName': pressure,
-                    'values': expected_pressures,
-                },
-                {
-                    'attrName': temperature,
-                    'values': expected_temperatures,
-                },
-            ]
-        }
+        'entityId': entity_id,
+        'index': expected_index,
+        'attributes': [
+            {
+                'attrName': pressure,
+                'values': expected_pressures,
+            },
+            {
+                'attrName': temperature,
+                'values': expected_temperatures,
+            }
+        ]
     }
     obtained = r.json()
     assert_1T1ENA_response(obtained, expected)
@@ -244,20 +236,18 @@ def test_1T1ENA_lastN(reporter_dataset):
 
     # Assert
     expected = {
-        'data': {
-            'entityId': entity_id,
-            'index': expected_index,
-            'attributes': [
-                {
-                    'attrName': pressure,
-                    'values': expected_pressures,
-                },
-                {
-                    'attrName': temperature,
-                    'values': expected_temperatures,
-                },
-            ]
-        }
+        'entityId': entity_id,
+        'index': expected_index,
+        'attributes': [
+            {
+                'attrName': pressure,
+                'values': expected_pressures,
+            },
+            {
+                'attrName': temperature,
+                'values': expected_temperatures,
+            }
+        ]
     }
     obtained = r.json()
     assert_1T1ENA_response(obtained, expected)
@@ -284,20 +274,18 @@ def test_1T1ENA_limit(reporter_dataset):
 
     # Assert
     expected = {
-        'data': {
-            'entityId': entity_id,
-            'index': expected_index,
-            'attributes': [
-                {
-                    'attrName': pressure,
-                    'values': expected_pressures,
-                },
-                {
-                    'attrName': temperature,
-                    'values': expected_temperatures,
-                },
-            ]
-        }
+        'entityId': entity_id,
+        'index': expected_index,
+        'attributes': [
+            {
+                'attrName': pressure,
+                'values': expected_pressures,
+            },
+            {
+                'attrName': temperature,
+                'values': expected_temperatures,
+            }
+        ]
     }
     obtained = r.json()
     assert_1T1ENA_response(obtained, expected)
@@ -324,20 +312,18 @@ def test_1T1ENA_offset(reporter_dataset):
 
     # Assert
     expected = {
-        'data': {
-            'entityId': entity_id,
-            'index': expected_index,
-            'attributes': [
-                {
-                    'attrName': pressure,
-                    'values': expected_pressures,
-                },
-                {
-                    'attrName': temperature,
-                    'values': expected_temperatures,
-                },
-            ]
-        }
+        'entityId': entity_id,
+         'index': expected_index,
+         'attributes': [
+            {
+                'attrName': pressure,
+                'values': expected_pressures,
+            },
+            {
+                'attrName': temperature,
+                'values': expected_temperatures,
+            }
+        ]
     }
     obtained = r.json()
     assert_1T1ENA_response(obtained, expected)
@@ -366,20 +352,18 @@ def test_1T1ENA_combined(reporter_dataset):
 
     # Assert
     expected = {
-        'data': {
-            'entityId': entity_id,
-            'index': expected_index,
-            'attributes': [
-                {
-                    'attrName': pressure,
-                    'values': expected_pressures,
-                },
-                {
-                    'attrName': temperature,
-                    'values': expected_temperatures,
-                },
-            ]
-        }
+        'entityId': entity_id,
+        'index': expected_index,
+        'attributes': [
+            {
+                'attrName': pressure,
+                'values': expected_pressures,
+            },
+            {
+                'attrName': temperature,
+                'values': expected_temperatures,
+            }
+        ]
     }
     obtained = r.json()
     assert_1T1ENA_response(obtained, expected)
@@ -400,19 +384,17 @@ def test_1T1ENA_values_defaults(reporter_dataset):
         '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_temperatures
     ]
     expected = {
-        'data': {
-            'index': expected_index,
-            'attributes': [
-                {
-                    'attrName': pressure,
-                    'values': expected_pressures,
-                },
-                {
-                    'attrName': temperature,
-                    'values': expected_temperatures,
-                },
-            ]
-        }
+        'index': expected_index,
+        'attributes': [
+            {
+                'attrName': pressure,
+                'values': expected_pressures,
+            },
+            {
+                'attrName': temperature,
+                'values': expected_temperatures,
+            }
+        ]
     }
     obtained = r.json()
     assert_1T1ENA_response(obtained, expected)

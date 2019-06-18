@@ -47,7 +47,7 @@ def test_integration(entity, clean_mongo, clean_crate):
     )
     r = requests.get(query_url, params=query_params)
     assert r.status_code == 200, r.text
-    data = r.json()['data']
+    data = r.json()
     assert len(data['index']) == 4
     assert len(data['attributes']) == 2
     assert data['attributes'][0]['values'] == [720.0, 721.0, 722.0, 723.0]
