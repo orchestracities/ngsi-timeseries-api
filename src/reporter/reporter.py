@@ -94,7 +94,7 @@ def _validate_payload(payload):
     # (i.e, the changed value)
     attrs = list(iter_entity_attrs(payload))
     if len(attrs) == 0:
-        log().warning("Received notification without attributes " +
+        log().warning("Received notification containing an entity update without attributes " +
                       "other than 'type' and 'id'")
 
     # Attributes should have a value and the modification time
@@ -102,7 +102,7 @@ def _validate_payload(payload):
         if not has_value(payload, attr):
             payload[attr].update({'value': None})
             log().warning(
-                'Payload is missing value for attribute {}'.format(attr))
+                'An entity update is missing value for attribute {}'.format(attr))
 
 
 def notify():
@@ -115,26 +115,25 @@ def notify():
                'content.', 400
 
     payload = request.json['data']
-    if len(payload) > 1:
-        return 'Multiple data elements in notifications not supported yet', 400
-    payload = payload[0]
 
     log().info('Received payload: {}'.format(payload))
 
-    # Validate notification
-    error = _validate_payload(payload)
-    if error:
-        return error, 400
-
-    # Add TIME_INDEX attribute
-    payload[CrateTranslator.TIME_INDEX_NAME] = \
-        select_time_index_value_as_iso(request.headers, payload)
-
-    # Add GEO-DATE if enabled
-    add_geodata(payload)
-
-    # Always normalize location if there's one
-    normalize_location(payload)
+    # preprocess and validate each entity update
+    for entity in payload:
+        # Validate entity update
+        error = _validate_payload(entity)
+        if error:
+            return error, 400
+    
+        # Add TIME_INDEX attribute
+        entity[CrateTranslator.TIME_INDEX_NAME] = \
+            select_time_index_value_as_iso(request.headers, entity)
+    
+        # Add GEO-DATE if enabled
+        add_geodata(entity)
+    
+        # Always normalize location if there's one
+        normalize_location(entity)
 
     # Define FIWARE tenant
     fiware_s = request.headers.get('fiware-service', None)
@@ -149,7 +148,7 @@ def notify():
 
     # Send valid entities to translator
     with CrateTranslatorInstance() as trans:
-        trans.insert([payload], fiware_s, fiware_sp)
+        trans.insert(payload, fiware_s, fiware_sp)
 
     msg = 'Notification successfully processed'
     log().info(msg)

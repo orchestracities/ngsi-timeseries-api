@@ -72,6 +72,13 @@ def do_clean_crate():
                        "'information_schema', 'pg_catalog')")
         for (ts, tn) in cursor.rows:
             cursor.execute('DROP TABLE IF EXISTS "{}"."{}"'.format(ts, tn))
+            try:
+                # Just for bc test
+                cursor.execute('DROP TABLE IF EXISTS {}.{}'.format(ts, tn))
+            except exceptions.ProgrammingError:
+                # tests like test_accept_special_chars may break
+                pass
+
     finally:
         cursor.close()
 
@@ -140,6 +147,53 @@ def entity():
     }
     return entity
 
+@pytest.fixture
+def sameEntityWithDifferentAttrs():
+    """
+    Two updates for the same entity with different attributes.
+    The first update has temperature and pressure but the second update has only temperature.
+    """
+    entities = [
+        {
+            'id': 'Room1',
+            'type': 'Room',
+            'temperature': {
+                'value': 24.2,
+                'type': 'Number',
+                'metadata': {
+                    'dateModified': {
+                        'type': 'DateTime',
+                        'value': '2019-05-09T15:28:30.000'
+                    }
+                }
+            },
+            'pressure': {
+                'value': 720,
+                'type': 'Number',
+                'metadata': {
+                    'dateModified': {
+                        'type': 'DateTime',
+                        'value': '2019-05-09T15:28:30.000'
+                    }
+                }
+            }
+        },
+        {
+            'id': 'Room1',
+            'type': 'Room',
+            'temperature': {
+                'value': 25.2,
+                'type': 'Number',
+                'metadata': {
+                    'dateModified': {
+                        'type': 'DateTime',
+                        'value': '2019-05-09T15:29:30.000'
+                    }
+                }
+            }
+        }
+    ]
+    return entities
 
 @pytest.fixture
 def air_quality_observed():

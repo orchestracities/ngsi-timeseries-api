@@ -7,6 +7,10 @@ def build_subscription(quantumleap_url,
                        attributes, observed_attributes, notified_attributes,
                        throttling_secs,
                        time_index_attribute=None):
+    metadata_list = ['dateCreated', 'dateModified', 'TimeInstant', 'timestamp']
+    if time_index_attribute is not None:
+        metadata_list.append(time_index_attribute)
+
     tree = subscription(
         description('Created by QuantumLeap {}.'.format(quantumleap_url)),
         subject(
@@ -22,7 +26,7 @@ def build_subscription(quantumleap_url,
         ),
         notification(
             build_notification_target(quantumleap_url, time_index_attribute),
-            metadata(['dateCreated', 'dateModified', 'TimeInstant']),
+            metadata(metadata_list),
             attrs(first_of(attributes, notified_attributes))
         ),
         throttling(throttling_secs)

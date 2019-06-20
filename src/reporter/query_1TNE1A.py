@@ -4,6 +4,7 @@ from reporter.reporter import _validate_query_params
 from translators.crate import CrateTranslatorInstance, CrateTranslator
 import logging
 from .geo_query_handler import handle_geo_query
+from utils.dicts import lookup_string_match
 
 
 def query_1TNE1A(attr_name,   # In Path
@@ -94,7 +95,8 @@ def _prepare_response(entities, attr_name, entity_type, entity_ids,
                       aggr_method, aggr_period, from_date, to_date):
     values = {}
     for e in entities:
-        values[e['id']] = e[attr_name]['values']
+        matched_attr = lookup_string_match(e, attr_name)
+        values[e['id']] = matched_attr['values'] if matched_attr else []
 
     if aggr_method and not aggr_period:
         # Use fromDate / toDate

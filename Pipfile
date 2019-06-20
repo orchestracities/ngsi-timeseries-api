@@ -4,27 +4,21 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-connexion = "~=1.1"
+certifi = "==2018.10.15"
+connexion = "~=2.2"
 crate = "~=0.22"
-python-dateutil = ">=2.7"
 flask = "~=0.12"
 geocoder = "~=1.33"
 geojson = "~=2.4"
 influxdb = "~=4.0"
+pymongo = "~=3.4"
 pytest = "~=3.0"
+pytest-flask = "~=0.10"
+python-dateutil = ">=2.7"
+pyyaml = ">=4.2"
 redis = "~=2.10"
 requests = ">=2.20"
-rethinkdb = "~=2.3"
-matplotlib = "~=2.0"
-numpy = "~=1.12"
-pymongo = "~=3.4"
-pytest-flask = "~=0.10"
-
-# Indirect dependencies needing special handling.
-# See #157 for the details.
-# Note. Run `pipenv lock --pre` to generate the lock file.
-pyyaml = ">=4.2b1"
-certifi = "==2018.10.15"
+rethinkdb = "==2.3"
 
 [dev-packages]
 

@@ -215,28 +215,15 @@ def test_geocoding(notification, clean_mongo, crate_translator):
     assert float(lat) == pytest.approx(24.9412167, abs=1e-2)
 
 
-def test_no_multiple_data_elements(notification, clean_mongo, clean_crate):
-    second_element = {
-                        'id': 'Room2',
-                        'type': 'Room',
-                        'temperature': {
-                            'type': 'Number',
-                            'value': 30,
-                            'metadata': {
-                                'dateModified': {
-                                    'type': 'DateTime',
-                                    'value': '2017-06-20T11:46:45.00Z'
-                                }
-                            }
-                        }
-                    }
-    notification['data'].append(second_element)
-    print(json.dumps(notification))
+def test_multiple_data_elements(notification, sameEntityWithDifferentAttrs, clean_mongo, clean_crate):
+    """
+    Test that the notify API can process notifications containing multiple elements in the data array.
+    """
+    notification['data'] = sameEntityWithDifferentAttrs
     r = requests.post('{}'.format(notify_url), data=json.dumps(notification),
                       headers=HEADERS_PUT)
-    assert r.status_code == 400
-    assert r.json() == 'Multiple data elements in notifications not ' \
-                       'supported yet'
+    assert r.status_code == 200
+    assert r.json() == 'Notification successfully processed'
 
 
 def test_time_index(notification, clean_mongo, crate_translator):

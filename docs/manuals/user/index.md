@@ -13,9 +13,9 @@ QuantumLeap's API. However, you will still need to understand the basics of
 how subscriptions and notifications work, so take your time to read
 [the docs](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#ubscriptions).
 
-Historical data for each entity type will be persisted as long as the
-subscription is active, correctly configured and the entity in the notification
-is NGSI compliant.
+Historical data for each entity type will be added in the QuantumLeap's database as long as the subscription is active, correctly configured and the entity in the notification is NGSI compliant.
+
+In case the subscription is removed or its status is changed, no data will be added after that. Although the previous data stored in QuantumLeap's database will persist until it is removed externally using APIs to delete data stored in QuantumLeap.
 
 So, summing up, the usage flow is therefore the following...
 
@@ -163,6 +163,51 @@ If the type of any of the received attributes is not present in the column
 internally as a string. So, if you use `Float` for your attribute type (not
 valid), your attribute will be stored as a `string`.
 
+### Time Index
+
+A fundamental element in the time-series database is the **time index**.
+You may be wondering... where is it stored? QuantumLeap will persist the
+*time index* for each notification in a special column called `time_index`.
+
+The value that is used for the *time index* of a received notification is
+defined according to the following policy, which choses the first present and
+valid time value chosen from the following ordered list of options.
+
+1. Custom **time index**. The value of the `Fiware-TimeIndex-Attribute` http
+header. Note that for a notification to contain such header, the corresponding
+subscription has to be created with an `httpCustom` block, as detailed in the
+*Subscriptions and Custom Notifications* section of the [NGSI spec](http://fiware.github.io/specifications/ngsiv2/stable/).
+This is the way you can instruct QL to use custom attributes of the
+notification payload to be taken as *time index* indicators.
+
+1. Custom **time index** metadata. The most recent custom time index (the value of the `Fiware-TimeIndex-Attribute`)
+attribute value found in any of the attribute metadata sections in the notification.
+See the previous option about the details regarding subscriptions.
+
+1. **TimeInstant** attribute. As specified in the
+[FIWARE IoT agent documentation](https://github.com/telefonicaid/iotagent-node-lib#the-timeinstant-element).
+
+1. **TimeInstant** metadata. The most recent `TimeInstant` attribute value
+found in any of the attribute metadata sections in the notification.
+(Again, refer to the [FIWARE IoT agent documentation](https://github.com/telefonicaid/iotagent-node-lib#the-timeinstant-element).)
+
+1. **timestamp** attribute.
+
+1. **timestamp** metadata. The most recent `timestamp` attribute value found in any of the attribute metadata sections
+in the notification. As specified in the
+[FIWARE data models documentation](https://fiware-datamodels.readthedocs.io/en/latest/guidelines/index.html#dynamic-attributes).
+
+1. **dateModified** attribute. If you payed attention in the
+[Orion Subscription section](#orion-subscription), this is the `"dateModified"`
+value notified by Orion.
+
+1. **dateModified** metadata. The most recent dateModified attribute value
+found in any of the attribute metadata sections in the notification.
+
+1. Finally, QL will use the **Current Time** (the time of notification
+reception) if none of the above options is present or none of the values found
+can actually be converted to a `datetime`.
+
 ### Restrictions and Limitations
 
 - You cannot have two entity types with the same name but different
@@ -174,6 +219,17 @@ should respect the naming guidelines explained
 [here](http://fiware-datamodels.readthedocs.io/en/latest/guidelines/index.html).
 
 - Attributes metadata are still not being persisted. See [Issue 12](https://github.com/smartsdk/ngsi-timeseries-api/issues/12)
+
+- While support for multiple data in a single notification as been recently introduced
+  (See [PR 191](https://github.com/smartsdk/ngsi-timeseries-api/pull/191)),
+  The following limitations still apply: a error in a single data entity will invalidate
+  the all set. There is not optimisation for large message size.
+
+- Data are assumed to be consistent. I.e., if the first data notification for
+  an entity type use a given set of data types for the attributes, the following
+  data notifications must be consistent, or they will be rejected. E.g. if
+  the data type of attribute `speed` of entity type `car` is set initially
+  to `Number`, later on it cannot be set to `Text`.
 
 ## Data Retrieval
 
@@ -193,40 +249,6 @@ prefixed also with the schema where they are defined. See the
 
 Finally, you can interact with your data visually using [Grafana](https://grafana.com/).
 See the [Grafana](../admin/grafana.md) section of the docs to see how.
-
-### Time Index
-
-A fundamental element in the time-series database is the **time index**.
-You may be wondering... where is it stored? QuantumLeap will persist the
-*time index* for each notification in a special column called `time_index`.
-
-The value that is used for the *time index* of a received notification is
-defined according to the following policy, which choses the first present and
-valid time value chosen from the following ordered list of options.
-
-1. Custom **time index**. The value of the `Fiware-TimeIndex-Attribute` http
-header. Note that for a notification to contain such header, the corresponding
-subscription has to be created with an `httpCustom` block, as detailed in the
-*Subscriptions and Custom Notifications* section of the [NGSI spec](http://fiware.github.io/specifications/ngsiv2/stable/).
-This is the way you can instruct QL to use custom attributes of the
-notification payload to be taken as *time index* indicators.
-
-1. **TimeInstant** attribute. As specified in the [FIWARE IoT agent documentation](https://github.com/telefonicaid/iotagent-node-lib#the-timeinstant-element).
-
-1. **TimeInstant** metadata. The most recent `TimeInstant` attribute value
-found in any of the attribute metadata sections in the notification.
-(Again, refer to the [FIWARE IoT agent documentation](https://github.com/telefonicaid/iotagent-node-lib#the-timeinstant-element).)
-
-1. **dateModified** attribute. If you payed attention in the
-[Orion Subscription section](#orion-subscription), this is the `"dateModified"`
-value notified by Orion.
-
-1. **dateModified** metadata. The most recent dateModified attribute value
-found in any of the attribute metadata sections in the notification.
-
-1. Finally, QL will use the **Current Time** (the time of notification
-reception) if none of the above options is present or none of the values found
-can actually be converted to a `datetime`.
 
 ## Data Removal
 

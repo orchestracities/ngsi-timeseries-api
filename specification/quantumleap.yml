@@ -41,7 +41,7 @@ definitions:
       data:
         type: array
         items:
-          $ref: "#/definitions/Entity"
+          $ref: '#/definitions/Entity'
     example:
       subscriptionId: 5947d174793fe6f7eb5e3961
       data:
@@ -477,8 +477,7 @@ paths:
           name: notification
           required: true
           schema:
-            type: object
-            $ref: "#/definitions/Notification"
+            $ref: '#/definitions/Notification'
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
       tags:

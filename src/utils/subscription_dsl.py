@@ -66,7 +66,7 @@ def metadata(value):
 
 
 def throttling(value):
-    return node('throttling', value if value else 1)
+    return node('throttling', value if value is not None else 1)
 
 
 def first_of(*xs):

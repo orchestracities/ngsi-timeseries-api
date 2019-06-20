@@ -7,7 +7,7 @@ from utils.common import *
 
 def test_db_version(translator):
     version = translator.get_db_version()
-    assert version == '3.0.5'
+    assert version == '3.3.2'
 
 
 def test_insert(translator):
@@ -29,6 +29,21 @@ def test_insert_entity(translator, entity):
 
     check_notifications_record([entity], loaded_entities)
 
+def test_insert_same_entity_with_different_attrs( translator, sameEntityWithDifferentAttrs ):
+    """
+    Test that the CrateTranslator can insert entity updates  that are of the same type but have different attributes.
+    """
+    # Add time index to the updates. Use the dateModified meta data attribute of temperature.
+    for entity in sameEntityWithDifferentAttrs:
+        entity[BaseTranslator.TIME_INDEX_NAME] = entity['temperature']['metadata']['dateModified']['value']
+        
+    result = translator.insert( sameEntityWithDifferentAttrs )
+    assert result.rowcount != 0
+    
+    loaded_entities = translator.query()
+    assert len(loaded_entities) == 1
+
+    check_notifications_record( sameEntityWithDifferentAttrs, loaded_entities)
 
 def test_insert_multiple_types(translator):
     args = {
@@ -359,6 +374,45 @@ def test_geo_point(translator):
 
     # Check entity is retrieved as it was inserted
     check_notifications_record([entity], entities)
+
+
+def test_geo_point_null_values(translator):
+    # Github PR #198: Support geo:point null values
+    entity = {
+        'id': 'Room1',
+        'type': 'Room',
+        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
+        'location': {
+            'type': 'geo:point',
+            'value': "19.6389474, -98.9109537"  # lat, long
+        }
+    }
+    translator.insert([entity])
+    entities = translator.query()
+    assert len(entities) == 1
+    check_notifications_record([entity], entities)
+
+    entity_new = {
+        'id': 'Room1',
+        'type': 'Room',
+        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
+        'temperature': {
+            'type': 'Number',
+            'value': "19"
+        }
+    }
+    translator.insert([entity_new])
+    entities = translator.query()
+    assert len(entities) == 1
+
+    # Check location's None is saved as a geo_point column in crate
+    op = 'select latitude(location), longitude(location), temperature from ' \
+         'etroom order by time_index ASC'
+    translator.cursor.execute(op)
+    res = translator.cursor.fetchall()
+    assert len(res) == 2
+    assert res[0] == [19.6389474, -98.9109537, None]
+    assert res[1] == [None, None, '19']
 
 
 def test_structured_value_to_array(translator):
