@@ -19,3 +19,4 @@ nav:
     - 'Ports': 'admin/ports.md'
     - 'CrateDB': 'admin/crate.md'
     - 'Grafana': 'admin/grafana.md'
+    - 'Data-Migration': 'admin/dataMigration.md'
