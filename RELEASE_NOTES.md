@@ -1,5 +1,31 @@
 # QuantumLeap Release Notes
 
+## 0.7.0
+
+- Flatten JSON in query results (#213)
+- Data migration from STH-Comet to QuantumLeap (#184)
+
+#### Important: Backward compatibility
+This release breaks API backward compatibility. Existing 0.6.3 clients will
+**not** be able to work with Quantum Leap 0.7.0 without code changes.
+In detail: version 0.7.0 changes the structure of query results. Up to
+version 0.6.3, Quantum Leap used the following JSON format for query results:
+
+    {
+        data: {
+           ...query results...
+        }
+    }
+
+Version 0.7.0 removes the `data` field and puts all the fields that make up
+the query result at the top level as in e.g.
+
+    {
+        entityId: ...,
+        index: ...,
+        values: ...
+    }
+
 ## 0.6.3
 
 - Fix queries involving attribute names (#206)
