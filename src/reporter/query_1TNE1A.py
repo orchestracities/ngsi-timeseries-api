@@ -134,20 +134,18 @@ def _prepare_response(entities, attr_name, entity_type, entity_ids,
         entries.append(i)
 
     res = {
-        'data': {
-            'entityType': entity_type,
-            'attrName': attr_name,
-            'entities': entries,
-        }
+        'entityType': entity_type,
+        'attrName': attr_name,
+        'entities': entries
     }
     return res
 
 
 def query_1TNE1A_value(*args, **kwargs):
     res = query_1TNE1A(*args, **kwargs)
-    if isinstance(res, dict) and 'data' in res:
-        res['data'].pop('entityType')
-        res['data'].pop('attrName')
-        res['data']['values'] = res['data']['entities']
-        res['data'].pop('entities')
+    if isinstance(res, dict):
+        res.pop('entityType', None)
+        res.pop('attrName', None)
+        res['values'] = res['entities']
+        res.pop('entities', None)
     return res

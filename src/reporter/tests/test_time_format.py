@@ -23,12 +23,10 @@ def check_time_index(input_index, expected_index=None):
 
     # Check Response
     expected = {
-        'data': {
-            'entityId': 'Room0',
-            'attrName': 'temperature',
-            'index': expected_index,
-            'values': [0, 1, 2],
-        }
+        'entityId': 'Room0',
+        'attrName': 'temperature',
+        'index': expected_index,
+        'values': [0, 1, 2]
     }
     assert_1T1E1A_response(obtained, expected)
 

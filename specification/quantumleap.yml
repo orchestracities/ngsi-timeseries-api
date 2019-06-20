@@ -83,8 +83,6 @@ definitions:
 
   ValuesArray:
     type: array
-    items:
-      type: number
     description: "Array of values of the selected attribute, in the same
     corresponding order of the 'index' array. When using aggregation options,
     the format of this remains the same, only the semantics will change. For
@@ -663,28 +661,23 @@ paths:
           schema:
             type: object
             properties:
-              data:
-                type: object
-                properties:
-                  entityId:
-                    type: string
-                  attrName:
-                    type: string
-                  index:
-                    $ref: '#/definitions/IndexArray'
-                  values:
-                    $ref: '#/definitions/ValuesArray'
+              entityId:
+                type: string
+              attrName:
+                type: string
+              index:
+                $ref: '#/definitions/IndexArray'
+              values:
+                $ref: '#/definitions/ValuesArray'
           examples:
             application/json:
               {
-                "data": {
                     "entityId": "Kitchen1",
                     "attrName": "temperature",
                     "index": ["2018-01-05T15:44:34", "2018-01-06T15:44:59",
                     "2018-01-07T15:44:59"],
                     # TODO: in NGSI orion would return the type+metadata of attr
                     "values": [24.1, 25.3, 26.7]
-                  }
               }
         404:
           description: "Not Found"
@@ -735,18 +728,13 @@ paths:
         200:
           description: OK
           schema:
-            type: object
-            properties:
-              data:
-                $ref: '#/definitions/IndexedValues'
+            $ref: '#/definitions/IndexedValues'
           examples:
             application/json:
               {
-                "data": {
                     "index": ["2018-01-05T15:44:34", "2018-01-06T15:44:59",
                     "2018-01-07T15:44:59"],
                     "values": [24.1, 25.3, 26.7]
-                  }
               }
         404:
           description: "Not Found"
@@ -798,21 +786,17 @@ paths:
           schema:
             type: object
             properties:
-              data:
-                type: object
-                properties:
-                  entityId:
-                    type: string
-                  index:
-                    $ref: '#/definitions/IndexArray'
-                  attributes:
-                    type: array
-                    items:
-                      $ref: '#/definitions/AttributeValues'
+              entityId:
+                type: string
+              index:
+                $ref: '#/definitions/IndexArray'
+              attributes:
+                type: array
+                items:
+                  $ref: '#/definitions/AttributeValues'
           examples:
             application/json:
               {
-                "data": {
                   "entityId": "Kitchen1",
                   "index": ["2018-01-05T15:44:34", "2018-01-06T15:44:59",
                             "2018-01-07T15:44:59"],
@@ -826,7 +810,6 @@ paths:
                       "values": [1.01, 0.9, 1.02]
                     }
                   ]
-                }
               }
         404:
           description: "Not Found"
@@ -917,19 +900,15 @@ paths:
           schema:
             type: object
             properties:
-              data:
-                type: object
-                properties:
-                  index:
-                    $ref: '#/definitions/IndexArray'
-                  values:
-                    type: array
-                    items:
-                      $ref: '#/definitions/AttributeValues'
+              index:
+                $ref: '#/definitions/IndexArray'
+              values:
+                type: array
+                items:
+                  $ref: '#/definitions/AttributeValues'
           examples:
             application/json:
               {
-                "data": {
                   "index": ["2018-01-05T15:44:34", "2018-01-06T15:44:59",
                             "2018-01-07T15:44:59"],
                   "values": [
@@ -942,7 +921,6 @@ paths:
                       "values": [1.01, 0.9, 1.02]
                     }
                   ]
-                }
               }
         404:
           description: "Not Found"
@@ -999,22 +977,18 @@ paths:
           schema:
             type: object
             properties:
-              data:
-                type: object
-                properties:
-                  entityType:
-                    type: string
-                  attrName:
-                    type: string
-                  entities:
-                    type: array
-                    items:
-                      $ref: '#/definitions/EntityIndexedValues'
+              entityType:
+                type: string
+              attrName:
+                type: string
+              entities:
+                type: array
+                items:
+                  $ref: '#/definitions/EntityIndexedValues'
           examples:
             # TODO: Maybe for this 'query all' we cloud keep a per-type index.
             application/json:
               {
-                "data": {
                   "entityType": "Room",
                   "attrName": "temperature",
                   "entities": [
@@ -1031,7 +1005,6 @@ paths:
                       "values": [21.01, 20.9, 21.02]
                     }
                   ]
-                }
               }
 
 
@@ -1071,18 +1044,14 @@ paths:
           schema:
             type: object
             properties:
-              data:
-                type: object
-                properties:
-                  entities:
-                    type: array
-                    items:
-                      $ref: '#/definitions/EntityIndexedValues'
+              entities:
+                type: array
+                items:
+                  $ref: '#/definitions/EntityIndexedValues'
           examples:
             # TODO: Maybe for this 'query all' we cloud keep a per-type index.
             application/json:
               {
-                "data": {
                   "values": [
                     {
                       "entityId": "Kitchen1",
@@ -1097,7 +1066,6 @@ paths:
                       "values": [21.01, 20.9, 21.02]
                     }
                   ]
-                }
               }
 
 
@@ -1139,29 +1107,25 @@ paths:
           schema:
             type: object
             properties:
-              data:
-                type: object
-                properties:
-                  entityType:
-                    type: string
-                  entities:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        entityId:
-                          type: string
-                        index:
-                          $ref: '#/definitions/IndexArray'
-                        attributes:
-                          type: array
-                          items:
-                            $ref: '#/definitions/AttributeValues'
+              entityType:
+                type: string
+              entities:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    entityId:
+                      type: string
+                    index:
+                      $ref: '#/definitions/IndexArray'
+                    attributes:
+                      type: array
+                      items:
+                        $ref: '#/definitions/AttributeValues'
           examples:
             # TODO: Maybe for this 'query all' we cloud keep a per-type index.
             application/json:
               {
-                "data": {
                   "entityType": "Room",
                   "entities": [
                     {
@@ -1196,7 +1160,6 @@ paths:
                       ]
                     }
                   ]
-                }
               }
     delete:
       operationId: reporter.delete.delete_entities
@@ -1260,29 +1223,25 @@ paths:
           schema:
             type: object
             properties:
-              data:
-                type: object
-                properties:
-                  entityType:
-                    type: string
-                  entities:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        entityId:
-                          type: string
-                        index:
-                          $ref: '#/definitions/IndexArray'
-                        attributes:
-                          type: array
-                          items:
-                            $ref: '#/definitions/AttributeValues'
+              entityType:
+                type: string
+              entities:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    entityId:
+                      type: string
+                    index:
+                      $ref: '#/definitions/IndexArray'
+                    attributes:
+                      type: array
+                      items:
+                        $ref: '#/definitions/AttributeValues'
           examples:
             # TODO: Maybe for this 'query all' we cloud keep a per-type index.
             application/json:
               {
-                "data": {
                   "values": [
                     {
                       "entityId": "Room1",
@@ -1316,7 +1275,6 @@ paths:
                       ]
                     }
                   ]
-                }
               }
 
 
@@ -1356,27 +1314,23 @@ paths:
           schema:
             type: object
             properties:
-              data:
-                type: object
-                properties:
-                  attrName:
-                    type: string
-                  types:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        entityType:
-                          type: string
-                        entities:
-                          type: array
-                          items:
-                            $ref: '#/definitions/EntityIndexedValues'
+              attrName:
+                type: string
+              types:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    entityType:
+                      type: string
+                    entities:
+                      type: array
+                      items:
+                        $ref: '#/definitions/EntityIndexedValues'
           examples:
             # TODO: Maybe for this 'query all' we cloud keep a per-type index.
             application/json:
               {
-                "data": {
                   "attrName": "temperature",
                   "types": [
                     {
@@ -1418,7 +1372,6 @@ paths:
                       ]
                     }
                   ]
-                }
               }
 
   /attrs/{attrName}/value:
@@ -1461,27 +1414,23 @@ paths:
           schema:
             type: object
             properties:
-              data:
-                type: object
-                properties:
-                  attrName:
-                    type: string
-                  types:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        entityType:
-                          type: string
-                        entities:
-                          type: array
-                          items:
-                            $ref: '#/definitions/EntityIndexedValues'
+              attrName:
+                type: string
+              types:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    entityType:
+                      type: string
+                    entities:
+                      type: array
+                      items:
+                        $ref: '#/definitions/EntityIndexedValues'
           examples:
             # TODO: Maybe for this 'query all' we cloud keep a per-type index.
             application/json:
               {
-                "data": {
                   "values": [
                     {
                       "entityType": "Room",
@@ -1522,7 +1471,6 @@ paths:
                       ]
                     }
                   ]
-                }
               }
 
   /attrs:
@@ -1563,32 +1511,28 @@ paths:
           schema:
             type: object
             properties:
-              data:
-                type: object
-                properties:
-                  attrs:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        attrName:
-                          type: string
-                        types:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              entityType:
-                                type: string
-                              entities:
-                                type: array
-                                items:
-                                  $ref: '#/definitions/EntityIndexedValues'
+              attrs:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    attrName:
+                      type: string
+                    types:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          entityType:
+                            type: string
+                          entities:
+                            type: array
+                            items:
+                              $ref: '#/definitions/EntityIndexedValues'
           examples:
             # TODO: Maybe for this 'query all' we cloud keep a per-type index.
             application/json:
               {
-                "data": {
                   "attrs:": [
                     {
                       "attrName": "temperature",
@@ -1634,7 +1578,6 @@ paths:
                       ]
                     }
                   ]
-                }
               }
 
 
@@ -1676,32 +1619,28 @@ paths:
           schema:
             type: object
             properties:
-              data:
-                type: object
-                properties:
-                  values:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        attrName:
-                          type: string
-                        types:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              entityType:
-                                type: string
-                              entities:
-                                type: array
-                                items:
-                                  $ref: '#/definitions/EntityIndexedValues'
+              values:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    attrName:
+                      type: string
+                    types:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          entityType:
+                            type: string
+                          entities:
+                            type: array
+                            items:
+                              $ref: '#/definitions/EntityIndexedValues'
           examples:
             # TODO: Maybe for this 'query all' we cloud keep a per-type index.
             application/json:
               {
-                "data": {
                   "values:": [
                     {
                       "attrName": "temperature",
@@ -1747,5 +1686,4 @@ paths:
                       ]
                     }
                   ]
-                }
               }

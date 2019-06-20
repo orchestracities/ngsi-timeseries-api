@@ -60,7 +60,7 @@ def query_1t1e1a(entity_id, attr_name):
     url = "{}/entities/{}/attrs/{}".format(QL_URL, entity_id, escaped_attr_name)
     response = requests.get(url)
     assert response.status_code == 200
-    return response.json().get('data', {})
+    return response.json()
 
 
 def query_1tne1a(attr_name):
@@ -68,7 +68,7 @@ def query_1tne1a(attr_name):
     url = "{}/types/{}/attrs/{}".format(QL_URL, entity_type, escaped_attr_name)
     response = requests.get(url)
     assert response.status_code == 200
-    return response.json().get('data', {})
+    return response.json()
 
 
 def query_1t1ena(entity_id, attr1_name, attr2_name):
@@ -78,7 +78,7 @@ def query_1t1ena(entity_id, attr1_name, attr2_name):
     }
     response = requests.get(url, query_params)
     assert response.status_code == 200
-    return response.json().get('data', {})
+    return response.json()
 
 
 @pytest.mark.parametrize('attr_name', [

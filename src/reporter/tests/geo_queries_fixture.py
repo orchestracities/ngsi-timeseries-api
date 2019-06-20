@@ -60,9 +60,9 @@ def query_1t1e1a(entity_id, query_params, expected_status_code=200):
 
 
 def eids_from_response(response):
-    entities = response.json().get('data', {}).get('entities', {})
+    entities = response.json().get('entities', {})
     if not entities:
-        entities = [response.json().get('data', {})]
+        entities = [response.json()]
 
     return set([e['entityId'] for e in entities])
 
