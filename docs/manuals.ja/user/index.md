@@ -16,12 +16,18 @@ Orion の専門家ではないのですか？問題はありません。QuantumL
 を読む時間を取ってください 。
 
 サブスクリプションがアクティブで正しく設定され、通知内のエンティティが NGSI
-準拠である限り、各エンティティ・タイプの履歴データは保持されます。
+に準拠している限り、各エンティティ型の履歴データが QuantumLeap のデータベースに
+追加されます。
+
+サブスクリプションが削除された場合、またはそのステータスが変更された場合、
+その後データは追加されません。 ただし、QuantumLeap のデータベースに格納されている
+以前のデータは、QuantumLeap に格納されているデータを削除するために API
+を使用して外部から削除されるまで保持されます。
 
 したがって、要約すると、使用フローは次のようになります...
 
 - 関心のあるエンティティ・タイプごとに Orion のサブスクリプションを作成します
-- 通常どおり Orion にデータを挿入/更新します
+- 通常どおり Orion にエンティティを挿入/更新します
 - 履歴データは QuantumLeap のデータベースに保存されます。
 
 各ステップの詳細を見てみましょう。
@@ -37,7 +43,7 @@ Orion の専門家ではないのですか？問題はありません。QuantumL
 の対応するセクションで詳しく説明されています。
 
 サブスクリプションを作成するために、QuantumLeap は
-[ここ](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
+[/subscribe で、ここ](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
 にドキュメント化された API エンドポイントを提供します。
 
 また、Orion
@@ -98,11 +104,10 @@ Orion-QuantumLeap リンクを確立するために Orion
 -  必須ではありません が、サブスクリプションの `notification` 部分に、
 
 `"metadata": ["dateCreated", "dateModified"]`
-の部分を含めることを強くお勧めします。これは Orion
-に通知の属性の変更時刻を含めるよう指示します。
-このタイムスタンプは、データベース内の時間インデックスとして使用されます。
-これが何らかの理由で欠落している場合、QuantumLeap
-は通知が届いた現在のシステム時刻を使用します
+の部分を含めることを強くお勧めします。これは Orion に 属性の変更時刻を
+通知に含めるように指示します。可能であれば、このタイムスタンプは
+データベースの **タイム・インデックス** として使用されます。
+詳細については、*タイム・インデックス* のセクションを参照してください。
 
 -  以前のルールに従っているエンティティに対して、有効な NGSI
 
@@ -175,23 +180,87 @@ NGSI エンティティが属性に有効な NGSI 型を使用していること
 |Text                | [string](https://crate.io/docs/crate/reference/sql/data_types.html#string)                  | 提供された NGSI 型がサポートされていないか間違っている場合、これはデフォルト型です |
 |StructuredValue     | [object](https://crate.io/docs/crate/reference/sql/data_types.html#object)                  |-|
 
-受信した属性のいずれかの型が、上記のテーブルの列 *NGSI 型*に存在しない場合、その属性の値は内部的に文字列として扱われます。したがって、属性型 (有効ではない) に `Float` を使用すると、属性は `string` として格納されます。
+受信した属性のいずれかの型が、上記のテーブルの列 *NGSI 型*に存在しない場合、
+その属性の値は内部的に文字列として扱われます。したがって、属性型 (有効ではない)
+に `Float` を使用すると、属性は `string` として格納されます。
+
+
+### タイム・インデックス (Time Index)
+
+時系列データベースの基本要素は**タイム・インデクス**です。あなたは疑問に
+思うかもしれません...。それはどこに保存されていますか？ QuantumLeap は各通知の
+*タイム・インデクス*を `time_index` と呼ばれる特別な列に保持します。
+
+受信した通知の*タイム・インデクス*に使用される値は、次のポリシーに従って
+定義されます。このポリシーでは、次の順序付けられたオプションのリストから
+選択された最初の現在の有効な時間値を選択します。
+
+1. カスタム **time index**。`Fiware-TimeIndex-Attribute` http ヘッダの値。
+   このようなヘッダを含む通知には、
+   [NGSI 仕様](http://fiware.github.io/specifications/ngsiv2/stable/)
+   の *Subscriptions and Custom Notifications* セクションに詳述されているように、
+   対応するサブスクリプションを `httpCustom` ブロックで作成する必要があることに
+   注意してください。これは、通知ペイロードのカスタム属性を使用して
+   *タイム・インデックス* のインジケータとして使用するように QL に指示する
+   方法です
+
+1. カスタム **time index** メタデータ。通知内のいずれかの属性メタデータ・
+   セクションにある最新のカスタム・タイム・インデックス
+   (`Fiware-TimeIndex-Attribute`の値) 属性値。サブスクリプションに関する
+   詳細については、前のオプションを参照してください
+
+1. **TimeInstant** 属性。
+   [FIWARE IoT Agent のドキュメント](https://github.com/telefonicaid/iotagent-node-lib#the-timeinstant-element)
+   で指定されているとおりです
+
+1. **TimeInstant** メタデータ。通知内のいずれかの属性メタデータ・セクション
+   にある最新の  `TimeInstant` 属性値。(繰り返しますが、
+   [FIWARE IoT Agent のドキュメント](https://github.com/telefonicaid/iotagent-node-lib#the-timeinstant-element)
+   を参照してください)
+
+1. **timestamp** 属性
+
+1. **timestamp** のメタデータ。通知内のいずれかの属性メタデータ・セクションに
+   ある最新の `timestamp` 属性値。
+   [FIWARE データ・モデルのドキュメント](https://fiware-datamodels.readthedocs.io/en/latest/guidelines/index.html#dynamic-attributes)
+   で指定されているとおりです
+
+1. **dateModified** 属性。
+   [Orion サブスクリプションのセクション](#orion-subscription)
+   に記載のとおり、これは Orion から通知された `"dateModified"` 値です
+
+1. **dateModified** メタデータ。通知内のいずれかの属性メタデータ・セクションに
+   ある最新の `"dateModified"` 属性値です
+
+1. 最後に、上記のオプションのどれも存在しない場合、または見つかった値のどれも
+   実際に `datetime` に変換できない場合、QL は**現在時刻** (通知受信時刻)
+   を使用します
 
 ### 制約と制限
 
 - 同じ名前で、大文字とは異なる2つのエンティティ型を持つことはできません。
-
-例 : `Preprocessor` と `preProcessor`。特定のエンティティの属性名についても
-同様です。すなわち、`hotSpot` 属性と `hotspot` 属性は、同じように扱われます。
-これらはまれなコーナー・ケースですが、これに留意する価値があります。
-最終的に、型と属性の正しい命名は、
-[ここ](http://fiware-datamodels.readthedocs.io/en/latest/guidelines/index.html)
-で説明する命名ガイドラインを遵守する必要があります
+  例 : `Preprocessor` と `preProcessor`。特定のエンティティの属性名についても
+  同様です。すなわち、`hotSpot` 属性と `hotspot` 属性は、同じように扱われます。
+  これらはまれなコーナー・ケースですが、これに留意する価値があります。
+  最終的に、型と属性の正しい命名は、
+  [ここ](http://fiware-datamodels.readthedocs.io/en/latest/guidelines/index.html)
+  で説明する命名ガイドラインを遵守する必要があります
 
 - 属性メタデータは依然として永続化されていません。
+  [Issue 12](https://github.com/smartsdk/ngsi-timeseries-api/issues/12)
+  を参照してください
 
-[Issue 12](https://github.com/smartsdk/ngsi-timeseries-api/issues/12)
-を参照してください
+- 最近導入された単一の通知における複数のデータのサポート
+  ([PR 191](https://github.com/smartsdk/ngsi-timeseries-api/pull/191) を参照)
+  が、依然として以下の制限が適用されます。単一のデータ・エンティティにエラーが
+  あると、すべてのセットが無効になります。大きなメッセージサイズに対する最適化は
+  ありません
+
+- データは一貫していると仮定されます。つまり、エンティティ型の最初のデータ通知で
+  属性に特定のデータ型のセットを使用する場合、次のデータ通知は一貫している必要が
+  あります。そうしないと拒否されます。例えば。 エンティティ型 `car` の属性
+  `speed` のデータ型が最初に `Number` に設定されている場合、後でそれを `Text`
+  に設定することはできません
 
 ## データ検索
 
@@ -213,33 +282,17 @@ QuantumLeap から履歴データを取得するには、
 できます。確認するために、ドキュメントの [Grafana](../admin/grafana.md)
 をセクションを参照してください。
 
-### タイム・インデックス
-
-時系列データベースの基本的なインデックスはタイム・インデックスです。
-あなたは疑問に思うかもしれませんが...それはどこに保存されていますか？
-
-QuantumLeap は、`time_index` という特別な列に、各通知のタイム・インデックスを
-保持します。[Orion  サブスクリプションのセクション](#orion-subscription)
-で、少なくともタイム・インデックスとしてどの値が使用されているかがわかります。
-これは、Orionによって通知された `"dateModified"` 値か、サブスクリプションで
-そのオプションが欠落していた場合は、通知の到着時間です。
-
-将来的には、これにより柔軟性が増し、ユーザーは任意の `Datetime`
-属性をタイム・インデックスとして使用するように定義できます。
-
 ## データの削除
 
 QuantumLeap から履歴データを削除する方法は2通りあります。
 
 - 特定のエンティティのすべてのレコードを削除するには、この
-
-[API エンドポイント](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
-を使用します
+  [/entities delete API エンドポイント](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
+  を使用します
 
 - 指定した型のすべてのエンティティのすべてのレコードを削除するには、この
-
-[API エンドポイント](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
-を使用します
+  [/types delete API エンドポイント](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
+  を使用します
 
 フィルターを使用して、特定の時間間隔でレコードのみを削除します。
 
@@ -256,19 +309,21 @@ QuantumLeap は、Orion が
 デフォルトではそれらなしで機能します。ただし、挿入にヘッダを使用する場合は、
 データをクエリするときにヘッダを指定する必要があります。
 
-QuantumLeap の場合、
-[Orion へのサブスクリプション](#orion-subscription)の作成時には、
-クライアントが "挿入" 時のヘッダを使用し、Orion にデータをプッシュする場合は、
-デバイスが実際に使用する必要があります 。前述したように、そのようなデータを
-取得するためには同じヘッダを使用する必要があります。
+QuantumLeap の場合、挿入時のヘッダは実際には
+[Orion へのサブスクリプション](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions)
+の作成時にクライアントによって使用され、また Orion にデータをプッシュする
+ときにもデバイスによって使用されるべきです。前述のように、そのようなデータを
+取得するには同じヘッダを使用する必要があります。
 
-データベースと直接対話する場合は、QuantumLeap が 特定のプレフィックスで、
-crate のデータベース・スキームとして `FIWARE-Service` を使用することを知る
-必要があります。このようにして、`Fiware-Service: magic` ヘッダを使用して、
-`Room` 型のエンティティを挿入すると、`mtmagic.etroom`
-でテーブルを見つけるはずです。この情報は、ドキュメントの
-[Grafana セクション](../admin/grafana.md)で説明したように、Grafana
-データソースを設定している場合などにも役立ちます 。
+データベースと直接対話している場合、QuantumLeap は crate の
+[データベース・スキーマ](https://crate.io/docs/crate/reference/en/latest/general/ddl/create-table.html?highlight=scheme#schemas)
+として特定のプレフィックスを付けて `FIWARE-Service` を使用することを知って
+おく必要があります。こうすれば、`Fiware-Service: magic` ヘッダを使って `Room`
+型のエンティティを挿入した場合、あなたのテーブルは `mtmagic.etroom` として
+見つかるはずです。この情報は、ドキュメントの
+[Grafana セクション](../admin/grafana.md)
+で説明されているように、例えば Grafana データソースを設定している場合にも
+役立ちます。
 
 ## ジオ・コーディング
 
@@ -290,12 +345,12 @@ address が都市名、番地、郵便番号を含む完全な住所であれば
 サービスを使用します。そのため、
 [著作権に関する注意](https://www.openstreetmap.org/copyright)や、
 最も重要な使用ポリシーを認識する必要があります。
-[API 使用ポリシー](https://operations.osmfoundation.org/policies/api/)、
+[API 使用ポリシー](https://operations.osmfoundation.org/policies/api/) と
 [Nominatim 使用ポリシー](https://operations.osmfoundation.org/policies/nominatim/)
 はこの無料サービスを悪用するべきではないので、
 あなたのリクエストをキャッシュする必要があります。
 キャッシュを使用して、ジオ・コーディングを有効にします。QuantumLeap は
-[Redis](https://redis.io/) を使用します。
+そのために、[Redis](https://redis.io/) を使用します。
 
 したがって、この機能を有効にするには、初期化時に、QuantumLeap
 コンテナに環境変数 `USE_GEOCODING` を `True` に設定し、環境変数 `REDIS_HOST` と

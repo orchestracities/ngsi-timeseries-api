@@ -20,5 +20,7 @@
 |TCP                | 4300          |  CrateDB トランスポート・プロトコル |
 |TCP                | 6379          |  Redisキャッシュ (ジオ・コーディングで使用) |
 
-ポート番号の詳細については、このリポジトリの `docker-compose.yml`
-ファイルで公開されているポートをいつでも調べることができます。
+このリポジトリの
+[docker-compose-dev.yml](https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
+ファイル (実際にはデプロイに使用したものはもちろんのこと) で公開されている
+ポートをいつでも調べることができます。
