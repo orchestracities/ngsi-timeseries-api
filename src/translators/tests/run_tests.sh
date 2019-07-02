@@ -5,8 +5,10 @@ docker build -t quantumleap ../../../
 docker-compose up -d
 sleep 20
 
-docker run -ti --rm --network tests_translatorstests quantumleap pytest translators/tests
+cd ../../../
+pytest src/translators/ --cov-report= --cov-config=.coveragerc --cov=src/
 r=$?
+cd -
 
 docker-compose down -v
 exit $r

@@ -9,10 +9,19 @@ services:
 
 install:
   - docker --version
+  - pip install coveralls
+  - pip install pytest-cov
+  - pip install pipenv
+
+before_script:
+  - pipenv install
 
 script:
-  - source deps.env
+  - source setup_dev_env.sh
   - sh run_tests.sh
+
+after_success:
+  - coveralls
 
 notifications:
   email: false
