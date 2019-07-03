@@ -83,7 +83,7 @@ definitions:
 
   ValuesArray:
     type: array
-    items:
+    items: {}
     description: "Array of values of the selected attribute, in the same
     corresponding order of the 'index' array. When using aggregation options,
     the format of this remains the same, only the semantics will change. For
