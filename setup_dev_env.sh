@@ -9,7 +9,7 @@ docker build -t quantumleap .
 
 source deps.env
 
-LH=`/sbin/ifconfig eth0 | grep 'inet' | cut -d: -f2 | awk '{ print $1}' 2> /dev/null`
+LH=`( /sbin/ifconfig eth0 | grep 'inet' | cut -d: -f2 | awk '{ print $1}' ) 2> /dev/null`
 if [ -z "$LH" ]
 then
     # Aliasing so that notifications from orion container reach dev localhost
@@ -27,4 +27,4 @@ export RETHINK_HOST=$LH
 
 export REDIS_HOST=$LH
 
-pipenv shell
+[[ "$LH" == "192.0.0.1" ]] && pipenv shell
