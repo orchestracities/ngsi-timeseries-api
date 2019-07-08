@@ -36,6 +36,7 @@ loc=$?
 if [ "$tot" -eq 0 ]; then
   tot=$loc
 fi
+cd -
 
 docker-compose -f ../../docker/docker-compose-dev.yml down -v
 exit ${tot}
