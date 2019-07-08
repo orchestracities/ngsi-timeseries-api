@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+
+  timescale:
+    image: timescale/timescaledb-postgis:latest-pg10
+    ports:
+      - "5432:5432"
+    networks:
+      - timescaletests
+    environment:
+      - POSTGRES_PASSWORD=*
+
+  quantumleap-db-setup:
+    build: ../
+    image: quantumleap-db-setup
+    depends_on:
+      - timescale
+    networks:
+      - timescaletests
+    volumes:
+      - ./ql-db-init:/ql-db-init
+    environment:
+      - QL_DB_PASS=*
+      - QL_DB_INIT_DIR=/ql-db-init
+      - PG_HOST=timescale
+      - PG_PASS=*
+
+networks:
+  timescaletests:
+    driver: bridge
+
+
+# return self._parser.parse_args([
+#            '--pg-pass', '*',
+#            '--ql-db-init-dir', '/Users/andrea/github/ngsi-timeseries-api/timescale-container/test/ql-db-init'
+#        ])
