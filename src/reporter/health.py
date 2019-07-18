@@ -49,7 +49,7 @@ def _get_http_code(res):
     return code
 
 
-def get_health():
+def get_health(with_geocoder=False):
     """
     Return status of QuantumLeap service, taking into account status of the
     services it depends on.
@@ -75,11 +75,12 @@ def get_health():
             res['status'] = health['status']
 
     # Check geocoder (not critical)
-    health = check_geocoder()
-    if health['status'] != 'pass':
-        res.setdefault('details', {})['osm'] = health
-        if res['status'] == 'pass':
-            res['status'] = 'warn'
+    if with_geocoder:
+        health = check_geocoder()
+        if health['status'] != 'pass':
+            res.setdefault('details', {})['osm'] = health
+            if res['status'] == 'pass':
+                res['status'] = 'warn'
 
     # Determine HTTP code
     code = _get_http_code(res)
