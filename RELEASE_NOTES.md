@@ -1,5 +1,10 @@
 # QuantumLeap Release Notes
 
+## 0.7.1
+
+- Japanses Translations Update (#220)
+- Remove OSM checks by default (#226)
+
 ## 0.7.0
 
 - Flatten JSON in query results (#213)
