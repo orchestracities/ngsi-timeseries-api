@@ -29,9 +29,3 @@ services:
 networks:
   timescaletests:
     driver: bridge
-
-
-# return self._parser.parse_args([
-#            '--pg-pass', '*',
-#            '--ql-db-init-dir', '/Users/andrea/github/ngsi-timeseries-api/timescale-container/test/ql-db-init'
-#        ])
