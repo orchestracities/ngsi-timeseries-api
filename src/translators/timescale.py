@@ -1,8 +1,10 @@
+from contextlib import contextmanager
 import pg8000
 from datetime import datetime
 from translators import base_translator
 from utils.common import iter_entity_attrs
 import logging
+import os
 
 
 # TODO: Refactor this mess!
@@ -63,14 +65,47 @@ TENANT_PREFIX = 'mt'
 TYPE_PREFIX = 'et'
 
 
-class PostgresTranslator(base_translator.BaseTranslator):
+class PostgresConnectionData:
 
-    def __init__(self, host='localhost', port=5432, db_name='quantumleap',
+    def __init__(self, host='timescale', port=5432,
+                 db_name='quantumleap',
                  db_user='quantumleap', db_pass='*'):
-        super(PostgresTranslator, self).__init__(host, port, db_name)
-        self.logger = logging.getLogger(__name__)
+        self.host = host
+        self.port = port
+        self.db_name = db_name
         self.db_user = db_user
         self.db_pass = db_pass
+
+    def read_env(self):
+        env_var = os.environ.get('POSTGRES_HOST')
+        if env_var:
+            self.host = env_var
+
+        env_var = os.environ.get('POSTGRES_PORT')
+        if env_var:
+            self.port = env_var
+
+        env_var = os.environ.get('POSTGRES_DB_NAME')
+        if env_var:
+            self.db_name = env_var
+
+        env_var = os.environ.get('POSTGRES_DB_USER')
+        if env_var:
+            self.db_user = env_var
+
+        env_var = os.environ.get('POSTGRES_DB_PASS')
+        if env_var:
+            self.db_pass = env_var
+
+
+class PostgresTranslator(base_translator.BaseTranslator):
+
+    def __init__(self, conn_data=PostgresConnectionData()):
+        super(PostgresTranslator, self).__init__(
+            conn_data.host, conn_data.port, conn_data.db_name)
+        self.logger = logging.getLogger(__name__)
+        self.db_user = conn_data.db_user
+        self.db_pass = conn_data.db_pass
         self.conn = None
         self.cursor = None
 
@@ -336,3 +371,11 @@ class PostgresTranslator(base_translator.BaseTranslator):
     # TODO: concurrency.
     # This implementation, just like the one in the Crate translator, paves
     # the way to lost updates...
+
+
+@contextmanager
+def postgres_translator_instance():
+    conn_data = PostgresConnectionData()
+    conn_data.read_env()
+    with PostgresTranslator(conn_data) as trans:
+        yield trans
