@@ -37,6 +37,28 @@ services:
     networks:
         - translatorstests
 
+  timescale:
+    image: timescale/timescaledb-postgis:latest-pg10
+    ports:
+      - "5432:5432"
+    networks:
+      - translatorstests
+    environment:
+      - POSTGRES_PASSWORD=*
+
+  quantumleap-db-setup:
+    build: ../../../timescale-container/
+    image: quantumleap-db-setup
+    depends_on:
+      - timescale
+    networks:
+      - translatorstests
+    environment:
+      - QL_DB_PASS=*
+      - QL_DB_INIT_DIR=/ql-db-init
+      - PG_HOST=timescale
+      - PG_PASS=*
+
 networks:
     translatorstests:
         driver: bridge
