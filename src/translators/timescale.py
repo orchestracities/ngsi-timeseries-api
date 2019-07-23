@@ -33,14 +33,14 @@ NGSI_TEXT = 'Text'
 NGSI_TYPE = 'type'
 
 # POSTGRES TYPES
-PG_ARRAY_STR = 'text[]'
+PG_JSON_ARRAY = 'jsonb'
 # hyper-table requires a non-null time index
 PG_TIME_INDEX = 'timestamp WITH TIME ZONE NOT NULL'
 
 
 # Translation
 NGSI_TO_PG = {
-    "Array": PG_ARRAY_STR,  # TODO #36: Support numeric arrays
+    "Array": PG_JSON_ARRAY,  # NB array of str in Crate backend!
     "Boolean": 'boolean',
     NGSI_ISO8601: 'timestamp WITH TIME ZONE',
     NGSI_DATETIME: 'timestamp WITH TIME ZONE',
@@ -225,7 +225,7 @@ class PostgresTranslator(base_translator.BaseTranslator):
                     # Github issue 24: StructuredValue == object or array
                     is_list = isinstance(e[attr].get('value', None), list)
                     if attr_t == NGSI_STRUCTURED_VALUE and is_list:
-                        pg_t = PG_ARRAY_STR
+                        pg_t = PG_JSON_ARRAY
 
                     table[attr] = pg_t
 
@@ -312,8 +312,8 @@ class PostgresTranslator(base_translator.BaseTranslator):
                         mapped_value = pg8000.PGJsonb(ngsi_value)
                     elif mapped_type == NGSI_TO_PG[NGSI_TEXT]:
                         mapped_value = str(ngsi_value)
-                    elif mapped_type == PG_ARRAY_STR:
-                        mapped_value = [str(v) for v in ngsi_value]
+                    elif mapped_type == PG_JSON_ARRAY:
+                        mapped_value = pg8000.PGJsonb(ngsi_value)
                     else:
                         mapped_value = ngsi_value
 

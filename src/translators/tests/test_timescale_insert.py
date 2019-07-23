@@ -67,7 +67,7 @@ def gen_entity(entity_type):
         },
         'an_array': {
             'type': 'StructuredValue',
-            'value': [1, 'struct val but array =>', 2, 'array of str']
+            'value': [1, 'x', {'v': 'y'}]
         }
     }
 
@@ -84,8 +84,7 @@ def assert_inserted_entity_values(entity, row):
     assert row['a_point'] == [1, 2]  # i.e. swapped lat/lon
     assert entity['a_text']['value'] == row['a_text']
     assert entity['an_obj']['value'] == row['an_obj']
-    assert row['an_array'] == [  # note how original ints got stringified
-        '1', 'struct val but array =>', '2', 'array of str']
+    assert entity['an_array']['value'] == row['an_array']
 
 
 def expected_entity_attrs_meta():
