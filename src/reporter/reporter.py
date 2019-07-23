@@ -31,6 +31,7 @@ from geocoding.geocache import GeoCodingCache
 from requests import RequestException
 from translators.crate import CrateTranslator, CrateTranslatorInstance, \
     NGSI_TO_CRATE, NGSI_TEXT, NGSI_DATETIME, NGSI_ISO8601
+from translators.factory import translator_for
 from utils.common import iter_entity_attrs
 import json
 import logging
@@ -147,7 +148,7 @@ def notify():
         fiware_sp = None
 
     # Send valid entities to translator
-    with CrateTranslatorInstance() as trans:
+    with translator_for(fiware_s) as trans:
         trans.insert(payload, fiware_s, fiware_sp)
 
     msg = 'Notification successfully processed'
