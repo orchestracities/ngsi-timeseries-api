@@ -22,7 +22,8 @@ def read_config() -> dict:
 
 def translator_for(fiware_service: str):
     config = read_config()
-    backend = maybe_value(config, 'tenants', fiware_service, 'backend')
+    backend = maybe_value(config, 'tenants', fiware_service, 'backend')\
+        or maybe_value(config, 'default-backend')
 
     if backend == CRATE_BACKEND:
         return CrateTranslatorInstance()
