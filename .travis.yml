@@ -9,8 +9,6 @@ services:
 
 install:
   - docker --version
-  - pip install coveralls
-  - pip install pytest-cov
   - pip install pipenv
 
 before_script:

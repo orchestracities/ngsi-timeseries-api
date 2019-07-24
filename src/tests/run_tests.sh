@@ -11,8 +11,8 @@ tot=0
 QL_IMAGE=${QL_PREV_IMAGE} docker-compose -f ../../docker/docker-compose-dev.yml up -d
 sleep 10
 
-ORION_HOST=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' docker_orion_1`
-QUANTUMLEAP_HOST=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' docker_quantumleap_1`
+ORION_HOST=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps | grep "1026" | awk '{ print $1 }')`
+QUANTUMLEAP_HOST=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps | grep "8668" | awk '{ print $1 }')`
 
 # Load data
 docker run -ti --rm --network docker_default \

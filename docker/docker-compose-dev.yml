@@ -4,7 +4,6 @@ services:
 
   orion:
     image: fiware/orion:${ORION_VERSION:-2.0.0}
-    container_name: docker_orion_1
     ports:
       - "1026:1026"
     command: -logLevel DEBUG -noCache -dbhost mongo
@@ -25,7 +24,6 @@ services:
 
   quantumleap:
     image: ${QL_IMAGE:-smartsdk/quantumleap}
-    container_name: docker_quantumleap_1
     ports:
       - "8668:8668"
     depends_on:
