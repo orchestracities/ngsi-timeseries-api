@@ -4,6 +4,7 @@ import pytest
 import random
 from time import sleep
 
+from geocoding.geojson.wktcodec import decode_wkb_hexstr
 from translators.base_translator import TIME_INDEX_NAME
 from translators.timescale import postgres_translator_instance,\
     PostgresConnectionData,\
@@ -56,6 +57,13 @@ def gen_entity(entity_type):
             'type': 'geo:point',
             'value': '2, 1'
         },
+        'a_geom': {
+            'type': 'geo:json',
+            'value': {
+                'type': 'LineString',
+                'coordinates': [[30, 10], [10, 30], [40, 40]]
+            }
+        },
         'a_text': {
             'value': 'no type => text'
         },
@@ -81,7 +89,11 @@ def assert_inserted_entity_values(entity, row):
     assert bool(entity['a_bool']['value']) == row['a_bool']
     assert row['a_datetime'] == datetime(2019, 7, 22, 11, 46, 45, 123000,
                                          tzinfo=timezone.utc)
-    assert row['a_point'] == [1, 2]  # i.e. swapped lat/lon
+    assert decode_wkb_hexstr(row['a_point']) == {
+        'type': 'Point',
+        'coordinates': [1.0, 2.0]  # note how lat/lon get swapped
+    }
+    assert entity['a_geom']['value'] == decode_wkb_hexstr(row['a_geom'])
     assert entity['a_text']['value'] == row['a_text']
     assert entity['an_obj']['value'] == row['an_obj']
     assert entity['an_array']['value'] == row['an_array']
@@ -97,6 +109,7 @@ def expected_entity_attrs_meta():
         'a_bool': ['a_bool', 'Boolean'],
         'a_datetime': ['a_datetime', 'DateTime'],
         'a_point': ['a_point', 'geo:point'],
+        'a_geom': ['a_geom', 'geo:json'],
         'a_text': ['a_text', 'Text'],
         'an_obj': ['an_obj', 'Custom'],
         'an_array': ['an_array', 'StructuredValue']

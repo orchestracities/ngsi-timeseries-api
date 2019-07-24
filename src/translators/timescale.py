@@ -1,10 +1,14 @@
 from contextlib import contextmanager
-import pg8000
 from datetime import datetime
+import logging
+import pg8000
+import os
+
+import geocoding.geojson.wktcodec
+from geocoding.slf.geotypes import *
+import geocoding.slf.wktcodec
 from translators import base_translator
 from utils.common import iter_entity_attrs
-import logging
-import os
 
 
 # TODO: Refactor this mess!
@@ -26,7 +30,6 @@ import os
 NGSI_DATETIME = 'DateTime'
 NGSI_ID = 'id'
 NGSI_GEOJSON = 'geo:json'
-NGSI_GEOPOINT = 'geo:point'
 NGSI_ISO8601 = 'ISO8601'
 NGSI_STRUCTURED_VALUE = 'StructuredValue'
 NGSI_TEXT = 'Text'
@@ -45,12 +48,11 @@ NGSI_TO_PG = {
     NGSI_ISO8601: 'timestamp WITH TIME ZONE',
     NGSI_DATETIME: 'timestamp WITH TIME ZONE',
     "Integer": 'bigint',
-
-    # NGSI_GEOJSON: 'geo_shape', # TODO: figure out best way to handle GeoJSON
-    NGSI_GEOPOINT: 'float[]',    # 'geo_point' in Crate
-    # TODO: perhaps a simple POINT will do here...
-    # if you change the above, update _preprocess_values accordingly!
-
+    NGSI_GEOJSON: 'geometry',
+    SlfPoint.ngsi_type(): 'geometry',
+    SlfLine.ngsi_type(): 'geometry',
+    SlfPolygon.ngsi_type(): 'geometry',
+    SlfBox.ngsi_type(): 'geometry',
     "Number": 'float',
     NGSI_TEXT: 'text',
     NGSI_STRUCTURED_VALUE: 'jsonb'
@@ -304,10 +306,12 @@ class PostgresTranslator(base_translator.BaseTranslator):
                     mapped_type = table[cn]
                     ngsi_value = e[cn]['value']
 
-                    if mapped_type == NGSI_TO_PG[NGSI_GEOPOINT]:
-                        lat, lon = ngsi_value.split(',')
-                        # pt_vector = '{{{}, {}}}'.format(float(lon), float(lat))
-                        mapped_value = [float(lon), float(lat)]
+                    if SlfGeometry.is_ngsi_slf_attr(e[cn]):
+                        ast = SlfGeometry.build_from_ngsi_dict(e[cn])
+                        mapped_value = geocoding.slf.wktcodec.encode_as_wkt(ast)
+                    elif mapped_type == NGSI_TO_PG[NGSI_GEOJSON]:
+                        mapped_value = geocoding.geojson.wktcodec.encode_as_wkt(
+                            ngsi_value)
                     elif mapped_type == NGSI_TO_PG[NGSI_STRUCTURED_VALUE]:
                         mapped_value = pg8000.PGJsonb(ngsi_value)
                     elif mapped_type == NGSI_TO_PG[NGSI_TEXT]:
