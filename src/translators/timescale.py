@@ -282,6 +282,11 @@ class PostgresTranslator(base_translator.BaseTranslator):
         stmt = "alter table {} {};".format(table_name, alt_cols)
         self.cursor.execute(stmt)
 
+        ix_name = '"ix_{}_eid_and_tx"'.format(table_name.replace('"', ''))
+        stmt = f"create index if not exists {ix_name} " +\
+               f"on {table_name} (entity_id, {self.TIME_INDEX_NAME} desc)"
+        self.cursor.execute(stmt)
+
     def _attr_is_structured(self, a):
         if a['value'] is not None and isinstance(a['value'], dict):
             self.logger.info("attribute {} has 'value' attribute of type dict"

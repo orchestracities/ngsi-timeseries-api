@@ -156,6 +156,15 @@ def select_hyper_table(pg_cursor, schema_name, table_name):
     return rows[0][0] if rows else {}
 
 
+def select_eid_index(pg_cursor, full_table_name):
+    stmt = 'select count(*) from pg_class where relname = ?'
+    unquoted_ftn = full_table_name.replace('"', '')
+    ix_name = f'ix_{unquoted_ftn}_eid_and_tx'
+    pg_cursor.execute(stmt, [ix_name])
+    rows = pg_cursor.fetchall()
+    return rows[0][0] if rows else {}
+
+
 def select_entities(pg_cursor, full_table_name, entity_id):
     stmt = f'select * from {full_table_name} where entity_id = ?'
 
@@ -174,6 +183,11 @@ def assert_have_hyper_table(pg_cursor, schema_name, table_name):
     assert data == 1
 
 
+def assert_have_eid_index(pg_cursor, full_table_name):
+    data = select_eid_index(pg_cursor, full_table_name)
+    assert data == 1
+
+
 def test_bare_entity(with_pg8000):
     entity_type = 'test-device'
     entity = gen_entity('test-device')
@@ -184,6 +198,9 @@ def test_bare_entity(with_pg8000):
 
     assert_have_hyper_table(pg_cursor, 'public', f'{TYPE_PREFIX}{entity_type}')
     # NOTE. In the hypertable names get unquoted.
+
+    assert_have_eid_index(pg_cursor, full_table_name)
+    # NOTE. Translator unquotes schema and table names when creating the ix.
 
     assert_entity_attrs_meta(pg_cursor, full_table_name)
 
@@ -205,6 +222,9 @@ def test_tenants_entity(with_pg8000):
                             f'{TENANT_PREFIX}{fw_svc}',
                             f'{TYPE_PREFIX}{entity_type}')
     # NOTE. In the hypertable names get unquoted.
+
+    assert_have_eid_index(pg_cursor, full_table_name)
+    # NOTE. Translator unquotes schema and table names when creating the ix.
 
     assert_entity_attrs_meta(pg_cursor, full_table_name)
 
