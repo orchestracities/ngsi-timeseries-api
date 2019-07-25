@@ -60,8 +60,8 @@ geoj_geom_collection = {
     ]
 }
 
-wkt_geom_collection = 'GEOMETRYCOLLECTION (POINT (40 10), ' + \
-                      'LINESTRING (10 10, 20 20, 10 40), ' + \
+wkt_geom_collection = 'GEOMETRYCOLLECTION (POINT (40 10),' + \
+                      'LINESTRING (10 10, 20 20, 10 40),' + \
                       'POLYGON ((40 40, 20 45, 45 30, 40 40)))'
 
 
@@ -73,7 +73,7 @@ wkt_geom_collection = 'GEOMETRYCOLLECTION (POINT (40 10), ' + \
     (geoj_geom_collection, wkt_geom_collection)
 ])
 def test_encode_as_wkt(input_geoj, expected_wkt):
-    assert encode_as_wkt(input_geoj) == expected_wkt
+    assert encode_as_wkt(input_geoj, decimals=0) == expected_wkt
 
 
 @pytest.mark.parametrize('input_geoj', [
@@ -81,8 +81,8 @@ def test_encode_as_wkt(input_geoj, expected_wkt):
     geoj_geom_collection
 ])
 def test_encode_as_wkt_then_decode(input_geoj):
-    wkt = encode_as_wkt(input_geoj)
-    decoded_geoj = decode_wkt(wkt)
+    wkt_str = encode_as_wkt(input_geoj)
+    decoded_geoj = decode_wkt(wkt_str)
     assert decoded_geoj == input_geoj
 
 
@@ -91,8 +91,8 @@ def test_encode_as_wkt_then_decode(input_geoj):
     geoj_geom_collection
 ])
 def test_encode_as_wkb_then_decode(input_geoj):
-    wkb = encode_as_wkb(input_geoj)
-    decoded_geoj = decode_wkb(wkb)
+    wkb_bytes = encode_as_wkb(input_geoj)
+    decoded_geoj = decode_wkb(wkb_bytes)
     assert decoded_geoj == input_geoj
 
 
@@ -101,6 +101,6 @@ def test_encode_as_wkb_then_decode(input_geoj):
     geoj_geom_collection
 ])
 def test_encode_as_wkb_hex_then_decode(input_geoj):
-    wkb = encode_as_wkb_hex(input_geoj)
-    decoded_geoj = decode_wkb_hexstr(wkb)
+    wkb_hex = encode_as_wkb_hex(input_geoj)
+    decoded_geoj = decode_wkb_hexstr(wkb_hex)
     assert decoded_geoj == input_geoj
