@@ -27,7 +27,7 @@ SELECT
     latitude,
     leafweatness,
     location,
-    format('{%s, %s}', location_centroid[1], location_centroid[2]) AS location_centroid,
+    format('POINT (%s %s)', location_centroid[1], location_centroid[2]) AS location_centroid,
     longitude,
     manufacturername,
     precipitationlevel,

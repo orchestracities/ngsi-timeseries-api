@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS mtlusovini.etdevice (
     latitude text,
     leafweatness float,
     location jsonb,
-    location_centroid float[],
+    location_centroid geometry,
     longitude text,
     manufacturername text,
     precipitationlevel float,
