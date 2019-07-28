@@ -37,7 +37,7 @@ class Args:
         p = ArgumentParser(description='QuantumLeap Crate export script.')
         ne = self._non_empty_string
 
-        p.add_argument('--schema', type=ne, required=True,
+        p.add_argument('--schema', type=ne, required=False,
                        help='Crate schema from which to export')
         p.add_argument('--table', type=ne, required=True,
                        help='Crate table from which to export')
@@ -64,14 +64,8 @@ class Args:
         return self._parser.parse_args()
 
 
-class CrateTable:
-    """
-    Holds table spec of the Crate table from which to export data.
-    """
-
-    TIME_INDEX_COLUMN_NAME = 'time_index'
-    LOCATION_COLUMN_NAME = 'location'
-    CENTROID_COLUMN_NAME = 'location_centroid'
+class CrateSql:
+    """Crate SQL utilities."""
 
     @staticmethod
     def to_string(x) -> str:
@@ -91,48 +85,69 @@ class CrateTable:
         v = str(x)  # TODO consider escaping?
         return f'"{v}"'
 
-    def __init__(self, schema_name: str, table_name: str):
-        """
-        Create an initial table with no columns.
 
-        :param schema_name: the (unquoted) name of the schema the table is in.
+class CrateTableIdentifier:
+    """
+    Represents a Crate table identifier.
+    """
+
+    def __init__(self, table_name: str, schema_name: str = 'doc'):
+        """
+        Create a table identifier.
+
+        :param schema_name: the (unquoted) name of the schema the table is in,
+            defaults to 'doc'---see Crate docs, excuse the pun!
         :param table_name: the (unquoted) table name.
         """
-        self._schema_name = schema_name
         self._table_name = table_name
-        self._col_names = []
-        self._col_type_codes = []
-
-    def columns(self, names: list, type_codes: list):
-        """
-        Specify table columns.
-        See "Column Types" section of:
-        - https://crate.io/docs/crate/reference/en/latest/interfaces/http.html
-
-        :param names: the list of (unquoted) column names.
-        :param type_codes: the list of corresponding Crate column types, given
-            in the same order as the column names.
-        """
-        self._col_names = names
-        self._col_type_codes = type_codes
+        self._schema_name = schema_name
 
     def schema_name(self) -> str:
         """
         :return: schema name as quoted identifier.
         """
-        return self.to_quoted_identifier(self._schema_name)
+        return CrateSql.to_quoted_identifier(self._schema_name)
 
     def table_name(self) -> str:
         """
         :return: table name as quoted identifier.
         """
-        return self.to_quoted_identifier(self._table_name)
+        return CrateSql.to_quoted_identifier(self._table_name)
 
     def fqn(self) -> str:
         """
         :return: table fully qualified name in the format: "schema"."table"
         """
         return f"{self.schema_name()}.{self.table_name()}"
+
+
+class CrateTable:
+    """
+    Holds table spec of the Crate table from which to export data.
+    """
+
+    TIME_INDEX_COLUMN_NAME = 'time_index'
+    LOCATION_COLUMN_NAME = 'location'
+    CENTROID_COLUMN_NAME = 'location_centroid'
+
+    def __init__(self, table_identifier: CrateTableIdentifier,
+                 column_names: list, column_type_codes: list):
+        """
+        Specify a Crate table structure.
+        See "Column Types" section of:
+        - https://crate.io/docs/crate/reference/en/latest/interfaces/http.html
+
+        :param table_identifier: the table fully qualified name.
+        :param column_names: the list of (unquoted) column names.
+        :param column_type_codes: the list of corresponding Crate column types, given
+            in the same order as the column names.
+        """
+        self._identifier = table_identifier
+        self._col_names = column_names
+        self._col_type_codes = column_type_codes
+
+    def identifier(self):
+        return self._identifier
 
     def zip_with_col_specs(self, f):
         zs = zip(self._col_names, self._col_type_codes)
@@ -245,8 +260,9 @@ class SqlGenerator:
     """
 
     @staticmethod
-    def select_all_from_src_table(src_table: CrateTable):
-        return f"SELECT * FROM {src_table.fqn()} LIMIT 1000000000;"
+    def select_all_from_src_table(src_table: CrateTableIdentifier):
+        fqn = src_table.fqn()
+        return f"SELECT * FROM {fqn} LIMIT 1000000000;"
     # NOTE if you don't specify a limit, Crate will use a default of 10,000.
 
     def __init__(self, src_table: CrateTable):
@@ -255,7 +271,7 @@ class SqlGenerator:
 
     def _column_specs(self):
         for c in self._converters:
-            quoted_name = self._table.to_quoted_identifier(c.column_name())
+            quoted_name = CrateSql.to_quoted_identifier(c.column_name())
             yield quoted_name, c.pg_type()
 
     def _data_vector(self, row) -> str:
@@ -264,16 +280,18 @@ class SqlGenerator:
         return f"({joined})"
 
     def create_target_schema(self):
-        return f"CREATE SCHEMA IF NOT EXISTS {self._table.schema_name()};"
+        quoted_schema = self._table.identifier().schema_name()
+        return f"CREATE SCHEMA IF NOT EXISTS {quoted_schema};"
 
     def create_target_table(self):
+        table_fqn = self._table.identifier().fqn()
         cs = [f"{n} {t}" for (n, t) in self._column_specs()]
         cols = ', '.join(cs)
-        return f"CREATE TABLE IF NOT EXISTS {self._table.fqn()} ({cols});"
+        return f"CREATE TABLE IF NOT EXISTS {table_fqn} ({cols});"
 
     def create_target_hypertable(self):
-        fqn = self._table.to_string(self._table.fqn())
-        tix = self._table.to_string(CrateTable.TIME_INDEX_COLUMN_NAME)
+        fqn = CrateSql.to_string(self._table.identifier().fqn())
+        tix = CrateSql.to_string(CrateTable.TIME_INDEX_COLUMN_NAME)
         return f"SELECT create_hypertable({fqn}, {tix}, if_not_exists => true);"
 
     def import_script_lines(self, exported_rows: Iterable) -> Iterable[str]:
@@ -291,7 +309,7 @@ class SqlGenerator:
         yield self.create_target_table()
         yield self.create_target_hypertable()
 
-        yield f"INSERT INTO {self._table.fqn()}"
+        yield f"INSERT INTO {self._table.identifier().fqn()}"
         cols = ', '.join([n for (n, t) in self._column_specs()])
         yield f"({cols})"
         yield 'VALUES'
@@ -304,39 +322,45 @@ class SqlGenerator:
         yield ';'
 
 
-class CrateQuery:
+class CrateClient:
+    """
+    Rudimentary Crate client which uses the Crate HTTP interface.
+    """
 
     def __init__(self, host='localhost', port=4200):
         self._conn = http.client.HTTPConnection(host, port)
 
-    def run(self, query: str) -> dict:
+    def run(self, sql: str) -> dict:
         headers = {'Content-type': 'application/json'}
-        sql_query = {'stmt': query}
-        body = json.dumps(sql_query)
+        sql_msg = {'stmt': sql}
+        body = json.dumps(sql_msg)
 
         self._conn.request('POST', '/_sql?types', body, headers)
         response = self._conn.getresponse()
 
         if response.status != 200:
-            raise RuntimeError(f"query failed, HTTP status: {response.status}")
+            raise RuntimeError(f"Failed with HTTP status: {response.status}")
 
         data = response.read().decode()
         return json.loads(data)
 
 
+def lookup_create_query(args, table: CrateTableIdentifier):
+    if args.query:
+        return args.query
+    return SqlGenerator.select_all_from_src_table(table)
+
+
 def run():
     args = Args().get()
 
-    table = CrateTable(args.schema, args.table)
+    table_identifier = CrateTableIdentifier(args.table, args.schema)
 
-    if args.query:
-        query = args.query
-    else:
-        query = SqlGenerator.select_all_from_src_table(table)
+    query = lookup_create_query(args, table_identifier)
+    query_results = CrateClient().run(query)
 
-    query_results = CrateQuery().run(query)
-
-    table.columns(query_results['cols'], query_results['col_types'])
+    table = CrateTable(table_identifier,
+                       query_results['cols'], query_results['col_types'])
     generator = SqlGenerator(table)
 
     for k in generator.import_script_lines(query_results['rows']):
