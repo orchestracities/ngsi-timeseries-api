@@ -139,8 +139,8 @@ class CrateTable:
 
         :param table_identifier: the table fully qualified name.
         :param column_names: the list of (unquoted) column names.
-        :param column_type_codes: the list of corresponding Crate column types, given
-            in the same order as the column names.
+        :param column_type_codes: the list of corresponding Crate column types,
+            given in the same order as the column names.
         """
         self._identifier = table_identifier
         self._col_names = column_names
