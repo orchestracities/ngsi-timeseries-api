@@ -5,8 +5,8 @@ set -e
 DOCKER_IMG=timescale/timescaledb-postgis:latest-pg10
 PORT=5432
 PASS=abc123
-DATA=ql-db-init/mtlusovini.etdevice.csv
-DATA_LOADER=sql/import-mtlusovini.etdevice-data.sql
+DATA=ql-db-init/mtutenant.etdevice.csv
+DATA_LOADER=sql/import-mtutenant.etdevice-data.sql
 PG_CONN_URI=postgres://postgres:$PASS@localhost:5432/
 QL_CONN_URI=postgres://quantumleap:*@localhost:5432/quantumleap
 
@@ -16,7 +16,7 @@ docker run -d \
     --name timescaledb \
     -e POSTGRES_PASSWORD=$PASS \
     -p $PORT:$PORT \
-    --mount type=bind,source="$(pwd)"/$DATA,target=/mtlusovini.etdevice.csv \
+    --mount type=bind,source="$(pwd)"/$DATA,target=/mtutenant.etdevice.csv \
     --mount type=bind,source="$(pwd)"/$DATA_LOADER,target=/$DATA_LOADER \
     $DOCKER_IMG
 
@@ -27,7 +27,7 @@ sleep 5
 cat sql/bootstrap.sql | docker exec -i timescaledb psql $PG_CONN_URI
 
 # Create Lusovini schema and tables.
-cat ql-db-init/1-mtlusovini.etdevice-ddl.sql \
+cat ql-db-init/1-mtutenant.etdevice-ddl.sql \
     | docker exec -i timescaledb psql $QL_CONN_URI
 
 # Load the data exported from CrateDB.

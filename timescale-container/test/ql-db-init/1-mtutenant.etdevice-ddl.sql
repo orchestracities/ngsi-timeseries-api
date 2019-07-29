@@ -1,6 +1,6 @@
-CREATE SCHEMA IF NOT EXISTS mtlusovini;
+CREATE SCHEMA IF NOT EXISTS mtutenant;
 
-CREATE TABLE IF NOT EXISTS mtlusovini.etdevice (
+CREATE TABLE IF NOT EXISTS mtutenant.etdevice (
     accumulatedprecipitationlevel24 float,
     airhumidity float,
     airpressure float,
@@ -31,5 +31,5 @@ CREATE TABLE IF NOT EXISTS mtlusovini.etdevice (
     windspeed float
 );
 
-SELECT create_hypertable('mtlusovini.etdevice', 'time_index',
+SELECT create_hypertable('mtutenant.etdevice', 'time_index',
                          if_not_exists => true);

@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
+# call with schema name: ./export-mtutenant-data mtsometesttenant
+
 set -e
 
-DATA_FILE=../ql-db-init/mtlusovini.etdevice.csv
+DATA_FILE=../ql-db-init/mtutenant.etdevice.csv
 
 pipenv install
 
-echo "Exporting Lusovini data to data file $DATA_FILE"
+echo "Exporting test data to data file $DATA_FILE"
 
 # NOTE In the below command, crash uses the default host and port, which
 # means it'll try connecting to localhost:4200. To fetch data from prod,
@@ -40,7 +42,8 @@ SELECT
     date_format(timeinstant) AS timeinstant,
     winddirection,
     windspeed
-FROM mtlusovini.etdevice;
+FROM $1.etdevice
+LIMIT 10;
 " \
     | sed -e '$ d' > "$DATA_FILE"
 

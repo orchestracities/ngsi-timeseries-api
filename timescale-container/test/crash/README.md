@@ -33,4 +33,4 @@ should have a DB CLI connected to prod. Or you can just use it to run
 DB commands from the shell. For example here's how to export data from
 a table to a CSV file:
 
-    crash --format csv -c 'select * from mtlusovini.etdevice limit 10' > t.csv
+    crash --format csv -c 'select * from mtutenant.etdevice limit 10' > t.csv

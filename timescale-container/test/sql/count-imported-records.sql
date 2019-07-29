@@ -1,1 +1,1 @@
-SELECT count(*) FROM mtlusovini.etdevice;
+SELECT count(*) FROM mtutenant.etdevice;

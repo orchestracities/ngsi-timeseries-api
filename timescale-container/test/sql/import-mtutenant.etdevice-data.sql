@@ -1,6 +1,6 @@
 \c quantumleap
 
-COPY mtlusovini.etdevice(
+COPY mtutenant.etdevice(
      accumulatedprecipitationlevel24,
      airhumidity,
      airpressure,
@@ -26,5 +26,5 @@ COPY mtlusovini.etdevice(
      winddirection,
      windspeed
 )
-FROM '/mtlusovini.etdevice.csv'
+FROM '/mtutenant.etdevice.csv'
 WITH (FORMAT CSV, HEADER, DELIMITER ',', QUOTE '''');
