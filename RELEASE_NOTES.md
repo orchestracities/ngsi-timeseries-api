@@ -1,5 +1,9 @@
 # QuantumLeap Release Notes
 
+## 0.7.2
+
+- Initial Timescale DB support (#231)
+
 ## 0.7.1
 
 - Japanses Translations Update (#220)
