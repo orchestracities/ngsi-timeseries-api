@@ -8,6 +8,7 @@ large set of points in *constant* space.
 
 from typing import List, Iterable, Iterator, Optional
 from geocoding.centroid import best_effort_centroid2d
+from utils.jsondict import maybe_value
 from utils.streams import ensure_min_items
 
 
@@ -50,6 +51,42 @@ class SlfGeometry:
         :return: this geometry's NGSI type.
         """
         pass
+
+    @staticmethod
+    def _from_ngsi_dict(data: dict, slf_type) -> Optional['SlfGeometry']:
+        if maybe_value(data, 'type') == slf_type.ngsi_type():
+            try:
+                ps = [SlfPoint.from_ngsi_coords(p) for p in data['value']]
+                if all(ps):
+                    return slf_type(ps)
+            except (TypeError, KeyError, ValueError):
+                return None
+
+    @staticmethod
+    def build_from_ngsi_dict(data: dict) -> Optional['SlfGeometry']:
+        """
+        Build an SlfGeometry from an NGSI value.
+
+        :param data: a dictionary containing the required NGSI attributes.
+        :return: the corresponding SlfGeometry or ``None`` on a parse error.
+        """
+        for t in [SlfPoint, SlfLine, SlfPolygon, SlfBox]:
+            v = t.from_ngsi_dict(data)
+            if v:
+                return v
+
+    @staticmethod
+    def is_ngsi_slf_attr(data: dict) -> bool:
+        """
+        Does the given NGSI attribute have an SLF type?
+
+        :param data: the NGSI attribute to test.
+        :return: true for yes, false for no.
+        """
+        return maybe_value(data, 'type') in [
+            SlfPoint.ngsi_type(), SlfLine.ngsi_type(),
+            SlfPolygon.ngsi_type(), SlfBox.ngsi_type()
+        ]
 
     def centroid2d(self) -> Optional['SlfPoint']:
         """
@@ -123,6 +160,33 @@ class SlfPoint(SlfGeometry):
         """
         return 'geo:point'
 
+    @staticmethod
+    def from_ngsi_coords(data: str) -> Optional['SlfPoint']:
+        """
+        Build an SlfPoint from NGSI coordinates.
+
+        :param data: a string containing latitude and longitude separated
+            by a comma, e.g. '1.9989, 2.88'
+        :return: an SlfPoint with the specified coordinates or ``None`` on
+            a parse error.
+        """
+        try:
+            lat, lon = data.split(',')
+            return SlfPoint(float(lat), float(lon))
+        except (TypeError, ValueError, AttributeError):
+            return None
+
+    @staticmethod
+    def from_ngsi_dict(data: dict) -> Optional['SlfPoint']:
+        """
+        Build an SlfPoint from an NGSI 'geo:point' value.
+
+        :param data: a dictionary containing the required NGSI attributes.
+        :return: the corresponding SlfPoint or ``None`` on a parse error.
+        """
+        if maybe_value(data, 'type') == SlfPoint.ngsi_type():
+            return SlfPoint.from_ngsi_coords(maybe_value(data, 'value'))
+
 
 class SlfLine(SlfGeometry):
     """
@@ -142,6 +206,16 @@ class SlfLine(SlfGeometry):
         """
         return 'geo:line'
 
+    @staticmethod
+    def from_ngsi_dict(data: dict) -> Optional['SlfLine']:
+        """
+        Build an SlfLine from an NGSI 'geo:line' value.
+
+        :param data: a dictionary containing the required NGSI attributes.
+        :return: the corresponding SlfLine or ``None`` on a parse error.
+        """
+        return SlfGeometry._from_ngsi_dict(data, SlfLine)
+
 
 class SlfPolygon(SlfGeometry):
     """
@@ -160,6 +234,16 @@ class SlfPolygon(SlfGeometry):
         :return: the NGSI type for an SLF polygon.
         """
         return 'geo:polygon'
+
+    @staticmethod
+    def from_ngsi_dict(data: dict) -> Optional['SlfPolygon']:
+        """
+        Build an SlfPolygon from an NGSI 'geo:polygon' value.
+
+        :param data: a dictionary containing the required NGSI attributes.
+        :return: the corresponding SlfPolygon or ``None`` on a parse error.
+        """
+        return SlfGeometry._from_ngsi_dict(data, SlfPolygon)
 
 
 class SlfBox(SlfGeometry):
@@ -211,3 +295,13 @@ class SlfBox(SlfGeometry):
         :return: the NGSI type for an SLF polygon.
         """
         return 'geo:box'
+
+    @staticmethod
+    def from_ngsi_dict(data: dict) -> Optional['SlfBox']:
+        """
+        Build an SlfBox from an NGSI 'geo:box' value.
+
+        :param data: a dictionary containing the required NGSI attributes.
+        :return: the corresponding SlfBox or ``None`` on a parse error.
+        """
+        return SlfGeometry._from_ngsi_dict(data, SlfBox)

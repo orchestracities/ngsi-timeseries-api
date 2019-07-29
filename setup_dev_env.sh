@@ -18,6 +18,7 @@ export MONGO_HOST=$LH
 
 export QL_HOST=$LH
 export CRATE_HOST=$LH
+export POSTGRES_HOST=$LH
 export INFLUX_HOST=$LH
 export RETHINK_HOST=$LH
 
