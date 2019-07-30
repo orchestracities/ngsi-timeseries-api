@@ -78,7 +78,7 @@ def maybe_value(tree: dict, *path_components: str):
     :param path_components: the key path ``[k1, k2, ..]``.
     :return: the value, if any, corresponding to the last key in the path.
     """
-    if path_components:
+    if isinstance(tree, dict) and path_components:
         vs = collect_values(tree, *path_components)
         return list(vs)[len(path_components) - 1]
     return None

@@ -33,7 +33,7 @@ QuantumLeapは、NGSI [FIWARE NGSIv2](http://docs.orioncontextbroker.apiary.io/#
 - うまく動作する、
   [SQLライクの・クエリ言語](https://crate.io/docs/crate/reference/en/latest/sql/index.html)
 - [Grafana](http://www.grafana.com) のような視覚化ツールとの
-  [統合サポート](https://grafana.com/plugins/crate-datasource/installation)
+  [統合サポート](http://docs.grafana.org/features/datasources/postgres/)
 
 ## 一般的な使用法とその仕組み
 
@@ -56,14 +56,17 @@ QuantumLeap の一般的な使用シナリオは次のとおりです
 によって管理される **IoT レイヤ**全体が、NGSI形式のデータをプッシュするなど、
 対象となるエンティティの新しい値が
 *[Orion Context Broker](https://fiware-orion.readthedocs.io)** **(2)**
-に到着します。その結果、通知は
+に到着します。その結果、通知は、Orion から
 QuantumLeap の [/v2/notify](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
 エンドポイント **(3)** に届きます。
 
-QuantumLeap の**レポーター**・サブモジュールは、受信した通知を解析して検証し、
-最終的に構成済みの **トランスレータ** にフィードします。
-トランスレータは最終的に、構成された時系列データベースクラスタに NGSI
-情報を保持する責任があります。
+QuantumLeap の **Reporter** サブモジュールは受け取った通知を解析し検証します。
+設定されている場合、例えば、異なるエンティティの位置表現をハーモナイズさせるなど、
+**Geocoder** によってサポートされているような、何らかの前処理を行うことができます。
+最終的に **Reporter** は受け取ったエンティティの検証済み NGSI 表現を設定済み
+**Translator** に渡します。Translator は、最終的に NGSI 情報を設定された時系列
+データベース・クラスタに永続化する責任があります。同様に、**Translator** は、
+その時点で **Reporter** をサポートし、履歴記録クエリにレスポンスします。
 
 現在の API には、クライアントが履歴データをクエリするための未処理および
 集約データ検索用 **(4)** のいくつかのエンドポイントが含まれています。
@@ -72,11 +75,10 @@ QuantumLeap で実装されているわけではありません。API の詳細�
 [NGSI-TSDB specification](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
 の仕様を参照してください 。
 
-
-データ **(5)** の視覚化のために、[Grafana](http://grafana.com/)
-にデータベース用のオープンソース・プラグインを補完していました。
-将来、QuantumLeap の API と直接対話するための grafana
-プラグインを想定しています。
+データ **(5)** の視覚化のために、現時点では [Grafana](http://grafana.com/)
+を使用しており、データベース用のオープンソース・プラグイン (data-sources
+として知られています) で補完されています。将来的には、QL の API
+と直接対話するための Grafana プラグインを想定しています。
 
 ## 詳細情報
 
@@ -86,4 +88,6 @@ QuantumLeap で実装されているわけではありません。API の詳細�
   使用方法の詳細は[ユーザ・マニュアル](user/index.md)を参照してください
 - QuantumLeap の使用例については、
   [SmartSDK ガイド・ツアー](http://guided-tour-smartsdk.readthedocs.io/en/latest/)
+  をご覧ください
+- [FIWARE ステップ・バイ・ステップ](https://fiware-tutorials.readthedocs.io/en/latest/time-series-data/index.html)
   をご覧ください
