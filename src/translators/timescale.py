@@ -85,7 +85,7 @@ class PostgresConnectionData:
 
         env_var = os.environ.get('POSTGRES_PORT')
         if env_var:
-            self.port = env_var
+            self.port = int(env_var)
 
         env_var = os.environ.get('POSTGRES_DB_NAME')
         if env_var:

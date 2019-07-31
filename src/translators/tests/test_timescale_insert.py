@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+import os
 import pg8000
 import pytest
 import random
@@ -123,6 +124,9 @@ def insert(entities, fw_svc=None, fw_path=None):
 
 @pytest.fixture(scope='module')
 def with_pg8000():
+    pg_port_var = 'POSTGRES_PORT'
+    os.environ[pg_port_var] = '54320'
+
     pg8000.paramstyle = "qmark"
     t = PostgresConnectionData()
     t.read_env()
@@ -135,6 +139,7 @@ def with_pg8000():
 
     yield (pg_conn, pg_cursor)
 
+    os.environ[pg_port_var] = ''
     pg_cursor.close()
     pg_conn.close()
 
