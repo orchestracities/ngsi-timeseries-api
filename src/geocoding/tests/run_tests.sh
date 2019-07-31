@@ -5,8 +5,10 @@ docker build -t quantumleap ../../../
 docker-compose up -d
 sleep 8
 
-docker run -ti --rm --network tests_geocodingtests quantumleap pytest geocoding/
+cd ../../../
+pytest src/geocoding/ --cov-report= --cov-config=.coveragerc --cov-append --cov=src/
 r=$?
+cd -
 
 docker-compose down -v
 exit $r

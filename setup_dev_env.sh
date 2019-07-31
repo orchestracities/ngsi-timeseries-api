@@ -9,9 +9,13 @@ docker build -t quantumleap .
 
 source deps.env
 
-# Aliasing so that notifications from orion container reach dev localhost
-LH=192.0.0.1
-sudo ifconfig lo0 alias $LH
+LH=`( /sbin/ifconfig eth0 | grep 'inet' | cut -d: -f2 | awk '{ print $1}' ) 2> /dev/null`
+if [ -z "$LH" ]
+then
+    # Aliasing so that notifications from orion container reach dev localhost
+    LH=192.0.0.1
+    sudo ifconfig lo0 alias $LH
+fi
 
 export ORION_HOST=$LH
 export MONGO_HOST=$LH
@@ -24,4 +28,4 @@ export RETHINK_HOST=$LH
 
 export REDIS_HOST=$LH
 
-pipenv shell
+[[ "$LH" != "192.0.0.1" ]] || pipenv shell

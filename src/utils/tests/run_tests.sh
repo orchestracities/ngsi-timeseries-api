@@ -2,6 +2,7 @@
 
 docker build -t quantumleap ../../../
 
-docker run -ti --rm quantumleap pytest utils/tests
+cd ../../../
+pytest src/utils/ --cov-report= --cov-config=.coveragerc --cov-append --cov=src/
 
 exit $?
