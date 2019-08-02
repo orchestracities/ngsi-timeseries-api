@@ -69,11 +69,12 @@ TYPE_PREFIX = 'et'
 
 class PostgresConnectionData:
 
-    def __init__(self, host='timescale', port=5432,
+    def __init__(self, host='timescale', port=5432, use_ssl=False,
                  db_name='quantumleap',
                  db_user='quantumleap', db_pass='*'):
         self.host = host
         self.port = port
+        self.use_ssl = use_ssl
         self.db_name = db_name
         self.db_user = db_user
         self.db_pass = db_pass
@@ -86,6 +87,10 @@ class PostgresConnectionData:
         env_var = os.environ.get('POSTGRES_PORT')
         if env_var:
             self.port = int(env_var)
+
+        env_var = os.environ.get('POSTGRES_USE_SSL')
+        if env_var:
+            self.use_ssl = env_var.strip().lower() in ('true', 'yes', '1', 't')
 
         env_var = os.environ.get('POSTGRES_DB_NAME')
         if env_var:
@@ -108,12 +113,13 @@ class PostgresTranslator(base_translator.BaseTranslator):
         self.logger = logging.getLogger(__name__)
         self.db_user = conn_data.db_user
         self.db_pass = conn_data.db_pass
+        self.ssl = {} if conn_data.use_ssl else None
         self.conn = None
         self.cursor = None
 
     def setup(self):
         pg8000.paramstyle = "qmark"
-        self.conn = pg8000.connect(host=self.host, port=self.port,
+        self.conn = pg8000.connect(host=self.host, port=self.port, ssl=self.ssl,
                                    database=self.db_name,
                                    user=self.db_user, password=self.db_pass)
         self.cursor = self.conn.cursor()
