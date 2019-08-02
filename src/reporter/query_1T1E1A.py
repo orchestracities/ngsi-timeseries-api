@@ -4,7 +4,7 @@ from reporter.reporter import _validate_query_params
 from translators.crate import CrateTranslatorInstance
 import logging
 from .geo_query_handler import handle_geo_query
-from utils.dicts import lookup_string_match
+from utils.jsondict import lookup_string_match
 
 
 def query_1T1E1A(attr_name,   # In Path
