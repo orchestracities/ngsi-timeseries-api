@@ -45,3 +45,8 @@ def test_tenant3(with_config):
 def test_unknown_tenant(with_config):
     with translator_for('not-in-config') as t:
         assert isinstance(t, CrateTranslator)
+
+
+def test_no_tenant(with_config):
+    with translator_for(None) as t:
+        assert isinstance(t, CrateTranslator)
