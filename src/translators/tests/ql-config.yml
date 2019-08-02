@@ -3,6 +3,6 @@ tenants:
     backend: Timescale
   t2:
     backend: Crate
-  t3:
+  T3:
     backend: Timescale
 default-backend: Crate
