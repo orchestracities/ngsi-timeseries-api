@@ -108,7 +108,7 @@ class CrateTranslator(base_translator.BaseTranslator):
 
         else:
             res = self.cursor.fetchall()
-            if len(res) == 0 or res[0][0] == 'GREEN':
+            if len(res) == 0 or res[0][0] in ('GREEN', 'YELLOW'):
                 # (can be empty when no tables were created yet)
                 health['status'] = 'pass'
             else:
