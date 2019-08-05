@@ -20,8 +20,11 @@ def write_config() -> str:
 def with_config():
     path = os.path.join(os.path.dirname(__file__), 'ql-config.yml')
     os.environ[QL_CONFIG_ENV_VAR] = path
+    pg_port_var = 'POSTGRES_PORT'
+    os.environ[pg_port_var] = '54320'
     yield {}
     os.environ[QL_CONFIG_ENV_VAR] = ''
+    os.environ[pg_port_var] = ''
 
 
 def test_tenant1(with_config):
@@ -41,4 +44,9 @@ def test_tenant3(with_config):
 
 def test_unknown_tenant(with_config):
     with translator_for('not-in-config') as t:
+        assert isinstance(t, CrateTranslator)
+
+
+def test_no_tenant(with_config):
+    with translator_for(None) as t:
         assert isinstance(t, CrateTranslator)
