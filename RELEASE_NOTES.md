@@ -1,5 +1,16 @@
 # QuantumLeap Release Notes
 
+## 0.7.3
+
+- Relax Crate health check (#239)
+- Timescale backend teething troubles (#237)
+- add coverall badge (#236)
+- Coverage tool integration with travis (#221)
+
+## 0.7.2
+
+- Initial Timescale DB support (#231)
+
 ## 0.7.1
 
 - Japanses Translations Update (#220)
