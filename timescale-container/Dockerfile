@@ -1,6 +1,6 @@
 FROM python:3.6-alpine
 
-RUN apk --no-cache --update-cache add postgresql-client
+RUN apk --no-cache --update-cache add postgresql-client openssl
 
 RUN mkdir -p /ngsi-timeseries-api/timescale-container
 

@@ -34,6 +34,17 @@ Assumptions
 2. Postgres `psql` command is in the PATH and is compatible with Postgres
    server v10 or higher.
 3. Scripts and data files are encoded in utf8.
+
+Notes
+-----
+1. SSL connections. This script interacts with Posgres through `psql`.
+Since we don't specify any SSL mode explicitly, the default of `prefer`
+will be used. Under this mode, `psql` will first attempt to establish
+an SSL connection with the server and fall back to plain TCP if SSL
+can't be used---this may happen if either or both the server and the
+client don't have OpenSSL installed or if the server isn't configured
+to use SSL for connections from the client host or if the server isn't
+configured to use SSL at all.
 """
 
 from argparse import ArgumentParser, ArgumentTypeError
