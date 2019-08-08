@@ -67,7 +67,52 @@ TENANT_PREFIX = 'mt'
 TYPE_PREFIX = 'et'
 
 
+def to_bool(str_rep):
+    return str_rep.strip().lower() in ('true', 'yes', '1', 't')
+
+
+def to_int(str_rep):
+    return int(str_rep)
+
+
+def to_str(str_rep):
+    return str_rep.strip() if str_rep else ''
+
+
 class PostgresConnectionData:
+
+    @staticmethod
+    def log(msg):
+        logging.basicConfig(level=logging.INFO)
+        logging.getLogger(__name__).info(msg)
+
+    @staticmethod
+    def log_setting(env_var_name, env_var, default_value, mask_value):
+        if env_var:
+            if mask_value:
+                msg = f"Env variable {env_var_name} set, using its value."
+            else:
+                msg = f"Env variable {env_var_name} set to '{env_var}', " + \
+                      "using this value."
+        else:
+            if mask_value:
+                msg = f"Env variable {env_var_name} not set, " + \
+                      "using default value."
+            else:
+                msg = f"Env variable {env_var_name} not set, " + \
+                      f"using default value of: {default_value}"
+
+        PostgresConnectionData.log(msg)
+
+    @staticmethod
+    def get_setting(env_var_name, converter, default_value, mask_value=False):
+        env_var = to_str(os.environ.get(env_var_name))
+        PostgresConnectionData.log_setting(
+            env_var_name, env_var, default_value, mask_value)
+
+        if env_var:
+            return converter(env_var)
+        return default_value
 
     def __init__(self, host='timescale', port=5432, use_ssl=False,
                  db_name='quantumleap',
@@ -80,29 +125,16 @@ class PostgresConnectionData:
         self.db_pass = db_pass
 
     def read_env(self):
-        env_var = os.environ.get('POSTGRES_HOST')
-        if env_var:
-            self.host = env_var
-
-        env_var = os.environ.get('POSTGRES_PORT')
-        if env_var:
-            self.port = int(env_var)
-
-        env_var = os.environ.get('POSTGRES_USE_SSL')
-        if env_var:
-            self.use_ssl = env_var.strip().lower() in ('true', 'yes', '1', 't')
-
-        env_var = os.environ.get('POSTGRES_DB_NAME')
-        if env_var:
-            self.db_name = env_var
-
-        env_var = os.environ.get('POSTGRES_DB_USER')
-        if env_var:
-            self.db_user = env_var
-
-        env_var = os.environ.get('POSTGRES_DB_PASS')
-        if env_var:
-            self.db_pass = env_var
+        self.host = self.get_setting('POSTGRES_HOST', to_str, self.host)
+        self.port = self.get_setting('POSTGRES_PORT', to_int, self.port)
+        self.use_ssl = self.get_setting('POSTGRES_USE_SSL', to_bool,
+                                        self.use_ssl)
+        self.db_name = self.get_setting('POSTGRES_DB_NAME', to_str,
+                                        self.db_name)
+        self.db_user = self.get_setting('POSTGRES_DB_USER', to_str,
+                                        self.db_user)
+        self.db_pass = self.get_setting('POSTGRES_DB_PASS', to_str,
+                                        self.db_pass, mask_value=True)
 
 
 class PostgresTranslator(base_translator.BaseTranslator):
