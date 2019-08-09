@@ -1,13 +1,12 @@
 from contextlib import contextmanager
 from datetime import datetime
-import logging
 import pg8000
-import os
 
 import geocoding.geojson.wktcodec
 from geocoding.slf.geotypes import *
 import geocoding.slf.wktcodec
 from translators import base_translator
+from utils.cfgreader import *
 from utils.common import iter_entity_attrs
 
 
@@ -67,52 +66,7 @@ TENANT_PREFIX = 'mt'
 TYPE_PREFIX = 'et'
 
 
-def to_bool(str_rep):
-    return str_rep.strip().lower() in ('true', 'yes', '1', 't')
-
-
-def to_int(str_rep):
-    return int(str_rep)
-
-
-def to_str(str_rep):
-    return str_rep.strip() if str_rep else ''
-
-
 class PostgresConnectionData:
-
-    @staticmethod
-    def log(msg):
-        logging.basicConfig(level=logging.INFO)
-        logging.getLogger(__name__).info(msg)
-
-    @staticmethod
-    def log_setting(env_var_name, env_var, default_value, mask_value):
-        if env_var:
-            if mask_value:
-                msg = f"Env variable {env_var_name} set, using its value."
-            else:
-                msg = f"Env variable {env_var_name} set to '{env_var}', " + \
-                      "using this value."
-        else:
-            if mask_value:
-                msg = f"Env variable {env_var_name} not set, " + \
-                      "using default value."
-            else:
-                msg = f"Env variable {env_var_name} not set, " + \
-                      f"using default value of: {default_value}"
-
-        PostgresConnectionData.log(msg)
-
-    @staticmethod
-    def get_setting(env_var_name, converter, default_value, mask_value=False):
-        env_var = to_str(os.environ.get(env_var_name))
-        PostgresConnectionData.log_setting(
-            env_var_name, env_var, default_value, mask_value)
-
-        if env_var:
-            return converter(env_var)
-        return default_value
 
     def __init__(self, host='timescale', port=5432, use_ssl=False,
                  db_name='quantumleap',
@@ -124,17 +78,15 @@ class PostgresConnectionData:
         self.db_user = db_user
         self.db_pass = db_pass
 
-    def read_env(self):
-        self.host = self.get_setting('POSTGRES_HOST', to_str, self.host)
-        self.port = self.get_setting('POSTGRES_PORT', to_int, self.port)
-        self.use_ssl = self.get_setting('POSTGRES_USE_SSL', to_bool,
-                                        self.use_ssl)
-        self.db_name = self.get_setting('POSTGRES_DB_NAME', to_str,
-                                        self.db_name)
-        self.db_user = self.get_setting('POSTGRES_DB_USER', to_str,
-                                        self.db_user)
-        self.db_pass = self.get_setting('POSTGRES_DB_PASS', to_str,
-                                        self.db_pass, mask_value=True)
+    def read_env(self, env: dict = os.environ):
+        r = EnvReader(env, log=logging.getLogger(__name__).info)
+        self.host = r.read(StrVar('POSTGRES_HOST', self.host))
+        self.port = r.read(IntVar('POSTGRES_PORT', self.port))
+        self.use_ssl = r.read(BoolVar('POSTGRES_USE_SSL', self.use_ssl))
+        self.db_name = r.read(StrVar('POSTGRES_DB_NAME', self.db_name))
+        self.db_user = r.read(StrVar('POSTGRES_DB_USER', self.db_user))
+        self.db_pass = r.read(StrVar('POSTGRES_DB_PASS', self.db_pass,
+                                     mask_value=True))
 
 
 class PostgresTranslator(base_translator.BaseTranslator):

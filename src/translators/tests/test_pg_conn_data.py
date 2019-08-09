@@ -1,62 +1,18 @@
-import os
 import pytest
 
-from translators.timescale import to_str, to_bool, to_int,\
-    PostgresConnectionData
-
-
-@pytest.mark.parametrize('value, expected', [
-    (None, ''), ('', ''),
-    (' ', ''), ('\t', ''), ('\n', ''), ('\r\n', ''),
-    (' x', 'x'), ('\tx ', 'x'), ('x\n', 'x'), (' x ', 'x'),
-])
-def test_to_str(value, expected):
-    assert to_str(value) == expected
-
-
-@pytest.mark.parametrize('value, expected', [
-    (' 5', 5), ('\t5 ', 5), ('5\n', 5), (' 5 ', 5)
-])
-def test_to_int(value, expected):
-    assert to_int(value) == expected
-
-
-@pytest.mark.parametrize('value, expected', [
-    (' 5', False), ('\t5 ', False), ('5\n', False), (' 5 ', False),
-    ('false', False), ('\t', False), ('\n', False), (' ', False), ('', False),
-    ('t', True), (' t', True), ('\tt ', True), ('t\n', True), (' t ', True),
-    ('T', True), (' T', True), ('\tT ', True), ('T\n', True), (' T ', True),
-    ('1', True), (' 1', True), ('\t1 ', True), ('1\n', True), (' 1 ', True),
-    ('yes', True), (' yes', True), ('\tyes ', True), ('yes\n', True),
-    (' yes ', True),
-    ('true', True), (' true', True), ('\ttrue ', True), ('true\n', True),
-    (' true ', True),
-    ('True', True), (' tRue', True), ('\ttruE ', True), ('TRUE\n', True),
-    (' TrUe ', True)
-])
-def test_to_bool(value, expected):
-    assert to_bool(value) == expected
-
-
-def with_env_var(name, value, action):  # TODO how to turn into pytest fixture?
-    os.environ[name] = value
-    action()
-    os.environ[name] = ''
+from translators.timescale import PostgresConnectionData
 
 
 def assert_conn_param(getter, env_var_name, env_var_value,
                       expected_param_value=None):
-    def assert_value():
-        conn_data = PostgresConnectionData()
-        default_value = getter(conn_data)
-        conn_data.read_env()
+    conn_data = PostgresConnectionData()
+    default_value = getter(conn_data)
+    conn_data.read_env(env={env_var_name: env_var_value})
 
-        if expected_param_value:
-            assert getter(conn_data) == expected_param_value
-        else:
-            assert getter(conn_data) == default_value
-
-    with_env_var(env_var_name, env_var_value, assert_value)
+    if expected_param_value:
+        assert getter(conn_data) == expected_param_value
+    else:
+        assert getter(conn_data) == default_value
 
 
 def get_host(c: PostgresConnectionData): return c.host
