@@ -86,19 +86,19 @@ class EnvReader:
 
     @staticmethod
     def get_log_msg(var: EVar, value: MaybeString):
-        if var.has_value(value):
-            if var.mask_value:
-                return f"Env variable {var.name} set, using its value."
-            else:
-                return f"Env variable {var.name} set to '{value}', " + \
-                        "using this value."
-        else:
-            if var.mask_value:
-                return f"Env variable {var.name} not set, " + \
-                        "using default value."
-            else:
-                return f"Env variable {var.name} not set, " + \
-                       f"using default value of: {var.default_value}"
+        msgs = {
+            # (has value, mask value)
+            (True, True): "Env variable {name} set, using its value.",
+            (True, False): "Env variable {name} set to '{value}', " + \
+                           "using this value.",
+            (False, True): "Env variable {name} not set, " + \
+                           "using default value.",
+            (False, False): "Env variable {name} not set, " + \
+                            "using default value of: {default_value}"
+        }
+        return msgs[var.has_value(value), var.mask_value].format(
+            name=var.name, value=value, default_value=var.default_value
+        )
 
     def __init__(self, var_store: dict = os.environ, log=None):
         self.var_store = var_store
