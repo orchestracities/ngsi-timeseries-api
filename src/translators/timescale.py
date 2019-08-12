@@ -1,13 +1,12 @@
 from contextlib import contextmanager
 from datetime import datetime
-import logging
 import pg8000
-import os
 
 import geocoding.geojson.wktcodec
 from geocoding.slf.geotypes import *
 import geocoding.slf.wktcodec
 from translators import base_translator
+from utils.cfgreader import *
 from utils.common import iter_entity_attrs
 
 
@@ -79,30 +78,15 @@ class PostgresConnectionData:
         self.db_user = db_user
         self.db_pass = db_pass
 
-    def read_env(self):
-        env_var = os.environ.get('POSTGRES_HOST')
-        if env_var:
-            self.host = env_var
-
-        env_var = os.environ.get('POSTGRES_PORT')
-        if env_var:
-            self.port = int(env_var)
-
-        env_var = os.environ.get('POSTGRES_USE_SSL')
-        if env_var:
-            self.use_ssl = env_var.strip().lower() in ('true', 'yes', '1', 't')
-
-        env_var = os.environ.get('POSTGRES_DB_NAME')
-        if env_var:
-            self.db_name = env_var
-
-        env_var = os.environ.get('POSTGRES_DB_USER')
-        if env_var:
-            self.db_user = env_var
-
-        env_var = os.environ.get('POSTGRES_DB_PASS')
-        if env_var:
-            self.db_pass = env_var
+    def read_env(self, env: dict = os.environ):
+        r = EnvReader(env, log=logging.getLogger(__name__).info)
+        self.host = r.read(StrVar('POSTGRES_HOST', self.host))
+        self.port = r.read(IntVar('POSTGRES_PORT', self.port))
+        self.use_ssl = r.read(BoolVar('POSTGRES_USE_SSL', self.use_ssl))
+        self.db_name = r.read(StrVar('POSTGRES_DB_NAME', self.db_name))
+        self.db_user = r.read(StrVar('POSTGRES_DB_USER', self.db_user))
+        self.db_pass = r.read(StrVar('POSTGRES_DB_PASS', self.db_pass,
+                                     mask_value=True))
 
 
 class PostgresTranslator(base_translator.BaseTranslator):

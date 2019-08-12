@@ -289,6 +289,13 @@ class SqlGenerator:
         cols = ', '.join(cs)
         return f"CREATE TABLE IF NOT EXISTS {table_fqn} ({cols});"
 
+    def add_target_table_columns(self):
+        table_fqn = self._table.identifier().fqn()
+        cs = [f"ADD COLUMN IF NOT EXISTS {n} {t}"
+              for (n, t) in self._column_specs()]
+        cols = ', '.join(cs)
+        return f"ALTER TABLE {table_fqn} {cols};"
+
     def create_target_hypertable(self):
         fqn = CrateSql.to_string(self._table.identifier().fqn())
         tix = CrateSql.to_string(CrateTable.TIME_INDEX_COLUMN_NAME)
@@ -307,6 +314,7 @@ class SqlGenerator:
         """
         yield self.create_target_schema()
         yield self.create_target_table()
+        yield self.add_target_table_columns()
         yield self.create_target_hypertable()
 
         yield f"INSERT INTO {self._table.identifier().fqn()}"

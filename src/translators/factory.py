@@ -1,9 +1,8 @@
 import logging
-import os
-import yaml
 
 from translators.crate import CrateTranslatorInstance
 from translators.timescale import postgres_translator_instance
+from utils.cfgreader import YamlReader
 from utils.jsondict import maybe_string_match
 
 
@@ -14,23 +13,13 @@ QL_CONFIG_ENV_VAR = 'QL_CONFIG'
 
 
 def log():
-    logging.basicConfig(level=logging.INFO)
     return logging.getLogger(__name__)
 
 
-def read_config() -> dict:
-    path = os.environ.get(QL_CONFIG_ENV_VAR)
-    if path:
-        log().info(f"using config file: {path}")
-        file = open(path)
-        return yaml.safe_load(file)
-
-    log().info(f"no config file specified, using defaults.")
-    return {}
-
-
 def translator_for(fiware_service: str):
-    config = read_config()
+    reader = YamlReader(log=log().info)
+    config = reader.from_env_file(QL_CONFIG_ENV_VAR, defaults={})
+
     backend = maybe_string_match(config, 'tenants', fiware_service, 'backend')\
         or maybe_string_match(config, 'default-backend')
     backend = backend.strip().lower() if backend is not None else ''
