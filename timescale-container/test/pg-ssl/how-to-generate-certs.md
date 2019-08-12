@@ -12,7 +12,7 @@ don't even think of doing the same for prod!
 
 Create a simple self-signed certificate for localhost valid for 10 years:
 
-    $ openssl req -new -x509 -days 365 -nodes -text -out server.crt \
+    $ openssl req -new -x509 -days 3650 -nodes -text -out server.crt \
         -keyout server.key -subj "/CN=localhost"
 
 Then do:

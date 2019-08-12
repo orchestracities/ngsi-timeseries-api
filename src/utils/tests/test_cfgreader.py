@@ -51,6 +51,8 @@ def test_int_var_default(value):
     ('1', True), (' 1', True), ('\t1 ', True), ('1\n', True), (' 1 ', True),
     ('yes', True), (' yes', True), ('\tyes ', True), ('yes\n', True),
     (' yes ', True),
+    ('y', True), (' y', True), ('\ty ', True), ('y\n', True), (' y ', True),
+    ('Y', True), (' Y', True), ('\tY ', True), ('Y\n', True), (' Y ', True),
     ('true', True), (' true', True), ('\ttrue ', True), ('true\n', True),
     (' true ', True),
     ('True', True), (' tRue', True), ('\ttruE ', True), ('TRUE\n', True),

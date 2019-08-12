@@ -76,7 +76,7 @@ class BoolVar(EVar):
     """
 
     def _do_read(self, rep: str) -> bool:
-        return rep.strip().lower() in ('true', 'yes', '1', 't')
+        return rep.strip().lower() in ('true', 'yes', '1', 't', 'y')
 
 
 class EnvReader:
