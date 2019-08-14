@@ -5,9 +5,9 @@ name = "pypi"
 
 [packages]
 certifi = "==2018.10.15"
-connexion = "~=2.2"
+"connexion[swagger-ui]" = "~=2.2"
 crate = "~=0.22"
-flask = "~=0.12"
+flask = "~=1.1.0"
 geocoder = "~=1.33"
 geojson = "~=2.4"
 geomet = "~=0.2"
