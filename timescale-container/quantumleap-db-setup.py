@@ -315,16 +315,18 @@ class DbExistCmd:
 
     def __init__(self, args):
         self._args = args
-        self._psql = Psql(dbname='',
-                          hostname=self._args.pg_host,
-                          port=self._args.pg_port,
-                          username=self._args.pg_username,
-                          password=self._args.pg_pass)
+
+    def _psql(self):
+        return Psql(dbname='',
+                    hostname=self._args.pg_host,
+                    port=self._args.pg_port,
+                    username=self._args.pg_username,
+                    password=self._args.pg_pass)
 
     def db_exist(self, db_name: str) -> bool:
         """Check if there's a database having the specified name."""
         query = DbExist.sql(db_name)
-        out = self._psql.with_stdin_from_mem(query).run()
+        out = self._psql().with_stdin_from_mem(query).run()
         return out.find('1') != -1
 
 
@@ -333,11 +335,13 @@ class DbBootstrapCmd:
 
     def __init__(self, args):
         self._args = args
-        self._psql = Psql(dbname='',
-                          hostname=self._args.pg_host,
-                          port=self._args.pg_port,
-                          username=self._args.pg_username,
-                          password=self._args.pg_pass)
+
+    def _psql(self):
+        return Psql(dbname='',
+                    hostname=self._args.pg_host,
+                    port=self._args.pg_port,
+                    username=self._args.pg_username,
+                    password=self._args.pg_pass)
 
     def _log_start(self):
         ql_db = self._args.ql_db_name
@@ -361,7 +365,7 @@ class DbBootstrapCmd:
             statements = CreateDb.sql(self._args.ql_db_name,
                                       self._args.ql_db_user,
                                       self._args.ql_db_pass)
-            self._psql.with_stdin_from_mem(statements).run()
+            self._psql().with_stdin_from_mem(statements).run()
             self._log_done()
         else:
             self._log_skip()
@@ -372,11 +376,13 @@ class DbInitCmd:
 
     def __init__(self, args):
         self._args = args
-        self._psql = Psql(dbname=self._args.ql_db_name,
-                          hostname=self._args.pg_host,
-                          port=self._args.pg_port,
-                          username=self._args.ql_db_user,
-                          password=self._args.ql_db_pass)
+
+    def _psql(self):
+        return Psql(dbname=self._args.ql_db_name,
+                    hostname=self._args.pg_host,
+                    port=self._args.pg_port,
+                    username=self._args.ql_db_user,
+                    password=self._args.ql_db_pass)
 
     def run(self):
         """
@@ -389,7 +395,7 @@ class DbInitCmd:
         """
         for path in files_in_asc_order(self._args.ql_db_init_dir, '.sql'):
             print(f'Running init script: {path}')
-            out = self._psql.with_script_file(path).run()
+            out = self._psql().with_script_file(path).run()
             print(out)
 
 
@@ -398,11 +404,13 @@ class DbLoadCmd:
 
     def __init__(self, args):
         self._args = args
-        self._psql = Psql(dbname=self._args.ql_db_name,
-                          hostname=self._args.pg_host,
-                          port=self._args.pg_port,
-                          username=self._args.ql_db_user,
-                          password=self._args.ql_db_pass)
+
+    def _psql(self):
+        return Psql(dbname=self._args.ql_db_name,
+                    hostname=self._args.pg_host,
+                    port=self._args.pg_port,
+                    username=self._args.ql_db_user,
+                    password=self._args.ql_db_pass)
 
     def run(self):
         """
@@ -419,7 +427,10 @@ class DbLoadCmd:
             name = file_name_without_extension(path)
             header = read_first_line(path)
             copy = LoadFromCsv.sql(table=name, columns=header)
-            out = self._psql.with_command(copy).with_stdin_from_file(path).run()
+            out = self._psql()\
+                .with_command(copy)\
+                .with_stdin_from_file(path)\
+                .run()
 
             print(out)
 
