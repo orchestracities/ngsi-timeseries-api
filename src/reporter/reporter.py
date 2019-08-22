@@ -128,7 +128,7 @@ def notify():
     
         # Add TIME_INDEX attribute
         entity[CrateTranslator.TIME_INDEX_NAME] = \
-            select_time_index_value_as_iso(request.headers, entity)
+            select_time_index_value_as_iso(dict(request.headers), entity)
     
         # Add GEO-DATE if enabled
         add_geodata(entity)

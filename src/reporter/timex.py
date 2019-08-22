@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Iterable, Union
-
 from utils.common import iter_entity_attrs
 from utils.jsondict import maybe_value, maybe_string_match
 from utils.timestr import latest_from_str_rep, to_datetime
