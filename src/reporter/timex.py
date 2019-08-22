@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Iterable, Union
 
 from utils.common import iter_entity_attrs
-from utils.jsondict import maybe_value
+from utils.jsondict import maybe_value, maybe_string_match
 from utils.timestr import latest_from_str_rep, to_datetime
 
 TIME_INDEX_HEADER_NAME = 'Fiware-TimeIndex-Attribute'
@@ -37,7 +37,7 @@ def time_index_priority_list(headers: dict, notification: dict) -> datetime:
     Returns the next possible time_index value using the strategy described in
     the function select_time_index_value.
     """
-    custom_attribute = maybe_value(headers, TIME_INDEX_HEADER_NAME)
+    custom_attribute = maybe_string_match(headers, TIME_INDEX_HEADER_NAME)
 
     # Custom time index attribute
     yield to_datetime(_attribute(notification, custom_attribute))

@@ -1,5 +1,6 @@
 from datetime import *
 from reporter.timex import *
+import pytest
 
 
 def build_notification(custom, ti, ts, dm,
@@ -64,6 +65,23 @@ def build_notification_timepoints(base_point):
 def test_custom_index_takes_priority():
     headers = {
         TIME_INDEX_HEADER_NAME: 'customTimeIndex'
+    }
+    custom_time_index_value = datetime(2019, 1, 1)
+    ts = build_notification_timepoints(custom_time_index_value)
+    notification = build_notification(*ts)
+
+    assert custom_time_index_value == \
+        select_time_index_value(headers, notification)
+
+
+@pytest.mark.parametrize('header_name', [
+    TIME_INDEX_HEADER_NAME,
+    TIME_INDEX_HEADER_NAME.lower(),
+    TIME_INDEX_HEADER_NAME.swapcase()
+])
+def test_headers_are_case_insensitive(header_name):
+    headers = {
+        header_name: 'customTimeIndex'
     }
     custom_time_index_value = datetime(2019, 1, 1)
     ts = build_notification_timepoints(custom_time_index_value)
