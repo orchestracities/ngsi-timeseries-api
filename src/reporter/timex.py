@@ -31,18 +31,16 @@ def _iter_metadata(notification: dict, meta_name: str) -> Iterable[MaybeString]:
         yield _meta_attribute(notification, attr_name, meta_name)
 
 
-def time_index_priority_list(headers: dict, notification: dict) -> datetime:
+def time_index_priority_list(custom_index: str, notification: dict) -> datetime:
     """
     Returns the next possible time_index value using the strategy described in
     the function select_time_index_value.
     """
-    custom_attribute = maybe_string_match(headers, TIME_INDEX_HEADER_NAME)
-
     # Custom time index attribute
-    yield to_datetime(_attribute(notification, custom_attribute))
+    yield to_datetime(_attribute(notification, custom_index))
 
     # The most recent custom time index metadata
-    yield latest_from_str_rep(_iter_metadata(notification, custom_attribute))
+    yield latest_from_str_rep(_iter_metadata(notification, custom_index))
 
     # TimeInstant attribute
     yield to_datetime(_attribute(notification, "TimeInstant"))
@@ -63,7 +61,7 @@ def time_index_priority_list(headers: dict, notification: dict) -> datetime:
     yield latest_from_str_rep(_iter_metadata(notification, "dateModified"))
 
 
-def select_time_index_value(headers: dict, notification: dict) -> datetime:
+def select_time_index_value(custom_index: str, notification: dict) -> datetime:
     """
     Determine which attribute or metadata value to use as a time index for the
     entity being notified.
@@ -92,23 +90,23 @@ def select_time_index_value(headers: dict, notification: dict) -> datetime:
       present or none of the values found can actually be converted to a
       ``datetime``.
 
-    :param headers: the HTTP headers as received from Orion.
+    :param custom_index: name of the custom_index (if requested, None otherwise)
     :param notification: the notification JSON payload as received from Orion.
     :return: the value to be used as time index.
     """
     current_time = datetime.now()
 
-    for time_index_candidate in time_index_priority_list(headers, notification):
-        if time_index_candidate:
-            return time_index_candidate
+    for index_candidate in time_index_priority_list(custom_index, notification):
+        if index_candidate:
+            return index_candidate
 
     # use the current time as a last resort
     return current_time
 
 
-def select_time_index_value_as_iso(headers: dict, notification: dict) -> str:
+def select_time_index_value_as_iso(custom_index: str, notification: dict) -> str:
     """
     Same as ``select_time_index_value`` but formats the returned ``datetime``
     as an ISO 8601 string.
     """
-    return select_time_index_value(headers, notification).isoformat()
+    return select_time_index_value(custom_index, notification).isoformat()

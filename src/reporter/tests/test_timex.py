@@ -63,38 +63,15 @@ def build_notification_timepoints(base_point):
 
 
 def test_custom_index_takes_priority():
-    headers = {
-        TIME_INDEX_HEADER_NAME: 'customTimeIndex'
-    }
     custom_time_index_value = datetime(2019, 1, 1)
     ts = build_notification_timepoints(custom_time_index_value)
     notification = build_notification(*ts)
 
     assert custom_time_index_value == \
-        select_time_index_value(headers, notification)
-
-
-@pytest.mark.parametrize('header_name', [
-    TIME_INDEX_HEADER_NAME,
-    TIME_INDEX_HEADER_NAME.lower(),
-    TIME_INDEX_HEADER_NAME.swapcase()
-])
-def test_headers_are_case_insensitive(header_name):
-    headers = {
-        header_name: 'customTimeIndex'
-    }
-    custom_time_index_value = datetime(2019, 1, 1)
-    ts = build_notification_timepoints(custom_time_index_value)
-    notification = build_notification(*ts)
-
-    assert custom_time_index_value == \
-        select_time_index_value(headers, notification)
+        select_time_index_value('customTimeIndex', notification)
 
 
 def test_use_latest_meta_custom_index():
-    headers = {
-        TIME_INDEX_HEADER_NAME: 'customTimeIndex'
-    }
     base_point = datetime(2019, 1, 1)
 
     ts = build_notification_timepoints(base_point)
@@ -104,13 +81,10 @@ def test_use_latest_meta_custom_index():
 
     # latest meta custom index slot = 8
     assert ts[8] == \
-        select_time_index_value(headers, notification).isoformat()
+        select_time_index_value('customTimeIndex', notification).isoformat()
 
 
 def test_skip_custom_index_if_it_has_no_value():
-    headers = {
-        TIME_INDEX_HEADER_NAME: 'customTimeIndex'
-    }
     base_point = datetime(2019, 1, 1)
     ts = build_notification_timepoints(base_point)
     ts[0] = None  # custom index slot
@@ -119,21 +93,19 @@ def test_skip_custom_index_if_it_has_no_value():
     notification = build_notification(*ts)
 
     assert ts[1] == \
-        select_time_index_value(headers, notification).isoformat()
+        select_time_index_value('customTimeIndex', notification).isoformat()
 
 
 def test_use_time_instant():
-    headers = {}
     base_point = datetime(2019, 1, 1)
     ts = build_notification_timepoints(base_point)
     notification = build_notification(*ts)
 
     assert ts[1] == \
-        select_time_index_value(headers, notification).isoformat()
+        select_time_index_value(None, notification).isoformat()
 
 
 def test_use_latest_meta_time_instant():
-    headers = {}
     base_point = datetime(2019, 1, 1)
 
     ts = build_notification_timepoints(base_point)
@@ -143,11 +115,10 @@ def test_use_latest_meta_time_instant():
 
     # latest meta time instant slot = 9
     assert ts[9] == \
-        select_time_index_value(headers, notification).isoformat()
+        select_time_index_value(None, notification).isoformat()
 
 
 def test_use_timestamp():
-    headers = {}
     base_point = datetime(2019, 1, 1)
     ts = build_notification_timepoints(base_point)
     ts[1] = None  # TimeInstant slot
@@ -156,11 +127,10 @@ def test_use_timestamp():
     notification = build_notification(*ts)
 
     assert ts[2] == \
-        select_time_index_value(headers, notification).isoformat()
+        select_time_index_value(None, notification).isoformat()
 
 
 def test_use_latest_meta_timestamp():
-    headers = {}
     base_point = datetime(2019, 1, 1)
 
     ts = build_notification_timepoints(base_point)
@@ -173,11 +143,10 @@ def test_use_latest_meta_timestamp():
 
     # latest meta time instant slot = 10
     assert ts[10] == \
-        select_time_index_value(headers, notification).isoformat()
+        select_time_index_value(None, notification).isoformat()
 
 
 def test_use_date_modified():
-    headers = {}
     base_point = datetime(2019, 1, 1)
 
     ts = build_notification_timepoints(base_point)
@@ -192,11 +161,10 @@ def test_use_date_modified():
 
     # date modified slot = 3
     assert ts[3] == \
-        select_time_index_value(headers, notification).isoformat()
+        select_time_index_value(None, notification).isoformat()
 
 
 def test_use_latest_meta_date_modified():
-    headers = {}
     base_point = datetime(2019, 1, 1)
 
     ts = build_notification_timepoints(base_point)
@@ -212,13 +180,12 @@ def test_use_latest_meta_date_modified():
 
     # latest meta date modified slot = 11
     assert ts[11] == \
-        select_time_index_value(headers, notification).isoformat()
+        select_time_index_value(None, notification).isoformat()
 
 
 def test_use_default_value():
-    headers = {}
     notification = build_notification(*([None] * 12))
 
-    actual = select_time_index_value(headers, notification)
+    actual = select_time_index_value(None, notification)
     diff = datetime.now() - actual
     assert diff < timedelta(seconds=2)
