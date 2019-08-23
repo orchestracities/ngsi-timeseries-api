@@ -1,5 +1,12 @@
 # QuantumLeap Release Notes
 
+## 0.7.4
+
+- Fix bug with Custom Time Index header handling (#247)
+- Timescale backend fixes (#243 #246)
+- Bring back /ui endpoint (#229)
+- Update dependencies (#244)
+
 ## 0.7.3
 
 - Relax Crate health check (#239)
