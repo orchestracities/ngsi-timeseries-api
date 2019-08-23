@@ -75,8 +75,8 @@ def select_time_index_value(custom_index: str, notification: dict) -> datetime:
       subscription has to be created with an ``httpCustom`` block as detailed
       in the *Subscriptions* and *Custom Notifications* sections of the NGSI
       spec.
-    - Custom time index metadata. The most recent custom time index attribute value
-      found in any of the attribute metadata sections in the notification.
+    - Custom time index metadata. The most recent custom time index attribute
+      value found in any of the attribute metadata sections in the notification
     - ``TimeInstant`` attribute.
     - ``TimeInstant`` metadata. The most recent ``TimeInstant`` attribute value
       found in any of the attribute metadata sections in the notification.
@@ -90,7 +90,8 @@ def select_time_index_value(custom_index: str, notification: dict) -> datetime:
       present or none of the values found can actually be converted to a
       ``datetime``.
 
-    :param custom_index: name of the custom_index (if requested, None otherwise)
+    :param custom_index: name of the custom_index (if requested,
+    None otherwise)
     :param notification: the notification JSON payload as received from Orion.
     :return: the value to be used as time index.
     """
@@ -104,7 +105,8 @@ def select_time_index_value(custom_index: str, notification: dict) -> datetime:
     return current_time
 
 
-def select_time_index_value_as_iso(custom_index: str, notification: dict) -> str:
+def select_time_index_value_as_iso(custom_index: str, notification: dict) -> \
+        str:
     """
     Same as ``select_time_index_value`` but formats the returned ``datetime``
     as an ISO 8601 string.
