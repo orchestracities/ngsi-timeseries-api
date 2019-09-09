@@ -392,8 +392,9 @@ def test_no_type_not_unique(translator):
 
     # Without type
     r = requests.get(url, params={})
-    assert r.status_code == 409, r.text
+    assert r.status_code == 400, r.text
+    e = AmbiguousNGSIIdError('repeatedId')
     assert r.json() == {
-        "error": "AmbiguousNGSIIdError",
-        "description": str(AmbiguousNGSIIdError('repeatedId'))
+        "error": "{}".format(type(e)),
+        "description": str(e)
     }

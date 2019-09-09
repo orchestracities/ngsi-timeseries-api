@@ -6,6 +6,12 @@ class QLError(Exception):
     """
 
 
+class UnsupportedOption(QLError):
+    """
+    Used to flag usage of an unsupported/invalid option in any of the methods.
+    """
+
+
 class NGSIUsageError(QLError):
     """
     Errors due to wrong NGSI usage.
@@ -22,8 +28,3 @@ class AmbiguousNGSIIdError(NGSIUsageError):
               "Please specify entity_type."
         NGSIUsageError.__init__(self, msg.format(entity_id))
 
-
-class UnsupportedOption(QLError):
-    """
-    Used to flag usage of an unsupported/invalid option in any of the methods.
-    """

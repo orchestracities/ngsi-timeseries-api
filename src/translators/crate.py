@@ -2,7 +2,8 @@ from contextlib import contextmanager
 from crate import client
 from crate.client import exceptions
 from datetime import datetime, timedelta
-from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption
+from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption, \
+    NGSIUsageError
 from translators import base_translator
 from utils.common import iter_entity_attrs
 import logging
@@ -417,8 +418,8 @@ class CrateTranslator(base_translator.BaseTranslator):
             last_n = limit
 
         if limit < 1 or last_n < 1:
-            raise ValueError("Limit and LastN should be >=1 and <= {"
-                             "}.".format(default_limit))
+            raise NGSIUsageError("Limit and LastN should be >=1 and <= {"
+                                 "}.".format(default_limit))
 
         return min(last_n, limit)
 
@@ -624,8 +625,8 @@ class CrateTranslator(base_translator.BaseTranslator):
             return []
 
         if entity_id and entity_ids:
-            raise ValueError("Cannot use both entity_id and entity_ids params "
-                             "in the same call.")
+            raise NGSIUsageError("Cannot use both entity_id and entity_ids "
+                                 "params in the same call.")
 
         if aggr_method and aggr_method.lower() not in VALID_AGGR_METHODS:
             raise UnsupportedOption("aggr_method={}".format(aggr_method))
@@ -810,7 +811,7 @@ class CrateTranslator(base_translator.BaseTranslator):
                       to_date=None, fiware_service=None,
                       fiware_servicepath=None):
         if not entity_id:
-            raise ValueError("entity_id cannot be None nor empty")
+            raise NGSIUsageError("entity_id cannot be None nor empty")
 
         if not entity_type:
             entity_type = self._get_entity_type(entity_id, fiware_service)
