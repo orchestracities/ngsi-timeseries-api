@@ -200,6 +200,38 @@ def test_1T1E1A_lastN(reporter_dataset):
     assert_1T1E1A_response(obtained, expected)
 
 
+def test_1T1E1A_lastN_with_limit(reporter_dataset):
+    """
+    See GitHub issue #249.
+    """
+    # Query
+    query_params = {
+        'type': entity_type,
+        'lastN': 3,
+        'limit': 10
+    }
+    r = requests.get(query_url(), params=query_params)
+    assert r.status_code == 200, r.text
+
+    # Expect only last N
+    expected_temperatures = [27, 28, 29]
+    expected_index = [
+        '1970-01-28T00:00:00',
+        '1970-01-29T00:00:00',
+        '1970-01-30T00:00:00'
+    ]
+
+    # Assert
+    obtained = r.json()
+    expected = {
+        'entityId': entity_id,
+        'attrName': attr_name,
+        'index': expected_index,
+        'values': expected_temperatures
+    }
+    assert_1T1E1A_response(obtained, expected)
+
+
 def test_1T1E1A_limit(reporter_dataset):
     # Query
     query_params = {

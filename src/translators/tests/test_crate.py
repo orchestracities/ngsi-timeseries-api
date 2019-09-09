@@ -105,6 +105,38 @@ def test_query_all(translator):
         check_notifications_record(notifications, records)
 
 
+def test_limit_0(translator):
+    entities = create_random_entities(num_updates=2)
+    result = translator.insert(entities)
+    assert result.rowcount > 0
+
+    loaded_entities = translator.query(last_n=0)
+    assert loaded_entities == []
+
+    loaded_entities = translator.query(limit=0)
+    assert loaded_entities == []
+
+
+def test_limit_overrides_lastN(translator):
+    entities = create_random_entities(num_updates=7)
+    result = translator.insert(entities)
+    assert result.rowcount > 0
+
+    loaded_entities = translator.query(last_n=5, limit=3)
+    assert len(loaded_entities[0]['index']) == 3
+
+
+def test_lastN_ordering(translator):
+    entities = create_random_entities(num_updates=5)
+    result = translator.insert(entities)
+    assert result.rowcount > 0
+
+    loaded_entities = translator.query(last_n=3)
+    index = loaded_entities[0]['index']
+    assert len(index) == 3
+    assert index[-1] > index[0]
+
+
 def test_attrs_by_entity_id(translator):
     # First insert some data
     num_updates = 10
