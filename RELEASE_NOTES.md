@@ -1,5 +1,9 @@
 # QuantumLeap Release Notes
 
+## 0.7.5
+
+- Fix bug with lastN parameter (#249)
+
 ## 0.7.4
 
 - Fix bug with Custom Time Index header handling (#247)
