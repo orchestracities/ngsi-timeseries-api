@@ -1,7 +1,7 @@
 swagger: '2.0'  # For 3.0 see (https://github.com/zalando/connexion/issues/420)
 info:
   title: "QuantumLeap API"
-  version: "0.7"        # we'll keep it aligned with QL version
+  version: "0.7.5"      # we'll keep it aligned with QL version
 host: "localhost:8668"  # it'll run in the same container, hence localhost.
 basePath: /v2
 produces:
