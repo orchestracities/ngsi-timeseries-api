@@ -3,6 +3,7 @@
 ## 0.7.5
 
 - Fix bug with lastN parameter (#249)
+- Update specification version to align with QL versions (#218)
 
 ## 0.7.4
 
