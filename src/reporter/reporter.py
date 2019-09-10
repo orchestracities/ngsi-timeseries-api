@@ -29,15 +29,16 @@ I.e, QL must be told where orion is.
 from flask import request
 from geocoding.geocache import GeoCodingCache
 from requests import RequestException
-from translators.crate import CrateTranslator, CrateTranslatorInstance, \
-    NGSI_TO_CRATE, NGSI_TEXT, NGSI_DATETIME, NGSI_ISO8601
-from utils.common import iter_entity_attrs
+from translators.crate import NGSI_TO_CRATE, NGSI_TEXT
+from translators.factory import translator_for
+from utils.common import iter_entity_attrs, TIME_INDEX_NAME
 import json
 import logging
 import os
 import requests
 from reporter.subscription_builder import build_subscription
-from reporter.timex import select_time_index_value_as_iso
+from reporter.timex import select_time_index_value_as_iso, \
+    TIME_INDEX_HEADER_NAME
 from geocoding.location import normalize_location
 
 
@@ -126,8 +127,9 @@ def notify():
             return error, 400
     
         # Add TIME_INDEX attribute
-        entity[CrateTranslator.TIME_INDEX_NAME] = \
-            select_time_index_value_as_iso(request.headers, entity)
+        custom_index = request.headers.get(TIME_INDEX_HEADER_NAME, None)
+        entity[TIME_INDEX_NAME] = \
+            select_time_index_value_as_iso(custom_index, entity)
     
         # Add GEO-DATE if enabled
         add_geodata(entity)
@@ -147,7 +149,7 @@ def notify():
         fiware_sp = None
 
     # Send valid entities to translator
-    with CrateTranslatorInstance() as trans:
+    with translator_for(fiware_s) as trans:
         trans.insert(payload, fiware_s, fiware_sp)
 
     msg = 'Notification successfully processed'

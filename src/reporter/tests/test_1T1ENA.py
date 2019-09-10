@@ -253,6 +253,47 @@ def test_1T1ENA_lastN(reporter_dataset):
     assert_1T1ENA_response(obtained, expected)
 
 
+def test_1T1E1A_lastN_with_limit(reporter_dataset):
+    """
+    See GitHub issue #249.
+    """
+    # Query
+    query_params = {
+        'type': entity_type,
+        'lastN': 3,
+        'limit': 10
+    }
+    r = requests.get(query_url(), params=query_params)
+    assert r.status_code == 200, r.text
+
+    # Expected
+    expected_temperatures = [27, 28, 29]
+    expected_pressures = [t * 10 for t in expected_temperatures]
+    expected_index = [
+        '1970-01-28T00:00:00',
+        '1970-01-29T00:00:00',
+        '1970-01-30T00:00:00'
+    ]
+    expected = {
+        'entityId': entity_id,
+        'index': expected_index,
+        'attributes': [
+            {
+                'attrName': pressure,
+                'values': expected_pressures,
+            },
+            {
+                'attrName': temperature,
+                'values': expected_temperatures,
+            }
+        ]
+    }
+
+    # Assert
+    obtained = r.json()
+    assert_1T1ENA_response(obtained, expected)
+
+
 def test_1T1ENA_limit(reporter_dataset):
     # Query
     query_params = {

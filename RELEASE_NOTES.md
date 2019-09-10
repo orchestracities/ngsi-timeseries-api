@@ -1,5 +1,28 @@
 # QuantumLeap Release Notes
 
+## 0.7.4
+
+- Fix bug with Custom Time Index header handling (#247)
+- Timescale backend fixes (#243 #246)
+- Bring back /ui endpoint (#229)
+- Update dependencies (#244)
+
+## 0.7.3
+
+- Relax Crate health check (#239)
+- Timescale backend teething troubles (#237)
+- add coverall badge (#236)
+- Coverage tool integration with travis (#221)
+
+## 0.7.2
+
+- Initial Timescale DB support (#231)
+
+## 0.7.1
+
+- Japanses Translations Update (#220)
+- Remove OSM checks by default (#226)
+
 ## 0.7.0
 
 - Flatten JSON in query results (#213)

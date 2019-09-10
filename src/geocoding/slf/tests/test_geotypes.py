@@ -171,3 +171,138 @@ def test_box_ngsi_attribute():
     }
 
     assert expected == box.to_ngsi_attribute()
+
+
+@pytest.mark.parametrize('ngsi_data', [
+    None, '{}', {}, {'type': 'geo:line'},
+    {'type': 'geo:point'},
+    {'type': 'geo:point', 'value': None},
+    {'type': 'geo:point', 'value': ''},
+    {'type': 'geo:point', 'value': ','},
+    {'type': 'geo:point', 'value': ', 2'},
+    {'type': 'geo:point', 'value': '1'},
+    {'type': 'geo:point', 'value': '1,'},
+    {'type': 'geo:point', 'value': '1,?'},
+    {'type': 'geo:point', 'value': [1, 2]}
+])
+def test_point_from_invalid_ngsi_dict(ngsi_data):
+    assert SlfPoint.from_ngsi_dict(ngsi_data) is None
+
+
+@pytest.mark.parametrize('ngsi_data', [
+    {'type': 'geo:point', 'value': '1.0, 2.0'},
+    {'type': 'geo:point', 'value': '1.2, -3.4'}
+])
+def test_point_from_ngsi_dict(ngsi_data):
+    ast = SlfPoint.from_ngsi_dict(ngsi_data)
+    assert ast.to_ngsi_attribute() == ngsi_data
+
+
+@pytest.mark.parametrize('ngsi_data', [
+    None, '{}', {}, {'type': 'geo:point'},
+    {'type': 'geo:line'},
+    {'type': 'geo:line', 'value': None},
+    {'type': 'geo:line', 'value': ''},
+    {'type': 'geo:line', 'value': {}},
+    {'type': 'geo:line', 'value': [', 2']},
+    {'type': 'geo:line', 'value': ['1']},
+    {'type': 'geo:line', 'value': ['1,']},
+    {'type': 'geo:line', 'value': ['1,?']},
+    {'type': 'geo:line', 'value': ['1,2', '']},
+    {'type': 'geo:line', 'value': ['1,2', '', '3,4']},
+    {'type': 'geo:line', 'value': ['1,2', '3,4', '']},
+    {'type': 'geo:line', 'value': ['1,2', 3, 4]}
+])
+def test_line_from_invalid_ngsi_dict(ngsi_data):
+    assert SlfLine.from_ngsi_dict(ngsi_data) is None
+
+
+@pytest.mark.parametrize('ngsi_data', [
+    {'type': 'geo:line', 'value': ['1.0, 2.0', '3.0, 4.0']},
+    {'type': 'geo:line', 'value': ['1.0, 2.0', '3.0, 4.0', '5.0, 6.0']}
+])
+def test_line_from_ngsi_dict(ngsi_data):
+    ast = SlfLine.from_ngsi_dict(ngsi_data)
+    assert ast.to_ngsi_attribute() == ngsi_data
+
+
+@pytest.mark.parametrize('ngsi_data', [
+    None, '{}', {}, {'type': 'geo:point'},
+    {'type': 'geo:polygon'},
+    {'type': 'geo:polygon', 'value': None},
+    {'type': 'geo:polygon', 'value': ''},
+    {'type': 'geo:polygon', 'value': {}},
+    {'type': 'geo:polygon', 'value': [', 2']},
+    {'type': 'geo:polygon', 'value': ['1']},
+    {'type': 'geo:polygon', 'value': ['1,']},
+    {'type': 'geo:polygon', 'value': ['1,?']},
+    {'type': 'geo:polygon', 'value': ['1,2', '']},
+    {'type': 'geo:polygon', 'value': ['1,2', '', '3,4']},
+    {'type': 'geo:polygon', 'value': ['1,2', '3,4', '']},
+    {'type': 'geo:polygon', 'value': ['1,2', 3, 4]},
+    {'type': 'geo:polygon', 'value': ['1,2', '3,4']}
+])
+def test_polygon_from_invalid_ngsi_dict(ngsi_data):
+    assert SlfPolygon.from_ngsi_dict(ngsi_data) is None
+
+
+@pytest.mark.parametrize('ngsi_data', [
+    {'type': 'geo:polygon', 'value': ['1.0, 2.0', '3.0, 4.0', '5.0, 6.0',
+                                      '7.0, 8.0', '9.0, 10.0']},
+    {'type': 'geo:polygon', 'value': ['1.0, 2.0', '3.0, 4.0', '5.0, 6.0',
+                                      '7.0, 8.0', '9.0, 10.0', '1.0, 2.0']}
+])
+def test_polygon_from_ngsi_dict(ngsi_data):
+    ast = SlfPolygon.from_ngsi_dict(ngsi_data)
+    assert ast.to_ngsi_attribute() == ngsi_data
+
+
+@pytest.mark.parametrize('ngsi_data', [
+    None, '{}', {}, {'type': 'geo:point'},
+    {'type': 'geo:box'},
+    {'type': 'geo:box', 'value': None},
+    {'type': 'geo:box', 'value': ''},
+    {'type': 'geo:box', 'value': {}},
+    {'type': 'geo:box', 'value': [', 2']},
+    {'type': 'geo:box', 'value': ['1']},
+    {'type': 'geo:box', 'value': ['1,']},
+    {'type': 'geo:box', 'value': ['1,?']},
+    {'type': 'geo:box', 'value': ['1,2', '']},
+    {'type': 'geo:box', 'value': ['1,2', '', '3,4']},
+    {'type': 'geo:box', 'value': ['1,2', '3,4', '']},
+    {'type': 'geo:box', 'value': ['1,2', 3, 4]}
+])
+def test_box_from_invalid_ngsi_dict(ngsi_data):
+    assert SlfBox.from_ngsi_dict(ngsi_data) is None
+
+
+@pytest.mark.parametrize('ngsi_data', [
+    {'type': 'geo:box', 'value': ['1.0, 2.0', '3.0, 4.0']}
+])
+def test_box_from_ngsi_dict(ngsi_data):
+    ast = SlfBox.from_ngsi_dict(ngsi_data)
+    assert ast.to_ngsi_attribute() == ngsi_data
+
+
+@pytest.mark.parametrize('ngsi_data, slf_type', [
+    ({'type': 'geo:point', 'value': '1.0, 2.0'}, SlfPoint),
+    ({'type': 'geo:line', 'value': ['1.0, 2.0', '3.0, 4.0']}, SlfLine),
+    ({'type': 'geo:polygon', 'value': ['1.0, 2.0', '3.0, 4.0', '5.0, 6.0',
+                                       '7.0, 8.0', '9.0, 10.0']}, SlfPolygon),
+    ({'type': 'geo:box', 'value': ['1.0, 2.0', '3.0, 4.0']}, SlfBox)
+])
+def test_build_from_ngsi_dict(ngsi_data, slf_type):
+    ast = SlfGeometry.build_from_ngsi_dict(ngsi_data)
+    assert isinstance(ast, slf_type)
+    assert ast.to_ngsi_attribute() == ngsi_data
+
+
+@pytest.mark.parametrize('ngsi_data, expected', [
+    ({'type': 'geo:point'}, True),
+    ({'type': 'geo:line', 'value': ['1.0, 2.0', '3.0, 4.0']}, True),
+    ({'type': 'geo:polygon', 'value': []}, True),
+    ({'type': 'geo:box', 'value': None}, True),
+    (None, False), ('', False), ({}, False)
+])
+def test_is_ngsi_slf_attr(ngsi_data, expected):
+    assert SlfGeometry.is_ngsi_slf_attr(ngsi_data) == expected

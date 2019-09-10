@@ -1,0 +1,11 @@
+CREATE ROLE quantumleap
+LOGIN PASSWORD '*';
+
+CREATE DATABASE quantumleap
+OWNER quantumleap
+ENCODING 'UTF8';
+
+\connect quantumleap
+
+CREATE EXTENSION IF NOT EXISTS postgis CASCADE;
+CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
