@@ -261,12 +261,14 @@ parameters:
     in: query
     name: lastN
     type: integer
+    minimum: 1
     description: "Optional. Used to request only the last N values that satisfy
     the request conditions."
   limit:
     in: query
     name: limit
     type: integer
+    minimum: 1
     default: 10000
     description: "Optional. Maximum number of results to retrieve in a single
     response."
@@ -274,6 +276,7 @@ parameters:
     in: query
     name: offset
     type: integer
+    minimum: 0
     description: "Optional. Offset to apply to the response results. For
     example, if the query was to return 10 results and you use an offset of
     1, the response will return the last 9 values. Make sure you don't give

@@ -2,7 +2,8 @@ from contextlib import contextmanager
 from crate import client
 from crate.client import exceptions
 from datetime import datetime, timedelta
-from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption
+from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption, \
+    NGSIUsageError
 from translators import base_translator
 from utils.common import iter_entity_attrs
 import logging
@@ -406,15 +407,21 @@ class CrateTranslator(base_translator.BaseTranslator):
         return select
 
 
-    def _get_limit(self, limit):
+    def _get_limit(self, limit, last_n):
         # https://crate.io/docs/crate/reference/en/latest/general/dql/selects.html#limits
-        default = 10000
-        if not limit:
-            return default
-        limit = int(limit)
-        if limit < 1:
-            raise ValueError("Limit should be >=1 and <= 10000.")
-        return min(default, limit)
+        default_limit = 10000
+
+        if limit is None or limit > default_limit:
+            limit = default_limit
+
+        if last_n is None:
+            last_n = limit
+
+        if limit < 1 or last_n < 1:
+            raise NGSIUsageError("Limit and LastN should be >=1 and <= {"
+                                 "}.".format(default_limit))
+
+        return min(last_n, limit)
 
 
     def _get_where_clause(self, entity_ids, from_date, to_date, fiware_sp=None,
@@ -445,7 +452,8 @@ class CrateTranslator(base_translator.BaseTranslator):
         return where_clause
 
 
-    def _get_order_group_clause(self, aggr_method, aggr_period, select_clause):
+    def _get_order_group_clause(self, aggr_method, aggr_period,
+                                select_clause, last_n):
         order_by = []
         group_by = []
 
@@ -460,13 +468,15 @@ class CrateTranslator(base_translator.BaseTranslator):
                 group_by.append(gb)
 
         # Order by
+        direction = "DESC" if last_n else "ASC"
+
         if aggr_method:
             if aggr_period:
                 # consider always ordering by entity_id also
                 order_by.extend(["entity_type", "entity_id"])
-                order_by.append("{} ASC".format(self.TIME_INDEX_NAME))
+                order_by.append("{} {}".format(self.TIME_INDEX_NAME, direction))
         else:
-            order_by.append("{} ASC".format(self.TIME_INDEX_NAME))
+            order_by.append("{} {}".format(self.TIME_INDEX_NAME, direction))
 
         clause = ""
         if group_by:
@@ -611,9 +621,12 @@ class CrateTranslator(base_translator.BaseTranslator):
         UnsupportedOption for still-to-be-implemented features.
         crate.DatabaseError in case of errors with CrateDB interaction.
         """
+        if last_n == 0 or limit == 0:
+            return []
+
         if entity_id and entity_ids:
-            raise ValueError("Cannot use both entity_id and entity_ids params "
-                             "in the same call.")
+            raise NGSIUsageError("Cannot use both entity_id and entity_ids "
+                                 "params in the same call.")
 
         if aggr_method and aggr_method.lower() not in VALID_AGGR_METHODS:
             raise UnsupportedOption("aggr_method={}".format(aggr_method))
@@ -647,14 +660,15 @@ class CrateTranslator(base_translator.BaseTranslator):
 
         order_group_clause = self._get_order_group_clause(aggr_method,
                                                           aggr_period,
-                                                          select_clause)
+                                                          select_clause,
+                                                          last_n)
 
         if entity_type:
             table_names = [self._et2tn(entity_type, fiware_service)]
         else:
             table_names = self._get_et_table_names(fiware_service)
 
-        limit = self._get_limit(limit)
+        limit = self._get_limit(limit, last_n)
         offset = max(0, offset)
 
         result = []
@@ -734,8 +748,6 @@ class CrateTranslator(base_translator.BaseTranslator):
 
         Indexes elements are time steps in ISO format.
         """
-        last_n = last_n or 0
-
         stmt = "select entity_attrs from {} " \
                "where table_name = ?".format(METADATA_TABLE_NAME)
         self.cursor.execute(stmt, [table_name])
@@ -755,7 +767,12 @@ class CrateTranslator(base_translator.BaseTranslator):
 
         entities = {}
         entity_attrs = res[0][0]
-        for r in resultset[-last_n:]:  # Improve last_n, use dec order + limit
+
+        if last_n:
+            # LastN induces DESC order, but we always return ASC order.
+            resultset = reversed(resultset)
+
+        for r in resultset:
             for k, v in zip(col_names, r):
                 if k not in entity_attrs:
                     # implementation-specific columns not representing attrs
@@ -794,7 +811,7 @@ class CrateTranslator(base_translator.BaseTranslator):
                       to_date=None, fiware_service=None,
                       fiware_servicepath=None):
         if not entity_id:
-            raise ValueError("entity_id cannot be None nor empty")
+            raise NGSIUsageError("entity_id cannot be None nor empty")
 
         if not entity_type:
             entity_type = self._get_entity_type(entity_id, fiware_service)

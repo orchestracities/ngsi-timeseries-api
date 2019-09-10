@@ -1,7 +1,7 @@
-from exceptions.exceptions import AmbiguousNGSIIdError
+from exceptions.exceptions import NGSIUsageError
 from flask import request
 from reporter.reporter import _validate_query_params
-from translators.crate import CrateTranslatorInstance, CrateTranslator
+from translators.crate import CrateTranslatorInstance
 import logging
 from .geo_query_handler import handle_geo_query
 from utils.jsondict import lookup_string_match
@@ -61,11 +61,11 @@ def query_1TNE1A(attr_name,   # In Path
                                    fiware_service=fiware_s,
                                    fiware_servicepath=fiware_sp,
                                    geo_query=geo_query)
-    except AmbiguousNGSIIdError as e:
+    except NGSIUsageError as e:
         return {
-            "error": "AmbiguousNGSIIdError",
+            "error": "{}".format(type(e)),
             "description": str(e)
-        }, 409
+        }, 400
 
     except Exception as e:
         # Temp workaround to debug test_not_found
