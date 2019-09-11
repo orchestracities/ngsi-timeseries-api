@@ -6,7 +6,7 @@ edit_uri: 'edit/master/docs/manuals'
 docs_dir: docs/manuals
 theme: readthedocs
 markdown_extensions: [toc,fenced_code]
-extra_css: ["https://fiware.org/style/fiware_readthedocs.css", "https://fiware.org/style/fiware_readthedocs_core.css"]
+extra_css: ["https://www.fiware.org/style/fiware_readthedocs.css", "https://www.fiware.org/style/fiware_readthedocs_core.css"]
 nav:
   - Home: index.md
   - 'User & Programmers Manual':
