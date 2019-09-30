@@ -329,7 +329,7 @@ paths:
         200:
           description: "Successful response."
 
-  /version:
+  /v2/version:
     get:
       operationId: reporter.version.version
       summary: "Returns the version of QuantumLeap."
