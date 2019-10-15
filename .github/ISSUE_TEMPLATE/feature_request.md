@@ -3,7 +3,7 @@ name: Feature request
 about: Suggest an idea for this project
 title: ''
 labels: enhancement
-assignees: c0c0n3, chicco785, taliaga
+assignees: c0c0n3, chicco785
 
 ---
 
