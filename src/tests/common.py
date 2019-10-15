@@ -62,7 +62,7 @@ def check_orion_url():
 
 
 def check_ql_url():
-    res = requests.get("{}/v2/version".format(QL_URL))
+    res = requests.get("{}/version".format(QL_URL))
     assert res.ok, "{} not accessible. {}".format(QL_URL, res.text)
 
 
