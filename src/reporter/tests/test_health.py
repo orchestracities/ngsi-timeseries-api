@@ -10,7 +10,7 @@ def test_health_pass():
     url = '{}/health'.format(QL_URL)
     QL_health_url = url.replace("/v2","")
 
-    r = requests.get(url)
+    r = requests.get(QL_health_url)
     assert r.status_code == 200, r.text
     assert r.headers['Cache-Control'] == 'max-age=180'
 
