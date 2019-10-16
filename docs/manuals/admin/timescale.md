@@ -121,31 +121,15 @@ are:
   plain TCP connection.
 * `QL_CONFIG`: absolute pathname of the QuantumLeap YAML configuration
   file. If not set, the default configuration will be used where only
-  the Crate back end is available.
-
-The YAML configuration file specifies what back end to use for which
-tenant as well as the default back end to use for any other tenant
-not explicitly mentioned in the file. Here's an example YAML
-configuration:
-
-    tenants:
-        t1:
-            backend: Timescale
-        t2:
-            backend: Crate
-        t3:
-            backend: Timescale
-
-    default-backend: Crate
-
-With this configuration, any NGSI entity coming in for tenant `t1`
-or `t3` will be stored in Timescale whereas tenant `t2` will use
-Crate. Any tenant other than `t1`, `t2`, or `t3` gets the default
-Crate back end.
+  the Crate back end is available. For details about how to select a
+  back end and YAML configuration, refer to the [Database Selection
+  section][admin.db].
 
 
 
 
+[admin.db]: ./db-selection.md
+    "QuantumLeap Database Selection"
 [admin.dm]: ./dataMigration.md
     "QuantumLeap Data Migration"
 [postgres]: https://www.postgresql.org
