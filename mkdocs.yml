@@ -18,5 +18,6 @@ nav:
     - 'Sanity Check': 'admin/check.md'
     - 'Ports': 'admin/ports.md'
     - 'CrateDB': 'admin/crate.md'
+    - 'Timescale': 'admin/timescale.md'
     - 'Grafana': 'admin/grafana.md'
     - 'Data-Migration': 'admin/dataMigration.md'
