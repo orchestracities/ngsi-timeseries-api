@@ -186,7 +186,7 @@ def unload_data(entities):
         h = e.headers()
         if e.FIWARE_SERVICEPATH_KEY in h:
             h.pop(e.FIWARE_SERVICEPATH_KEY)
-        url = "{}/types/{}".format(QL_URL, e.type)
+        url = "{}/v2/types/{}".format(QL_URL, e.type)
 
         r = requests.delete(url, headers=h)
         if not r.ok:
