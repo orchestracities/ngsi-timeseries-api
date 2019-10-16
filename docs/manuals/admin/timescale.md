@@ -9,7 +9,7 @@ possible to dynamically select, at runtime, which storage back end to
 use (Crate or Timescale) depending on the tenant who owns the entity
 being persisted. Also, QuantumLeap ships with tools to automate the
 Timescale back end setup and generate Crate-to-Timescale migration
-scripts.
+scripts---details in the [Data Migration section][admin.dm].
 
 
 ## Operation overview
@@ -144,41 +144,10 @@ Crate. Any tenant other than `t1`, `t2`, or `t3` gets the default
 Crate back end.
 
 
-## Migrating from Crate
-
-QuantumLeap provides a self-contained Python script to help with
-migrating tables from Crate to Timescale. The script is located
-in the `timescale-container` directory and is called `crate-exporter.py`.
-It exports rows in a given Crate table and generates, on `stdout`,
-all the SQL statements needed to import that data into Timescale.
-These include creating a corresponding schema, table and hypertable
-in PostgreSQL as needed. Note that the script generates DDL statements
-that, when executed, will result in the exact same table structures
-the QuantumLeap Timescale back end would have generated on seeing
-NGSI entities corresponding to the rows stored in the Crate table.
-
-Here's an example usage
-
-    $ python crate-exporter.py --schema mtyoutenant --table etdevice \
-        > mtyoutenant.etdevice-import.sql
-
-where we export all the rows in the Crate table `mtyoutenant.etdevice`.
-The generated file contains all the SQL statements to recreate the
-table and insert the data in Timescale. You may want to put this file
-in the `quantumleap-db-setup` script's init directory so that data
-are migrated automatically for you when you bootstrap the QuantumLeap
-DB on Timescale as explained earlier.
-
-By default the script exports all the rows in the Crate table, but
-you can also use the `--query` argument to specify a query to select
-only a subset of interest as shown below:
-
-    $ python crate-exporter.py --schema mtyoutenant --table etdevice --query \
-        "SELECT * FROM mtyoutenant.etdevice where time_index > '2019-04-15';"
 
 
-
-
+[admin.dm]: ./dataMigration.md
+    "QuantumLeap Data Migration"
 [postgres]: https://www.postgresql.org
     "PostgreSQL Home"
 [postgis]: https://postgis.net/
