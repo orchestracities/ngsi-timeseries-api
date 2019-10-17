@@ -3,19 +3,22 @@
 [**Grafana**](https://grafana.com/) is a powerful visualisation tool that we
 can use to display graphics of the persisted data.
 
-In order to read data from a [CrateDB](./crate.md) database for your dashboards
-in Grafana, you should use the [Postgres Datasource](http://docs.grafana.org/features/datasources/postgres/).
-The Postgres Datasource should come preinstalled in the latest Grafana versions.
+You can easily connect Grafana to either the QuantumLeap [CrateDB](./crate.md)
+or [Timescale](./timescale.md) back end to visualise QuantumLeap data on
+your dashboards. In both cases, the Grafana data source to use is the
+[Postgres Datasource](http://docs.grafana.org/features/datasources/postgres/)
+which normally ships with recent versions of Grafana.
 
 If you followed the [Installation Guide](./index.md), you have already Grafana
 running in a Docker container. If deployed locally, it's probably at [http://0.0.0.0:3000](http://0.0.0.0:3000)
 
-You can now follow Crate's recommendations on how to configure the datasource
-by checking out [this post](https://crate.io/a/pair-cratedb-with-grafana-an-open-platform-for-time-series-data-visualization/).
-If you already put some data in your database, you can jump directly to the
-"Add a Data Source" section. The main parts of such post are convered below.
+If you're using the CrateDB back end, we suggest you read
+[this blog post](https://crate.io/a/pair-cratedb-with-grafana-an-open-platform-for-time-series-data-visualization/)
+and follow Crate's recommendations on how to configure the Grafana
+datasource which we have summarised in the below section.
 
-## Configuring the DataSource
+
+## Configuring the DataSource for CrateDB
 
 Explore your deployed Grafana instance (e.g [http://0.0.0.0:3000](http://0.0.0.0:3000)).
 If you didn't change the defaults credentials, use `admin` as both user and
@@ -40,6 +43,14 @@ look like
 ![alt text](../rsrc/postgres_datasource.png "Configuring the DataSource")
 
 Click *Save & Test* and you should get an OK message.
+
+
+## Configuring the DataSource for PostgreSQL
+
+The process is pretty much the same as outlined above and is well documented
+in the Grafana [PosgreSQL data source manual](https://grafana.com/docs/features/datasources/postgres/).
+Note that you should enable the *TimescaleDB* data source option.
+
 
 ## Using the DataSource in your Graph
 
