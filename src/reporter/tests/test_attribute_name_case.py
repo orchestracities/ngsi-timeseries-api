@@ -57,7 +57,7 @@ def manage_db_entities():
 
 def query_1t1e1a(entity_id, attr_name):
     escaped_attr_name = urllib.parse.quote(attr_name)
-    url = "{}/entities/{}/attrs/{}".format(QL_URL, entity_id, escaped_attr_name)
+    url = "{}/v2/entities/{}/attrs/{}".format(QL_URL, entity_id, escaped_attr_name)
     response = requests.get(url)
     assert response.status_code == 200
     return response.json()
@@ -65,14 +65,14 @@ def query_1t1e1a(entity_id, attr_name):
 
 def query_1tne1a(attr_name):
     escaped_attr_name = urllib.parse.quote(attr_name)
-    url = "{}/types/{}/attrs/{}".format(QL_URL, entity_type, escaped_attr_name)
+    url = "{}/v2/types/{}/attrs/{}".format(QL_URL, entity_type, escaped_attr_name)
     response = requests.get(url)
     assert response.status_code == 200
     return response.json()
 
 
 def query_1t1ena(entity_id, attr1_name, attr2_name):
-    url = "{}/entities/{}".format(QL_URL, entity_id)
+    url = "{}/v2/entities/{}".format(QL_URL, entity_id)
     query_params = {
         'attrs': attr1_name + ',' + attr2_name,
     }

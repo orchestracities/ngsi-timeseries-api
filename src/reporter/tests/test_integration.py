@@ -10,7 +10,7 @@ def test_integration(entity, clean_mongo, clean_crate):
         'orionUrl': ORION_URL,
         'quantumleapUrl': QL_URL,
     }
-    r = requests.post("{}/subscribe".format(QL_URL), params=params)
+    r = requests.post("{}/v2/subscribe".format(QL_URL), params=params)
     assert r.status_code == 201
 
     # Insert values in Orion
@@ -65,7 +65,7 @@ def test_integration_custom_index(entity, clean_mongo, clean_crate):
         'quantumleapUrl': QL_URL,
         'timeIndexAttribute': 'myCustomIndex'
     }
-    r = requests.post("{}/subscribe".format(QL_URL), params=params)
+    r = requests.post("{}/v2/subscribe".format(QL_URL), params=params)
     assert r.status_code == 201
 
     # Insert values in Orion
@@ -100,7 +100,7 @@ def test_integration_custom_index(entity, clean_mongo, clean_crate):
     query_params = {
         'type': entity['type'],
     }
-    query_url = "{qlUrl}/entities/{entityId}".format(
+    query_url = "{qlUrl}/v2/entities/{entityId}".format(
         qlUrl=QL_URL,
         entityId=entity['id'],
     )

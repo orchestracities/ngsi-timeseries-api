@@ -13,7 +13,7 @@ n_days = 30
 
 
 def query_url(entity_type='Room', entity_id='Room0', values=False):
-    url = "{qlUrl}/entities/{entityId}/attrs/{attrName}"
+    url = "{qlUrl}/v2/entities/{entityId}/attrs/{attrName}"
     if values:
         url += '/value'
     return url.format(
@@ -381,7 +381,7 @@ def test_no_type_not_unique(translator):
                      index_size=30,
                      entity_id="repeatedId")
 
-    url = "{qlUrl}/entities/{entityId}/attrs/temperature".format(
+    url = "{qlUrl}/v2/entities/{entityId}/attrs/temperature".format(
         qlUrl=QL_URL,
         entityId="repeatedId",
     )

@@ -6,8 +6,6 @@ def test_api():
     r = requests.get('{}'.format(api_url))
     assert r.status_code == 200, r.text
     assert r.json() == {
-            "config_url": "/config",
-            "health_url": "/health",
             "notify_url": "/v2/notify",
             "subscriptions_url": "/v2/subscriptions",
             "entities_url": "/v2/entities",

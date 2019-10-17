@@ -7,7 +7,7 @@ import pytest
 import requests
 import time
 
-notify_url = "{}/notify".format(QL_URL)
+notify_url = "{}/v2/notify".format(QL_URL)
 HEADERS_PUT = {'Content-Type': 'application/json'}
 
 

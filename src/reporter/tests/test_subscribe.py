@@ -2,7 +2,7 @@ from conftest import QL_URL, ORION_URL, clean_mongo, clean_crate
 import requests
 from reporter.timex import TIME_INDEX_HEADER_NAME
 
-subscribe_url = "{}/subscribe".format(QL_URL)
+subscribe_url = "{}/v2/subscribe".format(QL_URL)
 
 
 def test_invalid_wrong_orion_url(clean_mongo, clean_crate):

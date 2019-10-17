@@ -33,7 +33,7 @@ def test_integration_with_orion(clean_mongo, clean_crate, entity):
         'orionUrl': ORION_URL,
         'quantumleapUrl': QL_URL,
     }
-    r = requests.post("{}/subscribe".format(QL_URL), params=params, headers=h)
+    r = requests.post("{}/v2/subscribe".format(QL_URL), params=params, headers=h)
     assert r.status_code == 201
 
     # Insert values in Orion with Service and ServicePath

@@ -8,9 +8,8 @@ def test_health_pass():
     At the time test starts, services are already deployed.
     """
     url = '{}/health'.format(QL_URL)
-    QL_health_url = url.replace("/v2","")
 
-    r = requests.get(QL_health_url)
+    r = requests.get(url)
     assert r.status_code == 200, r.text
     assert r.headers['Cache-Control'] == 'max-age=180'
 
