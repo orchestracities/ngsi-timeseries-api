@@ -2,52 +2,12 @@
 
 [Timescale][timescale] is one of the time series databases that can be
 used with QuantumLeap as a back end to store NGSI entity time series.
-Indeed, QuantumLeap provides full support for storing NGSI entities in
-Timescale, including geographical features (encoded as GeoJSON or NGSI
-Simple Location Format), structured types and arrays. Moreover, it is
+As documented in the [Database Selection section][admin.db], it is
 possible to dynamically select, at runtime, which storage back end to
 use (Crate or Timescale) depending on the tenant who owns the entity
-being persisted. Also, QuantumLeap ships with tools to automate the
+being persisted. Moreover, QuantumLeap ships with tools to automate the
 Timescale back end setup and generate Crate-to-Timescale migration
 scripts---details in the [Data Migration section][admin.dm].
-
-
-## Operation overview
-
-QuantumLeap stores NGSI entities in Timescale using the existing
-`notify` endpoint. The Timescale back end is made up of [PostgreSQL][postgres]
-with both Timescale and [PostGIS][postgis] extensions enabled:
-
-    -------------------------
-    | Timescale     PostGIS |          ---------------
-    | --------------------- |  <-----  | QuantumLeap |-----O notify
-    |       Postgres        |          ---------------
-    -------------------------
-
-PostgreSQL is a rock-solid, battle-tested, open source database,
-and its PostGIS extension provides excellent support for advanced
-spatial functionality while the Timescale extension has fairly
-robust support for time series data. The mechanics of converting
-an NGSI entity to tabular format stay pretty much the same as in
-the Crate back end except for a few improvements:
-
-* NGSI arrays are stored as (indexable & queryable) JSON as opposed
-  to the flat array of strings in the Crate back end.
-* GeoJSON and NGSI Simple Location Format attributes are stored as
-  spatial data that can be indexed and queried---full support for
-  spatial attributes is still patchy in the Crate back end.
-
-The `test_timescale_insert.py` file in the QuantumLeap source base
-contains quite a number of examples of how NGSI data are stored in
-Timescale.
-
-#### Note: querying & retrieving data
-At the moment, QuantumLeap does **not** implement any querying or
-retrieving of data through the QuantumLeap REST API as is available
-for the Crate back end. This means that for now the only way to access
-your data is to query the Timescale DB directly. However, data querying
-and retrieval through the REST API is planned for the upcoming
-QuantumLeap major release.
 
 
 ## QuantumLeap Timescale DB setup
