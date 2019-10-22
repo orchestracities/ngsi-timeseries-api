@@ -3,7 +3,6 @@ from flask import request
 from reporter.reporter import _validate_query_params
 from translators.crate import CrateTranslatorInstance, CrateTranslator
 import logging
-from .geo_query_handler import handle_geo_query
 
 
 def query_NTNE(limit=10000,
@@ -48,10 +47,3 @@ def query_NTNE(limit=10000,
         "description": "No records were found for such query."
     }
     return r, 404
-
-
-def query_NTNE_value(*args, **kwargs):
-    res = query_NTNE(*args, **kwargs)
-    if isinstance(res, dict):
-        res.pop('entityId', None)
-    return res
