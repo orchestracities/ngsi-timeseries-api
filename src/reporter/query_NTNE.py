@@ -6,20 +6,8 @@ import logging
 from .geo_query_handler import handle_geo_query
 
 
-def query_NTNE(entity_id=None,
-                 type_=None,
-                 attrs=None,
-                 aggr_method=None,
-                 aggr_period=None,
-                 options=None,
-                 from_date=None,
-                 to_date=None,
-                 last_n=None,
-                 limit=10000,
-                 offset=0,
-                 georel=None,
-                 geometry=None,
-                 coords=None):
+def query_NTNE(limit=10000,
+                 offset=0):
     """
     See /entities in API Specification
     quantumleap.yml
@@ -30,19 +18,10 @@ def query_NTNE(entity_id=None,
     entities = None
     try:
         with CrateTranslatorInstance() as trans:
-            entities = trans.query(attr_names=attrs,
-                                   entity_type=type_,
-                                   entity_id=entity_id,
-                                   aggr_method=aggr_method,
-                                   aggr_period=aggr_period,
-                                   from_date=from_date,
-                                   to_date=to_date,
-                                   last_n=last_n,
-                                   limit=limit,
+            entities = trans.query(limit=limit,
                                    offset=offset,
                                    fiware_service=fiware_s,
-                                   fiware_servicepath=fiware_sp,
-                                   geo_query=geo_query)
+                                   fiware_servicepath=fiware_sp)
     except NGSIUsageError as e:
         return {
             "error": "{}".format(type(e)),
