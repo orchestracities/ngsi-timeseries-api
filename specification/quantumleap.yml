@@ -89,6 +89,18 @@ definitions:
     example, if aggrPeriod is day, each value of course may not correspond
     to original measurements but rather the aggregate of measurements in
     each day."
+    
+  EntitiesArray:
+    type: array
+    description: "Array of values of the Entity Id"
+
+  EntityIds:
+    type: object
+    properties:
+      EntityId:
+        type: string
+      values:
+        $ref: '#/definitions/EntitiesArray'
 
   IndexedValues:
     type: object
@@ -640,6 +652,49 @@ paths:
 ################################################################################
 # PATHS: OUTPUT
 ################################################################################
+  /v2/entities:
+    get:
+      operationId: reporter.query_NTNE.query_NTNE
+      summary: "List of all the entityId"
+      description: "For example, query the entities for entityId available in database specific to fiwareService and fiwareServicePath."
+      tags:
+        - queries
+      parameters:
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              entityId:
+                type: array
+                items:
+                  $ref: '#/definitions/EntityIds'
+          examples:
+            application/json:
+              {
+                  "entityId": ["Kitchen1",
+                               "Kitchen2"]
+              }
+        404:
+          description: "Not Found"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              description:
+                type: string
+          examples:
+            application/json:
+              {
+                "error": "Not Found",
+                "description": "No records were found for such query."
+              }
+
   /v2/entities/{entityId}/attrs/{attrName}:
     get:
       operationId: reporter.query_1T1E1A.query_1T1E1A
