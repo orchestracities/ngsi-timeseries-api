@@ -52,9 +52,6 @@ VALID_AGGR_METHODS = ['count', 'sum', 'avg', 'min', 'max']
 VALID_AGGR_PERIODS = ['year', 'month', 'day', 'hour', 'minute', 'second']
 
 
-
-
-
 class CrateTranslator(base_translator.BaseTranslator):
 
     def __init__(self, host, port=4200, db_name="ngsi-tsdb"):
