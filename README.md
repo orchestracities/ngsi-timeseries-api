@@ -37,6 +37,14 @@ FIWARE components in the [FIWARE catalogue](https://catalogue.fiware.org).
 
 Refer to the [Installation Guide](https://quantumleap.readthedocs.io/en/latest/admin/).
 
+QuantumLeap supports both Crate DB and Timescale as time-series DB
+backends but please bear in mind that at the moment we only support
+the following versions:
+
+* Crate backend: Crate DB version `3.3.*`
+* Timescale backend: Postgres version `10.*` or `11.*` +
+  Timescale extension `1.3.*` + Postgis extension `2.5.*`.
+
 ## Usage
 
 Refer to the [User Manual](https://quantumleap.readthedocs.io/en/latest/user/).

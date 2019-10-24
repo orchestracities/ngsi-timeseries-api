@@ -3,7 +3,6 @@ info:
   title: "QuantumLeap API"
   version: "0.7.5"      # we'll keep it aligned with QL version
 host: "localhost:8668"  # it'll run in the same container, hence localhost.
-basePath: /v2
 produces:
   - text/plain
   - application/json
@@ -319,7 +318,18 @@ parameters:
 # PATHS: META
 ################################################################################
 paths:
-  /version:
+
+  /v2/:
+    get:
+      operationId: reporter.api.list_of_api
+      summary: "Returns the List of API's available in QuantumLeap."
+      tags:
+        - meta
+      responses:
+        200:
+          description: "Successful response."
+
+  /v2/version:
     get:
       operationId: reporter.version.version
       summary: "Returns the version of QuantumLeap."
@@ -339,7 +349,7 @@ paths:
                 "version": "0.0.1"
               }
 
-  /config:
+  /v2/config:
     post:
       operationId: reporter.reporter.config
       summary: "(To Be Implemented) Customize your persistance configuration to
@@ -361,7 +371,7 @@ paths:
           schema:
             type: string
 
-  /health:
+  /v2/health:
     get:
       operationId: reporter.health.get_health
       summary: "Returns the health-check status of QuantumLeap and the services
@@ -469,7 +479,7 @@ paths:
 ################################################################################
 # PATHS: INPUT
 ################################################################################
-  /notify:
+  /v2/notify:
     post:
       operationId: reporter.reporter.notify
       summary: "Notify QuantumLeap the arrival of a new NGSI notification."
@@ -492,7 +502,7 @@ paths:
         500:
           description: "Internal server error."
 
-  /subscribe:
+  /v2/subscribe:
     post:
       operationId: reporter.reporter.subscribe
       summary: "Subscribe QL to process Orion notifications of certain type."
@@ -630,7 +640,7 @@ paths:
 ################################################################################
 # PATHS: OUTPUT
 ################################################################################
-  /entities/{entityId}/attrs/{attrName}:
+  /v2/entities/{entityId}/attrs/{attrName}:
     get:
       operationId: reporter.query_1T1E1A.query_1T1E1A
       summary: "History of an attribute of a given entity instance."
@@ -699,7 +709,7 @@ paths:
                 "description": "No records were found for such query."
               }
 
-  /entities/{entityId}/attrs/{attrName}/value:
+  /v2/entities/{entityId}/attrs/{attrName}/value:
     get:
       operationId: reporter.query_1T1E1A.query_1T1E1A_value
       summary: "History of an attribute (values only) of a given entity
@@ -756,7 +766,7 @@ paths:
                 "description": "No records were found for such query."
               }
 
-  /entities/{entityId}:
+  /v2/entities/{entityId}:
     get:
       operationId: reporter.query_1T1ENA.query_1T1ENA
       summary: "History of N attributes of a given entity instance."
@@ -868,7 +878,7 @@ paths:
                 "description": "No records were found for such query."
               }
 
-  /entities/{entityId}/value:
+  /v2/entities/{entityId}/value:
     get:
       operationId: reporter.query_1T1ENA.query_1T1ENA_value
       summary: "History of N attributes (values only) of a given entity
@@ -943,7 +953,7 @@ paths:
               }
 
 
-  /types/{entityType}/attrs/{attrName}:
+  /v2/types/{entityType}/attrs/{attrName}:
     get:
       operationId: reporter.query_1TNE1A.query_1TNE1A
       summary: "History of an attribute of N entities of the same type."
@@ -1012,7 +1022,7 @@ paths:
               }
 
 
-  /types/{entityType}/attrs/{attrName}/value:
+  /v2/types/{entityType}/attrs/{attrName}/value:
     get:
       operationId: reporter.query_1TNE1A.query_1TNE1A_value
       summary: "History of an attribute (values only) of N entities of the
@@ -1073,7 +1083,7 @@ paths:
               }
 
 
-  /types/{entityType}:
+  /v2/types/{entityType}:
     get:
       operationId: reporter.reporter.query_1TNENA
       summary: "(To Be Implemented) History of N attributes of N entities of
@@ -1188,7 +1198,7 @@ paths:
         # Shall we return number of deleted records?
 
 
-  /types/{entityType}/value:
+  /v2/types/{entityType}/value:
     get:
       operationId: reporter.reporter.query_1TNENA_value
       summary: "(To Be Implemented) History of N attributes (values only) of N
@@ -1282,7 +1292,7 @@ paths:
               }
 
 
-  /attrs/{attrName}:
+  /v2/attrs/{attrName}:
     get:
       operationId: reporter.reporter.query_NTNE1A
       summary: "(To Be Implemented) History of an attribute of N entities of N
@@ -1378,7 +1388,7 @@ paths:
                   ]
               }
 
-  /attrs/{attrName}/value:
+  /v2/attrs/{attrName}/value:
     get:
       operationId: reporter.reporter.query_NTNE1A_value
       summary: "(To Be Implemented) History of an attribute (values only) of N
@@ -1477,7 +1487,7 @@ paths:
                   ]
               }
 
-  /attrs:
+  /v2/attrs:
     get:
       operationId: reporter.reporter.query_NTNENA
       summary: "(To Be Implemented) History of N attributes of N entities of N
@@ -1585,7 +1595,7 @@ paths:
               }
 
 
-  /attrs/value:
+  /v2/attrs/value:
     get:
       operationId: reporter.reporter.query_NTNENA_value
       summary: "(To Be Implemented) History of N attributes (values only) of N
