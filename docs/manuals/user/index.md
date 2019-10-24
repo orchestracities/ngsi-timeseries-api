@@ -231,6 +231,39 @@ should respect the naming guidelines explained
   the data type of attribute `speed` of entity type `car` is set initially
   to `Number`, later on it cannot be set to `Text`.
 
+### Inserting Data into Quantum Leap directly
+
+To insert the data directly into quantum leap, we can use http://localhost:8668/v2/notify API, i.e. To notify QuantumLeap about the arrival of a new NGSI notification.
+
+For example, consider the below payload:
+
+curl http://localhost:8668/v2/notify -s -S -H 'Content-Type: application/json' -d @- <<EOF
+
+```
+{ 
+    "subscriptionId": "5ce3dbb331dfg9h71aad5deeaa", 
+    "data": [ 
+        { 
+            "id": "Room1", 
+            "temperature": 
+               { 
+                 "value": "10", 
+                 "type": "Number" 
+               }, 
+             "pressure": 
+               { 
+                 "value": "12", 
+                 "type": "Number" 
+               }, 
+            "type": "Room" 
+        } 
+    ] 
+}
+
+```
+
+The data will get inserted into QuantumLeap successfully.
+
 ## Data Retrieval
 
 To retrieve historical data from QuantumLeap, you can use the API endpoints
