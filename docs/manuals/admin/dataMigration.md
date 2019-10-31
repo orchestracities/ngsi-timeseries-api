@@ -2,22 +2,6 @@
 
 A few tools are available to assist with migrating data to QuantumLeap.
 
-
-## Migrating STH Comet data
-
-[Data-Migration-Tool][dmt] is a program designed to automatically
-migrate data stored in [STH-Comet][comet] to a QuantumLeap [CrateDB][crate]
-database. After migration, the data can be accessed through QuantumLeap's
-[REST API][ql-api].
-
-[Data-Migration-Tool][dmt] is developed in [Java][java] using the
-[Eclipse IDE][eclipse]. A Python script transforms data in [MongoDB][mongo]
-into the format expected by the QuantumLeap [CrateDB][crate] back end.
-
-The tool can be downloaded [here][dmt] and the accompanying user guide
-is also [available online][dmt-man].
-
-
 ## Migrating from QuantumLeap Crate to Timescale
 
 QuantumLeap provides a self-contained Python script to help with
@@ -52,23 +36,5 @@ only a subset of interest as shown below:
         "SELECT * FROM mtyoutenant.etdevice where time_index > '2019-04-15';"
 
 
-
-
-[comet]: https://github.com/telefonicaid/fiware-sth-comet
-    "FiWare STH Comet Home"
-[crate]: https://crate.io
-    "CrateDB Home"
-[dmt]: https://github.com/Data-Migration-Tool/STH-to-QuantumLeap
-    "Data-Migration-Tool Home"
-[dmt-man]: https://github.com/Data-Migration-Tool/STH-to-QuantumLeap/blob/master/docs/manuals/README.md
-    "Data-Migration-Tool Manual"
-[eclipse]: https://www.eclipse.org/
-    "Eclipse Home"
-[java]: https://en.wikipedia.org/wiki/Java_(software_platform)
-    "Wikipedia - Java"
-[mongo]: https://github.com/mongodb/mongo
-    "MongoDB Home"
-[ql-api]: https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.2
-    "QuantumLeap REST API"
 [ts-admin]: ./timescale.md
     "QuantumLeap Timescale"
