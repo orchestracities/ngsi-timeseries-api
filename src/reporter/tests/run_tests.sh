@@ -6,7 +6,25 @@ docker-compose up -d
 sleep 12
 
 cd ../../../
-pytest src/reporter/tests/test_version.py
+
+echo '=====================> localhost'
+curl http://localhost:8668/v2/version
+
+echo '=====================> 127.0.0.1'
+curl http://127.0.0.1:8668/v2/version
+
+echo '=====================> 0.0.0.0'
+curl http://0.0.0.0:8668/v2/version
+
+h=$(hostname)
+echo "=====================> ${h}"
+curl "http://${h}:8668/v2/version"
+
+ip=$(hostname -I | awk '{print $1}')
+echo "=====================> ${ip}"
+curl "http://${ip}:8668/v2/version"
+
+
 r=$?
 cd -
 
