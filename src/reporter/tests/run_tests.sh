@@ -10,6 +10,9 @@ cd ../../../
 echo '=====================> I/F'
 ip a
 
+echo '=====================> docker ps'
+docker ps
+
 echo '=====================> localhost'
 ping -c 1 localhost
 curl http://localhost:8668/v2/version
