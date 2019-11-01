@@ -6,7 +6,7 @@ docker build -t quantumleap .
 
 source deps.env
 
-LH=localhost
+LH=127.0.0.1
 
 export ORION_HOST=$LH
 export MONGO_HOST=$LH
