@@ -10,9 +10,6 @@ cd ../../../
 echo '=====================> I/F'
 ip a
 
-echo '=====================> docker ps'
-docker ps
-
 echo '=====================> localhost'
 ping -c 1 localhost
 curl http://localhost:8668/v2/version
@@ -35,6 +32,11 @@ echo "=====================> ${ip}"
 ping -c 1 ${ip}
 curl "http://${ip}:8668/v2/version"
 
+echo '=====================> docker ps'
+docker ps
+
+echo '=====================> docker-compose logs'
+docker-compose logs
 
 r=$?
 cd -
