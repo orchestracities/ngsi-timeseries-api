@@ -1,7 +1,6 @@
 #!/bin/bash
 
-docker pull smartsdk/quantumleap
-docker build --cache-from smartsdk/quantumleap -t quantumleap .
+docker build -t quantumleap .
 
 #cd src/translators/tests
 #sh run_tests.sh
