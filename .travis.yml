@@ -15,7 +15,7 @@ before_script:
   - pipenv install
 
 script:
-  - source setup_dev_env.sh
+  - source setup_travis_env.sh
   - sh run_tests.sh
 
 after_success:
