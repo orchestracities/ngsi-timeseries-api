@@ -9,8 +9,6 @@ docker build -t quantumleap .
 
 source deps.env
 
-/sbin/ifconfig
-
 LH=`( /sbin/ifconfig ens4 | grep 'inet' | cut -d: -f2 | awk '{ print $1}' ) 2> /dev/null`
 if [ -z "$LH" ]
 then
