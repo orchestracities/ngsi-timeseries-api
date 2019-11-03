@@ -1,4 +1,4 @@
-FROM python:3.6-alpine as base
+FROM python:3.6.8-alpine3.8 as base
 FROM base as builder
 RUN apk --no-cache --update-cache add gcc python python-dev py-pip build-base wget
 RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
