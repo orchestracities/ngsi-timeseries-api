@@ -6,7 +6,6 @@ import requests
 
 notify_url = "{}/notify".format(QL_URL)
 
-
 def insert_test_data(entity_id=None):
     # 3 entity types, 2 entities for each, 10 updates for each entity.
     for t in ("AirQualityObserved", "Room", "TrafficFlowObserved"):

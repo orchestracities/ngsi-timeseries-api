@@ -10,7 +10,7 @@ ORION_PORT = os.environ.get('ORION_PORT', '1026')
 
 # Internal
 QL_URL = 'http://{}:{}'.format(QL_HOST, QL_PORT)
-NOTIFY_URL = notify_url = '{}/notify'.format(QL_URL)
+NOTIFY_URL = notify_url = '{}/v2/notify'.format(QL_URL)
 
 
 def subscribe(entity_type):

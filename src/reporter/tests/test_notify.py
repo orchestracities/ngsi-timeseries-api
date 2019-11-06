@@ -6,8 +6,8 @@ import json
 import pytest
 import requests
 import time
-
 notify_url = "{}/notify".format(QL_URL)
+
 HEADERS_PUT = {'Content-Type': 'application/json'}
 
 
@@ -89,7 +89,6 @@ def test_valid_no_modified(notification, clean_mongo, clean_crate):
     assert r.status_code == 200
     assert r.json() == 'Notification successfully processed'
 
-
 def do_integration(entity, notify_url, orion_client, crate_translator):
     entity_id = entity['id']
     subscription = {
@@ -145,7 +144,6 @@ def test_integration(entity, orion_client, clean_mongo, crate_translator):
     """
     do_integration(entity, notify_url, orion_client, crate_translator)
 
-
 def test_air_quality_observed(air_quality_observed, orion_client, clean_mongo,
                               crate_translator):
     entity = air_quality_observed
@@ -177,7 +175,6 @@ def test_air_quality_observed(air_quality_observed, orion_client, clean_mongo,
 
     entities = crate_translator.query()
     assert len(entities) == 1
-
 
 @pytest.mark.skip(reason="See issue #105")
 def test_geocoding(notification, clean_mongo, crate_translator):

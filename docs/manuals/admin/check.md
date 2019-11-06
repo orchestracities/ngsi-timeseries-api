@@ -21,7 +21,7 @@ If you don't use Postman, you can use the equivalent curl commands bellow.
 
 1. Check you can get *QuantumLeap version*
 
-        curl -X GET http://0.0.0.0:8668/v2/version -H 'Accept: application/json'
+        curl -X GET http://0.0.0.0:8668/version -H 'Accept: application/json'
 
     You should get a return status `200 OK`.
 
