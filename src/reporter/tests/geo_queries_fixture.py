@@ -34,7 +34,7 @@ def setup_entities():
     time.sleep(2)
     yield {}
 
-    delete_url = "{}/v2/types/{}".format(QL_URL, entity_type)
+    delete_url = "{}/types/{}".format(QL_URL, entity_type)
     requests.delete(delete_url)
 
 
@@ -45,7 +45,7 @@ def run_query(base_url, query_params, expected_status_code=200):
 
 
 def query_1tne1a(query_params, expected_status_code=200):
-    base_url = "{}/v2/types/{}/attrs/location".format(QL_URL, entity_type)
+    base_url = "{}/types/{}/attrs/location".format(QL_URL, entity_type)
     return run_query(base_url, query_params, expected_status_code)
 
 
@@ -55,7 +55,7 @@ def query_1t1ena(entity_id, query_params, expected_status_code=200):
 
 
 def query_1t1e1a(entity_id, query_params, expected_status_code=200):
-    base_url = "{}/v2/entities/{}/attrs/location".format(QL_URL, entity_id)
+    base_url = "{}/entities/{}/attrs/location".format(QL_URL, entity_id)
     return run_query(base_url, query_params, expected_status_code)
 
 

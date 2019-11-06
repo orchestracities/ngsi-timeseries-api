@@ -11,7 +11,7 @@ n_days = 6
 
 
 def query_url(values=False):
-    url = "{qlUrl}/v2/types/{entityType}/attrs/{attrName}"
+    url = "{qlUrl}/types/{entityType}/attrs/{attrName}"
     if values:
         url += '/value'
     return url.format(

@@ -57,7 +57,7 @@ def gen_notification(entities):
 
 
 def post_notification(payload, fw_svc=None, fw_path=None):
-    url = f"{QL_URL}/notify"
+    url = f"{QL_URL}/v2/notify"
 
     headers = {'Content-Type': 'application/json'}
     if fw_svc:

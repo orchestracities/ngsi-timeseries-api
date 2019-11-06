@@ -4,7 +4,7 @@ from reporter.conftest import create_notification
 import json
 import requests
 
-notify_url = "{}/v2/notify".format(QL_URL)
+notify_url = "{}/notify".format(QL_URL)
 
 def insert_test_data(entity_id=None):
     # 3 entity types, 2 entities for each, 10 updates for each entity.
@@ -31,7 +31,7 @@ def test_delete_entity(translator):
     params = {
         'type': entity_type,
     }
-    url = '{}/v2/entities/{}'.format(QL_URL, entity_type+'0')
+    url = '{}/entities/{}'.format(QL_URL, entity_type+'0')
 
     # Values are there
     r = requests.get(url, params=params)
@@ -48,7 +48,7 @@ def test_delete_entity(translator):
     assert r.status_code == 404, r.text
 
     # But not for other entities of same type
-    url = '{}/v2/entities/{}'.format(QL_URL, entity_type+'1')
+    url = '{}/entities/{}'.format(QL_URL, entity_type+'1')
     r = requests.get(url, params=params)
     assert r.status_code == 200, r.text
     assert r.text != ''
@@ -74,7 +74,7 @@ def test_delete_entities(translator):
         assert r.text != ''
 
     # 1 Delete call
-    url = '{}/v2/types/{}'.format(QL_URL, entity_type)
+    url = '{}/types/{}'.format(QL_URL, entity_type)
     r = requests.delete(url, params=params)
     assert r.status_code == 204, r.text
 
@@ -85,7 +85,7 @@ def test_delete_entities(translator):
         assert r.status_code == 404, r.text
 
     # But not for entities of other types
-    url = '{}/v2/entities/{}'.format(QL_URL, 'Room1')
+    url = '{}/entities/{}'.format(QL_URL, 'Room1')
     r = requests.get(url, params={'type': 'Room'})
     assert r.status_code == 200, r.text
     assert r.text != ''
@@ -96,7 +96,7 @@ def test_not_found():
     params = {
         'type': entity_type,
     }
-    url = '{}/v2/entities/{}'.format(QL_URL, entity_type+'0')
+    url = '{}/entities/{}'.format(QL_URL, entity_type+'0')
 
     r = requests.delete(url, params=params)
     assert r.status_code == 404, r.text
@@ -111,7 +111,7 @@ def test_no_type_not_unique(translator):
     insert_test_data(entity_id='repeatedId')
     translator._refresh(['AirQualityObserved', 'Room', 'TrafficFlowObserved'])
 
-    url = '{}/v2/entities/{}'.format(QL_URL, 'repeatedId')
+    url = '{}/entities/{}'.format(QL_URL, 'repeatedId')
 
     # Without type
     r = requests.delete(url, params={})
@@ -159,7 +159,7 @@ def test_delete_no_type_with_multitenancy(translator):
     translator._refresh(['Car'], fiware_service='USA')
 
     # I could delete car1 from default without giving a type
-    url = '{}/v2/entities/{}'.format(QL_URL, 'car1')
+    url = '{}/entities/{}'.format(QL_URL, 'car1')
     r = requests.delete(url, params={}, headers=h_def)
     assert r.status_code == 204, r.text
 
@@ -168,7 +168,7 @@ def test_delete_no_type_with_multitenancy(translator):
     assert r.status_code == 200, r.text
 
     # I could delete car1 from EU without giving a type
-    url = '{}/v2/entities/{}'.format(QL_URL, 'car1')
+    url = '{}/entities/{}'.format(QL_URL, 'car1')
     r = requests.delete(url, params={}, headers=h_eu)
     assert r.status_code == 204, r.text
     translator._refresh(['Car'], fiware_service='EU')

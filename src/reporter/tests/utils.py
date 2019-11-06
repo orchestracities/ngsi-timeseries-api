@@ -6,7 +6,7 @@ import time
 
 
 def notify_url():
-    return "{}/v2/notify".format(QL_URL)
+    return "{}/notify".format(QL_URL)
 
 
 def get_notification(et, ei, attr_value, mod_value):

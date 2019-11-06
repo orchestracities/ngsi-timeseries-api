@@ -4,8 +4,9 @@ from reporter.reporter import _validate_query_params
 from translators.crate import CrateTranslatorInstance
 import logging
 from .geo_query_handler import handle_geo_query
+import pdb
 
-
+#pdb.set_trace()
 def query_1T1ENA(entity_id,   # In Path
                  type_=None,  # In Query
                  attrs=None,
@@ -24,6 +25,7 @@ def query_1T1ENA(entity_id,   # In Path
     See /entities/{entityId}/attrs/{attrName} in API Specification
     quantumleap.yml
     """
+    pdb.set_trace()
     r, c = _validate_query_params(attrs, aggr_period, aggr_method,
                                   options=options)
     if c != 200:
@@ -39,7 +41,7 @@ def query_1T1ENA(entity_id,   # In Path
     fiware_s = request.headers.get('fiware-service', None)
     fiware_sp = request.headers.get('fiware-servicepath', None)
 
-    entities = None
+    #entities = None
     try:
         with CrateTranslatorInstance() as trans:
             entities = trans.query(attr_names=attrs,
@@ -97,6 +99,7 @@ def query_1T1ENA(entity_id,   # In Path
 
 
 def query_1T1ENA_value(*args, **kwargs):
+    pdb.set_trace()
     res = query_1T1ENA(*args, **kwargs)
     if isinstance(res, dict):
         res.pop('entityId', None)

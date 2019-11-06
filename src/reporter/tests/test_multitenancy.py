@@ -17,7 +17,6 @@ import json
 import time
 import requests
 
-
 def test_integration_with_orion(clean_mongo, clean_crate, entity):
     """
     Make sure QL correctly handles headers in Orion's notification
@@ -33,7 +32,7 @@ def test_integration_with_orion(clean_mongo, clean_crate, entity):
         'orionUrl': ORION_URL,
         'quantumleapUrl': QL_URL,
     }
-    r = requests.post("{}/v2/subscribe".format(QL_URL), params=params, headers=h)
+    r = requests.post("{}/subscribe".format(QL_URL), params=params, headers=h)
     assert r.status_code == 201
 
     # Insert values in Orion with Service and ServicePath
@@ -52,7 +51,7 @@ def test_integration_with_orion(clean_mongo, clean_crate, entity):
     query_params = {
         'type': entity['type'],
     }
-    r = requests.get(url, params=query_params, headers=h)
+    r = requests.get('{}'.format(url), params=query_params, headers=h)
     assert r.status_code == 200, r.text
     obtained = r.json()
     assert obtained['entityId'] == entity['id']

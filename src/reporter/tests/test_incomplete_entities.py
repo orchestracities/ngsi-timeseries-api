@@ -12,7 +12,7 @@ def notify(entity):
 def get_all_stored_attributes(entity_id):
     time.sleep(2)
 
-    url = "{}/v2/entities/{}".format(QL_URL, entity_id)
+    url = "{}/entities/{}".format(QL_URL, entity_id)
     response = requests.get(url)
     attrs = response.json().get('attributes', [])
 
