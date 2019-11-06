@@ -4,9 +4,8 @@ from reporter.reporter import _validate_query_params
 from translators.crate import CrateTranslatorInstance
 import logging
 from .geo_query_handler import handle_geo_query
-import pdb
 
-#pdb.set_trace()
+
 def query_1T1ENA(entity_id,   # In Path
                  type_=None,  # In Query
                  attrs=None,
@@ -41,7 +40,7 @@ def query_1T1ENA(entity_id,   # In Path
     fiware_s = request.headers.get('fiware-service', None)
     fiware_sp = request.headers.get('fiware-servicepath', None)
 
-    #entities = None
+    entities = None
     try:
         with CrateTranslatorInstance() as trans:
             entities = trans.query(attr_names=attrs,
