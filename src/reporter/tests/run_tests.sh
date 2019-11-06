@@ -6,7 +6,7 @@ docker-compose up -d
 sleep 12
 
 cd ../../../
-pytest src/reporter/ --cov-report= --cov-config=.coveragerc --cov-append --cov=src/ 
+pytest src/reporter/ --cov-report= --cov-config=.coveragerc --cov-append --cov=src/
 r=$?
 cd -
 

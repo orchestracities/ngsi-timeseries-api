@@ -18,6 +18,7 @@ are used within the cluster.
 |TCP                | 27017         |  Mongo database |
 |TCP                | 4200          |  CrateDB Admin UI |
 |TCP                | 4300          |  CrateDB Transport Protocol |
+|TCP                | 5432          |  PostgreSQL Protocol |
 |TCP                | 6379          |  Redis cache (used by geocoding) |
 
 For more info on ports numbers, you can always inspect the ports being exposed
