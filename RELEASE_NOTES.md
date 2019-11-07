@@ -1,5 +1,26 @@
 # QuantumLeap Release Notes
 
+## 0.8.0
+
+- TODO: new features
+- TODO: bug fixes
+
+#### Important: Backward compatibility
+This release breaks API backward compatibility. Existing 0.7.5 clients may
+**not** be able to work with this new Quantum Leap version without code
+changes.
+In detail: version `0.8.0` changes the URL of the version, health and config
+endpoints as indicated below:
+
+      0.7.5           0.8.0
+      -----           -----
+    /v2/version      /version
+    /v2/config       /config
+    /v2/health       /health
+
+Note that the semantics of the endpoints remains the same as version
+ `0.7.5`.
+
 ## 0.7.5
 
 - Fix bug with lastN parameter (#249)
