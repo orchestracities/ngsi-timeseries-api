@@ -150,12 +150,12 @@ def notify():
     for entity in payload:
         attrs = list(iter_entity_attrs(entity))
     attrs.pop()
-    x=(len(payload))
+    length=(len(payload))
     Flag=False
-    for i in range(x):
+    for i in range(length):
         for j in attrs:
-            y=payload[i][j]['value']
-            if not y:
+            value=payload[i][j]['value']
+            if not value:
                 msg='Notification Not processed because of Null or empty value'
             else:
                 Flag=True
