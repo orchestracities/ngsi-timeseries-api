@@ -147,15 +147,26 @@ def notify():
         fiware_sp = request.headers.get('fiware-servicepath', None)
     else:
         fiware_sp = None
-
-    # Send valid entities to translator
-    with translator_for(fiware_s) as trans:
-        trans.insert(payload, fiware_s, fiware_sp)
-
-    msg = 'Notification successfully processed'
+    for entity in payload:
+        attrs = list(iter_entity_attrs(entity))
+    attrs.pop()
+    x=(len(payload))
+    Flag=False
+    for i in range(x):
+        for j in attrs:
+            y=payload[i][j]['value']
+            if not y:
+                msg='Notification Not processed because of Null or empty value'
+            else:
+                Flag=True
+                msg='Notification successfully processed'
+        if Flag:
+            # Send valid entities to translator
+            with translator_for(fiware_s) as trans:
+                trans.insert(payload, fiware_s, fiware_sp)
     log().info(msg)
     return msg
-
+    
 
 def add_geodata(entity):
     # TODO: Move this setting to configuration (See GH issue #10)
