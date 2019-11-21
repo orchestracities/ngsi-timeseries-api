@@ -156,7 +156,7 @@ def notify():
         for j in attrs:
             value = payload[i][j]['value']
             if not value:
-                msg = 'Notification Not processed because of Null or empty value'
+                msg = 'Notification Not processed because of Null value'
             else:
                 Flag = True
                 msg = 'Notification successfully processed'
