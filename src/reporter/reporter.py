@@ -150,16 +150,16 @@ def notify():
     for entity in payload:
         attrs = list(iter_entity_attrs(entity))
     attrs.pop()
-    length=(len(payload))
-    Flag=False
+    length = (len(payload))
+    Flag = False
     for i in range(length):
         for j in attrs:
-            value=payload[i][j]['value']
+            value = payload[i][j]['value']
             if not value:
-                msg='Notification Not processed because of Null or empty value'
+                msg = 'Notification Not processed because of Null or empty value'
             else:
-                Flag=True
-                msg='Notification successfully processed'
+                Flag = True
+                msg = 'Notification successfully processed'
         if Flag:
             # Send valid entities to translator
             with translator_for(fiware_s) as trans:
