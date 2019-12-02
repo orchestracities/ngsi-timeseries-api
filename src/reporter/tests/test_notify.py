@@ -313,3 +313,15 @@ def test_no_value_in_notification(notification):
     url = '{}'.format(notify_url)
     r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
     assert r.status_code == 200
+
+def test_no_value_for_attributes(notification):
+    notification['data'][0] = {
+        'id': '299531',
+        'type': 'AirQualityObserved',
+        'p': {'type': 'string', 'value': '', 'metadata': {}},
+        'pm10': {'type': 'string', 'value': '', 'metadata': {}},
+        'pm25': {'type': 'string', 'value': '', 'metadata': {}},
+    }
+    url = '{}'.format(notify_url)
+    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    assert r.status_code == 200
