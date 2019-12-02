@@ -144,22 +144,18 @@ def notify():
         if e is not None:
             res_entity.append(e)
     payload = res_entity
-
     # preprocess and validate each entity update
     for entity in payload:
         # Validate entity update
         error = _validate_payload(entity)
         if error:
-            return error, 400
-    
+            return error, 400  
         # Add TIME_INDEX attribute
         custom_index = request.headers.get(TIME_INDEX_HEADER_NAME, None)
         entity[TIME_INDEX_NAME] = \
             select_time_index_value_as_iso(custom_index, entity)
-    
         # Add GEO-DATE if enabled
-        add_geodata(entity)
-    
+        add_geodata(entity)    
         # Always normalize location if there's one
         normalize_location(entity)
 
