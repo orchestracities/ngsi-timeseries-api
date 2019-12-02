@@ -105,6 +105,23 @@ def _validate_payload(payload):
             log().warning(
                 'An entity update is missing value for attribute {}'.format(attr))
 
+def _filter_empty_entities(payload):
+    log().info('Received payload: {}'.format(payload))
+    attrs = list(iter_entity_attrs(payload))
+    length = (len(payload))
+    Flag = False
+    del_ids = []
+    for j in attrs:
+        key_list = list(payload[j].keys())
+        if 'value' not in payload[j]:
+            return payload
+        value = payload[j]['value']
+        if value:
+            Flag = True
+    if Flag:
+        return payload
+    else:
+        return None
 
 def notify():
     if request.json is None:
@@ -116,8 +133,15 @@ def notify():
                'content.', 400
 
     payload = request.json['data']
-
+    
     log().info('Received payload: {}'.format(payload))
+    res_entity = []
+    for entity in payload:
+        # Validate entity update
+        e = _filter_empty_entities(entity)
+        if e is not None:
+            res_entity.append(e)
+    payload = res_entity
 
     # preprocess and validate each entity update
     for entity in payload:
