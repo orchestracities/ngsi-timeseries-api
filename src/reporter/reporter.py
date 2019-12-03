@@ -108,8 +108,7 @@ def _validate_payload(payload):
 
 def _filter_empty_entities(payload):
     log().info('Received payload: {}'.format(payload))
-    attrs = list(iter_entity_attrs(payload))
-    length = (len(payload))
+    attrs , length = list(iter_entity_attrs(payload)),(len(payload))
     Flag = False
     del_ids = []
     for j in attrs:
