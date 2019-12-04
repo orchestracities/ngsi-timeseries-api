@@ -39,7 +39,7 @@ def query_NTNE(limit=10000,
     if entities:
         res = []
         for entity in entities:
-          res.append(entity)
+            res.append(entity)
 
         return res
 
