@@ -341,7 +341,7 @@ paths:
         200:
           description: "Successful response."
 
-  /v2/version:
+  /version:
     get:
       operationId: reporter.version.version
       summary: "Returns the version of QuantumLeap."
@@ -361,7 +361,7 @@ paths:
                 "version": "0.0.1"
               }
 
-  /v2/config:
+  /config:
     post:
       operationId: reporter.reporter.config
       summary: "(To Be Implemented) Customize your persistance configuration to
@@ -383,7 +383,7 @@ paths:
           schema:
             type: string
 
-  /v2/health:
+  /health:
     get:
       operationId: reporter.health.get_health
       summary: "Returns the health-check status of QuantumLeap and the services

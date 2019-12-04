@@ -1,13 +1,12 @@
-from conftest import QL_URL
+from conftest import QL_BASE_URL 
 import pytest
 import requests
-
 
 def test_health_pass():
     """
     At the time test starts, services are already deployed.
     """
-    url = '{}/health'.format(QL_URL)
+    url = '{}/health'.format(QL_BASE_URL)
 
     r = requests.get(url)
     assert r.status_code == 200, r.text
@@ -22,7 +21,7 @@ def test_health_warn_osm():
     """
     Run this test disabling access to Open Street Map (e.g. no internet).
     """
-    url = '{}/health'.format(QL_URL)
+    url = '{}/health'.format(QL_BASE_URL)
     r = requests.get(url)
 
     assert r.status_code == 200, r.text
@@ -41,7 +40,7 @@ def test_health_fail_redis():
 
     e.g. docker-compose scale redis=0
     """
-    url = '{}/health'.format(QL_URL)
+    url = '{}/health'.format(QL_BASE_URL)
     r = requests.get(url)
 
     assert r.status_code == 503, r.text
@@ -60,7 +59,7 @@ def test_health_fail_crate():
 
     e.g. docker-compose scale crate=0
     """
-    url = '{}/health'.format(QL_URL)
+    url = '{}/health'.format(QL_BASE_URL)
     r = requests.get(url)
 
     assert r.status_code == 503, r.text

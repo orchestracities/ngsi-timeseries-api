@@ -3,7 +3,6 @@ import json
 import time
 import requests
 
-
 def test_integration(entity, clean_mongo, clean_crate):
     # Subscribe QL to Orion
     params = {
