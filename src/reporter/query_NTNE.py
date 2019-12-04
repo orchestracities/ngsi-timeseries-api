@@ -4,8 +4,10 @@ from reporter.reporter import _validate_query_params
 from translators.crate import CrateTranslatorInstance, CrateTranslator
 import logging
 
-
 def query_NTNE(limit=10000,
+                 type_=None,  # In Query
+                 from_date=None,
+                 to_date=None,
                  offset=0):
     """
     See /entities in API Specification
@@ -17,15 +19,17 @@ def query_NTNE(limit=10000,
     entities = None
     try:
         with CrateTranslatorInstance() as trans:
-            entities = trans.query(limit=limit,
+            entities = trans.query_ids(limit=limit,
+                                   entity_type=type_,
+                                   from_date=from_date,
+                                   to_date=to_date,
                                    offset=offset,
                                    fiware_service=fiware_s,
                                    fiware_servicepath=fiware_sp)
     except NGSIUsageError as e:
-        return {
-            "error": "{}".format(type(e)),
-            "description": str(e)
-        }, 400
+        msg = "Bad Request Error: {}".format(e)
+        logging.getLogger().error(msg, exc_info=True)
+        return msg, 400
 
     except Exception as e:
         msg = "Internal server Error: {}".format(e)
@@ -33,13 +37,10 @@ def query_NTNE(limit=10000,
         return msg, 500
 
     if entities:
-        ids = []
+        res = []
         for entity in entities:
-          ids.append(entity['id'])
+          res.append(entity)
 
-        res = {
-            'entityId': ids
-        }
         return res
 
     r = {
@@ -47,3 +48,4 @@ def query_NTNE(limit=10000,
         "description": "No records were found for such query."
     }
     return r, 404
+

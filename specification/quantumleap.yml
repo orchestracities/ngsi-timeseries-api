@@ -90,18 +90,6 @@ definitions:
     to original measurements but rather the aggregate of measurements in
     each day."
     
-  EntitiesArray:
-    type: array
-    description: "Array of values of the Entity Id"
-
-  EntityIds:
-    type: object
-    properties:
-      EntityId:
-        type: string
-      values:
-        $ref: '#/definitions/EntitiesArray'
-
   IndexedValues:
     type: object
     properties:
@@ -660,6 +648,12 @@ paths:
       tags:
         - queries
       parameters:
+        # In Query...
+        - $ref: '#/parameters/type'
+        - $ref: '#/parameters/fromDate'
+        - $ref: '#/parameters/toDate'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
         # In Header...
         - $ref: '#/parameters/fiwareService'
         - $ref: '#/parameters/fiwareServicePath'
@@ -670,15 +664,25 @@ paths:
             type: object
             properties:
               entityId:
-                type: array
-                items:
-                  $ref: '#/definitions/EntityIds'
+                type: string
+              index:
+                $ref: '#/definitions/IndexArray'
+              type:
+                type: string
           examples:
             application/json:
+              [{
+                    "id": "Kitchen1",
+                    "index": [
+                      "2018-01-07T15:44:59"],
+                    "type": "Kitchen"
+              },
               {
-                  "entityId": ["Kitchen1",
-                               "Kitchen2"]
-              }
+                    "id": "Kitchen2",
+                    "index": [
+                      "2018-01-07T15:44:59"],
+                    "type": "Kitchen"
+              }]
         404:
           description: "Not Found"
           schema:
