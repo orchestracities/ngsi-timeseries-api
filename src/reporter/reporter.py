@@ -108,7 +108,8 @@ def _validate_payload(payload):
 
 def _filter_empty_entities(payload):
     log().info('Received payload: {}'.format(payload))
-    attrs, length = list(iter_entity_attrs(payload)), (len(payload))
+    attrs  = list(iter_entity_attrs(payload))
+    length = (len(payload))
     Flag = False
     del_ids = []
     for j in attrs:
@@ -135,7 +136,6 @@ def notify():
 
     payload = request.json['data']
     
-    log().info('Received payload: {}'.format(payload))
     res_entity = []
     for entity in payload:
         # Validate entity update
@@ -168,26 +168,14 @@ def notify():
         fiware_sp = request.headers.get('fiware-servicepath', None)
     else:
         fiware_sp = None
-    for entity in payload:
-        attrs = list(iter_entity_attrs(entity))
-    attrs.pop()
-    length = (len(payload))
-    Flag = False
-    for i in range(length):
-        for j in attrs:
-            value = payload[i][j]['value']
-            if not value:
-                msg = 'Notification Not processed because of Null value'
-            else:
-                Flag = True
-                msg = 'Notification successfully processed'
-        if Flag:
-            # Send valid entities to translator
-            with translator_for(fiware_s) as trans:
-                trans.insert(payload, fiware_s, fiware_sp)
+    # Send valid entities to translator
+    with translator_for(fiware_s) as trans:
+        trans.insert(payload, fiware_s, fiware_sp)
+
+    msg = 'Notification successfully processed'
     log().info(msg)
     return msg
-    
+
 
 def add_geodata(entity):
     # TODO: Move this setting to configuration (See GH issue #10)
