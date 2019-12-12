@@ -736,7 +736,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         for tn in table_names:
             len_tn += 1
             if len_tn != len(table_names):
-                stmt += "select entity_id, entity_type, max(time_index) " \
+                stmt += "select entity_id, entity_type, max(time_index) as time_index " \
                            "from {tn} {where_clause}" \
                            "group by entity_id, entity_type " \
                            "union all ".format(
@@ -744,14 +744,14 @@ class CrateTranslator(base_translator.BaseTranslator):
                               where_clause=where_clause
                            )
             else:
-                stmt += "select entity_id, entity_type, max(time_index) " \
+                stmt += "select entity_id, entity_type, max(time_index) as time_index " \
                            "from {tn} {where_clause}" \
                            "group by entity_id, entity_type ".format(
                               tn=tn,
                               where_clause=where_clause
                            )
 
-        op = stmt + "limit {limit} offset {offset}".format(
+        op = stmt + "order by time_index asc limit {limit} offset {offset}".format(
                 offset=offset,
                 limit=limit
              )
