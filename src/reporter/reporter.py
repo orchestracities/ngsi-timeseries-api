@@ -109,13 +109,11 @@ def _validate_payload(payload):
 def _filter_empty_entities(payload):
     log().info('Received payload: {}'.format(payload))
     attrs = list(iter_entity_attrs(payload))
-    length = (len(payload))
     Flag = False
-    del_ids = []
     for j in attrs:
         key_list = list(payload[j].keys())
-        if 'value' not in payload[j]:
-            return payload
+        if 'value' not in key_list:
+            return None
         value = payload[j]['value']
         if value:
             Flag = True
