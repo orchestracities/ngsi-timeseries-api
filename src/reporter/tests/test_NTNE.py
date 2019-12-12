@@ -121,8 +121,8 @@ def test_NTNE_limit(reporter_dataset):
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
 
-    expected_type = 'Room'
-    expected_id = 'Room0'
+    expected_type = 'Kitchen'
+    expected_id = 'Kitchen0'
     expected_index = [
         '1970-01-30T00:00:00.000'
     ]
