@@ -89,7 +89,7 @@ def test_NTNE_fromDate_toDate(reporter_dataset):
     expected_type = 'Room'
     expected_id = 'Room0'
     expected_index = [
-        '1970-01-17T00:00:00.000'
+        '1970-01-30T00:00:00.000'
     ]
     expected_type_1 = 'Kitchen'
     expected_id_1 = 'Kitchen0'
