@@ -89,7 +89,7 @@ definitions:
     example, if aggrPeriod is day, each value of course may not correspond
     to original measurements but rather the aggregate of measurements in
     each day."
-
+    
   IndexedValues:
     type: object
     properties:
@@ -640,6 +640,65 @@ paths:
 ################################################################################
 # PATHS: OUTPUT
 ################################################################################
+  /v2/entities:
+    get:
+      operationId: reporter.query_NTNE.query_NTNE
+      summary: "List of all the entityId"
+      description: "For example, query the entities for entityId available in database specific to fiwareService and fiwareServicePath."
+      tags:
+        - queries
+      parameters:
+        # In Query...
+        - $ref: '#/parameters/type'
+        - $ref: '#/parameters/fromDate'
+        - $ref: '#/parameters/toDate'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+        # In Header...
+        - $ref: '#/parameters/fiwareService'
+        - $ref: '#/parameters/fiwareServicePath'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              entityId:
+                type: string
+              index:
+                $ref: '#/definitions/IndexArray'
+              type:
+                type: string
+          examples:
+            application/json:
+              [{
+                    "id": "Kitchen1",
+                    "index": [
+                      "2018-01-07T15:44:59"],
+                    "type": "Kitchen"
+              },
+              {
+                    "id": "Kitchen2",
+                    "index": [
+                      "2018-01-07T15:44:59"],
+                    "type": "Kitchen"
+              }]
+        404:
+          description: "Not Found"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              description:
+                type: string
+          examples:
+            application/json:
+              {
+                "error": "Not Found",
+                "description": "No records were found for such query."
+              }
+
   /v2/entities/{entityId}/attrs/{attrName}:
     get:
       operationId: reporter.query_1T1E1A.query_1T1E1A

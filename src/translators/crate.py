@@ -701,6 +701,75 @@ class CrateTranslator(base_translator.BaseTranslator):
             result.extend(entities)
         return result
 
+    def query_ids(self,
+              entity_type=None,
+              from_date=None,
+              to_date=None,
+              limit=10000,
+              offset=0,
+              fiware_service=None,
+              fiware_servicepath=None):
+        if limit == 0:
+            return []
+
+        where_clause = self._get_where_clause(None,
+                                              from_date,
+                                              to_date,
+                                              fiware_servicepath,
+                                              None)
+
+        if entity_type:
+            table_names = [self._et2tn(entity_type, fiware_service)]
+        else:
+            table_names = self._get_et_table_names(fiware_service)
+
+        if fiware_service is None:
+            for tn in table_names:
+                if "." in tn:
+                    table_names.remove(tmp)
+
+        limit = min(10000, limit)
+        offset = max(0, offset)
+        len_tn = 0
+        result = []
+        stmt = ''
+        for tn in table_names:
+            len_tn += 1
+            if len_tn != len(table_names):
+                stmt += "select entity_id, entity_type, max(time_index) as time_index " \
+                           "from {tn} {where_clause}" \
+                           "group by entity_id, entity_type " \
+                           "union all ".format(
+                              tn=tn,
+                              where_clause=where_clause
+                           )
+            else:
+                stmt += "select entity_id, entity_type, max(time_index) as time_index " \
+                           "from {tn} {where_clause}" \
+                           "group by entity_id, entity_type ".format(
+                              tn=tn,
+                              where_clause=where_clause
+                           )
+
+        op = stmt + "order by time_index asc limit {limit} offset {offset}".format(
+                offset=offset,
+                limit=limit
+             )
+
+        try:
+            self.cursor.execute(op)
+        except exceptions.ProgrammingError as e:
+            logging.debug("{}".format(e))
+            entities = []
+        else:
+            res = self.cursor.fetchall()
+            col_names = ['entity_id', 'entity_type', 'time_index']
+            entities = self._format_response(res,
+                                             col_names,
+                                             tn,
+                                             None)
+        result.extend(entities)
+        return result
 
     def _format_response(self, resultset, col_names, table_name, last_n):
         """
