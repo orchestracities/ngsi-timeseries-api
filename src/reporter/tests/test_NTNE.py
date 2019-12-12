@@ -29,18 +29,18 @@ def test_NTNE_defaults(reporter_dataset):
 
     obtained = r.json()
     exp_values = [{
-        "id": 'Room0',
-        "index": [
-            "1970-01-30T00:00:00.000"
-        ],
-        "type": 'Room'
-    },
-    {
         "id": 'Kitchen0',
         "index": [
             "1980-01-30T00:00:00.000"
         ],
         "type": 'Kitchen'
+    },
+    {
+        "id": 'Room0',
+        "index": [
+            "1970-01-30T00:00:00.000"
+        ],
+        "type": 'Room'
     }]
 
     expected = exp_values
@@ -100,14 +100,14 @@ def test_NTNE_fromDate_toDate(reporter_dataset):
     # Assert
     obtained = r.json()
     expected = [{
+        'id': expected_id_1,
+        'index': expected_index_1,
+        'type': expected_type_1
+    },
+    {
         'id': expected_id,
         'index': expected_index,
         'type': expected_type
-    },
-    {
-        'id': expected_id_1,
-        'index': expected_index_1,
-        'type': expected_id_1
     }]
     assert obtained == expected
 
@@ -172,7 +172,7 @@ def test_NTNE_combined(reporter_dataset):
     expected_type = 'Room'
     expected_id = 'Room0'
     expected_index = [
-        '1970-01-20T00:00:00.000'
+        '1970-01-30T00:00:00.000'
     ]
 
     # Assert
