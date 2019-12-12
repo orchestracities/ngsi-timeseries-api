@@ -1,7 +1,7 @@
 from conftest import QL_URL, crate_translator as translator
 from exceptions.exceptions import AmbiguousNGSIIdError
 from reporter.tests.utils import insert_test_data
-import datetime
+from datetime import datetime
 import pytest
 import requests
 
