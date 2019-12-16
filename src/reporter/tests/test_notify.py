@@ -331,7 +331,6 @@ def test_no_value_for_attributes(notification):
     assert r.status_code == 200
     res_get = requests.get(url_new, headers=HEADERS_PUT)
     assert res_get.status_code == 404
-
     # entity with missing value string
     notification['data'][0] = {
         'id': '299531',
