@@ -110,11 +110,9 @@ def _filter_empty_entities(payload):
     log().info('Received payload: {}'.format(payload))
     attrs = list(iter_entity_attrs(payload))
     Flag = False
+    attrs.pop()
     for j in attrs:
-        key_list = list(payload[j].keys())
-        if 'value' not in key_list:
-            return None
-        value = payload[j]['value']
+        value = payload[j].get('value')
         if value:
             Flag = True
     if Flag:
@@ -134,13 +132,6 @@ def notify():
 
     payload = request.json['data']
     
-    res_entity = []
-    for entity in payload:
-        # Validate entity update
-        e = _filter_empty_entities(entity)
-        if e is not None:
-            res_entity.append(e)
-    payload = res_entity
     # preprocess and validate each entity update
     for entity in payload:
         # Validate entity update
@@ -166,6 +157,15 @@ def notify():
         fiware_sp = request.headers.get('fiware-servicepath', None)
     else:
         fiware_sp = None
+    res_entity = []
+    e = None
+    for entity in payload:
+        # Validate entity update
+        e = _filter_empty_entities(entity)
+        if e is not None:
+            res_entity.append(e)
+    payload = res_entity
+    
     # Send valid entities to translator
     with translator_for(fiware_s) as trans:
         trans.insert(payload, fiware_s, fiware_sp)
