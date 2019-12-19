@@ -346,3 +346,17 @@ def test_no_value_for_attributes(notification):
     assert r.status_code == 200
     res_get = requests.get(url_new, headers=HEADERS_PUT)
     assert res_get.status_code == 404
+    # entity has both valid and empty attributes
+    notification['data'][0] = {
+        'id': '299531',
+        'type': 'AirQualityObserved',
+        'p': {'type': 'string'},
+        'pm10': {'type': 'string', 'value': '10', 'metadata': {}},
+    }
+    url = '{}'.format(notify_url)
+    get_url = "{}/entities/299531/attrs/p/value".format(QL_URL)
+    url_new = '{}'.format(get_url)
+    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    assert r.status_code == 200
+    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    assert res_get.status_code == 404
