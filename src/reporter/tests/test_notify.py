@@ -358,7 +358,7 @@ def test_no_value_for_attributes(notification):
     url_new = '{}'.format(get_url_new)
     r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
     assert r.status_code == 200
-    # Give time for notification to be processed 
+    # Give time for notification to be processed
     time.sleep(3)
     res_get = requests.get(url_new, headers=HEADERS_PUT)
     assert res_get.status_code == 200
