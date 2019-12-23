@@ -112,7 +112,7 @@ def _filter_empty_entities(payload):
     Flag = False
     attrs.pop()
     for j in attrs:
-        value = payload[j].get('value')
+        value = payload[j]['value']
         if value:
             Flag = True
     if Flag:
