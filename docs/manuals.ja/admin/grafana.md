@@ -3,22 +3,23 @@
 [**Grafana**](https://grafana.com/) は、永続化されたデータのグラフィックを
 表示するために使用できる強力な視覚化ツールです。
 
-Grafana のダッシュボード用の [CrateDB](./crate.md) データベースからデータを
-読み込むには、
-[Postgres データソース](http://docs.grafana.org/features/datasources/postgres/)
-を使用してください。Postgres データソースは Grafana の最新バージョンに
-プリインストールされています。
+Grafana を QuantumLeap [CrateDB](./crate.md) または [Timescale](./timescale.md)
+バックエンドに簡単に接続して、ダッシュボードで QuantumLeap データを視覚化できま
+す。どちらの場合も、使用する Grafana データソースは、通常は最新バージョンの
+Grafana に同梱されている
+[Postgres のデータソース](http://docs.grafana.org/features/datasources/postgres/)
+です。
 
 [インストール・ガイド](./index.md) に従っているのであれば、Docker コンテナ内で
 既に Grafana が実行されています。ローカルに展開されている場合は、おそらく
 [http://0.0.0.0:3000](http://0.0.0.0:3000) です。
 
-[このポスト](https://crate.io/a/pair-cratedb-with-grafana-an-open-platform-for-time-series-data-visualization/)
-をチェックして、データソースの設定方法に関する Crate の勧告に従うことができます。
-データベースにデータをすでに格納している場合は、"Add a Data Source" セクションに
-直接進むことができます。そのようなポストの主要部分は以下でカバーされます。
+CrateDB バックエンドを使用している場合は、
+[このブログ投稿](https://crate.io/a/pair-cratedb-with-grafana-an-open-platform-for-time-series-data-visualization/)
+を読み、以下のセクションで説明する Grafana データソースの設定方法に関する
+Crate の推奨事項に従うことをお勧めします。
 
-## データソースの設定
+## CrateDB のデータソースの設定
 
 デプロイした Grafana インスタンスを調べます
 (例 : [http://0.0.0.0:3000](http://0.0.0.0:3000))。
@@ -44,6 +45,15 @@ Grafana のダッシュボード用の [CrateDB](./crate.md) データベース�
 ![alt text](../rsrc/postgres_datasource.png "Configuring the DataSource")
 
 *Save & Test* をクリックすると、OK メッセージが表示されます。
+
+
+## PostgreSQL のデータソースの設定
+
+このプロセスは上で概説したものとほとんど同じであり、Grafana
+[PosgreSQL　のデータソース・マニュアル](https://grafana.com/docs/features/datasources/postgres/)
+に詳しく記載されています。 *TimescaleDB* データソースオプションを有効に
+する必要があることに注意してください。
+
 
 ## グラフ内のデータソースの使用
 

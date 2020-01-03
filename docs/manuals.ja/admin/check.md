@@ -22,7 +22,7 @@ Postman を使用しない場合は、以下の同等の curl コマンドを使
 
 1. *QuantumLeap のバージョン*を確認できますか？
 
-        curl -X GET http://0.0.0.0:8668/v2/version -H 'Accept: application/json'
+        curl -X GET http://0.0.0.0:8668/version -H 'Accept: application/json'
 
     `200 OK` の返信ステータスを取得する必要があります。
 

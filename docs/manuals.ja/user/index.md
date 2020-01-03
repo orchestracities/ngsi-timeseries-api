@@ -262,7 +262,39 @@ NGSI エンティティが属性に有効な NGSI 型を使用していること
   `speed` のデータ型が最初に `Number` に設定されている場合、後でそれを `Text`
   に設定することはできません
 
-## データ検索
+### QuantumLeap にデータを直接挿入
+
+データを QuantumLeap に直接挿入するには、http://localhost:8668/v2/notify API
+を使用します。つまり、新しい NGSI 通知の到着について QuantumLeap に通知します。
+
+以下の例を検討してください :
+
+```
+curl http://localhost:8668/v2/notify -s -S -H 'Content-Type: application/json' -d @- <<EOF
+{ 
+    "subscriptionId": "5ce3dbb331dfg9h71aad5deeaa", 
+    "data": [ 
+        { 
+            "id": "Room1", 
+            "temperature": 
+               { 
+                 "value": "10", 
+                 "type": "Number" 
+               }, 
+             "pressure": 
+               { 
+                 "value": "12", 
+                 "type": "Number" 
+               }, 
+            "type": "Room" 
+        } 
+    ] 
+}
+```
+
+データは QuantumLeap に正常に挿入されます。
+
+## データの取得
 
 QuantumLeap から履歴データを取得するには、
 [ここ](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)

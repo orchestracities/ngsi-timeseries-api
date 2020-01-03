@@ -18,6 +18,7 @@
 |TCP                | 27017         |  Mongo データベース|
 |TCP                | 4200          |  CrateDB 管理 UI |
 |TCP                | 4300          |  CrateDB トランスポート・プロトコル |
+|TCP                | 5432          |  PostgreSQL プロトコル |
 |TCP                | 6379          |  Redisキャッシュ (ジオ・コーディングで使用) |
 
 このリポジトリの
