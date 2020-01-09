@@ -110,10 +110,12 @@ def _filter_empty_entities(payload):
     log().info('Received payload: {}'.format(payload))
     attrs = list(iter_entity_attrs(payload))
     Flag = False
-    attrs.pop()
+    attrs.remove('time_index')
     for j in attrs:
-        value = payload[j].get('value')
-        if value:
+        value = payload[j]['value']
+        if isinstance(value, int) and value is not None:
+            Flag = True
+        elif value:
             Flag = True
     if Flag:
         return payload
