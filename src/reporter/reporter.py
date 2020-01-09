@@ -104,7 +104,24 @@ def _validate_payload(payload):
             payload[attr].update({'value': None})
             log().warning(
                 'An entity update is missing value for attribute {}'.format(attr))
+  
 
+def _filter_empty_entities(payload):
+    log().info('Received payload: {}'.format(payload))
+    attrs = list(iter_entity_attrs(payload))
+    Flag = False
+    attrs.remove('time_index')
+    for j in attrs:
+        value = payload[j]['value']
+        if isinstance(value, int) and value is not None:
+            Flag = True
+        elif value:
+            Flag = True
+    if Flag:
+        return payload
+    else:
+        return None
+ 
 
 def notify():
     if request.json is None:
@@ -116,24 +133,19 @@ def notify():
                'content.', 400
 
     payload = request.json['data']
-
-    log().info('Received payload: {}'.format(payload))
-
+    
     # preprocess and validate each entity update
     for entity in payload:
         # Validate entity update
         error = _validate_payload(entity)
         if error:
             return error, 400
-    
         # Add TIME_INDEX attribute
         custom_index = request.headers.get(TIME_INDEX_HEADER_NAME, None)
         entity[TIME_INDEX_NAME] = \
             select_time_index_value_as_iso(custom_index, entity)
-    
         # Add GEO-DATE if enabled
         add_geodata(entity)
-    
         # Always normalize location if there's one
         normalize_location(entity)
 
@@ -147,7 +159,15 @@ def notify():
         fiware_sp = request.headers.get('fiware-servicepath', None)
     else:
         fiware_sp = None
-
+    res_entity = []
+    e = None
+    for entity in payload:
+        # Validate entity update
+        e = _filter_empty_entities(entity)
+        if e is not None:
+            res_entity.append(e)
+    payload = res_entity
+    
     # Send valid entities to translator
     with translator_for(fiware_s) as trans:
         trans.insert(payload, fiware_s, fiware_sp)
