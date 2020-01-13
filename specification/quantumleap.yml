@@ -121,16 +121,16 @@ definitions:
 # PARAMETERS: IN HEADERS
 ################################################################################
 parameters:
-  fiwareService:
+  fiware-Service:
     in: header
-    name: fiwareService
+    name: fiware-Service
     required: false
     type: string
     description: "The corresponding 'fiware-service' header.
     See http://fiware-orion.readthedocs.io/en/latest/user/multitenancy/index.html#multi-tenancy"
-  fiwareServicePath:
+  fiware-ServicePath:
     in: header
-    name: fiwareServicePath
+    name: fiware-ServicePath
     required: false
     type: string
     description: "The corresponding 'fiware-servicepath' header.
@@ -490,8 +490,8 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Notification'
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       tags:
         - input
       responses:
@@ -610,8 +610,8 @@ paths:
           receiving notifications containing this attribute, QL will use its value as
           a time series index for the entity being notified. If specified, it should
           refer to an entity attribute whose value is an ISO 8601 timestamp."
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       tags:
         - input
       responses:
@@ -644,7 +644,7 @@ paths:
     get:
       operationId: reporter.query_NTNE.query_NTNE
       summary: "List of all the entityId"
-      description: "For example, query the entities for entityId available in database specific to fiwareService and fiwareServicePath."
+      description: "For example, query the entities for entityId available in database specific to fiware-Service and fiware-ServicePath."
       tags:
         - queries
       parameters:
@@ -655,8 +655,8 @@ paths:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         200:
           description: OK
@@ -726,8 +726,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         200:
           description: OK
@@ -795,8 +795,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         200:
           description: OK
@@ -851,8 +851,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         200:
           description: OK
@@ -914,8 +914,8 @@ paths:
         - $ref: '#/parameters/fromDate'
         - $ref: '#/parameters/toDate'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         204:
           description: "Records successfully deleted."
@@ -965,8 +965,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         200:
           description: OK
@@ -1042,8 +1042,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         200:
           description: OK
@@ -1109,8 +1109,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         200:
           description: OK
@@ -1170,8 +1170,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         501:
           description: "Not implemented!"
@@ -1248,8 +1248,8 @@ paths:
         - $ref: '#/parameters/fromDate'
         - $ref: '#/parameters/toDate'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         204:
           description: "Records successfully deleted."
@@ -1286,8 +1286,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         501:
           description: "Not implemented!"
@@ -1377,8 +1377,8 @@ paths:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         501:
           description: "Not implemented!"
@@ -1477,8 +1477,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         501:
           description: "Not implemented!"
@@ -1574,8 +1574,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         501:
           description: "Not implemented!"
@@ -1682,8 +1682,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         501:
           description: "Not implemented!"
