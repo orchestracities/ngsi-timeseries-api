@@ -110,7 +110,7 @@ def test_store_missing_text_value_as_null():
         'id': 't2:1',
         'type': 't2',
         'y': {
-            'type': 'Number'
+            'type': 'Number',
             'value': '23'
         },
         'x': {
@@ -129,7 +129,7 @@ def test_store_missing_text_value_as_null_then_as_empty():
         'id': 't3:1',
         'type': 't3',
         'y': {
-            'type': 'Number'
+            'type': 'Number',
             'value': '23'
          },
         'x': {
