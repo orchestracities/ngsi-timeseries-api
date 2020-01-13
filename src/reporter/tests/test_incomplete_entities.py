@@ -109,6 +109,10 @@ def test_store_missing_text_value_as_null():
     entity = {
         'id': 't2:1',
         'type': 't2',
+        'y': {
+            'type': 'Number'
+            'value': '23'
+        },
         'x': {
             'type': 'Text'
         }
@@ -116,14 +120,18 @@ def test_store_missing_text_value_as_null():
     notify(entity)
 
     attr_values_map = get_all_stored_attributes(entity['id'])
-    assert len(attr_values_map) == 0
-    #assert attr_values_map['x'] == [None]
+    assert len(attr_values_map) == 2
+    assert attr_values_map['x'] == [None]
 
 
 def test_store_missing_text_value_as_null_then_as_empty():
     entity = {
         'id': 't3:1',
         'type': 't3',
+        'y': {
+            'type': 'Number'
+            'value': '23'
+         },
         'x': {
             'type': 'Text'
         }
@@ -134,14 +142,18 @@ def test_store_missing_text_value_as_null_then_as_empty():
     notify(entity)
 
     attr_values_map = get_all_stored_attributes(entity['id'])
-    assert len(attr_values_map) == 0
-    #assert attr_values_map['x'] == [None, '']
+    assert len(attr_values_map) == 2
+    assert attr_values_map['x'] == [None, '']
 
 
 def test_store_null_text_value_as_null():
     entity = {
         'id': 't4:1',
         'type': 't4',
+        'y': {
+             'type': 'Number',
+             'value': '23'
+        },
         'x': {
             'type': 'Text',
             'value': None
@@ -150,14 +162,18 @@ def test_store_null_text_value_as_null():
     notify(entity)
 
     attr_values_map = get_all_stored_attributes(entity['id'])
-    assert len(attr_values_map) == 0
-    #assert attr_values_map['x'] == [None]
+    assert len(attr_values_map) == 2
+    assert attr_values_map['x'] == [None]
 
 
 def test_store_null_numeric_value_as_null():
     entity = {
         'id': 't5:1',
         'type': 't5',
+        'y': {
+             'type': 'Number',
+             'value': '23'
+        },
         'x': {
             'type': 'Number',
             'value': None
@@ -166,14 +182,18 @@ def test_store_null_numeric_value_as_null():
     notify(entity)
 
     attr_values_map = get_all_stored_attributes(entity['id'])
-    assert len(attr_values_map) == 0
-    #assert attr_values_map['x'] == [None]
+    assert len(attr_values_map) == 2
+    assert attr_values_map['x'] == [None]
 
 
 def test_store_empty_numeric_value_as_null():
     entity = {
         'id': 't6:1',
         'type': 't6',
+        'y': {
+             'type': 'Number',
+             'value': '23'
+        },
         'x': {
             'type': 'Number',
             'value': ''
@@ -182,19 +202,23 @@ def test_store_empty_numeric_value_as_null():
     notify(entity)
 
     attr_values_map = get_all_stored_attributes(entity['id'])
-    assert len(attr_values_map) == 0
-    #assert attr_values_map['x'] == [None]
+    assert len(attr_values_map) == 2
+    assert attr_values_map['x'] == [None]
 
 
 def test_store_empty_attribute_as_null_text():
     entity = {
         'id': 't7:1',
         'type': 't7',
+        'y': {
+             'type': 'Number',
+             'value': '23'
+        },
         'x': {
         }
     }
     notify(entity)
 
     attr_values_map = get_all_stored_attributes(entity['id'])
-    assert len(attr_values_map) == 0
-    #assert attr_values_map['x'] == [None]
+    assert len(attr_values_map) == 2
+    assert attr_values_map['x'] == [None]
