@@ -726,7 +726,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         if fiware_service is None:
             for tn in table_names:
                 if "." in tn:
-                    table_names.remove(tmp)
+                    table_names.remove(tn)
 
         limit = min(10000, limit)
         offset = max(0, offset)
