@@ -38,6 +38,11 @@ def query_1T1ENA(entity_id,   # In Path
 
     fiware_s = request.headers.get('fiware-service', None)
     fiware_sp = request.headers.get('fiware-servicepath', None)
+    
+    if from_date:
+        from_date = from_date.strip('\"')
+    if to_date:
+        to_date = to_date.strip('\"')
 
     entities = None
     try:
