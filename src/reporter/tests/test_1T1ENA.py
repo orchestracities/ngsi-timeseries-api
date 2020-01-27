@@ -214,6 +214,43 @@ def test_1T1ENA_fromDate_toDate(reporter_dataset):
     obtained = r.json()
     assert_1T1ENA_response(obtained, expected)
 
+def test_1T1ENA_fromDate_toDate_with_quotes(reporter_dataset):
+    # Query
+    query_params = {
+        'type': entity_type,
+        'fromDate': '"1970-01-06T00:00:00"',
+        'toDate': '"1970-01-17T00:00:00"',
+    }
+    r = requests.get(query_url(), params=query_params)
+    assert r.status_code == 200, r.text
+
+    # Expect only last N
+    expected_temperatures = list(range(5, 17))
+    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_index = [
+        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_temperatures
+    ]
+    assert len(expected_index) == 12
+    assert expected_index[0] == "1970-01-06T00:00:00"
+    assert expected_index[-1] == "1970-01-17T00:00:00"
+
+    # Assert
+    expected = {
+        'entityId': entity_id,
+        'index': expected_index,
+        'attributes': [
+            {
+                'attrName': pressure,
+                'values': expected_pressures,
+            },
+            {
+                'attrName': temperature,
+                'values': expected_temperatures,
+            }
+        ]
+    }
+    obtained = r.json()
+    assert_1T1ENA_response(obtained, expected)
 
 def test_1T1ENA_lastN(reporter_dataset):
     # Query
