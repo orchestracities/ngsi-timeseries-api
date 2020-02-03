@@ -36,7 +36,7 @@ def query_1T1E1A(attr_name,   # In Path
 
     fiware_s = request.headers.get('fiware-service', None)
     fiware_sp = request.headers.get('fiware-servicepath', None)
-    
+
     entities = None
     try:
         with CrateTranslatorInstance() as trans:

@@ -15,7 +15,7 @@ def query_NTNE(limit=10000,
     """
     fiware_s = request.headers.get('fiware-service', None)
     fiware_sp = request.headers.get('fiware-servicepath', None)
-    
+
     entities = None
     try:
         with CrateTranslatorInstance() as trans:
