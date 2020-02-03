@@ -170,6 +170,34 @@ def test_1T1E1A_fromDate_toDate(reporter_dataset):
     }
     assert_1T1E1A_response(obtained, expected)
 
+def test_1T1E1A_fromDate_toDate_with_quotes(reporter_dataset):
+    # Query
+    query_params = {
+        'type': entity_type,
+        'fromDate': '"1970-01-06T00:00:00"',
+        'toDate': '"1970-01-17T00:00:00"',
+    }
+    r = requests.get(query_url(), params=query_params)
+    assert r.status_code == 200, r.text
+
+    # Expect only last N
+    expected_values = list(range(5, 17))
+    expected_index = [
+        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
+    ]
+    assert len(expected_index) == 12
+    assert expected_index[0] == "1970-01-06T00:00:00"
+    assert expected_index[-1] == "1970-01-17T00:00:00"
+
+    # Assert
+    obtained = r.json()
+    expected = {
+        'entityId': entity_id,
+        'index': expected_index,
+        'attrName': attr_name,
+        'values': expected_values
+    }
+    assert_1T1E1A_response(obtained, expected)
 
 def test_1T1E1A_lastN(reporter_dataset):
     # Query

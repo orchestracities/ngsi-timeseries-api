@@ -111,6 +111,40 @@ def test_NTNE_fromDate_toDate(reporter_dataset):
     }]
     assert obtained == expected
 
+def test_NTNE_fromDate_toDate_with_quotes(reporter_dataset):
+    # Query
+    query_params = {
+        'fromDate': '"1970-01-06T00:00:00"',
+        'toDate': '"1980-01-17T00:00:00"',
+    }
+    r = requests.get(query_url(), params=query_params)
+    assert r.status_code == 200, r.text
+    
+    expected_type = 'Room'
+    expected_id = 'Room0'
+    expected_index = [
+        '1970-01-30T00:00:00.000'
+    ]
+    expected_type_1 = 'Kitchen'
+    expected_id_1 = 'Kitchen0'
+    expected_index_1 = [
+        '1980-01-17T00:00:00.000'
+    ]
+
+    # Assert
+    obtained = r.json()
+    expected = [{
+        'id': expected_id_1,
+        'index': expected_index_1,
+        'type': expected_type_1
+    },
+    {
+        'id': expected_id,
+        'index': expected_index,
+        'type': expected_type
+    }]
+    assert obtained == expected
+
 def test_NTNE_limit(reporter_dataset):
     # Query
     query_params = {

@@ -433,9 +433,9 @@ class CrateTranslator(base_translator.BaseTranslator):
             clauses.append(" entity_id in ({}) ".format(ids))
         if from_date:
             clauses.append(" {} >= '{}'".format(self.TIME_INDEX_NAME,
-                                                from_date))
+                                                self._parse_date(from_date)))
         if to_date:
-            clauses.append(" {} <= '{}'".format(self.TIME_INDEX_NAME, to_date))
+            clauses.append(" {} <= '{}'".format(self.TIME_INDEX_NAME, self._parse_date(to_date)))
 
         if fiware_sp:
             # Match prefix of fiware service path
@@ -451,6 +451,8 @@ class CrateTranslator(base_translator.BaseTranslator):
         where_clause = "where " + "and ".join(clauses)
         return where_clause
 
+    def _parse_date(self, date):
+        return date.strip('\"')
 
     def _get_order_group_clause(self, aggr_method, aggr_period,
                                 select_clause, last_n):
