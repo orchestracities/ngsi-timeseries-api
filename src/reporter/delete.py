@@ -7,11 +7,6 @@ def delete_entity(entity_id, type_=None, from_date=None, to_date=None):
     fiware_s = request.headers.get('fiware-service', None)
     fiware_sp = request.headers.get('fiware-servicepath', None)
     
-    if from_date:
-        from_date = from_date.strip('\"')
-    if to_date:
-        to_date = to_date.strip('\"')
-
     try:
         with crate.CrateTranslatorInstance() as trans:
             deleted = trans.delete_entity(entity_id=entity_id,
