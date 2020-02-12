@@ -32,7 +32,7 @@ If you don't use Postman, you can use the equivalent curl commands bellow.
         -H 'Accept: application/json'
 
     Note we've just created a subscription for any change in any attribute of
-    entities of type [AirQualityObserved](https://github.com/Fiware/dataModels/tree/master/Environment/AirQualityObserved). You should get a return status `201 Created`.
+    entities of type [AirQualityObserved](https://github.com/FIWARE/data-models/tree/master/specs/Environment/AirQualityObserved). You should get a return status `201 Created`.
 
 1. Check you cat get such subscription from Orion
 
