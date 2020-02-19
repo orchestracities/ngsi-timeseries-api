@@ -1144,8 +1144,8 @@ paths:
 
   /v2/types/{entityType}:
     get:
-      operationId: reporter.reporter.query_1TNENA
-      summary: "(To Be Implemented) History of N attributes of N entities of
+      operationId: reporter.query_1TNENA.query_1TNENA
+      summary: "History of N attributes of N entities of
       the same type."
       description: "For example, query the average pressure, temperature and
       humidity of this month in all the weather stations."
@@ -1173,8 +1173,6 @@ paths:
         - $ref: '#/parameters/fiware-Service'
         - $ref: '#/parameters/fiware-ServicePath'
       responses:
-        501:
-          description: "Not implemented!"
         200:
           description: OK
           schema:
@@ -1259,8 +1257,8 @@ paths:
 
   /v2/types/{entityType}/value:
     get:
-      operationId: reporter.reporter.query_1TNENA_value
-      summary: "(To Be Implemented) History of N attributes (values only) of N
+      operationId: reporter.query_1TNENA.query_1TNENA_value
+      summary: "History of N attributes (values only) of N
       entities of the same type."
       description: "For example, query the average pressure, temperature and
       humidity (values only, no metadata) of this month in all the weather
@@ -1289,8 +1287,6 @@ paths:
         - $ref: '#/parameters/fiware-Service'
         - $ref: '#/parameters/fiware-ServicePath'
       responses:
-        501:
-          description: "Not implemented!"
         200:
           description: OK
           schema:
