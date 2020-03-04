@@ -7,7 +7,7 @@ import logging
 from .geo_query_handler import handle_geo_query
 
 
-def query_NTNENA(id_=None, # In Query
+def query_NTNENA(id_=None,  # In Query
                  attrs=None,
                  type_=None,
                  aggr_method=None,
@@ -65,8 +65,7 @@ def query_NTNENA(id_=None, # In Query
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)
         logging.getLogger().error(msg, exc_info=True)
-        return msg, 400   
-
+        return msg, 400
     except Exception as e:
         msg = "Something went wrong with QL. Error: {}".format(e)
         logging.getLogger().error(msg, exc_info=True)
@@ -130,6 +129,7 @@ def query_NTNENA(id_=None, # In Query
         }
     return r, 404
 
+  
 def query_NTNENA_value(*args, **kwargs):
     res = query_NTNENA(*args, **kwargs)
     if isinstance(res, dict):
