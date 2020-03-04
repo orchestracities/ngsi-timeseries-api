@@ -6,8 +6,9 @@ from reporter.reporter import _validate_query_params
 from translators.crate import CrateTranslatorInstance
 from exceptions.exceptions import NGSIUsageError
 
-def query_NTNE1A(attr_name, #In Path
-                 type_=None, #In Query
+
+def query_NTNE1A(attr_name,  #In Path
+                 type_=None,  #In Query
                  id_=None,
                  aggr_method=None,
                  aggr_period=None,
@@ -28,11 +29,9 @@ def query_NTNE1A(attr_name, #In Path
                                   aggr_scope,
                                   options)
     if c != 200:
-        return r, c
-    
+        return r, c 
     fiware_s = request.headers.get('fiware-service', None)
     fiware_sp = request.headers.get('fiware-servicepath', None)
-
     entities=None
     entity_ids = None
     if id_:
@@ -61,8 +60,6 @@ def query_NTNE1A(attr_name, #In Path
         msg = "Internal server Error: {}".format(e)
         logging.getLogger().error(msg, exc_info=True)
         return msg, 500
-
-
     attributes = []
     entries = []
     entity_value = []
@@ -101,8 +98,7 @@ def query_NTNE1A(attr_name, #In Path
         res = {
             'attrName': attr_name,
             'types': entity_type
-              }
-          
+              }       
         return res
     r = {
         "error": "Not Found",
@@ -110,6 +106,7 @@ def query_NTNE1A(attr_name, #In Path
     }
     return r, 404
 
+  
 def query_NTNE1A_value(*args, **kwargs):
     res = query_NTNE1A(*args, **kwargs)
     if isinstance(res, dict):
@@ -117,4 +114,3 @@ def query_NTNE1A_value(*args, **kwargs):
         res.pop('attrName', None)
         res.pop('types', None)
     return res
-
