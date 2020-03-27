@@ -7,8 +7,10 @@ import requests
 
 
 entity_type = "Room"
+entity_type_1 = "Kitchen"
 entity_id = "Room1"
 entity_id_1 = "Room2"
+attrs = 'pressure'
 n_days = 4
 
 def query_url(values=False):
@@ -23,6 +25,8 @@ def query_url(values=False):
 def reporter_dataset(translator):
     insert_test_data(translator, [entity_type], n_entities=1, index_size=4, entity_id=entity_id)
     insert_test_data(translator, [entity_type], n_entities=1, index_size=4, entity_id=entity_id_1)
+    #insert_test_data(translator, [entity_type_1], n_entities=1, index_size=4, entity_id=entity_id)
+    #insert_test_data(translator, [entity_type_1], n_entities=1, index_size=4, entity_id=entity_id_1) 
     yield
 
 def test_NTNENA_defaults(reporter_dataset):
@@ -830,3 +834,147 @@ def test_NTNENA_aggrScope(reporter_dataset):
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 501, r.text
+
+def test_NTNENA_types_two_attribute(translator):
+    # Query
+    t = 'Room'
+    t1 = 'Kitchen'
+
+    insert_test_data(translator,[t], entity_id='Room1', index_size=3)
+    insert_test_data(translator,[t1], entity_id='Kitchen1', index_size=3)
+
+    r = requests.get(query_url())
+    assert r.status_code == 200, r.text
+
+    # Assert Results
+    expected_temperatures = list(range(3))
+    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_index = [
+        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+    ]
+    expected_index_kitchen = [
+        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+    ]
+    expected_entities_kitchen = [
+        {
+            'entityId': 'Kitchen1',
+            'index': expected_index_kitchen,
+            'values': expected_pressures
+        }
+    ]
+    expected_entities_room = [
+        {
+            'entityId': 'Room1',
+            'index': expected_index,
+            'values': expected_pressures
+        }
+    ]
+    expected_entities_kitchen_temp = [
+        {
+            'entityId': 'Kitchen1',
+            'index': expected_index_kitchen,
+            'values': expected_temperatures
+        }
+    ]
+    expected_entities_room_temp = [
+        {
+            'entityId': 'Room1',
+            'index': expected_index,
+            'values': expected_temperatures
+        }
+    ]
+    expected_types_new = [
+        {
+            'entities': expected_entities_room,
+            'entityType': 'Room'
+        },
+        {
+            'entities': expected_entities_kitchen,
+            'entityType': 'Kitchen'
+        }
+        ]
+    expected_types = [
+        {   'entities': expected_entities_room_temp,
+            'entityType': 'Room'
+        },
+        {
+            'entities': expected_entities_kitchen_temp,
+            'entityType': 'Kitchen'
+        }
+        ]
+    expected_attrs = [
+        {
+            'attrName': 'pressure',
+            'types': expected_types_new
+        },
+        {
+            'attrName': 'temperature',
+            'types': expected_types
+        }
+    ]
+    expected = {
+        'attrs': expected_attrs
+    }
+    obtained = r.json()
+    assert obtained == expected
+
+
+def test_1TNENA_types_one_attribute(translator):
+    # Query
+    t = 'Room'
+    t1 = 'Kitchen'
+
+    insert_test_data(translator,[t], entity_id='Room1', index_size=3)
+    insert_test_data(translator,[t1], entity_id='Kitchen1', index_size=3)
+
+    query_params = {
+        'attrs': 'pressure'
+    }
+    r = requests.get(query_url(),params=query_params)
+    assert r.status_code == 200, r.text
+
+    # Assert Results
+    expected_temperatures = list(range(3))
+    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_index = [
+        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+    ]
+    expected_index_kitchen = [
+        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+    ]
+
+    expected_entities_kitchen = [
+        {
+            'entityId': 'Kitchen1',
+            'index': expected_index_kitchen,
+            'values': expected_pressures
+        }
+    ]
+    expected_entities_room = [
+        {
+            'entityId': 'Room1',
+            'index': expected_index,
+            'values': expected_pressures
+        }
+    ]
+    expected_types = [
+        {
+            'entities': expected_entities_room,
+            'entityType': 'Room'
+        },
+        {
+            'entities': expected_entities_kitchen,
+            'entityType': 'Kitchen'
+        }
+        ]
+    expected_attrs = [
+        {
+            'attrName': 'pressure',
+            'types': expected_types
+        }
+    ]
+    expected = {
+        'attrs': expected_attrs
+    }
+    obtained = r.json()
+    assert obtained == expected
