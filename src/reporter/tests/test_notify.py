@@ -363,3 +363,59 @@ def test_no_value_for_attributes(notification):
     res_get = requests.get(url_new, headers=HEADERS_PUT)
     assert res_get.status_code == 200
     assert res_get.json()['values'][2] == '10'
+
+def test_null_value_for_attributes(notification):
+    # with Null value
+    notification['data'][0] = {
+        'id': 'Room1',
+        'type': 'Room',
+        'odour': {'type': 'Text', 'value': 'Null', 'metadata': {}},
+        'temperature': {'type': 'Number', 'value': 'Null', 'metadata': {}},
+        'pressure': {'type': 'Number', 'value': 'Null', 'metadata': {}},
+    }
+    url = '{}'.format(notify_url)
+    get_url = "{}/entities/Room1".format(QL_URL)
+    url_new = '{}'.format(get_url)
+    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    assert r.status_code == 200
+    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    assert res_get.status_code == 404
+    # entity with one Null value
+    notification['data'][0] = {
+        'id': 'Room1',
+        'type': 'Room',
+        'odour': {'type': 'Text', 'value': 'Good', 'metadata': {}},
+        'temperature': {'type': 'Number', 'value': 'Null', 'metadata': {}},
+        'pressure': {'type': 'Number', 'value': '26', 'metadata': {}},
+    }
+    url = '{}'.format(notify_url)
+    get_url = "{}/entities/Room1/attrs/temperature/value".format(QL_URL)
+    url_new = '{}'.format(get_url)
+    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    assert r.status_code == 200
+    # Give time for notification to be processed
+    time.sleep(3)
+    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    assert res_get.status_code == 404
+    # Get value of attribute having value
+    get_url_new = "{}/entities/Room1/attrs/pressure/value".format(QL_URL)
+    url_new = '{}'.format(get_url_new)
+    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    assert res_get.status_code == 200
+    assert res_get.json()['values'][0] == 26
+    # entity with value other than Null
+    notification['data'][0] = {
+        'id': 'Room1',
+        'type': 'Room',
+        'temperature': {'type': 'Number', 'value': '25', 'metadata': {}}
+    }
+    url = '{}'.format(notify_url)
+    get_url = "{}/entities/Room1/attrs/temperature/value".format(QL_URL)
+    url_new = '{}'.format(get_url)
+    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    assert r.status_code == 200
+    # Give time for notification to be processed
+    time.sleep(3)
+    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    assert res_get.status_code == 200
+    assert res_get.json()['values'][1] == '25'
