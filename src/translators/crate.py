@@ -223,7 +223,7 @@ class CrateTranslator(base_translator.BaseTranslator):
             for attr in iter_entity_attrs(e):
                 if attr == self.TIME_INDEX_NAME:
                     continue
-                #Ignore attribute if its value is Null
+                # Ignore attribute if its value is Null
                 if e[attr].get('value') == 'Null':
                     continue
 
@@ -254,7 +254,7 @@ class CrateTranslator(base_translator.BaseTranslator):
                     # Github issue 44: Disable indexing for long string
                     db_version = self.get_db_version()
                     crate_t = _adjust_gh_44(attr_t, e[attr], db_version)
-                    #Ignore attribute if its value is Null
+                    # Ignore attribute if its value is Null
                     if e[attr].get('value') == 'Null':
                         continue
 
