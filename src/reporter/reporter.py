@@ -115,7 +115,7 @@ def _filter_empty_entities(payload):
         value = payload[j]['value']
         if isinstance(value, int) and value is not None:
             Flag = True
-        elif value:
+        elif value and value != 'Null':
             Flag = True
     if Flag:
         return payload
