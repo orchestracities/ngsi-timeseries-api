@@ -519,3 +519,117 @@ def test_NTNE1A_aggrScope(reporter_dataset):
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 501, r.text
 
+
+def test_aggregation_is_per_instance(translator):
+    t = 'Room'
+    insert_test_data(translator, [t], entity_id='Room1', index_size=3)
+
+    query_params = {
+        'attrs': 'temperature',
+        'id': 'Room1',
+        'aggrMethod': 'sum'
+    }
+    r = requests.get(query_url(), params=query_params)
+    assert r.status_code == 200, r.text
+ 
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+    expected_temperatures = list(range(4))
+    expected_index = [
+        '',''
+    ]
+    expected_entities = [
+        {
+            'entityId': 'Room1',
+            'index': expected_index,
+            'values': [sum(range(3))]
+        }
+    ]
+    expected_types = [
+        {
+            'entities': expected_entities,
+            'entityType': 'Room'
+        }
+    ]
+    expected = {
+        'attrName': attr_name,
+        'types': expected_types,
+    }
+    obtained = r.json()
+    assert obtained == expected
+    # Index array in the response is the used fromDate and toDate
+    query_params = {
+        'attrs': 'temperature',
+        'id': 'Room1',
+        'aggrMethod': 'max',
+        'fromDate': datetime(1970, 1, 1).isoformat(),
+        'toDate': datetime(1970, 1, 2).isoformat(),
+    }
+    r = requests.get(query_url(), params=query_params)
+    assert r.status_code == 200, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+    expected_temperatures = list(range(2))
+    expected_index = [
+    '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_temperatures
+    ]
+    expected_entities = [
+        {
+            'entityId': 'Room1',
+            'index': expected_index,
+            'values': [1]
+        }
+    ]
+    expected_types = [
+        {
+            'entities': expected_entities,
+            'entityType': 'Room'
+        }
+    ]
+    expected = {
+        'attrName': attr_name,
+        'types': expected_types,
+    }
+    obtained = r.json()
+    assert obtained == expected
+    
+    query_params = {
+        'attrs': 'temperature',
+        'id': 'Room1',
+        'aggrMethod': 'avg'
+    }
+    r = requests.get(query_url(), params=query_params)
+    assert r.status_code == 200, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+    expected_temperatures = list(range(4))
+    expected_index = [
+        '',''
+    ]
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+    expected_temperatures = list(range(4))
+    expected_index = [
+        '',''
+    ]
+    expected_entities = [
+        {
+            'entityId': 'Room1',
+            'index': expected_index,
+            'values': [1]
+        }
+    ]
+    expected_types = [
+        {
+            'entities': expected_entities,
+            'entityType': 'Room'
+        }
+    ]
+    expected = {
+        'attrName': attr_name,
+        'types': expected_types,
+    }
+    obtained = r.json()
+    assert obtained == expected

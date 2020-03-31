@@ -27,5 +27,5 @@ export INFLUX_HOST=$LH
 export RETHINK_HOST=$LH
 
 export REDIS_HOST=$LH
-[[ "$LH" != "192.0.0.1" ]] || pipenv shell
 
+[[ "$LH" != "192.0.0.1" ]] || pipenv shell
