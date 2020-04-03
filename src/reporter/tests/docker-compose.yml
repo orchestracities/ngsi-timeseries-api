@@ -37,6 +37,7 @@ services:
     environment:
       - USE_GEOCODING=True
       - REDIS_HOST=redis
+      - LOGLEVEL=DEBUG
 
   crate:
     image: crate:${CRATE_VERSION}

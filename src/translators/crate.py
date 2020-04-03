@@ -63,7 +63,10 @@ class CrateTranslator(base_translator.BaseTranslator):
         url = "{}:{}".format(self.host, self.port)
         self.conn = client.connect([url], error_trace=True)
         self.cursor = self.conn.cursor()
-
+        #IMPORTANT this reduce queries to crate, but it also means
+        #that you need to redeploy ql in case of major crate update
+        #TODO document this
+        self.db_version = self.get_db_version()
 
     def dispose(self):
         self.cursor.close()
@@ -249,8 +252,7 @@ class CrateTranslator(base_translator.BaseTranslator):
 
                 else:
                     # Github issue 44: Disable indexing for long string
-                    db_version = self.get_db_version()
-                    crate_t = _adjust_gh_44(attr_t, e[attr], db_version)
+                    crate_t = _adjust_gh_44(attr_t, e[attr], self.db_version)
 
                     # Github issue 24: StructuredValue == object or array
                     is_list = isinstance(e[attr].get('value', None), list)
@@ -290,7 +292,7 @@ class CrateTranslator(base_translator.BaseTranslator):
 
     def _attr_is_structured(self, a):
         if a['value'] is not None and isinstance(a['value'], dict):
-            self.logger.info("attribute {} has 'value' attribute of type dict"
+            self.logger.debug("attribute {} has 'value' attribute of type dict"
                              .format(a))
             return True
         return False
@@ -1029,7 +1031,7 @@ def _adjust_gh_44(attr_t, attr, db_version):
 @contextmanager
 def CrateTranslatorInstance():
     DB_HOST = os.environ.get('CRATE_HOST', 'crate')
-    DB_PORT = 4200
+    DB_PORT = os.environ.get('CRATE_PORT', 4200)
     DB_NAME = "ngsi-tsdb"
     with CrateTranslator(DB_HOST, DB_PORT, DB_NAME) as trans:
         yield trans
