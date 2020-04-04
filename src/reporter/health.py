@@ -1,6 +1,7 @@
 import os
 
 
+# TODO having now multiple backends, health check needs update
 def check_crate():
     """
     crateDB is the default backend of QuantumLeap, so it is required by
@@ -62,10 +63,14 @@ def get_health(with_geocoder=False):
     res = {}
 
     # Check crateDB (critical)
-    health = check_crate()
-    res['status'] = health['status']
-    if health['status'] != 'pass':
-        res.setdefault('details', {})['crateDB'] = health
+    try:
+        health = check_crate()
+        res['status'] = health['status']
+        if health['status'] != 'pass':
+            res.setdefault('details', {})['crateDB'] = health
+    except Exception:
+        res['status'] = 'fail'
+        res.setdefault('details', {})['crateDB'] = 'cannot reach crate'
 
     # Check geocache (critical)
     health = check_geocache()

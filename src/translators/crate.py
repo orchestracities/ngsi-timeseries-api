@@ -30,6 +30,8 @@ CRATE_ARRAY_STR = 'array(string)'
 NGSI_TO_CRATE = {
     "Array": CRATE_ARRAY_STR,  # TODO #36: Support numeric arrays
     "Boolean": 'boolean',
+# TODO since CRATEDB 4.0 timestamp is deprecated. Should be replaced with timestampz
+# This means that to maintain both version, we will need a different mechanism
     NGSI_ISO8601: 'timestamp',
     NGSI_DATETIME: 'timestamp',
     "Integer": 'long',
@@ -204,7 +206,7 @@ class CrateTranslator(base_translator.BaseTranslator):
                 msg = "Translating entity without TIME_INDEX. " \
                       "It should have been inserted by the 'Reporter'. {}"
                 warnings.warn(msg.format(e))
-                now_iso = datetime.now().isoformat(timespec='milliseconds')
+                now_iso = datetime.utcnow().isoformat(timespec='milliseconds')
                 e[self.TIME_INDEX_NAME] = now_iso
 
         # Define column types
@@ -231,7 +233,8 @@ class CrateTranslator(base_translator.BaseTranslator):
                 if isinstance(e[attr], dict) and 'type' in e[attr]:
                     attr_t = e[attr]['type']
                 else:
-                    # Won't guess the type if used did't specify the type.
+                    # Won't guess the type if user did't specify the type.
+                    # TODO Guess Type!
                     attr_t = NGSI_TEXT
 
                 col = self._ea2cn(attr)
@@ -239,9 +242,12 @@ class CrateTranslator(base_translator.BaseTranslator):
 
                 if attr_t not in NGSI_TO_CRATE:
                     # if attribute is complex assume it as an NGSI StructuredValue
+                    # TODO we should support type name different from NGSI types
+                    # but mapping to NGSI types
                     if self._attr_is_structured(e[attr]):
                         table[col] = NGSI_TO_CRATE[NGSI_STRUCTURED_VALUE]
                     else:
+                        #TODO fallback type should be defined by actual JSON type
                         supported_types = ', '.join(NGSI_TO_CRATE.keys())
                         msg = ("'{}' is not a supported NGSI type. "
                                "Please use any of the following: {}. "
@@ -272,7 +278,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         columns = ', '.join('"{}" {}'.format(cn.lower(), ct)
                             for cn, ct in table.items())
         stmt = "create table if not exists {} ({}) with " \
-               "(number_of_replicas = '2-all')".format(table_name, columns)
+               "(number_of_replicas = '2-all', column_policy = 'dynamic')".format(table_name, columns)
         self.cursor.execute(stmt)
 
         # Gather attribute values
@@ -343,7 +349,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         """
         stmt = "create table if not exists {} " \
                "(table_name string primary key, entity_attrs object) " \
-               "with (number_of_replicas = '2-all')"
+               "with (number_of_replicas = '2-all', column_policy = 'dynamic')"
         op = stmt.format(METADATA_TABLE_NAME)
         self.cursor.execute(op)
 
@@ -361,8 +367,14 @@ class CrateTranslator(base_translator.BaseTranslator):
 
         if metadata.keys() - persisted_metadata.keys():
             persisted_metadata.update(metadata)
-            stmt = "insert into {} (table_name, entity_attrs) values (?,?) " \
-               "on duplicate key update entity_attrs = values(entity_attrs)"
+
+            major = int(self.db_version.split('.')[0])
+            if (major <= 3):
+                stmt = "insert into {} (table_name, entity_attrs) values (?,?) " \
+                   "on duplicate key update entity_attrs = values(entity_attrs)"
+            else:
+                stmt = "insert into {} (table_name, entity_attrs) values (?,?) " \
+                   "on conflict(table_name) DO UPDATE SET entity_attrs = excluded.entity_attrs"
             stmt = stmt.format(METADATA_TABLE_NAME)
             self.cursor.execute(stmt, (table_name, persisted_metadata))
 
@@ -677,7 +689,7 @@ class CrateTranslator(base_translator.BaseTranslator):
         offset = max(0, offset)
 
         result = []
-        for tn in table_names:
+        for tn in sorted(table_names):
             op = "select {select_clause} " \
                  "from {tn} " \
                  "{where_clause} " \
@@ -738,11 +750,11 @@ class CrateTranslator(base_translator.BaseTranslator):
         len_tn = 0
         result = []
         stmt = ''
-        for tn in table_names:
+        for tn in sorted(table_names):
             len_tn += 1
             if len_tn != len(table_names):
                 stmt += "select entity_id, entity_type, max(time_index) as time_index " \
-                           "from {tn} {where_clause}" \
+                           "from {tn} {where_clause} " \
                            "group by entity_id, entity_type " \
                            "union all ".format(
                               tn=tn,
@@ -750,13 +762,14 @@ class CrateTranslator(base_translator.BaseTranslator):
                            )
             else:
                 stmt += "select entity_id, entity_type, max(time_index) as time_index " \
-                           "from {tn} {where_clause}" \
+                           "from {tn} {where_clause} " \
                            "group by entity_id, entity_type ".format(
                               tn=tn,
                               where_clause=where_clause
                            )
 
-        op = stmt + "order by time_index asc limit {limit} offset {offset}".format(
+        # TODO ORDER BY time_index asc is removed for the time being till we have a solution for https://github.com/crate/crate/issues/9854
+        op = stmt + "limit {limit} offset {offset}".format(
                 offset=offset,
                 limit=limit
              )

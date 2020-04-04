@@ -19,8 +19,21 @@ services:
     image: mongo:3.2.19
     ports:
       - "27017:27017"
-    volumes:
-      - mongodata:/data/db
+
+  quantumleap:
+    image: ${QL_IMAGE:-smartsdk/quantumleap}
+    ports:
+      - "8668:8668"
+    depends_on:
+      - mongo
+      - orion
+      - crate
+    environment:
+      - CRATE_HOST=${CRATE_HOST:-crate}
+      - USE_GEOCODING=True
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - LOGLEVEL=DEBUG
 
   crate:
     image: crate:${CRATE_VERSION:-4.1.4}
@@ -34,26 +47,13 @@ services:
     volumes:
       - cratedata:/data
 
-  grafana:
-    image: grafana/grafana
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_INSTALL_PLUGINS=crate-datasource,grafana-clock-panel,grafana-worldmap-panel
-    depends_on:
-      - crate
-
   redis:
     image: redis
     ports:
       - "6379:6379"
-    volumes:
-      - redisdata:/data
 
 volumes:
-  mongodata:
   cratedata:
-  redisdata:
 
 networks:
     default:
