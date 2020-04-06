@@ -63,9 +63,10 @@ class CrateTranslator(base_translator.BaseTranslator):
         url = "{}:{}".format(self.host, self.port)
         self.conn = client.connect([url], error_trace=True)
         self.cursor = self.conn.cursor()
-        # IMPORTANT this reduce queries to crate, but it also means
-        # that you need to redeploy ql in case of major crate update
-        # TODO document this
+        # TODO this reduce queries to crate,
+        # but only within a single API call to QUANTUMLEAP
+        # we need to think if we want to cache this information
+        # and save few msec for evey API call
         self.db_version = self.get_db_version()
 
     def dispose(self):
