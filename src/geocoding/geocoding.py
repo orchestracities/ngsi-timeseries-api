@@ -93,14 +93,14 @@ def add_location(entity, raise_error=False, session=None, cache=None):
         error_msg = 'Cannot add location to entity ' \
                     '(type: "{}", id: "{}")'.format(entity['type'],
                                                     entity['id'])
-        logger.info('{}, missing "address" attribute.'.format(error_msg))
+        logger.warning('{}, missing "address" attribute.'.format(error_msg))
         return entity
 
     addr = entity['address']
     if not isinstance(addr, dict) or not isinstance(addr['value'], dict):
         error_msg = 'Attribute address in entity (type: "{}", id: "{}")' \
                     'is not a dict, so geocoding will not act.'
-        logger.info(error_msg.format(entity['type'], entity['id']))
+        logger.warning(error_msg.format(entity['type'], entity['id']))
         return entity
 
     # Get Address Key
