@@ -885,21 +885,21 @@ def test_NTNENA_types_two_attribute(translator):
     ]
     expected_types_new = [
         {
-            'entities': expected_entities_room,
-            'entityType': 'Room'
-        },
-        {
             'entities': expected_entities_kitchen,
             'entityType': 'Kitchen'
+        },
+        {
+            'entities': expected_entities_room,
+            'entityType': 'Room'
         }
         ]
     expected_types = [
-        {   'entities': expected_entities_room_temp,
-            'entityType': 'Room'
+        {   'entities': expected_entities_kitchen_temp,
+            'entityType': 'Kitchen'
         },
         {
-            'entities': expected_entities_kitchen_temp,
-            'entityType': 'Kitchen'
+            'entities': expected_entities_room_temp,
+            'entityType': 'Room'
         }
         ]
     expected_attrs = [
@@ -959,12 +959,12 @@ def test_1TNENA_types_one_attribute(translator):
     ]
     expected_types = [
         {
-            'entities': expected_entities_room,
-            'entityType': 'Room'
-        },
-        {
             'entities': expected_entities_kitchen,
             'entityType': 'Kitchen'
+        },
+        {
+            'entities': expected_entities_room,
+            'entityType': 'Room'
         }
         ]
     expected_attrs = [
