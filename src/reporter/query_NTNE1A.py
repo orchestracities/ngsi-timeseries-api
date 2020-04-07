@@ -18,7 +18,10 @@ def query_NTNE1A(attr_name,  # In Path
                  to_date=None,
                  last_n=None,
                  limit=10000,
-                 offset=0):
+                 offset=0,
+                 georel=None,
+                 geometry=None,
+                 coords=None):
     """
     See /attrs/{attrName} in API Specification
         quantumleap.yml
@@ -30,6 +33,10 @@ def query_NTNE1A(attr_name,  # In Path
                                   options)
     if c != 200:
         return r, c
+    r, c, geo_query = handle_geo_query(georel, geometry, coords)
+    if r:
+        return r, c
+
     fiware_s = request.headers.get('fiware-service', None)
     fiware_sp = request.headers.get('fiware-servicepath', None)
     entities = None
@@ -50,7 +57,8 @@ def query_NTNE1A(attr_name,  # In Path
                                    limit=limit,
                                    offset=offset,
                                    fiware_service=fiware_s,
-                                   fiware_servicepath=fiware_sp)
+                                   fiware_servicepath=fiware_sp,
+                                   geo_query=geo_query)
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)
         logging.getLogger().error(msg, exc_info=True)
