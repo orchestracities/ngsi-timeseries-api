@@ -1,4 +1,26 @@
-# Database Selection
+# Configuration
+
+## Environment variables
+
+To configure QuantumLeap you can use the following environment variables:
+
+| Variable           | Description             | 
+| -------------------|-------------------------|
+| `CRATE_HOST`       | CrateDB Host            |
+| `CRATE_PORT`       | CrateDB Port            |
+| `POSTGRES_HOST`    | PostgreSQL Host         |
+| `POSTGRES_PORT`    | PostgreSQL Port         |
+| `POSTGRES_DB_NAME` | PostgreSQL default db   |
+| `POSTGRES_DB_USER` | PostgreSQL user         |
+| `POSTGRES_DB_PASS` | PostgreSQL password     |
+| `POSTGRES_USE_SSL` | `t` or `f` enable SSL   |
+| `REDIS_HOST`       | Redis Host              |
+| `REDIS_PORT`       | Redis Port              |
+| `USE_GEOCODING`    | `True` or `False` enable or disable geocoding |
+| `QL_CONFIG`        | Pathname for tenant  configuration  |
+| `LOGLEVEL`         | define the log level for all services (`DEBUG`, `INFO`, `WARNING` , `ERROR`)      |
+
+## Database selection per different tenant
 
 QuantumLeap can use different time series databases to persist and
 query NGSI data. Currently both [CrateDB][crate] and [Timescale][timescale]

@@ -28,6 +28,7 @@ services:
       - USE_GEOCODING=True
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - LOGLEVEL=DEBUG
 
   mongo:
     image: mongo:3.2.19

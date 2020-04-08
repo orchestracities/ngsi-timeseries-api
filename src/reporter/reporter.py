@@ -43,7 +43,8 @@ from geocoding.location import normalize_location
 
 
 def log():
-    logging.basicConfig(level=logging.INFO)
+    LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
+    logging.basicConfig(level=LOGLEVEL)
     return logging.getLogger(__name__)
 
 
@@ -107,7 +108,7 @@ def _validate_payload(payload):
   
 
 def _filter_empty_entities(payload):
-    log().info('Received payload: {}'.format(payload))
+    log().debug('Received payload: {}'.format(payload))
     attrs = list(iter_entity_attrs(payload))
     Flag = False
     attrs.remove('time_index')
@@ -124,6 +125,7 @@ def _filter_empty_entities(payload):
  
 
 def notify():
+
     if request.json is None:
         return 'Discarding notification due to lack of request body. ' \
                'Lost in a redirect maybe?', 400

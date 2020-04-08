@@ -279,7 +279,7 @@ class PostgresTranslator(base_translator.BaseTranslator):
 
     def _attr_is_structured(self, a):
         if a['value'] is not None and isinstance(a['value'], dict):
-            self.logger.info("attribute {} has 'value' attribute of type dict"
+            self.logger.debug("attribute {} has 'value' attribute of type dict"
                              .format(a))
             return True
         return False
