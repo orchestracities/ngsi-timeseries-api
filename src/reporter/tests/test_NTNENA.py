@@ -889,7 +889,7 @@ def test_NTNENA_types_two_attribute(translator):
             'entityType': 'Room'
         },
         {
-            'entities': expected_entities_kicthen,
+            'entities': expected_entities_kitchen,
             'entityType': 'Kitchen'
         }
         ]
