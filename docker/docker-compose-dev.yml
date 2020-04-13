@@ -38,7 +38,7 @@ services:
       - mongodata:/data/db
 
   crate:
-    image: crate:${CRATE_VERSION:-3.1.2}
+    image: crate:${CRATE_VERSION:-3.3.3}
     command: crate -Clicense.enterprise=false -Cauth.host_based.enabled=false
       -Ccluster.name=democluster -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*"
     ports:
