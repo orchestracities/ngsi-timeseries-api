@@ -752,6 +752,7 @@ def test_weird_ids(reporter_dataset):
     obtained = r.json()
     assert obtained == expected
 
+
 @pytest.mark.parametrize("aggr_period, exp_index, ins_period", [
     ("day",    ['1970-01-01T00:00:00.000',
                 '1970-01-02T00:00:00.000',
@@ -834,6 +835,7 @@ def test_NTNENA_aggrScope(reporter_dataset):
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 501, r.text
+
 
 def test_NTNENA_types_two_attribute(translator):
     # Query

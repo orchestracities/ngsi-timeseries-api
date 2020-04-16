@@ -41,7 +41,7 @@ QuantumLeap supports both Crate DB and Timescale as time-series DB
 backends but please bear in mind that at the moment we only support
 the following versions:
 
-* Crate backend: Crate DB version `3.3.*`
+* Crate backend: Crate DB version `3.3.*` and `4.*` (experimental)
 * Timescale backend: Postgres version `10.*` or `11.*` +
   Timescale extension `1.3.*` + Postgis extension `2.5.*`.
 
@@ -69,6 +69,7 @@ consistency.
 - [SmartSDK Guided-tour](https://guided-tour-smartsdk.readthedocs.io/en/latest/)
 - [FIWARE Step-by-step](https://fiware-tutorials.readthedocs.io/en/latest/time-series-data/index.html)
 - [SmartSDK Recipes](https://smartsdk-recipes.readthedocs.io/en/latest/data-management/quantumleap/readme/)
+- [Orchestra Cities Helm Charts](https://github.com/orchestracities/charts)
 
 ---
 
@@ -76,4 +77,4 @@ consistency.
 
 QuantumLeap is licensed under the [MIT](LICENSE) License
 
-© 2017-2019 SmartSDK Team
+© 2017-2019 Martel Innovate
