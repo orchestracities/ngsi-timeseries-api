@@ -364,28 +364,13 @@ def test_no_value_for_attributes(notification):
     assert res_get.status_code == 200
     assert res_get.json()['values'][2] == '10'
 
-def test_null_value_for_attributes(notification):
-    # with Null value
-    notification['data'][0] = {
-        'id': 'Room1',
-        'type': 'Room',
-        'odour': {'type': 'Text', 'value': 'Null', 'metadata': {}},
-        'temperature': {'type': 'Number', 'value': 'Null', 'metadata': {}},
-        'pressure': {'type': 'Number', 'value': 'Null', 'metadata': {}},
-    }
-    url = '{}'.format(notify_url)
-    get_url = "{}/entities/Room1".format(QL_URL)
-    url_new = '{}'.format(get_url)
-    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
-    assert r.status_code == 200
-    res_get = requests.get(url_new, headers=HEADERS_PUT)
-    assert res_get.status_code == 404
-    # entity with one Null value
+def test_no_value_no_type_for_attributes(notification):
+    # entity with no value and no type
     notification['data'][0] = {
         'id': 'Room1',
         'type': 'Room',
         'odour': {'type': 'Text', 'value': 'Good', 'metadata': {}},
-        'temperature': {'type': 'Number', 'value': 'Null', 'metadata': {}},
+        'temperature': {'metadata': {}},
         'pressure': {'type': 'Number', 'value': '26', 'metadata': {}},
     }
     url = '{}'.format(notify_url)
@@ -403,6 +388,7 @@ def test_null_value_for_attributes(notification):
     res_get = requests.get(url_new, headers=HEADERS_PUT)
     assert res_get.status_code == 200
     assert res_get.json()['values'][0] == 26
+
     # entity with value other than Null
     notification['data'][0] = {
         'id': 'Room1',
@@ -419,3 +405,46 @@ def test_null_value_for_attributes(notification):
     res_get = requests.get(url_new, headers=HEADERS_PUT)
     assert res_get.status_code == 200
     assert res_get.json()['values'][1] == '25'
+
+
+def test_with_value_no_type_for_attributes(notification):
+    # entity with value and no type
+    notification['data'][0] = {
+        'id': 'Kitchen1',
+        'type': 'Kitchen',
+        'odour': {'type': 'Text', 'value': 'Good', 'metadata': {}},
+        'temperature': {'value': '25', 'metadata': {}},
+        'pressure': {'type': 'Number', 'value': '26', 'metadata': {}},
+    }
+    url = '{}'.format(notify_url)
+    get_url = "{}/entities/Kitchen1/attrs/temperature/value".format(QL_URL)
+    url_new = '{}'.format(get_url)
+    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    assert r.status_code == 200
+    # Give time for notification to be processed
+    time.sleep(3)
+    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    assert res_get.status_code == 200
+    assert res_get.json()['values'][0] == '25'
+
+def test_no_value_with_type_for_attributes(notification):
+    # entity with one Null value and no type
+    notification['data'][0] = {
+        'id': 'Hall1',
+        'type': 'Hall',
+        'odour': {'type': 'Text', 'value': 'Good', 'metadata': {}},
+        'temperature': {'type': 'Number', 'metadata': {}},
+        'pressure': {'type': 'Number', 'value': '26', 'metadata': {}},
+    }
+    url = '{}'.format(notify_url)
+    get_url = "{}/entities/Hall1/attrs/temperature/value".format(QL_URL)
+    url_new = '{}'.format(get_url)
+    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    assert r.status_code == 200
+    # Give time for notification to be processed
+    time.sleep(3)
+    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    assert res_get.status_code == 200
+    assert res_get.json()['values'][0] == None
+
+
