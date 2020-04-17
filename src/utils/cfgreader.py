@@ -102,7 +102,7 @@ class EnvReader:
 
     def __init__(self, var_store: dict = os.environ, log=None):
         self.var_store = var_store
-        self.log = log if log else logging.getLogger(__name__).info
+        self.log = log if log else logging.getLogger(__name__).debug
 
     def read(self, var: EVar):
         """
@@ -133,7 +133,7 @@ class YamlReader:
 
     def __init__(self, var_store: dict = os.environ, log=None):
         self.var_store = var_store
-        self.log = log if log else logging.getLogger(__name__).info
+        self.log = log if log else logging.getLogger(__name__).debug
 
     def from_file(self, path: MaybeString, defaults: dict) -> dict:
         """

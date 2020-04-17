@@ -43,7 +43,8 @@ from geocoding.location import normalize_location
 
 
 def log():
-    logging.basicConfig(level=logging.INFO)
+    LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
+    logging.basicConfig(level=LOGLEVEL)
     return logging.getLogger(__name__)
 
 
@@ -137,6 +138,7 @@ def _filter_no_type_no_value_entities(payload):
 
 
 def notify():
+
     if request.json is None:
         return 'Discarding notification due to lack of request body. ' \
                'Lost in a redirect maybe?', 400

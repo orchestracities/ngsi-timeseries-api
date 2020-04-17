@@ -98,6 +98,16 @@ By default QL will append the port `4200` to the hostname. You can of course
 add your required environment variables with `-e`. For more options see
 [docker run reference](https://docs.docker.com/engine/reference/run/).
 
+## Deploy QuantumLeap in Kubernetes
+
+To deploy QuantumLeap services in Kubernetes,
+you can leverage the Helm Charts in [this repository](https://smartsdk-recipes.readthedocs.io/en/latest/data-management/quantumleap/readme/).
+
+In particular you will need to deploy:
+* [CrateDB](https://github.com/orchestracities/charts/tree/master/charts/crate)
+* [Optional] Timescale - for which you can refer to [Patroni Helm Chart](https://github.com/helm/charts/tree/master/incubator/patroni).
+* [QuantumLeap](https://github.com/orchestracities/charts/tree/master/charts/quantumleap)
+
 ## FIWARE Releases Compatibility
 
 The current version of QuantumLeap is compatible with any FIWARE release

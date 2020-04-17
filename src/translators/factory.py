@@ -17,7 +17,7 @@ def log():
 
 
 def translator_for(fiware_service: str):
-    reader = YamlReader(log=log().info)
+    reader = YamlReader(log=log().debug)
     config = reader.from_env_file(QL_CONFIG_ENV_VAR, defaults={})
 
     backend = maybe_string_match(config, 'tenants', fiware_service, 'backend')\

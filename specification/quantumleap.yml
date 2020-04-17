@@ -1349,8 +1349,8 @@ paths:
 
   /v2/attrs/{attrName}:
     get:
-      operationId: reporter.reporter.query_NTNE1A
-      summary: "(To Be Implemented) History of an attribute of N entities of N
+      operationId: reporter.query_NTNE1A.query_NTNE1A
+      summary: "History of an attribute of N entities of N
       types."
       description: "For example, query the average temperature of this month
       in all the devices capable of measuring temperature. In this case, you
@@ -1372,6 +1372,9 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/georel'
+        - $ref: '#/parameters/geometry'
+        - $ref: '#/parameters/coords'
         # In Header...
         - $ref: '#/parameters/fiware-Service'
         - $ref: '#/parameters/fiware-ServicePath'
@@ -1445,8 +1448,8 @@ paths:
 
   /v2/attrs/{attrName}/value:
     get:
-      operationId: reporter.reporter.query_NTNE1A_value
-      summary: "(To Be Implemented) History of an attribute (values only) of N
+      operationId: reporter.query_NTNE1A.query_NTNE1A_value
+      summary: "History of an attribute (values only) of N
       entities of N types."
       description: "For example, query the average temperature (values only, no
       metadata) of this month in all the devices capable of measuring
@@ -1544,8 +1547,8 @@ paths:
 
   /v2/attrs:
     get:
-      operationId: reporter.reporter.query_NTNENA
-      summary: "(To Be Implemented) History of N attributes of N entities of N
+      operationId: reporter.query_NTNENA.query_NTNENA
+      summary: "History of N attributes of N entities of N
       types."
       description: "This is sort of a query all. The response will likely not
       fit into a single response so an efficient paging mechanism and sensible
@@ -1652,8 +1655,8 @@ paths:
 
   /v2/attrs/value:
     get:
-      operationId: reporter.reporter.query_NTNENA_value
-      summary: "(To Be Implemented) History of N attributes (values only) of N
+      operationId: reporter.query_NTNENA.query_NTNENA_value
+      summary: "History of N attributes (values only) of N
       entities of N types."
       description: "This is sort of a query all. The response will likely not
       fit into a single response so an efficient paging mechanism and sensible

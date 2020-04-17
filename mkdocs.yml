@@ -17,7 +17,7 @@ nav:
     - 'Introduction': 'admin/index.md'
     - 'Sanity Check': 'admin/check.md'
     - 'Ports': 'admin/ports.md'
-    - 'Database Selection': 'admin/db-selection.md'
+    - 'Configuration': 'admin/configuration.md'
     - 'CrateDB': 'admin/crate.md'
     - 'Timescale': 'admin/timescale.md'
     - 'Grafana': 'admin/grafana.md'
