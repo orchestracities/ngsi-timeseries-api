@@ -124,6 +124,19 @@ def _filter_empty_entities(payload):
         return None
  
 
+def _filter_no_type_no_value_entities(payload):
+    attrs = list(iter_entity_attrs(payload))
+    attrs.remove('time_index')
+    for i in attrs:
+        attr = payload.get(i, {})
+        attr_value = attr.get('value', None)
+        attr_type = attr.get('type', None)
+        if not attr_type and not attr_value:
+            del payload[i]
+
+    return payload
+
+
 def notify():
 
     if request.json is None:
@@ -167,7 +180,8 @@ def notify():
         # Validate entity update
         e = _filter_empty_entities(entity)
         if e is not None:
-            res_entity.append(e)
+            e_new = _filter_no_type_no_value_entities(e)
+            res_entity.append(e_new)
     payload = res_entity
     
     # Send valid entities to translator
