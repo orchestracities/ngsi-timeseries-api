@@ -1,4 +1,4 @@
-from exceptions.exceptions import AmbiguousNGSIIdError
+from exceptions.exceptions import AmbiguousNGSIIdError, InvalidParameterValue
 from flask import request
 from reporter.reporter import _validate_query_params
 from translators.crate import CrateTranslatorInstance, CrateTranslator
@@ -30,6 +30,12 @@ def query_NTNE(limit=10000,
         msg = "Bad Request Error: {}".format(e)
         logging.getLogger().error(msg, exc_info=True)
         return msg, 400
+
+    except InvalidParameterValue as e:
+        return {
+            "error": "{}".format(type(e)),
+            "description": str(e)
+        }, 422
 
     except Exception as e:
         msg = "Internal server Error: {}".format(e)

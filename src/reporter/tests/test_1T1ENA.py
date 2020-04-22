@@ -5,6 +5,7 @@ from reporter.tests.utils import insert_test_data
 import pytest
 import requests
 from utils.common import assert_equal_time_index_arrays
+import dateutil.parser
 
 entity_type = 'Room'
 entity_id = 'Room0'
@@ -54,7 +55,7 @@ def test_1T1ENA_defaults(reporter_dataset):
     expected_temperatures = list(range(n_days))
     expected_pressures = [t*10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
     ]
     expected = {
         'entityId': entity_id,
@@ -119,20 +120,20 @@ def test_1T1ENA_aggrMethod(reporter_dataset, aggr_meth, aggr_press, aggr_temp):
 
 
 @pytest.mark.parametrize("aggr_period, exp_index, ins_period", [
-    ("month",  ['1970-01-01T00:00:00.000',
-                '1970-02-01T00:00:00.000',
-                '1970-03-01T00:00:00.000'], "day"),
-    ("hour",   ['1970-01-01T00:00:00.000',
-                '1970-01-01T01:00:00.000',
-                '1970-01-01T02:00:00.000'], "minute"),
-    ("minute", ['1970-01-01T00:00:00.000',
-                '1970-01-01T00:01:00.000',
-                '1970-01-01T00:02:00.000'], "second"),
+    ("month",  ['1970-01-01T00:00:00.000+00:00',
+                '1970-02-01T00:00:00.000+00:00',
+                '1970-03-01T00:00:00.000+00:00'], "day"),
+    ("hour",   ['1970-01-01T00:00:00.000+00:00',
+                '1970-01-01T01:00:00.000+00:00',
+                '1970-01-01T02:00:00.000+00:00'], "minute"),
+    ("minute", ['1970-01-01T00:00:00.000+00:00',
+                '1970-01-01T00:01:00.000+00:00',
+                '1970-01-01T00:02:00.000+00:00'], "second"),
 ])
 def test_1T1ENA_aggrPeriod(translator, aggr_period, exp_index, ins_period):
     # Custom index to test aggrPeriod
     for i in exp_index:
-        base = datetime.strptime(i, "%Y-%m-%dT%H:%M:%S.%f")
+        base = dateutil.parser.isoparse(i)
         insert_test_data(translator,
                          [entity_type],
                          index_size=3,
@@ -180,8 +181,8 @@ def test_1T1ENA_fromDate_toDate(reporter_dataset):
     # Query
     query_params = {
         'type': entity_type,
-        'fromDate': "1970-01-06T00:00:00",
-        'toDate': "1970-01-17T00:00:00",
+        'fromDate': "1970-01-06T00:00:00+00:00",
+        'toDate': "1970-01-17T00:00:00+00:00",
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
@@ -190,11 +191,11 @@ def test_1T1ENA_fromDate_toDate(reporter_dataset):
     expected_temperatures = list(range(5, 17))
     expected_pressures = [t*10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
     ]
     assert len(expected_index) == 12
-    assert expected_index[0] == "1970-01-06T00:00:00"
-    assert expected_index[-1] == "1970-01-17T00:00:00"
+    assert expected_index[0] == "1970-01-06T00:00:00+00:00"
+    assert expected_index[-1] == "1970-01-17T00:00:00+00:00"
 
     # Assert
     expected = {
@@ -218,8 +219,8 @@ def test_1T1ENA_fromDate_toDate_with_quotes(reporter_dataset):
     # Query
     query_params = {
         'type': entity_type,
-        'fromDate': '"1970-01-06T00:00:00"',
-        'toDate': '"1970-01-17T00:00:00"',
+        'fromDate': '"1970-01-06T00:00:00+00:00"',
+        'toDate': '"1970-01-17T00:00:00+00:00"',
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
@@ -228,11 +229,11 @@ def test_1T1ENA_fromDate_toDate_with_quotes(reporter_dataset):
     expected_temperatures = list(range(5, 17))
     expected_pressures = [t*10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
     ]
     assert len(expected_index) == 12
-    assert expected_index[0] == "1970-01-06T00:00:00"
-    assert expected_index[-1] == "1970-01-17T00:00:00"
+    assert expected_index[0] == "1970-01-06T00:00:00+00:00"
+    assert expected_index[-1] == "1970-01-17T00:00:00+00:00"
 
     # Assert
     expected = {
@@ -265,11 +266,11 @@ def test_1T1ENA_lastN(reporter_dataset):
     expected_temperatures = list(range(n_days-10, n_days))
     expected_pressures = [t*10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
     ]
     assert len(expected_index) == 10
-    assert expected_index[0] == "1970-01-21T00:00:00"
-    assert expected_index[-1] == "1970-01-30T00:00:00"
+    assert expected_index[0] == "1970-01-21T00:00:00+00:00"
+    assert expected_index[-1] == "1970-01-30T00:00:00+00:00"
 
     # Assert
     expected = {
@@ -307,9 +308,9 @@ def test_1T1E1A_lastN_with_limit(reporter_dataset):
     expected_temperatures = [27, 28, 29]
     expected_pressures = [t * 10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-28T00:00:00',
-        '1970-01-29T00:00:00',
-        '1970-01-30T00:00:00'
+        '1970-01-28T00:00:00+00:00',
+        '1970-01-29T00:00:00+00:00',
+        '1970-01-30T00:00:00+00:00'
     ]
     expected = {
         'entityId': entity_id,
@@ -344,11 +345,11 @@ def test_1T1ENA_limit(reporter_dataset):
     expected_temperatures = list(range(5))
     expected_pressures = [t*10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
     ]
     assert len(expected_index) == 5
-    assert expected_index[0] == "1970-01-01T00:00:00"
-    assert expected_index[-1] == "1970-01-05T00:00:00"
+    assert expected_index[0] == "1970-01-01T00:00:00+00:00"
+    assert expected_index[-1] == "1970-01-05T00:00:00+00:00"
 
     # Assert
     expected = {
@@ -382,11 +383,11 @@ def test_1T1ENA_offset(reporter_dataset):
     expected_temperatures = list(range(3, n_days))
     expected_pressures = [t*10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
     ]
     assert len(expected_index) == 27
-    assert expected_index[0] == "1970-01-04T00:00:00"
-    assert expected_index[-1] == "1970-01-30T00:00:00"
+    assert expected_index[0] == "1970-01-04T00:00:00+00:00"
+    assert expected_index[-1] == "1970-01-30T00:00:00+00:00"
 
     # Assert
     expected = {
@@ -412,7 +413,7 @@ def test_1T1ENA_combined(reporter_dataset):
     query_params = {
         'type': entity_type,
         'offset': 2,
-        'toDate': "1970-01-20T00:00:00",
+        'toDate': "1970-01-20T00:00:00+00:00",
         'limit': 28,
     }
     r = requests.get(query_url(), params=query_params)
@@ -422,11 +423,11 @@ def test_1T1ENA_combined(reporter_dataset):
     expected_temperatures = list(range(2, 20))
     expected_pressures = [t*10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
     ]
     assert len(expected_index) == 18
-    assert expected_index[0] == "1970-01-03T00:00:00"
-    assert expected_index[-1] == "1970-01-20T00:00:00"
+    assert expected_index[0] == "1970-01-03T00:00:00+00:00"
+    assert expected_index[-1] == "1970-01-20T00:00:00+00:00"
 
     # Assert
     expected = {
@@ -459,7 +460,7 @@ def test_1T1ENA_values_defaults(reporter_dataset):
     expected_temperatures = list(range(n_days))
     expected_pressures = [t*10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
     ]
     expected = {
         'index': expected_index,

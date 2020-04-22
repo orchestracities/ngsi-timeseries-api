@@ -1,11 +1,12 @@
-from exceptions.exceptions import NGSIUsageError
+from exceptions.exceptions import NGSIUsageError, InvalidParameterValue
 from utils.jsondict import lookup_string_match
 from flask import request
 from reporter.reporter import _validate_query_params
 from translators.crate import CrateTranslatorInstance
 import logging
 from .geo_query_handler import handle_geo_query
-
+import dateutil.parser
+from datetime import datetime, timezone
 
 def query_NTNENA(id_=None,  # In Query
                  attrs=None,
@@ -66,6 +67,13 @@ def query_NTNENA(id_=None,  # In Query
         msg = "Bad Request Error: {}".format(e)
         logging.getLogger().error(msg, exc_info=True)
         return msg, 400
+
+    except InvalidParameterValue as e:
+        return {
+            "error": "{}".format(type(e)),
+            "description": str(e)
+        }, 422
+
     except Exception as e:
         msg = "Something went wrong with QL. Error: {}".format(e)
         logging.getLogger().error(msg, exc_info=True)
@@ -91,7 +99,15 @@ def query_NTNENA(id_=None,  # In Query
             for e in entities:
                 matched_attr = lookup_string_match(e, at)
                 if matched_attr is not None:
-                    index = [from_date or '', to_date or ''] if aggr_method and not aggr_period else e['index']
+                    try:
+                        f_date = dateutil.parser.isoparse(from_date).replace(tzinfo=timezone.utc).isoformat()
+                    except Exception as ex:
+                        f_date = ''
+                    try:
+                        t_date = dateutil.parser.isoparse(to_date).replace(tzinfo=timezone.utc).isoformat()
+                    except Exception as ex:
+                        t_date = ''
+                    index = [f_date, t_date] if aggr_method and not aggr_period else e['index']
                     entity = {
                              'entityId': e['id'],
                              'index': index,

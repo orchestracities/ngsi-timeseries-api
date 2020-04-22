@@ -1,17 +1,13 @@
 from contextlib import contextmanager
 from crate import client
 from crate.client import exceptions
-from datetime import datetime, timedelta
-from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption, \
-    NGSIUsageError
+from datetime import datetime
 from translators import sql_translator
 from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
     NGSI_GEOJSON, NGSI_GEOPOINT, NGSI_TEXT, NGSI_STRUCTURED_VALUE, TIME_INDEX, \
     METADATA_TABLE_NAME, FIWARE_SERVICEPATH
-from utils.common import iter_entity_attrs
 import logging
 import os
-from geocoding.slf import SlfQuery
 from .crate_geo_query import from_ngsi_query
 
 # CRATE TYPES
@@ -83,7 +79,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
         health = {}
 
         op = "select health from sys.health order by severity desc limit 1"
-        health['time'] = datetime.now().isoformat(timespec='milliseconds')
+        health['time'] = datetime.utcnow().isoformat(timespec='milliseconds')
         try:
             self.cursor.execute(op)
 
@@ -107,7 +103,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
         return health
 
 
-    def _preprocess_values(self, e, col_names, fiware_servicepath):
+    def _preprocess_values(self, e, table, col_names, fiware_servicepath):
         values = []
         for cn in col_names:
             if cn == 'entity_type':
@@ -131,6 +127,19 @@ class CrateTranslator(sql_translator.SQLTranslator):
                     values.append( None )
         return values
 
+    def _prepare_data_table(self, table_name, table, fiware_service):
+        columns = ', '.join('"{}" {}'.format(cn.lower(), ct)
+                            for cn, ct in table.items())
+        stmt = "create table if not exists {} ({}) with " \
+               "(number_of_replicas = '2-all', column_policy = 'dynamic')".format(table_name, columns)
+        self.cursor.execute(stmt)
+
+    def _create_metadata_table(self):
+        stmt = "create table if not exists {} " \
+               "(table_name string primary key, entity_attrs object) " \
+               "with (number_of_replicas = '2-all', column_policy = 'dynamic')"
+        op = stmt.format(METADATA_TABLE_NAME)
+        self.cursor.execute(op)
 
     def _store_medatata(self, table_name, persisted_metadata):
         major = int(self.db_version.split('.')[0])
@@ -144,7 +153,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
         self.cursor.execute(stmt, (table_name, persisted_metadata))
 
 
-    def _disable_index(self, attr_t, attr):
+    def _compute_type(self, attr_t, attr):
         """
         Github issue 44: Disable indexing for long string
         """

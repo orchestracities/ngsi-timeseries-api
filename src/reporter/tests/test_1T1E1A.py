@@ -3,6 +3,7 @@ from datetime import datetime
 from exceptions.exceptions import AmbiguousNGSIIdError
 from reporter.tests.utils import insert_test_data
 from utils.common import assert_equal_time_index_arrays
+import dateutil.parser
 import pytest
 import requests
 
@@ -54,7 +55,7 @@ def test_1T1E1A_defaults(reporter_dataset):
 
     exp_values = list(range(n_days))
     exp_index = [
-        '1970-01-{:02}T00:00:00.00'.format(i+1) for i in exp_values
+        '1970-01-{:02}T00:00:00.00+00:00'.format(i+1) for i in exp_values
     ]
     expected = {
         'entityId': entity_id,
@@ -92,20 +93,20 @@ def test_1T1E1A_aggrMethod(reporter_dataset, aggr_method, aggr_value):
 
 
 @pytest.mark.parametrize("aggr_period, exp_index, ins_period", [
-    ("year", ['1970-01-01T00:00:00.000',
-              '1971-01-01T00:00:00.000',
-              '1972-01-01T00:00:00.000'], "month"),
-    ("day",  ['1970-01-01T00:00:00.000',
-              '1970-01-02T00:00:00.000',
-              '1970-01-03T00:00:00.000'], "hour"),
-    ("second", ['1970-01-01T00:00:00.000',
-                '1970-01-01T00:00:01.000',
-                '1970-01-01T00:00:02.000'], "milli"),
+    ("year", ['1970-01-01T00:00:00.000+00:00',
+              '1971-01-01T00:00:00.000+00:00',
+              '1972-01-01T00:00:00.000+00:00'], "month"),
+    ("day",  ['1970-01-01T00:00:00.000+00:00',
+              '1970-01-02T00:00:00.000+00:00',
+              '1970-01-03T00:00:00.000+00:00'], "hour"),
+    ("second", ['1970-01-01T00:00:00.000+00:00',
+                '1970-01-01T00:00:01.000+00:00',
+                '1970-01-01T00:00:02.000+00:00'], "milli"),
 ])
 def test_1T1E1A_aggrPeriod(translator, aggr_period, exp_index, ins_period):
     # Custom index to test aggrPeriod
     for i in exp_index:
-        base = datetime.strptime(i, "%Y-%m-%dT%H:%M:%S.%f")
+        base = dateutil.parser.isoparse(i)
         insert_test_data(translator,
                          [entity_type],
                          index_size=4,
@@ -145,8 +146,8 @@ def test_1T1E1A_fromDate_toDate(reporter_dataset):
     # Query
     query_params = {
         'type': entity_type,
-        'fromDate': "1970-01-06T00:00:00",
-        'toDate': "1970-01-17T00:00:00",
+        'fromDate': "1970-01-06T00:00:00+00:00",
+        'toDate': "1970-01-17T00:00:00+00:00",
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
@@ -154,11 +155,11 @@ def test_1T1E1A_fromDate_toDate(reporter_dataset):
     # Expect only last N
     expected_values = list(range(5, 17))
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_values
     ]
     assert len(expected_index) == 12
-    assert expected_index[0] == "1970-01-06T00:00:00"
-    assert expected_index[-1] == "1970-01-17T00:00:00"
+    assert expected_index[0] == "1970-01-06T00:00:00+00:00"
+    assert expected_index[-1] == "1970-01-17T00:00:00+00:00"
 
     # Assert
     obtained = r.json()
@@ -174,8 +175,8 @@ def test_1T1E1A_fromDate_toDate_with_quotes(reporter_dataset):
     # Query
     query_params = {
         'type': entity_type,
-        'fromDate': '"1970-01-06T00:00:00"',
-        'toDate': '"1970-01-17T00:00:00"',
+        'fromDate': '"1970-01-06T00:00:00+00:00"',
+        'toDate': '"1970-01-17T00:00:00+00:00"',
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
@@ -183,11 +184,11 @@ def test_1T1E1A_fromDate_toDate_with_quotes(reporter_dataset):
     # Expect only last N
     expected_values = list(range(5, 17))
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_values
     ]
     assert len(expected_index) == 12
-    assert expected_index[0] == "1970-01-06T00:00:00"
-    assert expected_index[-1] == "1970-01-17T00:00:00"
+    assert expected_index[0] == "1970-01-06T00:00:00+00:00"
+    assert expected_index[-1] == "1970-01-17T00:00:00+00:00"
 
     # Assert
     obtained = r.json()
@@ -211,11 +212,11 @@ def test_1T1E1A_lastN(reporter_dataset):
     # Expect only last N
     expected_values = list(range(n_days-10, n_days))
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_values
     ]
     assert len(expected_index) == 10
-    assert expected_index[0] == "1970-01-21T00:00:00"
-    assert expected_index[-1] == "1970-01-30T00:00:00"
+    assert expected_index[0] == "1970-01-21T00:00:00+00:00"
+    assert expected_index[-1] == "1970-01-30T00:00:00+00:00"
 
     # Assert
     obtained = r.json()
@@ -244,9 +245,9 @@ def test_1T1E1A_lastN_with_limit(reporter_dataset):
     # Expect only last N
     expected_temperatures = [27, 28, 29]
     expected_index = [
-        '1970-01-28T00:00:00',
-        '1970-01-29T00:00:00',
-        '1970-01-30T00:00:00'
+        '1970-01-28T00:00:00+00:00',
+        '1970-01-29T00:00:00+00:00',
+        '1970-01-30T00:00:00+00:00'
     ]
 
     # Assert
@@ -272,11 +273,11 @@ def test_1T1E1A_limit(reporter_dataset):
     # Expect only last N
     expected_values = list(range(5))
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_values
     ]
     assert len(expected_index) == 5
-    assert expected_index[0] == "1970-01-01T00:00:00"
-    assert expected_index[-1] == "1970-01-05T00:00:00"
+    assert expected_index[0] == "1970-01-01T00:00:00+00:00"
+    assert expected_index[-1] == "1970-01-05T00:00:00+00:00"
 
     # Assert
     obtained = r.json()
@@ -301,11 +302,11 @@ def test_1T1E1A_offset(reporter_dataset):
     # Expect only last N
     expected_values = list(range(3, n_days))
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_values
     ]
     assert len(expected_index) == 27
-    assert expected_index[0] == "1970-01-04T00:00:00"
-    assert expected_index[-1] == "1970-01-30T00:00:00"
+    assert expected_index[0] == "1970-01-04T00:00:00+00:00"
+    assert expected_index[-1] == "1970-01-30T00:00:00+00:00"
 
     # Assert
     obtained = r.json()
@@ -323,7 +324,7 @@ def test_1T1E1A_combined(reporter_dataset):
     query_params = {
         'type': entity_type,
         'offset': 2,
-        'toDate': "1970-01-20T00:00:00",
+        'toDate': "1970-01-20T00:00:00+00:00",
         'limit': 28,
     }
     r = requests.get(query_url(), params=query_params)
@@ -332,11 +333,11 @@ def test_1T1E1A_combined(reporter_dataset):
     # Expect only last N
     expected_values = list(range(2, 20))
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_values
     ]
     assert len(expected_index) == 18
-    assert expected_index[0] == "1970-01-03T00:00:00"
-    assert expected_index[-1] == "1970-01-20T00:00:00"
+    assert expected_index[0] == "1970-01-03T00:00:00+00:00"
+    assert expected_index[-1] == "1970-01-20T00:00:00+00:00"
 
     # Assert
     obtained = r.json()
@@ -361,7 +362,7 @@ def test_1T1E1A_values_defaults(reporter_dataset):
     obtained = r.json()
     expected_values = list(range(n_days))
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_values
     ]
     expected = {
         'index': expected_index,

@@ -1,5 +1,5 @@
 from conftest import QL_URL
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import json
 import requests
 import time
@@ -52,7 +52,7 @@ def send_notifications(notifications):
 def insert_test_data(translator, entity_types, n_entities=1, index_size=30,
                      entity_id=None, index_base=None, index_period="day"):
     assert isinstance(entity_types, list)
-    index_base = index_base or datetime(1970, 1, 1, 0, 0, 0, 0)
+    index_base = index_base or datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc)
 
     for et in entity_types:
         for ei in range(n_entities):

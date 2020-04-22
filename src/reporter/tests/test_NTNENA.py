@@ -4,7 +4,7 @@ from reporter.tests.utils import insert_test_data
 from utils.common import assert_equal_time_index_arrays
 import pytest
 import requests
-
+import dateutil.parser
 
 entity_type = "Room"
 entity_type_1 = "Kitchen"
@@ -36,7 +36,7 @@ def test_NTNENA_defaults(reporter_dataset):
     expected_temperatures = list(range(4))
     expected_pressures = [t*10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
     ]
     expected_entities = [
         {
@@ -112,7 +112,7 @@ def test_NTNENA_type(reporter_dataset):
     obtained = r.json()
     expected_values = list(range(4))
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_values
     ]
     expected_entities = [
         {
@@ -186,7 +186,7 @@ def test_NTNE1A_one_entity(reporter_dataset):
     obtained = r.json()
     expected_values = list(range(4))
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_values
     ]
     expected_entities = [
         {
@@ -247,7 +247,7 @@ def test_1TNENA_some_entities(reporter_dataset):
     expected_temperatures = list(range(n_days))
     expected_pressures = [t*10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
     ]
 
     expected_entities = [
@@ -320,7 +320,7 @@ def test_NTNENA_values_defaults(reporter_dataset):
     expected_temperatures = list(range(n_days))
     expected_pressures = [t*10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
     ]
     expected_entities = [
         {
@@ -382,8 +382,8 @@ def test_NTNENA_values_defaults(reporter_dataset):
 def test_NTNE_fromDate_toDate(reporter_dataset):
     # Query
     query_params = {
-        'fromDate': "1970-01-01T00:00:00",
-        'toDate': "1970-01-04T00:00:00"
+        'fromDate': "1970-01-01T00:00:00+00:00",
+        'toDate': "1970-01-04T00:00:00+00:00"
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
@@ -393,7 +393,7 @@ def test_NTNE_fromDate_toDate(reporter_dataset):
     obtained = r.json()
     expected_values = list(range(4))
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_values
     ]
  
     expected_entities = [
@@ -456,8 +456,8 @@ def test_NTNE_fromDate_toDate(reporter_dataset):
 def test_NTNENA_fromDate_toDate_with_quotes(reporter_dataset):
     # Query
     query_params = {
-        'fromDate': '"1970-01-01T00:00:00"',
-        'toDate': '"1970-01-04T00:00:00"'
+        'fromDate': '"1970-01-01T00:00:00+00:00"',
+        'toDate': '"1970-01-04T00:00:00+00:00"'
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
@@ -467,7 +467,7 @@ def test_NTNENA_fromDate_toDate_with_quotes(reporter_dataset):
     obtained = r.json()
     expected_values = list(range(4))
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_values
     ]
     expected_entities = [
         {
@@ -540,7 +540,7 @@ def test_NTNENA_limit(reporter_dataset):
     obtained = r.json()
     expected_values = list(range(4))
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_values
     ]
     expected_entities = [
         {
@@ -604,8 +604,8 @@ def test_NTNENA_combined(reporter_dataset):
     # Query
     query_params = {
         'type': entity_type,
-        'fromDate': "1970-01-01T00:00:00",
-        'toDate': "1970-01-04T00:00:00",
+        'fromDate': "1970-01-01T00:00:00+00:00",
+        'toDate': "1970-01-04T00:00:00+00:00",
         'limit': 10,
     }
     r = requests.get(query_url(), params=query_params)
@@ -617,7 +617,7 @@ def test_NTNENA_combined(reporter_dataset):
     obtained = r.json()
     expected_values = list(range(4))
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_values
     ]
     expected_entities = [
         {
@@ -693,7 +693,7 @@ def test_weird_ids(reporter_dataset):
     expected_temperatures = list(range(n_days))
     expected_pressures = [t*10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
     ]
     expected_entities = [
         {
@@ -754,20 +754,20 @@ def test_weird_ids(reporter_dataset):
 
 
 @pytest.mark.parametrize("aggr_period, exp_index, ins_period", [
-    ("day",    ['1970-01-01T00:00:00.000',
-                '1970-01-02T00:00:00.000',
-                '1970-01-03T00:00:00.000'], "hour"),
-    ("hour",   ['1970-01-01T00:00:00.000',
-                '1970-01-01T01:00:00.000',
-                '1970-01-01T02:00:00.000'], "minute"),
-    ("minute", ['1970-01-01T00:00:00.000',
-                '1970-01-01T00:01:00.000',
-                '1970-01-01T00:02:00.000'], "second"),
+    ("day",    ['1970-01-01T00:00:00.000+00:00',
+                '1970-01-02T00:00:00.000+00:00',
+                '1970-01-03T00:00:00.000+00:00'], "hour"),
+    ("hour",   ['1970-01-01T00:00:00.000+00:00',
+                '1970-01-01T01:00:00.000+00:00',
+                '1970-01-01T02:00:00.000+00:00'], "minute"),
+    ("minute", ['1970-01-01T00:00:00.000+00:00',
+                '1970-01-01T00:01:00.000+00:00',
+                '1970-01-01T00:02:00.000+00:00'], "second"),
 ])
 def test_NTNENA_aggrPeriod(translator, aggr_period, exp_index, ins_period):
     # Custom index to test aggrPeriod
     for i in exp_index:
-        base = datetime.strptime(i, "%Y-%m-%dT%H:%M:%S.%f")
+        base = dateutil.parser.isoparse(i)
         insert_test_data(translator,
                          [entity_type],
                          index_size=5,
@@ -852,10 +852,10 @@ def test_NTNENA_types_two_attribute(translator):
     expected_temperatures = list(range(3))
     expected_pressures = [t*10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
     ]
     expected_index_kitchen = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
     ]
     expected_entities_kitchen = [
         {
@@ -939,10 +939,10 @@ def test_1TNENA_types_one_attribute(translator):
     expected_temperatures = list(range(3))
     expected_pressures = [t*10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
     ]
     expected_index_kitchen = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
     ]
 
     expected_entities_kitchen = [
@@ -1052,7 +1052,7 @@ def test_aggregation_is_per_instance(translator):
     assert isinstance(obtained, dict)
     expected_temperatures = list(range(2))
     expected_index = [
-    '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_temperatures
+    '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
     ]
     expected_entities = [
         {

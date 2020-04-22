@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-docker build -t quantumleap ../../../
+docker build -t smartsdk/quantumleap ../../../
 
 docker-compose up -d
 sleep 8

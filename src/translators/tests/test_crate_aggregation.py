@@ -8,11 +8,11 @@ def test_aggr_per_second(translator):
     assert len(entities) == 34
 
     # One update every 100 millis -> 10 updates per second.
-    base_index = datetime.datetime(2010, 1, 1, 8, 0, 0)
+    base_index = datetime.datetime(2010, 1, 1, 8, 0, 0, 0, datetime.timezone.utc)
     delta = datetime.timedelta(milliseconds=100)
     for i, e in enumerate(entities):
         t = base_index + i * delta
-        e[TIME_INDEX_NAME] = t
+        e[TIME_INDEX_NAME] = t.isoformat(timespec='milliseconds')
         add_attr(e, 'attr_float', i)
 
     translator.insert(entities)
@@ -26,7 +26,7 @@ def test_aggr_per_second(translator):
     # 34 values span across 4 seconds
     expected_index = []
     for i in range(4):
-        d = datetime.datetime(2010, 1, 1, 8, 0, i)
+        d = datetime.datetime(2010, 1, 1, 8, 0, i, 0, datetime.timezone.utc)
         expected_index.append(d.isoformat(timespec='milliseconds'))
 
     assert res[0] == {

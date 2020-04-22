@@ -36,14 +36,14 @@ def test_NTNE_defaults(reporter_dataset):
     expected = [{
         "id": 'Kitchen0',
         "index": [
-            "1980-01-30T00:00:00.000"
+            "1980-01-30T00:00:00.000+00:00"
         ],
         "type": 'Kitchen'
     },
     {
         "id": 'Room0',
         "index": [
-            "1970-01-30T00:00:00.000"
+            "1970-01-30T00:00:00.000+00:00"
         ],
         "type": 'Room'
     }]
@@ -73,11 +73,11 @@ def test_NTNE_type(reporter_dataset):
     expected_type = 'Room'
     expected_values = list(range(n_days))
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_values
     ]
     expected = [{
         'id': 'Room0',
-        'index': [expected_index[-1]+'.000'],
+        'index': [expected_index[-1]],
         'type': expected_type
     }]
     assert obtained == expected
@@ -88,8 +88,8 @@ def test_NTNE_type(reporter_dataset):
 def test_NTNE_fromDate_toDate(reporter_dataset):
     # Query
     query_params = {
-        'fromDate': "1970-01-06T00:00:00",
-        'toDate': "1980-01-17T00:00:00",
+        'fromDate': "1970-01-06T00:00:00+00:00",
+        'toDate': "1980-01-17T00:00:00+00:00",
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
@@ -97,12 +97,12 @@ def test_NTNE_fromDate_toDate(reporter_dataset):
     expected_type = 'Room'
     expected_id = 'Room0'
     expected_index = [
-        '1970-01-30T00:00:00.000'
+        '1970-01-30T00:00:00.000+00:00'
     ]
     expected_type_1 = 'Kitchen'
     expected_id_1 = 'Kitchen0'
     expected_index_1 = [
-        '1980-01-17T00:00:00.000'
+        '1980-01-17T00:00:00.000+00:00'
     ]
 
     # Assert
@@ -123,8 +123,8 @@ def test_NTNE_fromDate_toDate(reporter_dataset):
 def test_NTNE_fromDate_toDate_with_quotes(reporter_dataset):
     # Query
     query_params = {
-        'fromDate': '"1970-01-06T00:00:00"',
-        'toDate': '"1980-01-17T00:00:00"',
+        'fromDate': '"1970-01-06T00:00:00+00:00"',
+        'toDate': '"1980-01-17T00:00:00+00:00"',
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
@@ -132,12 +132,12 @@ def test_NTNE_fromDate_toDate_with_quotes(reporter_dataset):
     expected_type = 'Room'
     expected_id = 'Room0'
     expected_index = [
-        '1970-01-30T00:00:00.000'
+        '1970-01-30T00:00:00.000+00:00'
     ]
     expected_type_1 = 'Kitchen'
     expected_id_1 = 'Kitchen0'
     expected_index_1 = [
-        '1980-01-17T00:00:00.000'
+        '1980-01-17T00:00:00.000+00:00'
     ]
 
     # Assert
@@ -168,7 +168,7 @@ def test_NTNE_limit(reporter_dataset):
     expected_type = 'Kitchen'
     expected_id = 'Kitchen0'
     expected_index = [
-        '1980-01-30T00:00:00.000'
+        '1980-01-30T00:00:00.000+00:00'
     ]
 
     # Assert
@@ -194,7 +194,7 @@ def test_NTNE_offset(reporter_dataset):
     expected_type = 'Kitchen'
     expected_id = 'Kitchen0'
     expected_index = [
-        '1980-01-30T00:00:00.000'
+        '1980-01-30T00:00:00.000+00:00'
     ]
 
     # Assert
@@ -212,8 +212,8 @@ def test_NTNE_combined(reporter_dataset):
     query_params = {
         'type': entity_type,
         'offset': 0,
-        'fromDate': "1970-01-06T00:00:00",
-        'toDate': "1980-01-20T00:00:00",
+        'fromDate': "1970-01-06T00:00:00+00:00",
+        'toDate': "1980-01-20T00:00:00+00:00",
         'limit': 1,
     }
     r = requests.get(query_url(), params=query_params)
@@ -222,7 +222,7 @@ def test_NTNE_combined(reporter_dataset):
     expected_type = 'Room'
     expected_id = 'Room0'
     expected_index = [
-        '1970-01-30T00:00:00.000'
+        '1970-01-30T00:00:00.000+00:00'
     ]
 
     # Assert

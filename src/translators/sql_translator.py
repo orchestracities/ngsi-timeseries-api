@@ -1,16 +1,12 @@
-from contextlib import contextmanager
-from datetime import datetime, timedelta
-from crate.client import exceptions
-import geocoding.geojson.wktcodec
+from datetime import datetime, timedelta, timezone
 from geocoding.slf.geotypes import *
-import geocoding.slf.wktcodec
 from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption, \
-    NGSIUsageError
+    NGSIUsageError, InvalidParameterValue
 from translators import base_translator
 from utils.common import iter_entity_attrs
 import logging
-import os
 from geocoding.slf import SlfQuery
+import dateutil.parser
 
 # NGSI TYPES
 # Based on Orion output because official docs don't say much about these :(
@@ -33,7 +29,6 @@ TIME_INDEX = 'timeindex'
 VALID_AGGR_METHODS = ['count', 'sum', 'avg', 'min', 'max']
 VALID_AGGR_PERIODS = ['year', 'month', 'day', 'hour', 'minute', 'second']
 
-
 # Default Translation
 NGSI_TO_SQL = {
     "Array": 'array',
@@ -41,7 +36,7 @@ NGSI_TO_SQL = {
     NGSI_ISO8601: 'timestamp WITH TIME ZONE',
     NGSI_DATETIME: 'timestamp WITH TIME ZONE',
     "Integer": 'bigint',
-    #NOT all databases supports geometry
+    # NOT all databases supports geometry
     NGSI_GEOJSON: 'text',
     SlfPoint.ngsi_type(): 'text',
     SlfLine.ngsi_type(): 'text',
@@ -55,11 +50,15 @@ NGSI_TO_SQL = {
 }
 
 
+# TODO: Refactor
+# I suggest we refactor both this and the Crate translator using something
+# like SQLAlchemy if we want to keep the same approach of doing everything
+# in Python, but this isn't exactly a good thing for performance---way too
+# many calls on each insert! Perhaps we should come up with a more efficient
+# design or at least consider stored procs.
+
 class SQLTranslator(base_translator.BaseTranslator):
-
-
     NGSI_TO_SQL = NGSI_TO_SQL
-
 
     def _refresh(self, entity_types, fiware_service=None):
         """
@@ -73,11 +72,10 @@ class SQLTranslator(base_translator.BaseTranslator):
         self.cursor.execute("refresh table {}".format(','.join(table_names)))
 
     def _prepare_data_table(self, table_name, table, fiware_service):
-        columns = ', '.join('"{}" {}'.format(cn.lower(), ct)
-                            for cn, ct in table.items())
-        stmt = "create table if not exists {} ({}) with " \
-               "(number_of_replicas = '2-all', column_policy = 'dynamic')".format(table_name, columns)
-        self.cursor.execute(stmt)
+        raise NotImplementedError
+
+    def _create_metadata_table(self):
+        raise NotImplementedError
 
     def _get_isoformat(self, ms_since_epoch):
         """
@@ -90,9 +88,8 @@ class SQLTranslator(base_translator.BaseTranslator):
         if ms_since_epoch is None:
             return "NULL"
         d = timedelta(milliseconds=ms_since_epoch)
-        utc = datetime(1970, 1, 1, 0, 0, 0, 0) + d
+        utc = datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc) + d
         return utc.isoformat(timespec='milliseconds')
-
 
     def _et2tn(self, entity_type, fiware_service=None):
         """
@@ -105,7 +102,6 @@ class SQLTranslator(base_translator.BaseTranslator):
         if fiware_service:
             return '"{}{}".{}'.format(TENANT_PREFIX, fiware_service.lower(), et)
         return et
-
 
     def _ea2cn(self, entity_attr):
         """
@@ -121,7 +117,6 @@ class SQLTranslator(base_translator.BaseTranslator):
         # This will break users connecting to db directly.
         # Implement when that becomes a real problem.
         return "{}".format(entity_attr.lower())
-
 
     def insert(self, entities, fiware_service=None, fiware_servicepath=None):
         if not isinstance(entities, list):
@@ -139,7 +134,6 @@ class SQLTranslator(base_translator.BaseTranslator):
                                                 fiware_service,
                                                 fiware_servicepath)
         return res
-
 
     def _insert_entities_of_type(self,
                                  entity_type,
@@ -199,7 +193,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                     if self._attr_is_structured(e[attr]):
                         table[col] = self.NGSI_TO_SQL[NGSI_STRUCTURED_VALUE]
                     else:
-                        #TODO fallback type should be defined by actual JSON type
+                        # TODO fallback type should be defined by actual JSON type
                         supported_types = ', '.join(self.NGSI_TO_SQL.keys())
                         msg = ("'{}' is not a supported NGSI type. "
                                "Please use any of the following: {}. "
@@ -211,7 +205,7 @@ class SQLTranslator(base_translator.BaseTranslator):
 
                 else:
                     # Github issue 44: Disable indexing for long string
-                    sql_type = self._disable_index(attr_t, e[attr])
+                    sql_type = self._compute_type(attr_t, e[attr])
 
                     # Github issue 24: StructuredValue == object or array
                     is_list = isinstance(e[attr].get('value', None), list)
@@ -223,7 +217,6 @@ class SQLTranslator(base_translator.BaseTranslator):
         # Create/Update metadata table for this type
         table_name = self._et2tn(entity_type, fiware_service)
         self._update_metadata_table(table_name, original_attrs)
-
         # Sort out data table.
         self._prepare_data_table(table_name, table, fiware_service)
 
@@ -231,7 +224,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         col_names = sorted(table.keys())
         entries = []  # raw values in same order as column names
         for e in entities:
-            values = self._preprocess_values(e, col_names, fiware_servicepath)
+            values = self._preprocess_values(e, table, col_names, fiware_servicepath)
             entries.append(values)
 
         # Insert entities data
@@ -242,16 +235,14 @@ class SQLTranslator(base_translator.BaseTranslator):
         self.cursor.executemany(stmt, entries)
         return self.cursor
 
-
     def _attr_is_structured(self, a):
         if a['value'] is not None and isinstance(a['value'], dict):
             self.logger.debug("attribute {} has 'value' attribute of type dict"
-                             .format(a))
+                              .format(a))
             return True
         return False
 
-
-    #TODO this logic is too simple
+    # TODO this logic is too simple
     @staticmethod
     def is_text(attr_type):
         # TODO: verify: same logic in two different places!
@@ -259,10 +250,8 @@ class SQLTranslator(base_translator.BaseTranslator):
         # factor this logic out and keep it in just one place!
         return attr_type == NGSI_TEXT or attr_type not in NGSI_TO_SQL
 
-
-    def _preprocess_values(self, e, col_names, fiware_servicepath):
+    def _preprocess_values(self, e, table, col_names, fiware_servicepath):
         raise NotImplementedError
-
 
     def _update_metadata_table(self, table_name, metadata):
         """
@@ -282,11 +271,8 @@ class SQLTranslator(base_translator.BaseTranslator):
         :param metadata: dict
             The dict mapping the matedata of each column. See original_attrs.
         """
-        stmt = "create table if not exists {} " \
-               "(table_name string primary key, entity_attrs object) " \
-               "with (number_of_replicas = '2-all', column_policy = 'dynamic')"
-        op = stmt.format(METADATA_TABLE_NAME)
-        self.cursor.execute(op)
+
+        self._create_metadata_table()
 
         if self.cursor.rowcount:
             # Table just created!
@@ -303,11 +289,12 @@ class SQLTranslator(base_translator.BaseTranslator):
         if metadata.keys() - persisted_metadata.keys():
             persisted_metadata.update(metadata)
             self._store_medatata(table_name, persisted_metadata)
+        # TODO: concurrency.
+        # This implementation paves
+        # the way to lost updates...
 
-
-    def _store_medatata(self,table_name, persisted_metadata):
+    def _store_medatata(self, table_name, persisted_metadata):
         raise NotImplementedError
-
 
     def _get_et_table_names(self, fiware_service=None):
         """
@@ -321,13 +308,12 @@ class SQLTranslator(base_translator.BaseTranslator):
 
         try:
             self.cursor.execute(op)
-        except exceptions.ProgrammingError as e:
+        except Exception as e:
             # Metadata table still not created
             msg = "Could not retrieve METADATA_TABLE. Empty database maybe?. {}"
             logging.debug(msg.format(e))
             return []
         return [r[0] for r in self.cursor.rows]
-
 
     def _get_select_clause(self, attr_names, aggr_method, aggr_period):
         if not attr_names:
@@ -351,7 +337,6 @@ class SQLTranslator(base_translator.BaseTranslator):
         select = ','.join(attrs)
         return select
 
-
     def _get_limit(self, limit, last_n):
         # https://crate.io/docs/crate/reference/en/latest/general/dql/selects.html#limits
         default_limit = 10000
@@ -362,12 +347,13 @@ class SQLTranslator(base_translator.BaseTranslator):
         if last_n is None:
             last_n = limit
 
-        if limit < 1 or last_n < 1:
-            raise NGSIUsageError("Limit and LastN should be >=1 and <= {"
-                                 "}.".format(default_limit))
-
+        if limit < 1:
+            raise InvalidParameterValue("{} should be >=1 and <= {"
+                                 "}.".format('limit', default_limit))
+        if last_n < 1:
+            raise InvalidParameterValue("{} should be >=1 and <= {"
+                                 "}.".format('last_n', default_limit))
         return min(last_n, limit)
-
 
     def _get_where_clause(self, entity_ids, from_date, to_date, fiware_sp=None,
                           geo_query=None):
@@ -384,10 +370,10 @@ class SQLTranslator(base_translator.BaseTranslator):
 
         if fiware_sp:
             # Match prefix of fiware service path
-            clauses.append(" "+FIWARE_SERVICEPATH+" ~* '"+fiware_sp+"($|/.*)'")
+            clauses.append(" " + FIWARE_SERVICEPATH + " ~* '" + fiware_sp + "($|/.*)'")
         else:
             # Match prefix of fiware service path
-            clauses.append(" "+FIWARE_SERVICEPATH+" = ''")
+            clauses.append(" " + FIWARE_SERVICEPATH + " = ''")
 
         geo_clause = self._get_geo_clause(geo_query)
         if geo_clause:
@@ -397,7 +383,20 @@ class SQLTranslator(base_translator.BaseTranslator):
         return where_clause
 
     def _parse_date(self, date):
-        return date.strip('\"')
+        try:
+            return dateutil.parser.isoparse(date.strip('\"'))
+        except Exception as e:
+            raise InvalidParameterValue(date, "**fromDate** or **toDate**")
+
+    def _parse_limit(sefl, limit):
+        if (not (limit is None or isinstance(limit, int))):
+            raise InvalidParameterValue(limit, "limit")
+        return limit
+
+    def _parse_last_n(sefl, last_n):
+        if (not (last_n is None or isinstance(last_n, int))):
+            raise InvalidParameterValue(last_n, "last_n")
+        return last_n
 
     def _get_geo_clause(self, geo_query):
         raise NotImplementedError
@@ -435,7 +434,6 @@ class SQLTranslator(base_translator.BaseTranslator):
             clause += " ORDER BY {}".format(",".join(order_by))
         return clause
 
-
     def query(self,
               attr_names=None,
               entity_type=None,
@@ -452,7 +450,7 @@ class SQLTranslator(base_translator.BaseTranslator):
               offset=0,
               fiware_service=None,
               fiware_servicepath=None,
-              geo_query: SlfQuery=None):
+              geo_query: SlfQuery = None):
         """
         This translator method is used by all API query endpoints.
 
@@ -571,6 +569,9 @@ class SQLTranslator(base_translator.BaseTranslator):
         UnsupportedOption for still-to-be-implemented features.
         crate.DatabaseError in case of errors with CrateDB interaction.
         """
+        last_n = self._parse_last_n(last_n)
+        limit = self._parse_limit(limit)
+
         if last_n == 0 or limit == 0:
             return []
 
@@ -584,6 +585,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         if aggr_period and aggr_period.lower() not in VALID_AGGR_PERIODS:
             raise UnsupportedOption("aggr_period={}".format(aggr_period))
 
+        # TODO check also entity_id and entity_type to not be SQL injection
         if entity_id and not entity_type:
             entity_type = self._get_entity_type(entity_id, fiware_service)
 
@@ -596,7 +598,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         if entity_id:
             entity_ids = tuple([entity_id])
 
-        lower_attr_names = [a.lower() for a in attr_names]\
+        lower_attr_names = [a.lower() for a in attr_names] \
             if attr_names else attr_names
         select_clause = self._get_select_clause(lower_attr_names,
                                                 aggr_method,
@@ -628,16 +630,16 @@ class SQLTranslator(base_translator.BaseTranslator):
                  "{where_clause} " \
                  "{order_group_clause} " \
                  "limit {limit} offset {offset}".format(
-                    select_clause=select_clause,
-                    tn=tn,
-                    where_clause=where_clause,
-                    order_group_clause=order_group_clause,
-                    limit=limit,
-                    offset=offset,
-                )
+                select_clause=select_clause,
+                tn=tn,
+                where_clause=where_clause,
+                order_group_clause=order_group_clause,
+                limit=limit,
+                offset=offset,
+            )
             try:
                 self.cursor.execute(op)
-            except exceptions.ProgrammingError as e:
+            except Exception as e:
                 # Reason 1: fiware_service_path column in legacy dbs.
                 logging.debug("{}".format(e))
                 entities = []
@@ -652,13 +654,13 @@ class SQLTranslator(base_translator.BaseTranslator):
         return result
 
     def query_ids(self,
-              entity_type=None,
-              from_date=None,
-              to_date=None,
-              limit=10000,
-              offset=0,
-              fiware_service=None,
-              fiware_servicepath=None):
+                  entity_type=None,
+                  from_date=None,
+                  to_date=None,
+                  limit=10000,
+                  offset=0,
+                  fiware_service=None,
+                  fiware_servicepath=None):
         if limit == 0:
             return []
 
@@ -687,29 +689,29 @@ class SQLTranslator(base_translator.BaseTranslator):
             len_tn += 1
             if len_tn != len(table_names):
                 stmt += "select entity_id, entity_type, max(time_index) as time_index " \
-                           "from {tn} {where_clause} " \
-                           "group by entity_id, entity_type " \
-                           "union all ".format(
-                              tn=tn,
-                              where_clause=where_clause
-                           )
+                        "from {tn} {where_clause} " \
+                        "group by entity_id, entity_type " \
+                        "union all ".format(
+                    tn=tn,
+                    where_clause=where_clause
+                )
             else:
                 stmt += "select entity_id, entity_type, max(time_index) as time_index " \
-                           "from {tn} {where_clause} " \
-                           "group by entity_id, entity_type ".format(
-                              tn=tn,
-                              where_clause=where_clause
-                           )
+                        "from {tn} {where_clause} " \
+                        "group by entity_id, entity_type ".format(
+                    tn=tn,
+                    where_clause=where_clause
+                )
 
         # TODO ORDER BY time_index asc is removed for the time being till we have a solution for https://github.com/crate/crate/issues/9854
         op = stmt + "limit {limit} offset {offset}".format(
-                offset=offset,
-                limit=limit
-             )
+            offset=offset,
+            limit=limit
+        )
 
         try:
             self.cursor.execute(op)
-        except exceptions.ProgrammingError as e:
+        except Exception as e:
             logging.debug("{}".format(e))
             entities = []
         else:
@@ -826,7 +828,6 @@ class SQLTranslator(base_translator.BaseTranslator):
 
         return [entities[k] for k in sorted(entities.keys())]
 
-
     def delete_entity(self, entity_id, entity_type=None, from_date=None,
                       to_date=None, fiware_service=None,
                       fiware_servicepath=None):
@@ -844,7 +845,7 @@ class SQLTranslator(base_translator.BaseTranslator):
 
         # First delete entries from table
         table_name = self._et2tn(entity_type, fiware_service)
-        where_clause = self._get_where_clause([entity_id,],
+        where_clause = self._get_where_clause([entity_id, ],
                                               from_date,
                                               to_date,
                                               fiware_servicepath)
@@ -852,12 +853,11 @@ class SQLTranslator(base_translator.BaseTranslator):
 
         try:
             self.cursor.execute(op)
-        except exceptions.ProgrammingError as e:
-            logging.debug("{}".format(e))
+        except Exception as e:
+            logging.error("{}".format(e))
             return 0
 
         return self.cursor.rowcount
-
 
     def delete_entities(self, entity_type, from_date=None, to_date=None,
                         fiware_service=None, fiware_servicepath=None):
@@ -873,43 +873,42 @@ class SQLTranslator(base_translator.BaseTranslator):
             op = "delete from {} {}".format(table_name, where_clause)
             try:
                 self.cursor.execute(op)
-            except exceptions.ProgrammingError as e:
-                logging.debug("{}".format(e))
+            except Exception as e:
+                logging.error("{}".format(e))
                 return 0
             return self.cursor.rowcount
 
         # Drop whole table
         try:
             self.cursor.execute("select count(*) from {}".format(table_name))
-        except exceptions.ProgrammingError as e:
-            logging.debug("{}".format(e))
+        except Exception as e:
+            logging.error("{}".format(e))
             return 0
         count = self.cursor.fetchone()[0]
 
         op = "drop table {}".format(table_name)
         try:
             self.cursor.execute(op)
-        except exceptions.ProgrammingError as e:
-            logging.debug("{}".format(e))
+        except Exception as e:
+            logging.error("{}".format(e))
             return 0
 
         # Delete entry from metadata table
         op = "delete from {} where table_name = ?".format(METADATA_TABLE_NAME)
         try:
             self.cursor.execute(op, [table_name])
-        except exceptions.ProgrammingError as e:
-            logging.debug("{}".format(e))
+        except Exception as e:
+            logging.error("{}".format(e))
 
         if self.cursor.rowcount == 0 and table_name.startswith('"'):
             # See GH #173
             old_tn = ".".join([x.strip('"') for x in table_name.split('.')])
             try:
                 self.cursor.execute(op, [old_tn])
-            except exceptions.ProgrammingError as e:
-                logging.debug("{}".format(e))
+            except Exception as e:
+                logging.error("{}".format(e))
 
         return count
-
 
     def _get_entity_type(self, entity_id, fiware_service):
         """
@@ -937,8 +936,8 @@ class SQLTranslator(base_translator.BaseTranslator):
         try:
             self.cursor.execute(stmt)
 
-        except exceptions.ProgrammingError as e:
-            logging.debug("{}".format(e))
+        except Exception as e:
+            logging.error("{}".format(e))
             return None
 
         else:
@@ -948,12 +947,11 @@ class SQLTranslator(base_translator.BaseTranslator):
         for et in all_types:
             stmt = "select distinct(entity_type) from {} " \
                    "where entity_id = ?".format(et)
-            self.cursor.execute(stmt, [entity_id,])
+            self.cursor.execute(stmt, [entity_id, ])
             types = [t[0] for t in self.cursor.fetchall()]
             matching_types.extend(types)
 
         return ','.join(matching_types)
 
-
-    def _disable_index(self, attr_t, attr):
+    def _compute_type(self, attr_t, attr):
         raise NotImplementedError

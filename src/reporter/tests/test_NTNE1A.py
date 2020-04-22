@@ -3,6 +3,7 @@ from reporter.tests.utils import insert_test_data
 from datetime import datetime
 import pytest
 import requests
+import dateutil.parser
 
 attr_name = 'temperature'
 entity_type = "Room"
@@ -32,7 +33,7 @@ def test_NTNE1A_defaults(reporter_dataset):
 
     expected_temperatures = list(range(4))
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
     ]
 
     expected_entities = [
@@ -71,7 +72,7 @@ def test_NTNE1A_type(reporter_dataset):
     assert r.status_code == 200, r.text
     expected_temperatures = list(range(4))
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
     ]
     expected_entities = [
         {
@@ -114,7 +115,7 @@ def test_NTNE1A_one_entity(reporter_dataset):
 
     expected_temperatures = list(range(4))
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
     ]
 
     expected_entities = [
@@ -138,7 +139,7 @@ def test_NTNE1A_one_entity(reporter_dataset):
     assert obtained == expected
 
 
-def test_1TNENA_some_entities(reporter_dataset):
+def test_NTNENA_some_entities(reporter_dataset):
     # Query
     # Assert Results
     entity_ids = "Room1, Room2"
@@ -152,7 +153,7 @@ def test_1TNENA_some_entities(reporter_dataset):
     assert isinstance(obtained_data, dict)
     expected_temperatures = list(range(4))
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
     ]
     
     expected_entities = [
@@ -192,7 +193,7 @@ def test_NTNE1A_values_defaults(reporter_dataset):
     # Assert Results
     expected_temperatures = list(range(4))
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
     ]
 
     expected_entities = [
@@ -237,7 +238,7 @@ def test_weird_ids(reporter_dataset):
     assert r.status_code == 200, r.text
     expected_temperatures = list(range(n_days))
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
     ]
     
     expected_entities = [
@@ -280,7 +281,7 @@ def test_NTNE1A_fromDate_toDate(reporter_dataset):
     assert isinstance(obtained, dict)
     expected_temperatures = list(range(4))
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
     ]
 
     expected_entities = [
@@ -314,8 +315,8 @@ def test_NTNE1A_fromDate_toDate_with_quotes(reporter_dataset):
     # Query
     query_params = {
         'types': 'entity_type',   
-        'fromDate': "1970-01-01T00:00:00",
-        'toDate': "1970-01-04T00:00:00"
+        'fromDate': "1970-01-01T00:00:00+00:00",
+        'toDate': "1970-01-04T00:00:00+00:00"
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
@@ -324,7 +325,7 @@ def test_NTNE1A_fromDate_toDate_with_quotes(reporter_dataset):
     assert isinstance(obtained, dict)
     expected_temperatures = list(range(4))
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
     ]
 
     expected_entities = [
@@ -365,7 +366,7 @@ def test_NTNE1A_limit(reporter_dataset):
     assert isinstance(obtained, dict)
     expected_temperatures = list(range(4))
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
     ]
 
     expected_entities = [
@@ -410,7 +411,7 @@ def test_NTNE1A_combined(reporter_dataset):
     assert isinstance(obtained, dict)
     expected_temperatures = list(range(3))
     expected_index = [
-        '1970-01-{:02}T00:00:00.000'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
     ]
 
     expected_entities = [
@@ -439,20 +440,20 @@ def test_NTNE1A_combined(reporter_dataset):
     assert obtained == expected
 
 @pytest.mark.parametrize("aggr_period, exp_index, ins_period", [
-    ("day",    ['1970-01-01T00:00:00.000',
-                '1970-01-02T00:00:00.000',
-                '1970-01-03T00:00:00.000'], "hour"),
-    ("hour",   ['1970-01-01T00:00:00.000',
-                '1970-01-01T01:00:00.000',
-                '1970-01-01T02:00:00.000'], "minute"),
-    ("minute", ['1970-01-01T00:00:00.000',
-                '1970-01-01T00:01:00.000',
-                '1970-01-01T00:02:00.000'], "second"),
+    ("day",    ['1970-01-01T00:00:00.000+00:00',
+                '1970-01-02T00:00:00.000+00:00',
+                '1970-01-03T00:00:00.000+00:00'], "hour"),
+    ("hour",   ['1970-01-01T00:00:00.000+00:00',
+                '1970-01-01T01:00:00.000+00:00',
+                '1970-01-01T02:00:00.000+00:00'], "minute"),
+    ("minute", ['1970-01-01T00:00:00.000+00:00',
+                '1970-01-01T00:01:00.000+00:00',
+                '1970-01-01T00:02:00.000+00:00'], "second"),
 ])
 def test_NTNE1A_aggrPeriod(translator, aggr_period, exp_index, ins_period):
     # Custom index to test aggrPeriod
     for i in exp_index:
-        base = datetime.strptime(i, "%Y-%m-%dT%H:%M:%S.%f")
+        base = dateutil.parser.isoparse(i)
         insert_test_data(translator,
                          [entity_type],
                          index_size=5,
@@ -572,7 +573,7 @@ def test_aggregation_is_per_instance(translator):
     assert isinstance(obtained, dict)
     expected_temperatures = list(range(2))
     expected_index = [
-    '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_temperatures
+    '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
     ]
     expected_entities = [
         {

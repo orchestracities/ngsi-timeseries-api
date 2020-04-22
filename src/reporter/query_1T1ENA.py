@@ -1,4 +1,4 @@
-from exceptions.exceptions import NGSIUsageError
+from exceptions.exceptions import NGSIUsageError, InvalidParameterValue
 from flask import request
 from reporter.reporter import _validate_query_params
 from translators.crate import CrateTranslatorInstance
@@ -60,6 +60,12 @@ def query_1T1ENA(entity_id,   # In Path
             "error": "{}".format(type(e)),
             "description": str(e)
         }, 400
+
+    except InvalidParameterValue as e:
+        return {
+            "error": "{}".format(type(e)),
+            "description": str(e)
+        }, 422
 
     except Exception as e:
         # Temp workaround to debug test_not_found

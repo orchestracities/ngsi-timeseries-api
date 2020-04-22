@@ -1,9 +1,10 @@
 from conftest import QL_URL, crate_translator as translator
-from datetime import datetime
+from datetime import datetime, timezone
 from reporter.tests.utils import insert_test_data
 from utils.common import assert_equal_time_index_arrays
 import pytest
 import requests
+import dateutil.parser
 
 entity_type = 'Room'
 attr_name = 'temperature'
@@ -60,7 +61,7 @@ def test_1TNE1A_defaults(reporter_dataset):
     # Assert Results
     expected_values = list(range(n_days))
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_values
     ]
     expected_entities = [
         {
@@ -104,7 +105,7 @@ def test_1TNE1A_one_entity(reporter_dataset):
 
     expected_values = list(range(n_days))
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_values
     ]
     expected_entities = [
         {
@@ -135,7 +136,7 @@ def test_1TNE1A_some_entities(reporter_dataset):
     # Assert Results
     expected_values = list(range(n_days))
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_values
     ]
     expected_entities = [
         {
@@ -171,7 +172,7 @@ def test_1TNE1A_values_defaults(reporter_dataset):
     # Assert Results
     expected_values = list(range(n_days))
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_values
     ]
     expected_entities = [
         {
@@ -222,7 +223,7 @@ def test_weird_ids(reporter_dataset):
     # Assert Results
     expected_values = list(range(n_days))
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_values
     ]
     expected_entities = [
         {
@@ -265,17 +266,17 @@ def test_different_time_indexes(translator):
     expected_entities = [
         {
             'entityId': 'Room3',
-            'index': ['1970-01-{:02}T00:00:00'.format(i+1) for i in range(4)],
+            'index': ['1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in range(4)],
             'values': list(range(4)),
         },
         {
             'entityId': 'Room1',
-            'index': ['1970-01-{:02}T00:00:00'.format(i+1) for i in range(2)],
+            'index': ['1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in range(2)],
             'values': list(range(2)),
         },
         {
             'entityId': 'Room2',
-            'index': ['1970-01-{:02}T00:00:00'.format(i+1) for i in range(3)],
+            'index': ['1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in range(3)],
             'values': list(range(3)),
         }
     ]
@@ -332,8 +333,8 @@ def test_aggregation_is_per_instance(translator):
         'type': t,
         'id': 'Room0,Room1',
         'aggrMethod': 'max',
-        'fromDate': datetime(1970, 1, 1).isoformat(),
-        'toDate': datetime(1970, 1, 6).isoformat(),
+        'fromDate': datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc).isoformat(),
+        'toDate': datetime(1970, 1, 6, 0, 0, 0, 0, timezone.utc).isoformat(),
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
@@ -342,12 +343,12 @@ def test_aggregation_is_per_instance(translator):
     expected_entities = [
         {
             'entityId': 'Room0',
-            'index': ['1970-01-01T00:00:00', '1970-01-06T00:00:00'],
+            'index': ['1970-01-01T00:00:00+00:00', '1970-01-06T00:00:00+00:00'],
             'values': [2],
         },
         {
             'entityId': 'Room1',
-            'index': ['1970-01-01T00:00:00', '1970-01-06T00:00:00'],
+            'index': ['1970-01-01T00:00:00+00:00', '1970-01-06T00:00:00+00:00'],
             'values': [5],
         }
     ]
@@ -359,20 +360,20 @@ def test_aggregation_is_per_instance(translator):
 
 
 @pytest.mark.parametrize("aggr_period, exp_index, ins_period", [
-    ("day",    ['1970-01-01T00:00:00.000',
-                '1970-01-02T00:00:00.000',
-                '1970-01-03T00:00:00.000'], "hour"),
-    ("hour",   ['1970-01-01T00:00:00.000',
-                '1970-01-01T01:00:00.000',
-                '1970-01-01T02:00:00.000'], "minute"),
-    ("minute", ['1970-01-01T00:00:00.000',
-                '1970-01-01T00:01:00.000',
-                '1970-01-01T00:02:00.000'], "second"),
+    ("day",    ['1970-01-01T00:00:00.000+00:00',
+                '1970-01-02T00:00:00.000+00:00',
+                '1970-01-03T00:00:00.000+00:00'], "hour"),
+    ("hour",   ['1970-01-01T00:00:00.000+00:00',
+                '1970-01-01T01:00:00.000+00:00',
+                '1970-01-01T02:00:00.000+00:00'], "minute"),
+    ("minute", ['1970-01-01T00:00:00.000+00:00',
+                '1970-01-01T00:01:00.000+00:00',
+                '1970-01-01T00:02:00.000+00:00'], "second"),
 ])
 def test_1T1ENA_aggrPeriod(translator, aggr_period, exp_index, ins_period):
     # Custom index to test aggrPeriod
     for i in exp_index:
-        base = datetime.strptime(i, "%Y-%m-%dT%H:%M:%S.%f")
+        base = dateutil.parser.isoparse(i)
         insert_test_data(translator,
                          [entity_type],
                          index_size=5,

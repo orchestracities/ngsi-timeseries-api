@@ -164,7 +164,7 @@ def sameEntityWithDifferentAttrs():
                 'metadata': {
                     'dateModified': {
                         'type': 'DateTime',
-                        'value': '2019-05-09T15:28:30.000'
+                        'value': '2019-05-09T15:28:30.000Z'
                     }
                 }
             },
@@ -174,7 +174,7 @@ def sameEntityWithDifferentAttrs():
                 'metadata': {
                     'dateModified': {
                         'type': 'DateTime',
-                        'value': '2019-05-09T15:28:30.000'
+                        'value': '2019-05-09T15:28:30.000Z'
                     }
                 }
             }
@@ -188,7 +188,7 @@ def sameEntityWithDifferentAttrs():
                 'metadata': {
                     'dateModified': {
                         'type': 'DateTime',
-                        'value': '2019-05-09T15:29:30.000'
+                        'value': '2019-05-09T15:29:30.000Z'
                     }
                 }
             }
@@ -216,7 +216,7 @@ def air_quality_observed():
         },
         "dateObserved": {
             "type": "DateTime",
-            "value": "2016-03-14T17:00:00"
+            "value": "2016-03-14T17:00:00Z"
         },
         "location": {
             "value": {
@@ -286,7 +286,7 @@ def traffic_flow_observed():
         },
         'dateObservedFrom': {
             'type': 'Text',
-            'value': '2017-11-22T17:17:30.352635',
+            'value': '2017-11-22T17:17:30.352635Z',
         },
         'averageVehicleLength': {
             'type': 'Number',
@@ -318,7 +318,7 @@ def traffic_flow_observed():
         },
         'dateObservedTo': {
             'type': 'Text',
-            'value': '2017-11-22T17:17:40.352652'
+            'value': '2017-11-22T17:17:40.352652Z'
         },
         'location': {
             'type': 'StructuredValue',
