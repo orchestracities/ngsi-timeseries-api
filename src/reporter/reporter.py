@@ -40,6 +40,7 @@ from reporter.subscription_builder import build_subscription
 from reporter.timex import select_time_index_value_as_iso, \
     TIME_INDEX_HEADER_NAME
 from geocoding.location import normalize_location
+from typing import Dict, List
 
 
 def log():
@@ -191,6 +192,15 @@ def notify():
     msg = 'Notification successfully processed'
     log().info(msg)
     return msg
+
+
+def get_types(limit: int = 10000, offset: int = 0) -> Dict[str, List[str]]:
+    fiware_s: str = request.headers.get('fiware-service', None)
+    fiware_sp: str = request.headers.get('fiware-servicepath', None) if fiware_s else None
+    with translator_for(fiware_s) as trans:
+        types: List[str] = trans.get_types(limit=limit, offset=offset,
+                                           fiware_service=fiware_s, fiware_servicepath=fiware_sp)
+        return {"types": types}
 
 
 def add_geodata(entity):

@@ -1,4 +1,5 @@
 from utils.common import TIME_INDEX_NAME
+from typing import Dict, List, Optional
 
 
 class BaseTranslator(object):
@@ -51,3 +52,48 @@ class BaseTranslator(object):
 
     def average(self, attr_name, entity_type=None, entity_id=None):
         raise NotImplementedError
+
+    def query_ids(self,
+                  entity_type: Optional[str] = None,
+                  from_date: Optional[str] = None,
+                  to_date: Optional[str] = None,
+                  limit: int = 10000,
+                  offset: int = 0,
+                  fiware_service: Optional[str] = None,
+                  fiware_servicepath: Optional[str] = None) -> List[Dict]:
+        """
+        For output format see /v2/entities endpoint in spec
+        """
+        raise NotImplementedError
+
+    def get_types(self,
+                  limit: int = 10000,
+                  offset: int = 0,
+                  fiware_service: Optional[str] = None,
+                  fiware_servicepath: Optional[str] = None) -> List[str]:
+        """
+        Note to implementer: this is the default impl based on an entities query,
+        it is recommended to override this with a more efficient one in a derived class
+        """
+        types: List[str] = []
+        offset: int = 0
+        cnt: int = 0
+        while True:
+            if cnt >= limit:
+                break
+            entities: List[dict] = self.query_ids(
+                offset=offset,
+                fiware_service=fiware_service,
+                fiware_servicepath=fiware_servicepath)
+            if not entities:
+                break
+            for entity in entities:
+                typ: Optional[str] = entity["type"] if "type" in entity else None
+                if (not typ) or (typ in types):
+                    continue
+                types.append(typ)
+                cnt = cnt + 1
+                if cnt >= limit:
+                    break
+            offset = offset + len(entities)
+        return sorted(types)

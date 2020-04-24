@@ -1011,6 +1011,33 @@ paths:
                 "description": "No records were found for such query."
               }
 
+  /v2/types:
+    get:
+      operationId: reporter.reporter.get_types
+      summary: "Get all entity types present in the system"
+      description: "Get an array of distinct entity types present in the system."
+      tags:
+        - queries
+      parameters:
+        # In Query...
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+        # In Header...
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              types:
+                type: array
+                items:
+                  type: string
+          examples:
+            application/json:
+              { "types": ["Building", "Room", "TemperatureSensor"] }
 
   /v2/types/{entityType}/attrs/{attrName}:
     get:
