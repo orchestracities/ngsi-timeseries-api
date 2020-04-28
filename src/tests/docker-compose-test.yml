@@ -18,8 +18,7 @@ services:
 
   quantumleap:
     # dockerized form of this app
-    image: quantumleap
-    command: pytest src/tests/test_cors.py --cov-report= --cov-config=.coveragerc --cov-append --cov=src/
+    image: quantumleap_test
     depends_on:
       - orion
       - crate

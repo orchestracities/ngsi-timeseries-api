@@ -5,6 +5,7 @@ docs/
 env/
 src/translators/plots/
 Dockerfile
+Dockerfile_test
 
 # PYTHON FILES
 **__pycache__/
