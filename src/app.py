@@ -12,7 +12,7 @@ def configure_cors(app, origin):
     max_age = os.environ.get("QL_CORS_MAX_AGE", "86400")  # in s
     expose_headers = os.environ.get("QL_CORS_EXPOSE_HEADERS", None)
     resources = {r"/v2/*": {"origins": origin, "headers": headers, "max_age": max_age, expose_headers: expose_headers}}
-    CORS(app.app, resource=resources)
+    CORS(app.app, resources=resources)
 
 
 if __name__ == '__main__':

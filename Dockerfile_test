@@ -8,7 +8,7 @@ COPY Pipfile /src/ngsi-timeseries-api/Pipfile
 COPY Pipfile.lock /src/ngsi-timeseries-api/Pipfile.lock
 WORKDIR /src/ngsi-timeseries-api
 # XXX use of --system is required to get all the paths right in the final docker image
-# it has the disadvantage of not updating Pipfile.lock though, so that this must be
+# it has the disadvantage of not updating Pipfile.lock, though, so that the latter must be
 # up-to-date when building this dockerfile
 RUN pipenv install --system
 
@@ -17,5 +17,6 @@ RUN apk --no-cache add curl
 COPY --from=builder /usr/local /usr/local
 COPY . /src/ngsi-timeseries-api/
 WORKDIR /src/ngsi-timeseries-api/src
+ENV QL_CORS_ALLOWED_ORIGIN ""
 
 CMD python app.py

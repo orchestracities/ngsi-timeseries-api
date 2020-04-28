@@ -29,6 +29,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - LOGLEVEL=DEBUG
+      - QL_CORS_ALLOWED_ORIGIN=${QL_CORS_ALLOWED_ORIGIN:-}
     networks:
       - quantumleap
       - crate
