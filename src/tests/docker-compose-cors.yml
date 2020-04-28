@@ -1,0 +1,54 @@
+version: '3'
+
+services:
+
+  orion:
+    image: fiware/orion:${ORION_VERSION:-2.0.0}
+    command: -logLevel DEBUG -noCache -dbhost mongo
+    depends_on:
+      - mongo
+    networks:
+      - quantumleap
+      - mongo
+
+  mongo:
+    image: mongo:3.2.19
+    networks:
+      - mongo
+
+  quantumleap:
+    # dockerized form of this app
+    image: quantumleap
+    command: pytest src/tests/test_cors.py --cov-report= --cov-config=.coveragerc --cov-append --cov=src/
+    depends_on:
+      - orion
+      - crate
+      - redis
+    environment:
+      - CRATE_HOST=crate
+      - USE_GEOCODING=True
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - LOGLEVEL=DEBUG
+    networks:
+      - quantumleap
+      - crate
+      - redis
+
+  crate:
+    image: crate:${CRATE_VERSION:-4.1.4}
+    command: crate -Cauth.host_based.enabled=false
+      -Ccluster.name=democluster -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*"
+    networks:
+      - crate
+
+  redis:
+    image: redis
+    networks:
+      - redis
+
+networks:
+  redis:
+  crate:
+  mongo:
+  quantumleap:
