@@ -38,8 +38,14 @@ loc=$?
 if [ "$tot" -eq 0 ]; then
    tot=$loc
 fi
+sh run_tests_cors.sh
+loc=$?
+if [ "$tot" -eq 0 ]; then
+   tot=$loc
+fi
 cd -
 
 docker rmi quantumleap
+docker rmi quantumleap_test
 
 exit $tot
