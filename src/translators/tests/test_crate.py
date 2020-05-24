@@ -104,6 +104,12 @@ def test_query_all(translator):
         notifications = [e for e in entities if e['id'] == i]
         records = [e for e in loaded_entities if e['id'] == i]
         check_notifications_record(notifications, records)
+        
+ 
+def test_limit_max(translator):
+    os.environ["DEFAULT_LIMIT"] == "12000"
+    limit = translator._get_limit(limit=11000,last_n=None)
+    assert limit == 11000
 
 
 def test_limit_0(translator):
