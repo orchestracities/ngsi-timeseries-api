@@ -3,6 +3,7 @@ from translators.base_translator import BaseTranslator
 from translators.crate import NGSI_TEXT
 from conftest import crate_translator as translator, entity
 from utils.common import *
+import os
 
 
 def test_db_version(translator):
