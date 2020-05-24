@@ -425,7 +425,9 @@ class CrateTranslator(base_translator.BaseTranslator):
     def _get_limit(self, limit, last_n):
         # https://crate.io/docs/crate/reference/en/latest/general/dql/selects.html#limits
         default_limit = 10000
-
+        if os.environ.get("DEFAULT_LIMIT"):
+            default_limit = int(os.environ["DEFAULT_LIMIT"])
+            
         if limit is None or limit > default_limit:
             limit = default_limit
 
