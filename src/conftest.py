@@ -6,13 +6,17 @@ import pytest
 import requests
 
 
-QL_HOST = os.environ.get('QL_HOST', "quantumleap")
+QL_HOST = os.environ.get('QL_HOST', 'quantumleap')
 QL_PORT = 8668
 QL_URL = "http://{}:{}/v2".format(QL_HOST, QL_PORT)
 QL_BASE_URL = "http://{}:{}".format(QL_HOST, QL_PORT)
+QL_DEFAULT_DB = os.environ.get('QL_DEFAULT_DB', 'crate')
 
 CRATE_HOST = os.environ.get('CRATE_HOST', 'crate')
 CRATE_PORT = 4200
+
+POSTGRES_HOST = os.environ.get('POSTGRES_HOST', 'timescale')
+POSTGRES_HOST = 5432
 
 REDIS_HOST = os.environ.get('REDIS_HOST', 'redis')
 REDIS_PORT = 6379
@@ -128,7 +132,6 @@ def crate_translator(clean_crate):
 
     with Translator(host=CRATE_HOST, port=CRATE_PORT) as trans:
         yield trans
-
 
 @pytest.fixture
 def entity():

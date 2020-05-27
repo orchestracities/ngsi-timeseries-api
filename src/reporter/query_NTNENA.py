@@ -2,11 +2,12 @@ from exceptions.exceptions import NGSIUsageError, InvalidParameterValue
 from utils.jsondict import lookup_string_match
 from flask import request
 from reporter.reporter import _validate_query_params
-from translators.crate import CrateTranslatorInstance
 import logging
 from .geo_query_handler import handle_geo_query
 import dateutil.parser
 from datetime import datetime, timezone
+from translators.factory import translator_for
+
 
 def query_NTNENA(id_=None,  # In Query
                  attrs=None,
@@ -48,7 +49,7 @@ def query_NTNENA(id_=None,  # In Query
         entity_ids = [s.strip() for s in id_.split(',') if s]
 
     try:
-        with CrateTranslatorInstance() as trans:
+        with translator_for(fiware_s) as trans:
             entities = trans.query(attr_names=attrs,
                                    entity_type=type_,
                                    entity_ids=entity_ids,

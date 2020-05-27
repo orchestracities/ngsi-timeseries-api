@@ -1,8 +1,10 @@
 from exceptions.exceptions import AmbiguousNGSIIdError, InvalidParameterValue
 from flask import request
 from reporter.reporter import _validate_query_params
-from translators.crate import CrateTranslatorInstance, CrateTranslator
+from translators.factory import translator_for
 import logging
+
+
 
 def query_NTNE(limit=10000,
                  type_=None,  # In Query
@@ -18,7 +20,7 @@ def query_NTNE(limit=10000,
 
     entities = None
     try:
-        with CrateTranslatorInstance() as trans:
+        with translator_for(fiware_s) as trans:
             entities = trans.query_ids(limit=limit,
                                    entity_type=type_,
                                    from_date=from_date,

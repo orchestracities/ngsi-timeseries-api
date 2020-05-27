@@ -1,6 +1,6 @@
-from conftest import QL_URL, crate_translator as translator
+from conftest import QL_URL
 from datetime import datetime, timezone
-from reporter.tests.utils import insert_test_data
+from reporter.tests.utils import insert_test_data, delete_test_data
 from utils.common import assert_equal_time_index_arrays
 import pytest
 import requests
@@ -23,10 +23,13 @@ def query_url(values=False):
 
 
 @pytest.fixture()
-def reporter_dataset(translator):
-    insert_test_data(translator, [entity_type], n_entities=3, index_size=n_days)
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def reporter_dataset(service):
+    insert_test_data(service, [entity_type], n_entities=3, index_size=n_days)
     yield
-
+    delete_test_data(service, [entity_type])
 
 def assert_1TNE1A_response(obtained, expected, values_only=False):
     """
@@ -50,12 +53,17 @@ def assert_1TNE1A_response(obtained, expected, values_only=False):
     assert obtained == expected
 
 
-def test_1TNE1A_defaults(reporter_dataset):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_1TNE1A_defaults(service, reporter_dataset):
     # Query without specific id
     query_params = {
         'type': entity_type,
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Assert Results
@@ -90,14 +98,19 @@ def test_1TNE1A_defaults(reporter_dataset):
     assert_1TNE1A_response(obtained, expected)
 
 
-def test_1TNE1A_one_entity(reporter_dataset):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_1TNE1A_one_entity(service, reporter_dataset):
     # Query
     entity_id = 'Room1'
     query_params = {
         'type': entity_type,
         'id': entity_id
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     obtained_data = r.json()
@@ -123,14 +136,19 @@ def test_1TNE1A_one_entity(reporter_dataset):
     assert_1TNE1A_response(obtained, expected)
 
 
-def test_1TNE1A_some_entities(reporter_dataset):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_1TNE1A_some_entities(service, reporter_dataset):
     # Query
     entity_id = 'Room0,Room2'
     query_params = {
         'type': entity_type,
         'id': entity_id
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Assert Results
@@ -160,13 +178,18 @@ def test_1TNE1A_some_entities(reporter_dataset):
     assert_1TNE1A_response(obtained, expected)
 
 
-def test_1TNE1A_values_defaults(reporter_dataset):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_1TNE1A_values_defaults(service, reporter_dataset):
     # Query
     query_params = {
         'type': entity_type,
         'id': 'Room0,,Room1,RoomNotValid',  # -> validates to Room0,Room1.
     }
-    r = requests.get(query_url(values=True), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(values=True), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Assert Results
@@ -194,12 +217,17 @@ def test_1TNE1A_values_defaults(reporter_dataset):
     assert_1TNE1A_response(obtained, expected, values_only=True)
 
 
-def test_not_found():
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_not_found(service):
     query_params = {
         'type': entity_type,
         'id': 'RoomNotValid'
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 404, r.text
     assert r.json() == {
         "error": "Not Found",
@@ -207,7 +235,10 @@ def test_not_found():
     }
 
 
-def test_weird_ids(reporter_dataset):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_weird_ids(service, reporter_dataset):
     """
     Invalid ids are ignored (provided at least one is valid to avoid 404).
     Empty values are ignored.
@@ -217,7 +248,9 @@ def test_weird_ids(reporter_dataset):
         'type': entity_type,
         'id': 'Room1,RoomNotValid,,Room0,',  # -> validates to Room0,Room1.
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Assert Results
@@ -247,20 +280,25 @@ def test_weird_ids(reporter_dataset):
     assert_1TNE1A_response(obtained, expected)
 
 
-def test_different_time_indexes(translator):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_different_time_indexes(service):
     """
     Each entity should have its time_index array.
     """
     t = 'Room'
-    insert_test_data(translator, [t], entity_id='Room1', index_size=2)
-    insert_test_data(translator, [t], entity_id='Room3', index_size=4)
-    insert_test_data(translator, [t], entity_id='Room2', index_size=3)
+    insert_test_data(service, [t], entity_id='Room1', index_size=2)
+    insert_test_data(service, [t], entity_id='Room3', index_size=4)
+    insert_test_data(service, [t], entity_id='Room2', index_size=3)
 
     query_params = {
         'type': 'Room',
         'id': 'Room3,Room1,Room2',
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     expected_entities = [
@@ -288,24 +326,30 @@ def test_different_time_indexes(translator):
     }
     obtained = r.json()
     assert_1TNE1A_response(obtained, expected)
+    delete_test_data(service, [t])
 
 
-def test_aggregation_is_per_instance(translator):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_aggregation_is_per_instance(service):
     """
     Attribute Aggregation works by default on a per-instance basis.
     Cross-instance aggregation not yet supported.
     It would change the shape of the response.
     """
     t = 'Room'
-    insert_test_data(translator, [t], entity_id='Room0', index_size=3)
-    insert_test_data(translator, [t], entity_id='Room1', index_size=9)
+    insert_test_data(service, [t], entity_id='Room0', index_size=3)
+    insert_test_data(service, [t], entity_id='Room1', index_size=9)
 
     query_params = {
         'type': t,
         'id': 'Room0,Room1',
         'aggrMethod': 'sum'
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Assert Results
@@ -336,7 +380,8 @@ def test_aggregation_is_per_instance(translator):
         'fromDate': datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc).isoformat(),
         'toDate': datetime(1970, 1, 6, 0, 0, 0, 0, timezone.utc).isoformat(),
     }
-    r = requests.get(query_url(), params=query_params)
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Assert Results
@@ -357,6 +402,7 @@ def test_aggregation_is_per_instance(translator):
     assert obtained_data['entityType'] == t
     assert obtained_data['attrName'] == attr_name
     assert obtained_data['entities'] == expected_entities
+    delete_test_data(service, [t])
 
 
 @pytest.mark.parametrize("aggr_period, exp_index, ins_period", [
@@ -370,11 +416,14 @@ def test_aggregation_is_per_instance(translator):
                 '1970-01-01T00:01:00.000+00:00',
                 '1970-01-01T00:02:00.000+00:00'], "second"),
 ])
-def test_1T1ENA_aggrPeriod(translator, aggr_period, exp_index, ins_period):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_1TNE1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
     # Custom index to test aggrPeriod
     for i in exp_index:
         base = dateutil.parser.isoparse(i)
-        insert_test_data(translator,
+        insert_test_data(service,
                          [entity_type],
                          index_size=5,
                          index_base=base,
@@ -385,7 +434,9 @@ def test_1T1ENA_aggrPeriod(translator, aggr_period, exp_index, ins_period):
         'type': entity_type,
         'aggrPeriod': aggr_period,
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 400, r.text
 
     # Check aggregation with aggrPeriod
@@ -394,7 +445,7 @@ def test_1T1ENA_aggrPeriod(translator, aggr_period, exp_index, ins_period):
         'aggrMethod': 'sum',
         'aggrPeriod': aggr_period,
     }
-    r = requests.get(query_url(), params=query_params)
+    r = requests.get(query_url(), params=query_params,  headers=h)
     assert r.status_code == 200, r.text
 
     # Assert Results
@@ -411,14 +462,20 @@ def test_1T1ENA_aggrPeriod(translator, aggr_period, exp_index, ins_period):
     assert obtained_data['entityType'] == entity_type
     assert obtained_data['attrName'] == attr_name
     assert obtained_data['entities'] == expected_entities
+    delete_test_data(service, [entity_type])
 
 
-def test_1T1E1A_aggrScope(reporter_dataset):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_1T1E1A_aggrScope(service, reporter_dataset):
     # Notify users when not yet implemented
     query_params = {
         'type': entity_type,
         'aggrMethod': 'avg',
         'aggrScope': 'global',
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 501, r.text

@@ -1,7 +1,6 @@
-from conftest import crate_translator as translator
 from conftest import QL_URL
 from datetime import datetime
-from reporter.tests.utils import insert_test_data
+from reporter.tests.utils import insert_test_data, delete_test_data
 import pytest
 import requests
 from utils.common import assert_equal_time_index_arrays
@@ -25,9 +24,13 @@ def query_url(values=False):
 
 
 @pytest.fixture()
-def reporter_dataset(translator):
-    insert_test_data(translator, [entity_type], n_entities=1, index_size=30)
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def reporter_dataset(service):
+    insert_test_data(service, [entity_type], n_entities=1, index_size=30)
     yield
+    delete_test_data(service, [entity_type])
 
 
 def assert_1T1ENA_response(obtained, expected):
@@ -43,12 +46,17 @@ def assert_1T1ENA_response(obtained, expected):
     assert obtained == expected
 
 
-def test_1T1ENA_defaults(reporter_dataset):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_1T1ENA_defaults(service, reporter_dataset):
     # Query
     query_params = {
         'type': entity_type,
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Assert
@@ -82,13 +90,18 @@ def test_1T1ENA_defaults(reporter_dataset):
     ("min", 0, 0),
     ("max", 290, 29),
 ])
-def test_1T1ENA_aggrMethod(reporter_dataset, aggr_meth, aggr_press, aggr_temp):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_1T1ENA_aggrMethod(service, reporter_dataset, aggr_meth, aggr_press, aggr_temp):
     # attrs is compulsory when using aggrMethod
     query_params = {
         'type': entity_type,
         'aggrMethod': aggr_meth,
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 400, r.text
 
     # Query
@@ -97,7 +110,7 @@ def test_1T1ENA_aggrMethod(reporter_dataset, aggr_meth, aggr_press, aggr_temp):
         'aggrMethod': aggr_meth,
         'attrs': temperature + ',' + pressure,
     }
-    r = requests.get(query_url(), params=query_params)
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Assert
@@ -130,11 +143,15 @@ def test_1T1ENA_aggrMethod(reporter_dataset, aggr_meth, aggr_press, aggr_temp):
                 '1970-01-01T00:01:00.000+00:00',
                 '1970-01-01T00:02:00.000+00:00'], "second"),
 ])
-def test_1T1ENA_aggrPeriod(translator, aggr_period, exp_index, ins_period):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_1T1ENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
     # Custom index to test aggrPeriod
+
     for i in exp_index:
         base = dateutil.parser.isoparse(i)
-        insert_test_data(translator,
+        insert_test_data(service,
                          [entity_type],
                          index_size=3,
                          index_base=base,
@@ -145,7 +162,9 @@ def test_1T1ENA_aggrPeriod(translator, aggr_period, exp_index, ins_period):
         'type': entity_type,
         'aggrPeriod': aggr_period,
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 400, r.text
 
     # Check aggregation with aggrPeriod
@@ -155,9 +174,10 @@ def test_1T1ENA_aggrPeriod(translator, aggr_period, exp_index, ins_period):
         'aggrMethod': 'max',
         'aggrPeriod': aggr_period,
     }
-    r = requests.get(query_url(), params=query_params)
-    assert r.status_code == 200, r.text
+    h = {'Fiware-Service': service}
 
+    r = requests.get(query_url(), params=query_params, headers=h)
+    assert r.status_code == 200, r.text
     # Assert Results
     expected = {
         'entityId': entity_id,
@@ -175,16 +195,22 @@ def test_1T1ENA_aggrPeriod(translator, aggr_period, exp_index, ins_period):
     }
     obtained = r.json()
     assert_1T1ENA_response(obtained, expected)
+    delete_test_data(service, [entity_type])
 
 
-def test_1T1ENA_fromDate_toDate(reporter_dataset):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_1T1ENA_fromDate_toDate(service, reporter_dataset):
     # Query
     query_params = {
         'type': entity_type,
         'fromDate': "1970-01-06T00:00:00+00:00",
         'toDate': "1970-01-17T00:00:00+00:00",
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Expect only last N
@@ -215,14 +241,20 @@ def test_1T1ENA_fromDate_toDate(reporter_dataset):
     obtained = r.json()
     assert_1T1ENA_response(obtained, expected)
 
-def test_1T1ENA_fromDate_toDate_with_quotes(reporter_dataset):
+
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_1T1ENA_fromDate_toDate_with_quotes(service, reporter_dataset):
     # Query
     query_params = {
         'type': entity_type,
         'fromDate': '"1970-01-06T00:00:00+00:00"',
         'toDate': '"1970-01-17T00:00:00+00:00"',
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Expect only last N
@@ -253,13 +285,19 @@ def test_1T1ENA_fromDate_toDate_with_quotes(reporter_dataset):
     obtained = r.json()
     assert_1T1ENA_response(obtained, expected)
 
-def test_1T1ENA_lastN(reporter_dataset):
+
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_1T1ENA_lastN(service, reporter_dataset):
     # Query
     query_params = {
         'type': entity_type,
         'lastN': 10
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Expect only last N
@@ -291,7 +329,10 @@ def test_1T1ENA_lastN(reporter_dataset):
     assert_1T1ENA_response(obtained, expected)
 
 
-def test_1T1E1A_lastN_with_limit(reporter_dataset):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_1T1E1A_lastN_with_limit(service, reporter_dataset):
     """
     See GitHub issue #249.
     """
@@ -301,7 +342,9 @@ def test_1T1E1A_lastN_with_limit(reporter_dataset):
         'lastN': 3,
         'limit': 10
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Expected
@@ -332,13 +375,18 @@ def test_1T1E1A_lastN_with_limit(reporter_dataset):
     assert_1T1ENA_response(obtained, expected)
 
 
-def test_1T1ENA_limit(reporter_dataset):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_1T1ENA_limit(service, reporter_dataset):
     # Query
     query_params = {
         'type': entity_type,
         'limit': 5
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Expect only last N
@@ -370,13 +418,18 @@ def test_1T1ENA_limit(reporter_dataset):
     assert_1T1ENA_response(obtained, expected)
 
 
-def test_1T1ENA_offset(reporter_dataset):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_1T1ENA_offset(service, reporter_dataset):
     # Query
     query_params = {
         'type': entity_type,
         'offset': 3
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Expect only last N
@@ -408,7 +461,10 @@ def test_1T1ENA_offset(reporter_dataset):
     assert_1T1ENA_response(obtained, expected)
 
 
-def test_1T1ENA_combined(reporter_dataset):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_1T1ENA_combined(service, reporter_dataset):
     # Query
     query_params = {
         'type': entity_type,
@@ -416,7 +472,9 @@ def test_1T1ENA_combined(reporter_dataset):
         'toDate': "1970-01-20T00:00:00+00:00",
         'limit': 28,
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Expect only last N
@@ -448,12 +506,17 @@ def test_1T1ENA_combined(reporter_dataset):
     assert_1T1ENA_response(obtained, expected)
 
 
-def test_1T1ENA_values_defaults(reporter_dataset):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_1T1ENA_values_defaults(service, reporter_dataset):
     # Query
     query_params = {
         'type': entity_type,
     }
-    r = requests.get(query_url(values=True), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(values=True), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Assert
@@ -479,11 +542,16 @@ def test_1T1ENA_values_defaults(reporter_dataset):
     assert_1T1ENA_response(obtained, expected)
 
 
-def test_not_found():
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_not_found(service):
     query_params = {
         'type': entity_type,
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 404, r.text
     assert r.json() == {
         "error": "Not Found",
