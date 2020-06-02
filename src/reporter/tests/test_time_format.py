@@ -13,7 +13,7 @@ def check_time_index(input_index, expected_index=None):
     n1 = get_notification('Room', 'Room0', 1, input_index[1])
     n2 = get_notification('Room', 'Room0', 2, input_index[2])
 
-    send_notifications([n0, n1, n2])
+    send_notifications(service='', notifications=[n0, n1, n2])
     time.sleep(1)
 
     # Query

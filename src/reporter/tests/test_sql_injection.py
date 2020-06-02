@@ -17,6 +17,9 @@ attr2_value = 2
 entity1_id = 'd1'
 entity2_id = 'd2'
 
+tenants = ['t1', 't2']
+
+
 def mk_entity(eid):
     return {
         'id': eid,
@@ -39,14 +42,15 @@ def mk_entities():
     ]
 
 
-def insert_entities():
+def insert_entities(service):
     notification_data = [{'data': mk_entities()}]
-    send_notifications(notification_data)
+    send_notifications(service, notification_data)
 
 
 @pytest.fixture(scope='module')
 def manage_db_entities():
-    insert_entities()
+    for service in tenants:
+        insert_entities(service)
     time.sleep(2)
 
     yield
@@ -54,48 +58,58 @@ def manage_db_entities():
     do_clean_crate()
 
 
-def query_sql_fromdate(entity_id, date):
+def query_sql(service, entity_id, query_params, response_code):
     url = "{}/entities/{}".format(QL_URL, entity_id)
+    hs = {'Fiware-Service': service}
+    response = requests.get(url, params=query_params, headers=hs)
+    assert response.status_code == response_code
+
+
+def query_sql_fromdate(service, entity_id, date):
     query_params = {
         'fromDate': date,
     }
-    response = requests.get(url, query_params)
-    assert response.status_code == 422
+    expected_response_code = 422
+    query_sql(service, entity_id, query_params, expected_response_code)
 
-def query_sql_todate(entity_id, date):
-    url = "{}/entities/{}".format(QL_URL, entity_id)
+
+def query_sql_todate(service, entity_id, date):
     query_params = {
         'toDate': date,
     }
-    response = requests.get(url, query_params)
-    assert response.status_code == 422
+    expected_response_code = 422
+    query_sql(service, entity_id, query_params, expected_response_code)
 
-def query_sql_limit(entity_id, value):
-    url = "{}/entities/{}".format(QL_URL, entity_id)
+
+def query_sql_limit(service, entity_id, value):
     query_params = {
         'limit': value,
     }
-    response = requests.get(url, query_params)
-    assert response.status_code == 400
+    expected_response_code = 400
+    query_sql(service, entity_id, query_params, expected_response_code)
 
-def query_sql_last_n(entity_id, value):
-    url = "{}/entities/{}".format(QL_URL, entity_id)
+
+def query_sql_last_n(service, entity_id, value):
     query_params = {
         'lastN': value,
     }
-    response = requests.get(url, query_params)
-    assert response.status_code == 400
+    expected_response_code = 400
+    query_sql(service, entity_id, query_params, expected_response_code)
+
 
 @pytest.mark.parametrize('date', [
     "2020-03-03'%20and%20'1'%3d'1"
 ])
 def test_sql_injection_dates(date, manage_db_entities):
-    query_sql_fromdate(entity1_id, date)
-    query_sql_todate(entity1_id, date)
+    for service in tenants:
+        query_sql_fromdate(service, entity1_id, date)
+        query_sql_todate(service, entity1_id, date)
+
 
 @pytest.mark.parametrize('value', [
     "1'%20and%20'1'%3d'1"
 ])
 def test_sql_injection_limit_and_last(value, manage_db_entities):
-    query_sql_limit(entity1_id, value)
-    query_sql_last_n(entity1_id, value)
+    for service in tenants:
+        query_sql_limit(service, entity1_id, value)
+        query_sql_last_n(service, entity1_id, value)
