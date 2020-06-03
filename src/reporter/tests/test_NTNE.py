@@ -1,6 +1,5 @@
-from conftest import QL_URL, crate_translator as translator
-from exceptions.exceptions import AmbiguousNGSIIdError
-from reporter.tests.utils import insert_test_data
+from conftest import QL_URL
+from reporter.tests.utils import insert_test_data, delete_test_data
 from datetime import datetime
 import pytest
 import requests
@@ -20,10 +19,15 @@ def query_url():
 
 
 @pytest.fixture()
-def reporter_dataset(translator):
-    insert_test_data(translator, [entity_type], n_entities=1, index_size=30, entity_id=entity_id)
-    insert_test_data(translator, [entity_type_1], n_entities=1, index_size=30, entity_id=entity_id_1, index_base=datetime(1980, 1, 1, 0, 0, 0, 0))
+def reporter_dataset():
+    service = ''
+    insert_test_data(service, [entity_type], n_entities=1, index_size=30,
+                     entity_id=entity_id)
+    insert_test_data(service, [entity_type_1], n_entities=1, index_size=30,
+                     entity_id=entity_id_1,
+                     index_base=datetime(1980, 1, 1, 0, 0, 0, 0))
     yield
+    delete_test_data(service, [entity_type, entity_type_1])
 
 
 # TODO we removed order comparison given that in
@@ -39,8 +43,7 @@ def test_NTNE_defaults(reporter_dataset):
             "1980-01-30T00:00:00.000+00:00"
         ],
         "type": 'Kitchen'
-    },
-    {
+    }, {
         "id": 'Room0',
         "index": [
             "1970-01-30T00:00:00.000+00:00"
@@ -111,8 +114,7 @@ def test_NTNE_fromDate_toDate(reporter_dataset):
         'id': expected_id_1,
         'index': expected_index_1,
         'type': expected_type_1
-    },
-    {
+    }, {
         'id': expected_id,
         'index': expected_index,
         'type': expected_type
@@ -146,8 +148,7 @@ def test_NTNE_fromDate_toDate_with_quotes(reporter_dataset):
         'id': expected_id_1,
         'index': expected_index_1,
         'type': expected_type_1
-    },
-    {
+    }, {
         'id': expected_id,
         'index': expected_index,
         'type': expected_type
