@@ -11,27 +11,27 @@ entity_type = 'Room'
 entity_id = 'Room0'
 attr_name = 'temperature'
 n_days = 30
+services = ['t1', 't2']
 
 
-def query_url(entity_type='Room', entity_id='Room0', values=False):
+def query_url(entity_type='Room', eid='Room0', values=False):
     url = "{qlUrl}/entities/{entityId}/attrs/{attrName}"
     if values:
         url += '/value'
     return url.format(
         qlUrl=QL_URL,
-        entityId=entity_id,
+        entityId=eid,
         attrName=attr_name,
     )
 
 
-@pytest.fixture()
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
-def reporter_dataset(service):
-    insert_test_data(service, [entity_type], n_entities=1, index_size=30)
+@pytest.fixture(scope='module')
+def reporter_dataset():
+    for service in services:
+        insert_test_data(service, [entity_type], n_entities=1, index_size=30)
     yield
-    delete_test_data(service, [entity_type])
+    for service in services:
+        delete_test_data(service, [entity_type])
 
 
 def assert_1T1E1A_response(obtained, expected):
@@ -47,9 +47,7 @@ def assert_1T1E1A_response(obtained, expected):
     assert obtained == expected
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1E1A_defaults(service, reporter_dataset):
     # Query
     query_params = {
@@ -82,9 +80,7 @@ def test_1T1E1A_defaults(service, reporter_dataset):
     ("min", 0),
     ("max", 29),
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1E1A_aggrMethod(service, reporter_dataset, aggr_method, aggr_value):
     # Query
     query_params = {
@@ -116,53 +112,59 @@ def test_1T1E1A_aggrMethod(service, reporter_dataset, aggr_method, aggr_value):
                 '1970-01-01T00:00:01.000+00:00',
                 '1970-01-01T00:00:02.000+00:00'], "milli"),
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1E1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
+    etype = 'test_1T1E1A_aggrPeriod'
+    # The reporter_dataset fixture is still in the DB cos it has a scope of
+    # module. We use a different entity type to store this test's rows in a
+    # different table to avoid messing up global state---see also delete down
+    # below.
+    eid = "{}0".format(etype)
+
     # Custom index to test aggrPeriod
     for i in exp_index:
         base = dateutil.parser.isoparse(i)
         insert_test_data(service,
-                         [entity_type],
+                         [etype],
+                         entity_id=eid,
                          index_size=4,
                          index_base=base,
                          index_period=ins_period)
 
     # aggrPeriod needs aggrMethod
     query_params = {
-        'type': entity_type,
+        'type': etype,
         'aggrPeriod': aggr_period,
     }
     h = {'Fiware-Service': service}
-    r = requests.get(query_url(), params=query_params, headers=h)
+    r = requests.get(query_url(eid=eid), params=query_params, headers=h)
     assert r.status_code == 400, r.text
 
     # Check aggregation with aggrPeriod
     query_params = {
-        'type': entity_type,
+        'type': etype,
         'aggrMethod': 'avg',
         'aggrPeriod': aggr_period,
     }
-    r = requests.get(query_url(), params=query_params, headers=h)
+    r = requests.get(query_url(eid=eid), params=query_params, headers=h)
+
+    delete_test_data(service, [etype])
+
     assert r.status_code == 200, r.text
 
     # Assert Results
     obtained = r.json()
     exp_avg = (0 + 1 + 2 + 3) / 4.
     expected = {
-        'entityId': entity_id,
+        'entityId': eid,
         'attrName': attr_name,
         'index': exp_index,
         'values': [exp_avg, exp_avg, exp_avg]
     }
     assert_1T1E1A_response(obtained, expected)
-    delete_test_data(service, [entity_type])
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1E1A_fromDate_toDate(service, reporter_dataset):
     # Query
     query_params = {
@@ -194,9 +196,7 @@ def test_1T1E1A_fromDate_toDate(service, reporter_dataset):
     assert_1T1E1A_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1E1A_fromDate_toDate_with_quotes(service, reporter_dataset):
     # Query
     query_params = {
@@ -228,9 +228,7 @@ def test_1T1E1A_fromDate_toDate_with_quotes(service, reporter_dataset):
     assert_1T1E1A_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1E1A_lastN(service, reporter_dataset):
     # Query
     query_params = {
@@ -261,9 +259,7 @@ def test_1T1E1A_lastN(service, reporter_dataset):
     assert_1T1E1A_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1E1A_lastN_with_limit(service, reporter_dataset):
     """
     See GitHub issue #249.
@@ -297,9 +293,7 @@ def test_1T1E1A_lastN_with_limit(service, reporter_dataset):
     assert_1T1E1A_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1E1A_limit(service, reporter_dataset):
     # Query
     query_params = {
@@ -330,9 +324,7 @@ def test_1T1E1A_limit(service, reporter_dataset):
     assert_1T1E1A_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1E1A_offset(service, reporter_dataset):
     # Query
     query_params = {
@@ -364,9 +356,7 @@ def test_1T1E1A_offset(service, reporter_dataset):
     assert_1T1E1A_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1E1A_combined(service, reporter_dataset):
     # Query
     query_params = {
@@ -401,9 +391,7 @@ def test_1T1E1A_combined(service, reporter_dataset):
     assert_1T1E1A_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1E1A_values_defaults(service, reporter_dataset):
     # Query
     query_params = {
@@ -428,12 +416,10 @@ def test_1T1E1A_values_defaults(service, reporter_dataset):
     assert_1T1E1A_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_not_found(service):
     query_params = {
-        'type': entity_type,
+        'type': 'NotThere',
     }
 
     h = {'Fiware-Service': service}
@@ -446,59 +432,72 @@ def test_not_found(service):
     }
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_no_type(service):
     """
     Specifying entity type is optional, provided that id is unique.
     """
-    insert_test_data(service, ['Room', 'Car'], n_entities=2, index_size=30)
+
+    etype_1, etype_2 = 'RoomDevice', 'Car'
+    etypes = [etype_1, etype_2]
+    eid = "{}1".format(etype_1)
+    # The reporter_dataset fixture is still in the DB cos it has a scope of
+    # module. We use different entity types to store this test's rows in
+    # different tables to avoid messing up global state---see also delete
+    # down below.
+    insert_test_data(service, etypes, n_entities=2, index_size=2)
 
     h = {'Fiware-Service': service}
 
     # With type
-    r = requests.get(query_url(), params={'type': 'Room'}, headers=h)
+    r = requests.get(query_url(eid=eid), params={'type': etype_1}, headers=h)
     assert r.status_code == 200, r.text
     res_with_type = r.json()
 
     # Without type
-    r = requests.get(query_url(), params={}, headers=h)
+    r = requests.get(query_url(eid=eid), params={}, headers=h)
     assert r.status_code == 200, r.text
     res_without_type = r.json()
 
     assert res_with_type == res_without_type
-    delete_test_data(service, ['Room', 'Car'])
+    delete_test_data(service, etypes)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_no_type_not_unique(service):
     # If id is not unique across types, you must specify type.
+
+    etype_1, etype_2 = 'RoomDevice', 'Car'
+    etypes = [etype_1, etype_2]
+    # The reporter_dataset fixture is still in the DB cos it has a scope of
+    # module. We use different entity types to store this test's rows in
+    # different tables to avoid messing up global state---see also delete
+    # down below.
+    shared_entity_id = "sharedId"
+
     insert_test_data(service,
-                     ['Room', 'Car'],
+                     etypes,
                      n_entities=2,
-                     index_size=30,
-                     entity_id="repeatedId")
+                     index_size=2,
+                     entity_id=shared_entity_id)
 
     url = "{qlUrl}/entities/{entityId}/attrs/temperature".format(
         qlUrl=QL_URL,
-        entityId="repeatedId",
+        entityId=shared_entity_id,
     )
 
     h = {'Fiware-Service': service}
 
     # With type
-    r = requests.get(url, params={'type': 'Room'}, headers=h)
+    r = requests.get(url, params={'type': etype_1}, headers=h)
     assert r.status_code == 200, r.text
 
     # Without type
     r = requests.get(url, params={}, headers=h)
     assert r.status_code == 400, r.text
-    e = AmbiguousNGSIIdError('repeatedId')
+    e = AmbiguousNGSIIdError(shared_entity_id)
     assert r.json() == {
         "error": "{}".format(type(e)),
         "description": str(e)
     }
-    delete_test_data(service, ['Room', 'Car'])
+    delete_test_data(service, etypes)
