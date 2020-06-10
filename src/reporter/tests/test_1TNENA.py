@@ -4,42 +4,43 @@ from reporter.tests.utils import insert_test_data, delete_test_data
 from utils.common import assert_equal_time_index_arrays
 import pytest
 import requests
-import pdb
 import dateutil.parser
 
 entity_type = 'Room'
 attr_name_1 = 'temperature'
 attr_name_2 = 'pressure'
 n_days = 6
+services = ['t1', 't2']
 
 
-def query_url(values=False):
+def query_url(etype=entity_type, values=False):
     url = "{qlUrl}/types/{entityType}"
     if values:
         url += '/value'
     return url.format(
         qlUrl=QL_URL,
-        entityType=entity_type
+        entityType=etype
     )
 
 
-@pytest.fixture()
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
-def reporter_dataset(service):
-    insert_test_data(service, [entity_type], n_entities=3, index_size=n_days)
+@pytest.fixture(scope='module')
+def reporter_dataset():
+    for service in services:
+        insert_test_data(service, [entity_type], n_entities=3,
+                         index_size=n_days)
     yield
-    delete_test_data(service, [entity_type])
+    for service in services:
+        delete_test_data(service, [entity_type])
 
 
-def assert_1TNENA_response(obtained, expected, values_only=False):
+def assert_1TNENA_response(obtained, expected, etype=entity_type,
+                           values_only=False):
     """
     Check API responses for 1TNENA
     """
     assert isinstance(obtained, dict)
     if not values_only:
-        assert obtained['entityType'] == entity_type
+        assert obtained['entityType'] == etype
         obt_entities_index = obtained['entities'][0]['index']
         exp_entities_index = expected['entities'][0]['index']
     else:
@@ -51,9 +52,7 @@ def assert_1TNENA_response(obtained, expected, values_only=False):
     assert obtained == expected
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1TNENA_defaults(service, reporter_dataset):
     h = {'Fiware-Service': service}
     r = requests.get(query_url(), headers=h)
@@ -101,9 +100,7 @@ def test_1TNENA_defaults(service, reporter_dataset):
     assert_1TNENA_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1TNENA_one_entity(service, reporter_dataset):
     # Query
     entity_id = 'Room1'
@@ -149,9 +146,7 @@ def test_1TNENA_one_entity(service, reporter_dataset):
     assert_1TNENA_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1TNENA_some_entities(service, reporter_dataset):
     # Query
     entity_id = 'Room0,Room2'
@@ -202,9 +197,7 @@ def test_1TNENA_some_entities(service, reporter_dataset):
     assert_1TNENA_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1TNENA_values_defaults(service, reporter_dataset):
     # Query
     query_params = {
@@ -253,9 +246,7 @@ def test_1TNENA_values_defaults(service, reporter_dataset):
     assert_1TNENA_response(obtained, expected, values_only=True)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_not_found(service):
     query_params = {
         'id': 'RoomNotValid'
@@ -269,9 +260,7 @@ def test_not_found(service):
     }
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_weird_ids(service, reporter_dataset):
     """
     Invalid ids are ignored (provided at least one is valid to avoid 404).
@@ -325,19 +314,13 @@ def test_weird_ids(service, reporter_dataset):
     assert_1TNENA_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
-def test_aggregation_is_per_instance(service):
+@pytest.mark.parametrize("service", services)
+def test_aggregation_is_per_instance(service, reporter_dataset):
     """
     Attribute Aggregation works by default on a per-instance basis.
     Cross-instance aggregation not yet supported.
     It would change the shape of the response.
     """
-    t = 'Room'
-    insert_test_data(service, [t], entity_id='Room0', index_size=3)
-    insert_test_data(service, [t], entity_id='Room1', index_size=3)
-
     query_params = {
         'attrs': 'temperature',
         'id': 'Room0,Room1',
@@ -351,7 +334,7 @@ def test_aggregation_is_per_instance(service):
     expected_attributes = [
         {
             'attrName': attr_name_1,
-            'values' : [sum(range(3))]
+            'values' : [sum(range(6))]
         }
     ]
 
@@ -392,7 +375,7 @@ def test_aggregation_is_per_instance(service):
     expected_attributes = [
         {
             'attrName': attr_name_1,
-            'values' : [2]
+            'values' : [5]
         }
     ]
 
@@ -417,7 +400,6 @@ def test_aggregation_is_per_instance(service):
     obtained = r.json()
     assert isinstance(obtained, dict)
     assert obtained == expected
-    delete_test_data(service, [t])
 
 
 @pytest.mark.parametrize("aggr_period, exp_index, ins_period", [
@@ -431,15 +413,20 @@ def test_aggregation_is_per_instance(service):
                 '1970-01-01T00:01:00.000+00:00',
                 '1970-01-01T00:02:00.000+00:00'], "second"),
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1TNENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
     # Custom index to test aggrPeriod
+
+    etype = 'test_1TNENA_aggrPeriod'
+    # The reporter_dataset fixture is still in the DB cos it has a scope of
+    # module. We use a different entity type to store this test's rows in a
+    # different table to avoid messing up global state---see also delete down
+    # below.
+    eid = '{}0'.format(etype)
     for i in exp_index:
         base = dateutil.parser.isoparse(i)
         insert_test_data(service,
-                         [entity_type],
+                         [etype],
                          index_size=5,
                          index_base=base,
                          index_period=ins_period)
@@ -449,7 +436,7 @@ def test_1TNENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
         'aggrPeriod': aggr_period,
     }
     h = {'Fiware-Service': service}
-    r = requests.get(query_url(), params=query_params, headers=h)
+    r = requests.get(query_url(etype=etype), params=query_params, headers=h)
     assert r.status_code == 400, r.text
 
     # Check aggregation with aggrPeriod
@@ -458,7 +445,7 @@ def test_1TNENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
         'aggrMethod': 'sum',
         'aggrPeriod': aggr_period,
     }
-    r = requests.get(query_url(), params=query_params, headers=h)
+    r = requests.get(query_url(etype=etype), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Assert Results
@@ -474,25 +461,23 @@ def test_1TNENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
     expected_entities = [
         {
             'attributes': expected_attributes,
-            'entityId': 'Room0',
+            'entityId': eid,
             'index': exp_index
         }
     ]
 
     expected = {
         'entities': expected_entities,
-        'entityType': entity_type
+        'entityType': etype
     }
 
     obtained = r.json()
     assert isinstance(obtained, dict)
-    assert_1TNENA_response(obtained, expected)
-    delete_test_data(service, [entity_type])
+    assert_1TNENA_response(obtained, expected, etype=etype)
+    delete_test_data(service, [etype])
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1TNENA_aggrScope(service, reporter_dataset):
     # Notify users when not yet implemented
     query_params = {
