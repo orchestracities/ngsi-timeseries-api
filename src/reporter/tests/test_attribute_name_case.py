@@ -17,6 +17,8 @@ attr2_value = 2
 entity1_id = 'd1'
 entity2_id = 'd2'
 
+services = ['t1', 't2']
+
 
 def mk_entity(eid):
     return {
@@ -46,17 +48,16 @@ def insert_entities(service):
     time.sleep(1)
 
 
-@pytest.fixture()
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
-def manage_db_entities(service):
-    insert_entities(service)
+@pytest.fixture(scope='module')
+def manage_db_entities():
+    for service in services:
+        insert_entities(service)
     time.sleep(2)
 
     yield
 
-    delete_test_data(service, [entity_type])
+    for service in services:
+        delete_test_data(service, [entity_type])
 
 
 def query_1t1e1a(service, entity_id, attr_name):
@@ -91,9 +92,7 @@ def query_1t1ena(service, entity_id, attr1_name, attr2_name):
 @pytest.mark.parametrize('attr_name', [
     attr1, 'attr1', 'atTr1'
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1t1e1a(service, attr_name, manage_db_entities):
     query_result = query_1t1e1a(service, entity1_id, attr_name)
     query_result.pop('index', None)
@@ -107,9 +106,7 @@ def test_1t1e1a(service, attr_name, manage_db_entities):
 @pytest.mark.parametrize('attr_name', [
     attr1, 'attr1', 'atTr1'
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1tne1a(service, attr_name, manage_db_entities):
     query_result = query_1tne1a(service, attr_name)
     for e in query_result['entities']:
@@ -134,9 +131,7 @@ def test_1tne1a(service, attr_name, manage_db_entities):
 @pytest.mark.parametrize('attr1_name, attr2_name', [
     (attr1, attr2), ('attr1', 'attr_2'), ('atTr1', 'ATtr_2')
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1t1ena(service, attr1_name, attr2_name, manage_db_entities):
     query_result = query_1t1ena(service, entity2_id, attr1_name, attr2_name)
     query_result.pop('index', None)
