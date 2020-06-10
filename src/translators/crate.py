@@ -7,6 +7,7 @@ from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption, \
 from translators import base_translator
 from utils.common import iter_entity_attrs
 import logging
+from utils.cfgreader import *
 import os
 from geocoding.slf import SlfQuery
 from .crate_geo_query import from_ngsi_query
@@ -59,7 +60,6 @@ class CrateTranslator(base_translator.BaseTranslator):
     def __init__(self, host, port=4200, db_name="ngsi-tsdb"):
         super(CrateTranslator, self).__init__(host, port, db_name)
         self.logger = logging.getLogger(__name__)
-
 
     def setup(self):
         url = "{}:{}".format(self.host, self.port)
@@ -422,12 +422,14 @@ class CrateTranslator(base_translator.BaseTranslator):
         return select
 
 
-    def _get_limit(self, limit, last_n):
+    def _get_limit(self, limit, last_n,env: dict = os.environ):
         # https://crate.io/docs/crate/reference/en/latest/general/dql/selects.html#limits
         default_limit = 10000
-        if os.environ.get("DEFAULT_LIMIT"):
-            default_limit = int(os.environ["DEFAULT_LIMIT"])
-            
+        env_default = None
+        r = EnvReader(env, log=logging.getLogger(__name__).info)
+        env_default = r.read(IntVar("DEFAULT_LIMIT",env_default))
+        if env_default:
+            default_limit = env_default
         if limit is None or limit > default_limit:
             limit = default_limit
 

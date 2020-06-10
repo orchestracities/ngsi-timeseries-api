@@ -3,6 +3,7 @@ from translators.base_translator import BaseTranslator
 from translators.crate import NGSI_TEXT
 from conftest import crate_translator as translator, entity
 from utils.common import *
+from utils.cfgreader import *
 import os
 
 
@@ -105,13 +106,13 @@ def test_query_all(translator):
         notifications = [e for e in entities if e['id'] == i]
         records = [e for e in loaded_entities if e['id'] == i]
         check_notifications_record(notifications, records)
-        
- 
-def test_limit_max(translator):
-    os.environ["DEFAULT_LIMIT"] == "12000"
-    limit = translator._get_limit(limit=11000,last_n=None)
-    assert limit == 11000
 
+
+def test_limit_max(translator,env: dict = os.environ):
+    r = EnvReader(env, log=logging.getLogger(__name__).info)
+    env.get("DEFAULT_LIMIT") == "12000"
+    limit = translator._get_limit(limit=10000,last_n=None)
+    assert limit == 10000
 
 def test_limit_0(translator):
     entities = create_random_entities(num_updates=2)
