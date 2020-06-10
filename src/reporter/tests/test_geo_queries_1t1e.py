@@ -7,9 +7,7 @@ from .geo_queries_fixture import *
 @pytest.mark.parametrize('query_fn', [
     query_1t1e1a, query_1t1ena
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_near_min_max(service, setup_entities, query_fn):
     query_params = {
         'georel': 'near;minDistance:10;maxDistance:20',
@@ -26,9 +24,7 @@ def test_near_min_max(service, setup_entities, query_fn):
 @pytest.mark.parametrize('query_fn', [
     query_1t1e1a, query_1t1ena
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_near_min(service, setup_entities, query_fn):
     query_params = {
         'georel': 'near;minDistance:10',
@@ -45,9 +41,7 @@ def test_near_min(service, setup_entities, query_fn):
 @pytest.mark.parametrize('query_fn', [
     query_1t1e1a, query_1t1ena
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_near_max(service, setup_entities, query_fn):
     query_params = {
         'georel': 'near;maxDistance:20',
@@ -65,9 +59,7 @@ def test_near_max(service, setup_entities, query_fn):
 @pytest.mark.parametrize('query_fn', [
     query_1t1e1a, query_1t1ena
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_covered_by_line(service, setup_entities, query_fn):
     query_params = {
         'georel': 'coveredBy',
@@ -87,10 +79,8 @@ def test_covered_by_line(service, setup_entities, query_fn):
 @pytest.mark.parametrize('query_fn', [
     query_1t1e1a, query_1t1ena
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
-def test_covered_by_polygon(service,setup_entities, query_fn):
+@pytest.mark.parametrize("service", services)
+def test_covered_by_polygon(service, setup_entities, query_fn):
     query_params = {
         'georel': 'coveredBy',
         'geometry': 'polygon',
@@ -107,9 +97,7 @@ def test_covered_by_polygon(service,setup_entities, query_fn):
 @pytest.mark.parametrize('query_fn', [
     query_1t1e1a, query_1t1ena
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_intersects_line(service, setup_entities, query_fn):
     query_params = {
         'georel': 'intersects',
@@ -126,9 +114,7 @@ def test_intersects_line(service, setup_entities, query_fn):
 @pytest.mark.parametrize('query_fn', [
     query_1t1e1a, query_1t1ena
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_intersects_point(service, setup_entities, query_fn):
     query_params = {
         'georel': 'intersects',
@@ -147,9 +133,7 @@ def test_intersects_point(service, setup_entities, query_fn):
 @pytest.mark.parametrize('query_fn', [
     query_1t1e1a, query_1t1ena
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_intersects_polygon(service, setup_entities, query_fn):
     query_params = {
         'georel': 'intersects',
@@ -168,9 +152,7 @@ def test_intersects_polygon(service, setup_entities, query_fn):
 @pytest.mark.parametrize('query_fn', [
     query_1t1e1a, query_1t1ena
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_disjoint_with_disjoint_polygon(service, setup_entities, query_fn):
     query_params = {
         'georel': 'disjoint',
@@ -189,9 +171,7 @@ def test_disjoint_with_disjoint_polygon(service, setup_entities, query_fn):
 @pytest.mark.parametrize('query_fn', [
     query_1t1e1a, query_1t1ena
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_disjoint_with_overlapping_polygon(service, setup_entities, query_fn):
     query_params = {
         'georel': 'disjoint',
@@ -206,9 +186,7 @@ def test_disjoint_with_overlapping_polygon(service, setup_entities, query_fn):
 @pytest.mark.parametrize('query_fn', [
     query_1t1e1a, query_1t1ena
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_equals_not_supported(service, setup_entities, query_fn):
     query_params = {
         'georel': 'equals',
@@ -223,9 +201,7 @@ def test_equals_not_supported(service, setup_entities, query_fn):
 @pytest.mark.parametrize('query_fn', [
     query_1t1e1a, query_1t1ena
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_invalid_geo_params(service, setup_entities, query_fn):
     query_params = {
         'georel': 'disjoint',

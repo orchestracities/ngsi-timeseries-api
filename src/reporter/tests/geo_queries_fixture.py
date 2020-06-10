@@ -25,19 +25,20 @@ def mk_entity(eid, coords):
 entity_1 = mk_entity('d1', [[0, 0], [2, 0]])
 entity_2 = mk_entity('d2', [[0, 1], [2, 1]])
 
+services = ['t1', 't2']
 
-@pytest.fixture()
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
-def setup_entities(service):
+
+@pytest.fixture(scope='module')
+def setup_entities():
     notification_data = [{'data': [e]} for e in [entity_1, entity_2]]
-    send_notifications(service, notification_data)
+    for service in services:
+        send_notifications(service, notification_data)
 
     time.sleep(2)
     yield {}
 
-    delete_entity_type(service, entity_type)
+    for service in services:
+        delete_entity_type(service, entity_type)
 
 
 def run_query(service, base_url, query_params, expected_status_code=200):
