@@ -1,15 +1,26 @@
-from conftest import QL_URL, crate_translator as translator
-from reporter.tests.utils import insert_test_data
-from datetime import datetime
+from conftest import QL_URL
+from reporter.tests.utils import AttrQueryResultGen, insert_test_data,\
+    delete_test_data, temperatures
 import pytest
 import requests
 import dateutil.parser
+from statistics import mean
 
-attr_name = 'temperature'
-entity_type = "Room"
-entity_id = "Room1"
-entity_id_1 = "Room2"
-n_days = 4
+
+entity_id_1 = "Room1"
+entity_id_2 = "Room2"
+result_gen = AttrQueryResultGen(time_index_size=4,
+                                entity_type='Room',
+                                attr_name='temperature',
+                                value_generator=temperatures)
+index = result_gen.time_index()
+
+
+def ix_intervals():
+    bs = list(range(0, result_gen.time_index_size)) + [None]
+    prod = [(i, j) for i in bs for j in bs]
+    return [(i, j) for (i, j) in prod if (i is None or j is None) or (i <= j)]
+
 
 def query_url(values=False):
     url = "{qlUrl}/attrs/{attrName}"
@@ -17,212 +28,82 @@ def query_url(values=False):
         url += '/value'
     return url.format(
         qlUrl=QL_URL,
-        attrName=attr_name
+        attrName=result_gen.attr_name()
     )
 
-@pytest.fixture()
-def reporter_dataset(translator):
-    insert_test_data(translator, [entity_type], n_entities=1, index_size=4, entity_id=entity_id)
-    insert_test_data(translator, [entity_type], n_entities=1, index_size=4, entity_id=entity_id_1)
+
+@pytest.fixture(scope='module')
+def reporter_dataset():
+    service = ''
+    entity_type = result_gen.formatter.entity_type
+    sz = result_gen.time_index_size
+    insert_test_data(service, [entity_type], n_entities=1,
+                     index_size=sz, entity_id=entity_id_1)
+    insert_test_data(service, [entity_type], n_entities=1,
+                     index_size=sz, entity_id=entity_id_2)
     yield
+    delete_test_data(service, [entity_type])
+
+
+def assert_entities(response, entity_ids, ix_lo=None, ix_hi=None,
+                    values_only=False):
+    assert response.status_code == 200, response.text
+
+    actual = response.json()
+    assert isinstance(actual, dict)
+
+    expected = result_gen.values(entity_ids, ix_lo, ix_hi, values_only)
+    assert actual == expected
+
+
+def assert_aggregate(response, entity_ids, aggregator, ix_lo=None, ix_hi=None):
+    assert response.status_code == 200, response.text
+
+    actual = response.json()
+    assert isinstance(actual, dict)
+
+    expected = result_gen.aggregate(aggregator, entity_ids, ix_lo, ix_hi)
+    assert actual == expected
+
 
 def test_NTNE1A_defaults(reporter_dataset):
-    r = requests.get(query_url())
-    # Assert Results
-    assert r.status_code == 200, r.text
-
-    expected_temperatures = list(range(4))
-    expected_index = [
-        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
-    ]
-
-    expected_entities = [
-        {
-            'entityId': 'Room1',
-            'index': expected_index,
-            'values': expected_temperatures
-        },
-        {
-            'entityId': 'Room2',
-            'index': expected_index,
-            'values': expected_temperatures
-
-        }
-    ]
-    expected_types = [
-        {
-            'entities': expected_entities,
-            'entityType': 'Room'
-        }
-    ]
-    expected = {
-        'attrName': attr_name,
-        'types': expected_types
-    }
-    obtained = r.json()
-    assert obtained == expected
+    response = requests.get(query_url())
+    assert_entities(response, [entity_id_1, entity_id_2])
 
 
 def test_NTNE1A_type(reporter_dataset):
-    # Query
     query_params = {
-        'type': entity_type
+        'type': result_gen.entity_type()
     }
-    r = requests.get(query_url(), params=query_params)
-    assert r.status_code == 200, r.text
-    expected_temperatures = list(range(4))
-    expected_index = [
-        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
-    ]
-    expected_entities = [
-        {
-            'entityId': 'Room1',
-            'index': expected_index,
-            'values': expected_temperatures
-        },
-        {
-            'entityId': 'Room2',
-            'index': expected_index,
-            'values': expected_temperatures
-
-        }
-    ]
-    expected_types = [
-        {
-            'entities': expected_entities,
-            'entityType': 'Room'
-        }
-    ]
-    expected = {
-        'attrName': attr_name,
-        'types': expected_types
-    }
-    obtained = r.json()
-
-    assert obtained == expected
+    response = requests.get(query_url(), params=query_params)
+    assert_entities(response, [entity_id_1, entity_id_2])
 
 
 def test_NTNE1A_one_entity(reporter_dataset):
-    # Query
     query_params = {
-        'id': entity_id
+        'id': entity_id_1
     }
-    r = requests.get(query_url(), params=query_params)
-    assert r.status_code == 200, r.text
-
-    obtained_data = r.json()
-    assert isinstance(obtained_data, dict)
-
-    expected_temperatures = list(range(4))
-    expected_index = [
-        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
-    ]
-
-    expected_entities = [
-        {
-            'entityId': 'Room1',
-            'index': expected_index,
-            'values': expected_temperatures
-        }
-    ]
-    expected_types = [
-        {
-            'entities': expected_entities,
-            'entityType': 'Room'
-        }
-    ]
-    expected = {
-        'attrName': attr_name,
-        'types': expected_types
-    }
-    obtained = r.json()
-    assert obtained == expected
+    response = requests.get(query_url(), params=query_params)
+    assert_entities(response, [entity_id_1])
 
 
 def test_NTNENA_some_entities(reporter_dataset):
-    # Query
-    # Assert Results
-    entity_ids = "Room1, Room2"
+    entity_ids = "{}, {}".format(entity_id_1, entity_id_2)
     query_params = {
         'id': entity_ids
     }
-    r = requests.get(query_url(), params=query_params)
-    assert r.status_code == 200, r.text
-
-    obtained_data = r.json()
-    assert isinstance(obtained_data, dict)
-    expected_temperatures = list(range(4))
-    expected_index = [
-        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
-    ]
-    
-    expected_entities = [
-        {
-            'entityId': 'Room1',
-            'index': expected_index,
-            'values': expected_temperatures
-        },
-        {
-            'entityId': 'Room2',
-            'index': expected_index,
-            'values': expected_temperatures
-        }
-    ]
-    expected_types = [
-        {
-            'entities': expected_entities,
-            'entityType': 'Room'
-        }
-    ]
-    expected = {
-        'attrName': attr_name,
-        'types': expected_types
-    }
-    obtained = r.json()
-    assert obtained == expected
+    response = requests.get(query_url(), params=query_params)
+    assert_entities(response, [entity_id_1, entity_id_2])
 
 
 def test_NTNE1A_values_defaults(reporter_dataset):
-    # Query
+    entity_ids = "{},{},{}".format(entity_id_1, entity_id_2, 'RoomNotValid')
+    # should ignore RoomNotValid
     query_params = {
-        'id': 'Room1,Room2,RoomNotValid',  # -> validates to Room1,Room2.
-    } 
-    r = requests.get(query_url(values=True), params=query_params)
-    assert r.status_code == 200, r.text
-    
-    # Assert Results
-    expected_temperatures = list(range(4))
-    expected_index = [
-        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
-    ]
-
-    expected_entities = [
-        {
-            'entityId': 'Room1',
-            'index': expected_index,
-            'values': expected_temperatures
-        },
-        {
-            'entityId': 'Room2',
-            'index': expected_index,
-            'values': expected_temperatures
-        }
-    ]
-    expected_types = [
-        {
-            'entities': expected_entities,
-            'entityType': 'Room'
-        }
-    ]
-    expected = {
-        #'values': expected_entities,
-        #'attrName': attr_name,
-        'values': expected_types
-        #'types': expected_types
+        'id': entity_ids
     }
-
-    obtained = r.json()
-    assert obtained == expected
+    response = requests.get(query_url(values=True), params=query_params)
+    assert_entities(response, [entity_id_1, entity_id_2], values_only=True)
 
 
 def test_weird_ids(reporter_dataset):
@@ -231,213 +112,56 @@ def test_weird_ids(reporter_dataset):
     Empty values are ignored.
     Order of ids is preserved in response (e.g., Room1 first, Room0 later)
     """
+    entity_ids = "{},{},{}".format(entity_id_1, 'RoomNotValid', entity_id_2)
     query_params = {
-        'id': 'Room1,RoomNotValid,Room2,',  # -> validates to Room2,Room1.
+        'id': entity_ids
     }
-    r = requests.get(query_url(), params=query_params)
-    assert r.status_code == 200, r.text
-    expected_temperatures = list(range(n_days))
-    expected_index = [
-        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
-    ]
-    
-    expected_entities = [
-        {
-            'entityId': 'Room1',
-            'index': expected_index,
-            'values': expected_temperatures
-        },
-        {
-            'entityId': 'Room2',
-            'index': expected_index,
-            'values': expected_temperatures
-        }
-    ]
-    expected_types = [
-        {
-            'entities': expected_entities,
-            'entityType': 'Room'
-        }
-    ]
-    expected = {
-        'attrName': attr_name,
-        'types': expected_types
-    }
-    obtained = r.json()
-    assert obtained == expected
+    response = requests.get(query_url(), params=query_params)
+    assert_entities(response, [entity_id_1, entity_id_2])
 
 
-def test_NTNE1A_fromDate_toDate(reporter_dataset):
-    # Query
+@pytest.mark.parametrize('ix_lo, ix_hi', ix_intervals())
+def test_NTNE1A_fromDate_toDate(reporter_dataset, ix_lo, ix_hi):
     query_params = {
-        'types': 'entity_type',
-        'fromDate': "1970-01-01T00:00:00",
-        'toDate': "1970-01-04T00:00:00"
+        'types': 'entity_type'
     }
-    r = requests.get(query_url(), params=query_params)
-    assert r.status_code == 200, r.text
+    if ix_lo is not None:
+        query_params['fromDate'] = index[ix_lo]
+    if ix_hi is not None:
+        query_params['toDate'] = index[ix_hi]
 
-    obtained = r.json()
-    assert isinstance(obtained, dict)
-    expected_temperatures = list(range(4))
-    expected_index = [
-        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
-    ]
-
-    expected_entities = [
-        {
-            'entityId': 'Room1',
-            'index': expected_index,
-            'values': expected_temperatures
-        },
-        {
-            'entityId': 'Room2',
-            'index': expected_index,
-            'values': expected_temperatures
-        }
-    ]
-    expected_types = [
-        {
-            'entities': expected_entities,
-            'entityType': 'Room'
-        }
-    ]
-    expected = {
-        'attrName': attr_name,
-        'types': expected_types,
-    }
-   
-    obtained = r.json()
-    assert obtained == expected
+    response = requests.get(query_url(), params=query_params)
+    assert_entities(response, [entity_id_1, entity_id_2], ix_lo, ix_hi)
 
 
 def test_NTNE1A_fromDate_toDate_with_quotes(reporter_dataset):
-    # Query
     query_params = {
         'types': 'entity_type',   
-        'fromDate': "1970-01-01T00:00:00+00:00",
-        'toDate': "1970-01-04T00:00:00+00:00"
+        'fromDate': '"{}"'.format(index[0]),
+        'toDate': '"{}"'.format(index[-1])
     }
-    r = requests.get(query_url(), params=query_params)
-    assert r.status_code == 200, r.text
-    
-    obtained = r.json()
-    assert isinstance(obtained, dict)
-    expected_temperatures = list(range(4))
-    expected_index = [
-        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
-    ]
-
-    expected_entities = [
-        {
-            'entityId': 'Room1',
-            'index': expected_index,
-            'values': expected_temperatures
-        },
-        {
-            'entityId': 'Room2',
-            'index': expected_index,
-            'values': expected_temperatures
-        }
-    ]
-    expected_types = [
-        {
-            'entities': expected_entities,
-            'entityType': 'Room'
-        }
-    ]
-    expected = {
-        'attrName': attr_name,
-        'types': expected_types,
-    }
-    obtained = r.json()
-    assert obtained == expected
+    response = requests.get(query_url(), params=query_params)
+    assert_entities(response, [entity_id_1, entity_id_2])
 
 
 def test_NTNE1A_limit(reporter_dataset):
-    # Query
     query_params = {
         'limit': 10
     }
-    r = requests.get(query_url(), params=query_params)
-    assert r.status_code == 200, r.text
-
-    obtained = r.json()
-    assert isinstance(obtained, dict)
-    expected_temperatures = list(range(4))
-    expected_index = [
-        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
-    ]
-
-    expected_entities = [
-        {
-            'entityId': 'Room1',
-            'index': expected_index,
-            'values': expected_temperatures
-        },
-        {
-            'entityId': 'Room2',
-            'index': expected_index,
-            'values': expected_temperatures
-        }
-    ]
-    expected_types = [
-        {
-            'entities': expected_entities,
-            'entityType': 'Room'
-        }
-    ]
-    expected = {
-        'attrName': attr_name,
-        'types': expected_types,
-    }
-    obtained = r.json()
-    assert obtained == expected
+    response = requests.get(query_url(), params=query_params)
+    assert_entities(response, [entity_id_1, entity_id_2])
 
 
 def test_NTNE1A_combined(reporter_dataset):
-    # Query
     query_params = {
-        'type': entity_type,
-        'fromDate': "1970-01-01T00:00:00",
-        'toDate': "1970-01-03T00:00:00",
+        'type': result_gen.entity_type(),
+        'fromDate': index[0],
+        'toDate': index[2],
         'limit': 10,
     }
-    
-    r = requests.get(query_url(), params=query_params)
-    assert r.status_code == 200, r.text
+    response = requests.get(query_url(), params=query_params)
+    assert_entities(response, [entity_id_1, entity_id_2], ix_hi=2)
 
-    obtained = r.json()
-    assert isinstance(obtained, dict)
-    expected_temperatures = list(range(3))
-    expected_index = [
-        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
-    ]
-
-    expected_entities = [
-        {
-            'entityId': 'Room1',
-            'index': expected_index,
-            'values': expected_temperatures
-        },
-        {
-            'entityId': 'Room2',
-            'index': expected_index,
-            'values': expected_temperatures
-        }
-    ]
-    expected_types = [
-        {
-            'entities': expected_entities,
-            'entityType': 'Room'
-        }
-    ]
-    expected = {
-        'attrName': attr_name,
-        'types': expected_types,
-    }
-    obtained = r.json()
-    assert obtained == expected
 
 @pytest.mark.parametrize("aggr_period, exp_index, ins_period", [
     ("day",    ['1970-01-01T00:00:00.000+00:00',
@@ -450,12 +174,22 @@ def test_NTNE1A_combined(reporter_dataset):
                 '1970-01-01T00:01:00.000+00:00',
                 '1970-01-01T00:02:00.000+00:00'], "second"),
 ])
-def test_NTNE1A_aggrPeriod(translator, aggr_period, exp_index, ins_period):
+def test_NTNE1A_aggrPeriod(aggr_period, exp_index, ins_period):
     # Custom index to test aggrPeriod
+    service = ''
+    entity_type = 'test_NTNE1A_aggrPeriod'
+    # The reporter_dataset fixture is still in the DB cos it has a scope of
+    # module. We use a different entity type to store this test's rows in a
+    # different table to avoid messing up global state---see also delete down
+    # below.
+    entity_id = "{}0".format(entity_type)
+    attr_name = result_gen.attr_name()
+
     for i in exp_index:
         base = dateutil.parser.isoparse(i)
-        insert_test_data(translator,
+        insert_test_data(service,
                          [entity_type],
+                         entity_id=entity_id,
                          index_size=5,
                          index_base=base,
                          index_period=ins_period)
@@ -469,37 +203,43 @@ def test_NTNE1A_aggrPeriod(translator, aggr_period, exp_index, ins_period):
 
     # Check aggregation with aggrPeriod
     query_params = {
-        'attrs': 'temperature',
+        'type': entity_type,  # avoid picking up temperatures of entities
+                              # in reporter_dataset fixture.
+        'attrs': attr_name,
         'aggrMethod': 'sum',
         'aggrPeriod': aggr_period,
     }
     r = requests.get(query_url(), params=query_params)
+
+    delete_test_data(service, [entity_type])
+
     assert r.status_code == 200, r.text
     expected_temperatures = 0 + 1 + 2 + 3 + 4
     # Assert
     obtained = r.json()
     expected_entities = [
         {
-            'entityId': 'Room0',
+            'entityId': entity_id,
             'index': exp_index,
-            'values': [expected_temperatures, expected_temperatures, expected_temperatures]
+            'values': [expected_temperatures, expected_temperatures,
+                       expected_temperatures]
         } 
     ]
     expected_types = [
         {
             'entities': expected_entities,
-            'entityType': 'Room'
+            'entityType': entity_type
         }
     ]
     expected = {
         'attrName': attr_name,
         'types': expected_types,
     }
-    obtained = r.json()
+
     assert obtained == expected
 
 
-def test_not_found():
+def test_not_found(reporter_dataset):
     query_params = {
         'id': 'RoomNotValid'
     }
@@ -521,116 +261,49 @@ def test_NTNE1A_aggrScope(reporter_dataset):
     assert r.status_code == 501, r.text
 
 
-def test_aggregation_is_per_instance(translator):
-    t = 'Room'
-    insert_test_data(translator, [t], entity_id='Room1', index_size=3)
-
+@pytest.mark.parametrize('aggr_method, aggregator, ix_lo, ix_hi',
+    [('count', len, lo, hi) for (lo, hi) in ix_intervals()] +
+    [('sum', sum, lo, hi) for (lo, hi) in ix_intervals()] +
+    [('avg', mean, lo, hi) for (lo, hi) in ix_intervals()] +
+    [('min', min, lo, hi) for (lo, hi) in ix_intervals()] +
+    [('max', max, lo, hi) for (lo, hi) in ix_intervals()]
+)
+def test_aggregating_entities_of_same_type(reporter_dataset,
+                                           aggr_method, aggregator,
+                                           ix_lo, ix_hi):
     query_params = {
-        'attrs': 'temperature',
-        'id': 'Room1',
-        'aggrMethod': 'sum'
+        'type': result_gen.entity_type(),
+        'aggrMethod': aggr_method
     }
-    r = requests.get(query_url(), params=query_params)
-    assert r.status_code == 200, r.text
- 
-    obtained = r.json()
-    assert isinstance(obtained, dict)
-    expected_temperatures = list(range(4))
-    expected_index = [
-        '',''
-    ]
-    expected_entities = [
-        {
-            'entityId': 'Room1',
-            'index': expected_index,
-            'values': [sum(range(3))]
-        }
-    ]
-    expected_types = [
-        {
-            'entities': expected_entities,
-            'entityType': 'Room'
-        }
-    ]
-    expected = {
-        'attrName': attr_name,
-        'types': expected_types,
-    }
-    obtained = r.json()
-    assert obtained == expected
-    # Index array in the response is the used fromDate and toDate
-    query_params = {
-        'attrs': 'temperature',
-        'id': 'Room1',
-        'aggrMethod': 'max',
-        'fromDate': datetime(1970, 1, 1).isoformat(),
-        'toDate': datetime(1970, 1, 2).isoformat(),
-    }
-    r = requests.get(query_url(), params=query_params)
-    assert r.status_code == 200, r.text
+    if ix_lo is not None:
+        query_params['fromDate'] = index[ix_lo]
+    if ix_hi is not None:
+        query_params['toDate'] = index[ix_hi]
 
-    obtained = r.json()
-    assert isinstance(obtained, dict)
-    expected_temperatures = list(range(2))
-    expected_index = [
-    '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
-    ]
-    expected_entities = [
-        {
-            'entityId': 'Room1',
-            'index': expected_index,
-            'values': [1]
-        }
-    ]
-    expected_types = [
-        {
-            'entities': expected_entities,
-            'entityType': 'Room'
-        }
-    ]
-    expected = {
-        'attrName': attr_name,
-        'types': expected_types,
-    }
-    obtained = r.json()
-    assert obtained == expected
-    
-    query_params = {
-        'attrs': 'temperature',
-        'id': 'Room1',
-        'aggrMethod': 'avg'
-    }
-    r = requests.get(query_url(), params=query_params)
-    assert r.status_code == 200, r.text
+    response = requests.get(query_url(), params=query_params)
+    assert_aggregate(response, [entity_id_1, entity_id_2], aggregator,
+                     ix_lo, ix_hi)
 
-    obtained = r.json()
-    assert isinstance(obtained, dict)
-    expected_temperatures = list(range(4))
-    expected_index = [
-        '',''
-    ]
-    obtained = r.json()
-    assert isinstance(obtained, dict)
-    expected_temperatures = list(range(4))
-    expected_index = [
-        '',''
-    ]
-    expected_entities = [
-        {
-            'entityId': 'Room1',
-            'index': expected_index,
-            'values': [1]
-        }
-    ]
-    expected_types = [
-        {
-            'entities': expected_entities,
-            'entityType': 'Room'
-        }
-    ]
-    expected = {
-        'attrName': attr_name,
-        'types': expected_types,
+
+@pytest.mark.parametrize('aggr_method, aggregator, ix_lo, ix_hi',
+    [('count', len, lo, hi) for (lo, hi) in ix_intervals()] +
+    [('sum', sum, lo, hi) for (lo, hi) in ix_intervals()] +
+    [('avg', mean, lo, hi) for (lo, hi) in ix_intervals()] +
+    [('min', min, lo, hi) for (lo, hi) in ix_intervals()] +
+    [('max', max, lo, hi) for (lo, hi) in ix_intervals()]
+)
+def test_aggregating_single_entity(reporter_dataset,
+                                   aggr_method, aggregator,
+                                   ix_lo, ix_hi):
+    query_params = {
+        'attrs': result_gen.attr_name(),
+        'id': entity_id_1,
+        'aggrMethod': aggr_method
     }
-    obtained = r.json()
-    assert obtained == expected
+    if ix_lo is not None:
+        query_params['fromDate'] = index[ix_lo]
+    if ix_hi is not None:
+        query_params['toDate'] = index[ix_hi]
+
+    response = requests.get(query_url(), params=query_params)
+    assert_aggregate(response, [entity_id_1], aggregator, ix_lo, ix_hi)
