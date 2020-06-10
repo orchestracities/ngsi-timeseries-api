@@ -1,5 +1,4 @@
 from conftest import QL_URL
-from datetime import datetime
 from reporter.tests.utils import insert_test_data, delete_test_data
 import pytest
 import requests
@@ -11,26 +10,26 @@ entity_id = 'Room0'
 temperature = 'temperature'
 pressure = 'pressure'
 n_days = 30
+services = ['t1', 't2']
 
 
-def query_url(values=False):
+def query_url(values=False, eid=entity_id):
     url = "{qlUrl}/entities/{entityId}"
     if values:
         url += '/value'
     return url.format(
         qlUrl=QL_URL,
-        entityId=entity_id,
+        entityId=eid,
     )
 
 
-@pytest.fixture()
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
-def reporter_dataset(service):
-    insert_test_data(service, [entity_type], n_entities=1, index_size=30)
+@pytest.fixture(scope='module')
+def reporter_dataset():
+    for service in services:
+        insert_test_data(service, [entity_type], n_entities=1, index_size=30)
     yield
-    delete_test_data(service, [entity_type])
+    for service in services:
+        delete_test_data(service, [entity_type])
 
 
 def assert_1T1ENA_response(obtained, expected):
@@ -46,9 +45,7 @@ def assert_1T1ENA_response(obtained, expected):
     assert obtained == expected
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1ENA_defaults(service, reporter_dataset):
     # Query
     query_params = {
@@ -90,9 +87,7 @@ def test_1T1ENA_defaults(service, reporter_dataset):
     ("min", 0, 0),
     ("max", 290, 29),
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1ENA_aggrMethod(service, reporter_dataset, aggr_meth, aggr_press, aggr_temp):
     # attrs is compulsory when using aggrMethod
     query_params = {
@@ -143,44 +138,50 @@ def test_1T1ENA_aggrMethod(service, reporter_dataset, aggr_meth, aggr_press, agg
                 '1970-01-01T00:01:00.000+00:00',
                 '1970-01-01T00:02:00.000+00:00'], "second"),
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1ENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
     # Custom index to test aggrPeriod
+
+    etype = 'test_1T1ENA_aggrPeriod'
+    # The reporter_dataset fixture is still in the DB cos it has a scope of
+    # module. We use a different entity type to store this test's rows in a
+    # different table to avoid messing up global state---see also delete down
+    # below.
+    eid = "{}0".format(etype)
 
     for i in exp_index:
         base = dateutil.parser.isoparse(i)
         insert_test_data(service,
-                         [entity_type],
+                         [etype],
+                         entity_id=eid,
                          index_size=3,
                          index_base=base,
                          index_period=ins_period)
 
     # aggrPeriod needs aggrMethod
     query_params = {
-        'type': entity_type,
+        'type': etype,
         'aggrPeriod': aggr_period,
     }
     h = {'Fiware-Service': service}
 
-    r = requests.get(query_url(), params=query_params, headers=h)
+    r = requests.get(query_url(eid=eid), params=query_params, headers=h)
     assert r.status_code == 400, r.text
 
     # Check aggregation with aggrPeriod
     query_params = {
-        'type': entity_type,
+        'type': etype,
         'attrs': temperature + ',' + pressure,
         'aggrMethod': 'max',
         'aggrPeriod': aggr_period,
     }
     h = {'Fiware-Service': service}
 
-    r = requests.get(query_url(), params=query_params, headers=h)
+    r = requests.get(query_url(eid=eid), params=query_params, headers=h)
     assert r.status_code == 200, r.text
     # Assert Results
     expected = {
-        'entityId': entity_id,
+        'entityId': eid,
         'index': exp_index,
         'attributes': [
             {
@@ -195,12 +196,10 @@ def test_1T1ENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
     }
     obtained = r.json()
     assert_1T1ENA_response(obtained, expected)
-    delete_test_data(service, [entity_type])
+    delete_test_data(service, [etype])
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1ENA_fromDate_toDate(service, reporter_dataset):
     # Query
     query_params = {
@@ -242,9 +241,7 @@ def test_1T1ENA_fromDate_toDate(service, reporter_dataset):
     assert_1T1ENA_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1ENA_fromDate_toDate_with_quotes(service, reporter_dataset):
     # Query
     query_params = {
@@ -286,9 +283,7 @@ def test_1T1ENA_fromDate_toDate_with_quotes(service, reporter_dataset):
     assert_1T1ENA_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1ENA_lastN(service, reporter_dataset):
     # Query
     query_params = {
@@ -329,9 +324,7 @@ def test_1T1ENA_lastN(service, reporter_dataset):
     assert_1T1ENA_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1E1A_lastN_with_limit(service, reporter_dataset):
     """
     See GitHub issue #249.
@@ -375,9 +368,7 @@ def test_1T1E1A_lastN_with_limit(service, reporter_dataset):
     assert_1T1ENA_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1ENA_limit(service, reporter_dataset):
     # Query
     query_params = {
@@ -418,9 +409,7 @@ def test_1T1ENA_limit(service, reporter_dataset):
     assert_1T1ENA_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1ENA_offset(service, reporter_dataset):
     # Query
     query_params = {
@@ -445,8 +434,8 @@ def test_1T1ENA_offset(service, reporter_dataset):
     # Assert
     expected = {
         'entityId': entity_id,
-         'index': expected_index,
-         'attributes': [
+        'index': expected_index,
+        'attributes': [
             {
                 'attrName': pressure,
                 'values': expected_pressures,
@@ -461,9 +450,7 @@ def test_1T1ENA_offset(service, reporter_dataset):
     assert_1T1ENA_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1ENA_combined(service, reporter_dataset):
     # Query
     query_params = {
@@ -506,9 +493,7 @@ def test_1T1ENA_combined(service, reporter_dataset):
     assert_1T1ENA_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1ENA_values_defaults(service, reporter_dataset):
     # Query
     query_params = {
@@ -542,12 +527,10 @@ def test_1T1ENA_values_defaults(service, reporter_dataset):
     assert_1T1ENA_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_not_found(service):
     query_params = {
-        'type': entity_type,
+        'type': 'NotThere',
     }
     h = {'Fiware-Service': service}
 
