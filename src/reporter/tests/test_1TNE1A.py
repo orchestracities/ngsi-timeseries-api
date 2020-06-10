@@ -9,35 +9,38 @@ import dateutil.parser
 entity_type = 'Room'
 attr_name = 'temperature'
 n_days = 6
+services = ['t1', 't2']
 
 
-def query_url(values=False):
+def query_url(values=False, etype=entity_type):
     url = "{qlUrl}/types/{entityType}/attrs/{attrName}"
     if values:
         url += '/value'
     return url.format(
         qlUrl=QL_URL,
-        entityType=entity_type,
+        entityType=etype,
         attrName=attr_name,
     )
 
 
-@pytest.fixture()
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
-def reporter_dataset(service):
-    insert_test_data(service, [entity_type], n_entities=3, index_size=n_days)
+@pytest.fixture(scope='module')
+def reporter_dataset():
+    for service in services:
+        insert_test_data(service, [entity_type], n_entities=3,
+                         index_size=n_days)
     yield
-    delete_test_data(service, [entity_type])
+    for service in services:
+        delete_test_data(service, [entity_type])
 
-def assert_1TNE1A_response(obtained, expected, values_only=False):
+
+def assert_1TNE1A_response(obtained, expected, etype=entity_type,
+                           values_only=False):
     """
     Check API responses for 1TNE1A
     """
     assert isinstance(obtained, dict)
     if not values_only:
-        assert obtained['entityType'] == entity_type
+        assert obtained['entityType'] == etype
         assert obtained['attrName'] == attr_name
         obt_entities = obtained['entities']
         exp_entities = expected['entities']
@@ -53,9 +56,7 @@ def assert_1TNE1A_response(obtained, expected, values_only=False):
     assert obtained == expected
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1TNE1A_defaults(service, reporter_dataset):
     # Query without specific id
     query_params = {
@@ -98,9 +99,7 @@ def test_1TNE1A_defaults(service, reporter_dataset):
     assert_1TNE1A_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1TNE1A_one_entity(service, reporter_dataset):
     # Query
     entity_id = 'Room1'
@@ -136,9 +135,7 @@ def test_1TNE1A_one_entity(service, reporter_dataset):
     assert_1TNE1A_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1TNE1A_some_entities(service, reporter_dataset):
     # Query
     entity_id = 'Room0,Room2'
@@ -178,9 +175,7 @@ def test_1TNE1A_some_entities(service, reporter_dataset):
     assert_1TNE1A_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1TNE1A_values_defaults(service, reporter_dataset):
     # Query
     query_params = {
@@ -217,9 +212,7 @@ def test_1TNE1A_values_defaults(service, reporter_dataset):
     assert_1TNE1A_response(obtained, expected, values_only=True)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_not_found(service):
     query_params = {
         'type': entity_type,
@@ -235,9 +228,7 @@ def test_not_found(service):
     }
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_weird_ids(service, reporter_dataset):
     """
     Invalid ids are ignored (provided at least one is valid to avoid 404).
@@ -280,25 +271,27 @@ def test_weird_ids(service, reporter_dataset):
     assert_1TNE1A_response(obtained, expected)
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_different_time_indexes(service):
     """
     Each entity should have its time_index array.
     """
-    t = 'Room'
-    insert_test_data(service, [t], entity_id='Room1', index_size=2)
-    insert_test_data(service, [t], entity_id='Room3', index_size=4)
-    insert_test_data(service, [t], entity_id='Room2', index_size=3)
+    etype = 'test_different_time_indexes'
+    # The reporter_dataset fixture is still in the DB cos it has a scope of
+    # module. We use a different entity type to store this test's rows in a
+    # different table to avoid messing up global state---see also delete down
+    # below.
+    insert_test_data(service, [etype], entity_id='Room1', index_size=2)
+    insert_test_data(service, [etype], entity_id='Room3', index_size=4)
+    insert_test_data(service, [etype], entity_id='Room2', index_size=3)
 
     query_params = {
-        'type': 'Room',
+        'type': etype,
         'id': 'Room3,Room1,Room2',
     }
     h = {'Fiware-Service': service}
 
-    r = requests.get(query_url(), params=query_params, headers=h)
+    r = requests.get(query_url(etype=etype), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     expected_entities = [
@@ -320,36 +313,38 @@ def test_different_time_indexes(service):
     ]
 
     expected = {
-        'entityType': entity_type,
+        'entityType': etype,
         'attrName': attr_name,
         'entities': expected_entities
     }
     obtained = r.json()
-    assert_1TNE1A_response(obtained, expected)
-    delete_test_data(service, [t])
+    assert_1TNE1A_response(obtained, expected, etype=etype)
+    delete_test_data(service, [etype])
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_aggregation_is_per_instance(service):
     """
     Attribute Aggregation works by default on a per-instance basis.
     Cross-instance aggregation not yet supported.
     It would change the shape of the response.
     """
-    t = 'Room'
-    insert_test_data(service, [t], entity_id='Room0', index_size=3)
-    insert_test_data(service, [t], entity_id='Room1', index_size=9)
+    etype = 'test_aggregation_is_per_instance'
+    # The reporter_dataset fixture is still in the DB cos it has a scope of
+    # module. We use a different entity type to store this test's rows in a
+    # different table to avoid messing up global state---see also delete down
+    # below.
+    insert_test_data(service, [etype], entity_id='Room0', index_size=3)
+    insert_test_data(service, [etype], entity_id='Room1', index_size=9)
 
     query_params = {
-        'type': t,
+        'type': etype,
         'id': 'Room0,Room1',
         'aggrMethod': 'sum'
     }
     h = {'Fiware-Service': service}
 
-    r = requests.get(query_url(), params=query_params, headers=h)
+    r = requests.get(query_url(etype=etype), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Assert Results
@@ -368,20 +363,20 @@ def test_aggregation_is_per_instance(service):
 
     obtained_data = r.json()
     assert isinstance(obtained_data, dict)
-    assert obtained_data['entityType'] == t
+    assert obtained_data['entityType'] == etype
     assert obtained_data['attrName'] == attr_name
     assert obtained_data['entities'] == expected_entities
 
     # Index array in the response is the used fromDate and toDate
     query_params = {
-        'type': t,
+        'type': etype,
         'id': 'Room0,Room1',
         'aggrMethod': 'max',
         'fromDate': datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc).isoformat(),
         'toDate': datetime(1970, 1, 6, 0, 0, 0, 0, timezone.utc).isoformat(),
     }
 
-    r = requests.get(query_url(), params=query_params, headers=h)
+    r = requests.get(query_url(etype=etype), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Assert Results
@@ -399,10 +394,10 @@ def test_aggregation_is_per_instance(service):
     ]
     obtained_data = r.json()
     assert isinstance(obtained_data, dict)
-    assert obtained_data['entityType'] == t
+    assert obtained_data['entityType'] == etype
     assert obtained_data['attrName'] == attr_name
     assert obtained_data['entities'] == expected_entities
-    delete_test_data(service, [t])
+    delete_test_data(service, [etype])
 
 
 @pytest.mark.parametrize("aggr_period, exp_index, ins_period", [
@@ -416,58 +411,62 @@ def test_aggregation_is_per_instance(service):
                 '1970-01-01T00:01:00.000+00:00',
                 '1970-01-01T00:02:00.000+00:00'], "second"),
 ])
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1TNE1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
     # Custom index to test aggrPeriod
+    etype = 'test_1TNE1A_aggrPeriod'
+    # The reporter_dataset fixture is still in the DB cos it has a scope of
+    # module. We use a different entity type to store this test's rows in a
+    # different table to avoid messing up global state---see also delete down
+    # below.
+    eid = '{}0'.format(etype)
+
     for i in exp_index:
         base = dateutil.parser.isoparse(i)
         insert_test_data(service,
-                         [entity_type],
+                         [etype],
+                         entity_id=eid,
                          index_size=5,
                          index_base=base,
                          index_period=ins_period)
 
     # aggrPeriod needs aggrMethod
     query_params = {
-        'type': entity_type,
+        'type': etype,
         'aggrPeriod': aggr_period,
     }
     h = {'Fiware-Service': service}
 
-    r = requests.get(query_url(), params=query_params, headers=h)
+    r = requests.get(query_url(etype=etype), params=query_params, headers=h)
     assert r.status_code == 400, r.text
 
     # Check aggregation with aggrPeriod
     query_params = {
-        'type': entity_type,
+        'type': etype,
         'aggrMethod': 'sum',
         'aggrPeriod': aggr_period,
     }
-    r = requests.get(query_url(), params=query_params,  headers=h)
+    r = requests.get(query_url(etype=etype), params=query_params,  headers=h)
     assert r.status_code == 200, r.text
 
     # Assert Results
     exp_sum = 0 + 1 + 2 + 3 + 4
     expected_entities = [
         {
-            'entityId': 'Room0',
+            'entityId': eid,
             'index': exp_index,
             'values': [exp_sum, exp_sum, exp_sum],
         }
     ]
     obtained_data = r.json()
     assert isinstance(obtained_data, dict)
-    assert obtained_data['entityType'] == entity_type
+    assert obtained_data['entityType'] == etype
     assert obtained_data['attrName'] == attr_name
     assert obtained_data['entities'] == expected_entities
-    delete_test_data(service, [entity_type])
+    delete_test_data(service, [etype])
 
 
-@pytest.mark.parametrize("service", [
-    "t1", "t2"
-])
+@pytest.mark.parametrize("service", services)
 def test_1T1E1A_aggrScope(service, reporter_dataset):
     # Notify users when not yet implemented
     query_params = {
