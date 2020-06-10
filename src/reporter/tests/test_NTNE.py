@@ -18,7 +18,7 @@ def query_url():
     )
 
 
-@pytest.fixture()
+@pytest.fixture(scope='module')
 def reporter_dataset():
     service = ''
     insert_test_data(service, [entity_type], n_entities=1, index_size=30,
@@ -55,7 +55,10 @@ def test_NTNE_defaults(reporter_dataset):
 
 
 def test_not_found():
-    r = requests.get(query_url())
+    query_params = {
+        'type': 'NotThere'
+    }
+    r = requests.get(query_url(), params=query_params)
     assert r.status_code == 404, r.text
     assert r.json() == {
         "error": "Not Found",
