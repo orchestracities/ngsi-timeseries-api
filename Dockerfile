@@ -1,6 +1,6 @@
-FROM python:3.6.10-alpine as base
+FROM python:3.6.10-alpine3.12 as base
 FROM base as builder
-RUN apk --no-cache --update-cache add gcc python python-dev py-pip build-base wget
+RUN apk --no-cache --update-cache add gcc python3 python3-dev py-pip build-base wget
 RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
 RUN pip install pipenv
 RUN mkdir -p /src/ngsi-timeseries-api
