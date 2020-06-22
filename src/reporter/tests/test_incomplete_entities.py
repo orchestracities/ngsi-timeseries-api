@@ -5,8 +5,9 @@ from .utils import send_notifications
 
 
 def notify(entity):
+    service = ''
     notification_data = [{'data': [entity]}]
-    send_notifications(notification_data)
+    send_notifications(service, notification_data)
 
 
 def get_all_stored_attributes(entity_id):

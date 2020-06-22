@@ -27,3 +27,12 @@ class AmbiguousNGSIIdError(NGSIUsageError):
         msg = "There are multiple entities with the given entity_id {}. " \
               "Please specify entity_type."
         NGSIUsageError.__init__(self, msg.format(entity_id))
+
+
+class InvalidParameterValue(QLError):
+    """
+    Passed parameter value is not valid.
+    """
+    def __init__(self, par_value='', par_name=''):
+        msg = "The parameter value '{}' for parameter {} is not valid."
+        QLError.__init__(self, msg.format(par_value, par_name))

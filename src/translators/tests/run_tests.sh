@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Make sure **all** images are available before starting to test!
-docker build -t quantumleap ../../../
+docker build -t smartsdk/quantumleap ../../../
 docker-compose build quantumleap-db-setup
 docker-compose pull influx
 docker-compose pull crate

@@ -1,6 +1,5 @@
-from conftest import QL_URL, crate_translator as translator
-from exceptions.exceptions import AmbiguousNGSIIdError
-from reporter.tests.utils import insert_test_data
+from conftest import QL_URL
+from reporter.tests.utils import insert_test_data, delete_test_data
 from datetime import datetime
 import pytest
 import requests
@@ -19,11 +18,16 @@ def query_url():
     )
 
 
-@pytest.fixture()
-def reporter_dataset(translator):
-    insert_test_data(translator, [entity_type], n_entities=1, index_size=30, entity_id=entity_id)
-    insert_test_data(translator, [entity_type_1], n_entities=1, index_size=30, entity_id=entity_id_1, index_base=datetime(1980, 1, 1, 0, 0, 0, 0))
+@pytest.fixture(scope='module')
+def reporter_dataset():
+    service = ''
+    insert_test_data(service, [entity_type], n_entities=1, index_size=30,
+                     entity_id=entity_id)
+    insert_test_data(service, [entity_type_1], n_entities=1, index_size=30,
+                     entity_id=entity_id_1,
+                     index_base=datetime(1980, 1, 1, 0, 0, 0, 0))
     yield
+    delete_test_data(service, [entity_type, entity_type_1])
 
 
 # TODO we removed order comparison given that in
@@ -36,14 +40,13 @@ def test_NTNE_defaults(reporter_dataset):
     expected = [{
         "id": 'Kitchen0',
         "index": [
-            "1980-01-30T00:00:00.000"
+            "1980-01-30T00:00:00.000+00:00"
         ],
         "type": 'Kitchen'
-    },
-    {
+    }, {
         "id": 'Room0',
         "index": [
-            "1970-01-30T00:00:00.000"
+            "1970-01-30T00:00:00.000+00:00"
         ],
         "type": 'Room'
     }]
@@ -52,7 +55,10 @@ def test_NTNE_defaults(reporter_dataset):
 
 
 def test_not_found():
-    r = requests.get(query_url())
+    query_params = {
+        'type': 'NotThere'
+    }
+    r = requests.get(query_url(), params=query_params)
     assert r.status_code == 404, r.text
     assert r.json() == {
         "error": "Not Found",
@@ -73,11 +79,11 @@ def test_NTNE_type(reporter_dataset):
     expected_type = 'Room'
     expected_values = list(range(n_days))
     expected_index = [
-        '1970-01-{:02}T00:00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_values
     ]
     expected = [{
         'id': 'Room0',
-        'index': [expected_index[-1]+'.000'],
+        'index': [expected_index[-1]],
         'type': expected_type
     }]
     assert obtained == expected
@@ -88,8 +94,8 @@ def test_NTNE_type(reporter_dataset):
 def test_NTNE_fromDate_toDate(reporter_dataset):
     # Query
     query_params = {
-        'fromDate': "1970-01-06T00:00:00",
-        'toDate': "1980-01-17T00:00:00",
+        'fromDate': "1970-01-06T00:00:00+00:00",
+        'toDate': "1980-01-17T00:00:00+00:00",
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
@@ -97,12 +103,12 @@ def test_NTNE_fromDate_toDate(reporter_dataset):
     expected_type = 'Room'
     expected_id = 'Room0'
     expected_index = [
-        '1970-01-30T00:00:00.000'
+        '1970-01-30T00:00:00.000+00:00'
     ]
     expected_type_1 = 'Kitchen'
     expected_id_1 = 'Kitchen0'
     expected_index_1 = [
-        '1980-01-17T00:00:00.000'
+        '1980-01-17T00:00:00.000+00:00'
     ]
 
     # Assert
@@ -111,8 +117,7 @@ def test_NTNE_fromDate_toDate(reporter_dataset):
         'id': expected_id_1,
         'index': expected_index_1,
         'type': expected_type_1
-    },
-    {
+    }, {
         'id': expected_id,
         'index': expected_index,
         'type': expected_type
@@ -123,8 +128,8 @@ def test_NTNE_fromDate_toDate(reporter_dataset):
 def test_NTNE_fromDate_toDate_with_quotes(reporter_dataset):
     # Query
     query_params = {
-        'fromDate': '"1970-01-06T00:00:00"',
-        'toDate': '"1980-01-17T00:00:00"',
+        'fromDate': '"1970-01-06T00:00:00+00:00"',
+        'toDate': '"1980-01-17T00:00:00+00:00"',
     }
     r = requests.get(query_url(), params=query_params)
     assert r.status_code == 200, r.text
@@ -132,12 +137,12 @@ def test_NTNE_fromDate_toDate_with_quotes(reporter_dataset):
     expected_type = 'Room'
     expected_id = 'Room0'
     expected_index = [
-        '1970-01-30T00:00:00.000'
+        '1970-01-30T00:00:00.000+00:00'
     ]
     expected_type_1 = 'Kitchen'
     expected_id_1 = 'Kitchen0'
     expected_index_1 = [
-        '1980-01-17T00:00:00.000'
+        '1980-01-17T00:00:00.000+00:00'
     ]
 
     # Assert
@@ -146,8 +151,7 @@ def test_NTNE_fromDate_toDate_with_quotes(reporter_dataset):
         'id': expected_id_1,
         'index': expected_index_1,
         'type': expected_type_1
-    },
-    {
+    }, {
         'id': expected_id,
         'index': expected_index,
         'type': expected_type
@@ -168,7 +172,7 @@ def test_NTNE_limit(reporter_dataset):
     expected_type = 'Kitchen'
     expected_id = 'Kitchen0'
     expected_index = [
-        '1980-01-30T00:00:00.000'
+        '1980-01-30T00:00:00.000+00:00'
     ]
 
     # Assert
@@ -194,7 +198,7 @@ def test_NTNE_offset(reporter_dataset):
     expected_type = 'Kitchen'
     expected_id = 'Kitchen0'
     expected_index = [
-        '1980-01-30T00:00:00.000'
+        '1980-01-30T00:00:00.000+00:00'
     ]
 
     # Assert
@@ -212,8 +216,8 @@ def test_NTNE_combined(reporter_dataset):
     query_params = {
         'type': entity_type,
         'offset': 0,
-        'fromDate': "1970-01-06T00:00:00",
-        'toDate': "1980-01-20T00:00:00",
+        'fromDate': "1970-01-06T00:00:00+00:00",
+        'toDate': "1980-01-20T00:00:00+00:00",
         'limit': 1,
     }
     r = requests.get(query_url(), params=query_params)
@@ -222,7 +226,7 @@ def test_NTNE_combined(reporter_dataset):
     expected_type = 'Room'
     expected_id = 'Room0'
     expected_index = [
-        '1970-01-30T00:00:00.000'
+        '1970-01-30T00:00:00.000+00:00'
     ]
 
     # Assert

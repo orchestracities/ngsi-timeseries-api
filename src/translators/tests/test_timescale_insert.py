@@ -7,8 +7,9 @@ from time import sleep
 from geocoding.geojson.wktcodec import decode_wkb_hexstr
 from translators.base_translator import TIME_INDEX_NAME
 from translators.timescale import postgres_translator_instance,\
-    PostgresConnectionData,\
-    METADATA_TABLE_NAME, TYPE_PREFIX, TENANT_PREFIX, FIWARE_SERVICEPATH
+    PostgresConnectionData
+from translators.sql_translator import METADATA_TABLE_NAME,\
+    TYPE_PREFIX, TENANT_PREFIX, FIWARE_SERVICEPATH
 
 #
 # NOTE. Using (sort of) unique IDs to avoid having to clean the DB after each
@@ -23,7 +24,7 @@ def gen_entity_id(entity_type):
 
 def next_iso_time():
     sleep(0.01)
-    return datetime.now().isoformat()
+    return datetime.now(timezone.utc).isoformat()
 
 
 def add_eid_and_timex(entity):

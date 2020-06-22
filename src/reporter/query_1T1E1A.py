@@ -1,7 +1,7 @@
 from exceptions.exceptions import NGSIUsageError
 from flask import request
 from reporter.reporter import _validate_query_params
-from translators.crate import CrateTranslatorInstance
+from translators.factory import translator_for
 import logging
 from .geo_query_handler import handle_geo_query
 from utils.jsondict import lookup_string_match
@@ -39,7 +39,7 @@ def query_1T1E1A(attr_name,   # In Path
 
     entities = None
     try:
-        with CrateTranslatorInstance() as trans:
+        with translator_for(fiware_s) as trans:
             entities = trans.query(attr_names=[attr_name],
                                    entity_type=type_,
                                    entity_id=entity_id,

@@ -29,7 +29,7 @@ I.e, QL must be told where orion is.
 from flask import request
 from geocoding.geocache import GeoCodingCache
 from requests import RequestException
-from translators.crate import NGSI_TO_CRATE, NGSI_TEXT
+from translators.sql_translator import NGSI_TEXT, SQLTranslator
 from translators.factory import translator_for
 from utils.common import iter_entity_attrs, TIME_INDEX_NAME
 import json
@@ -49,10 +49,7 @@ def log():
 
 
 def is_text(attr_type):
-    return attr_type == NGSI_TEXT or attr_type not in NGSI_TO_CRATE
-    # TODO: same logic in two different places!
-    # The above kinda reproduces the tests done by the translator, we should
-    # factor this logic out and keep it in just one place!
+    return SQLTranslator.is_text(attr_type)
 
 
 def has_value(entity, attr_name):

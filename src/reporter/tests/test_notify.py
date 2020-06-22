@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from conftest import QL_URL
 from utils.common import assert_equal_time_index_arrays
 import copy
@@ -38,7 +38,7 @@ def test_invalid_no_type(notification, clean_mongo, clean_crate):
                       data=json.dumps(notification),
                       headers=HEADERS_PUT)
     assert r.status_code == 400
-    assert r.json() == {'detail': "'type' is a required property",
+    assert r.json() == {'detail': "'type' is a required property - 'data.0'",
                         'status': 400,
                         'title': 'Bad Request',
                         'type': 'about:blank'}
@@ -50,7 +50,7 @@ def test_invalid_no_id(notification, clean_mongo, clean_crate):
                       data=json.dumps(notification),
                       headers=HEADERS_PUT)
     assert r.status_code == 400
-    assert r.json() == {'detail': "'id' is a required property",
+    assert r.json() == {'detail': "'id' is a required property - 'data.0'",
                         'status': 400,
                         'title': 'Bad Request',
                         'type': 'about:blank'}
@@ -225,7 +225,7 @@ def test_multiple_data_elements(notification, sameEntityWithDifferentAttrs, clea
 
 def test_time_index(notification, clean_mongo, crate_translator):
     # If present, use entity-level dateModified as time_index
-    global_modified = datetime(2000, 1, 2).isoformat()
+    global_modified = datetime(2000, 1, 2, 0, 0, 0, 0, timezone.utc).isoformat()
     modified = {
         'type': 'DateTime',
         'value': global_modified
@@ -251,8 +251,8 @@ def test_time_index(notification, clean_mongo, crate_translator):
     temp = notification['data'][0]['temperature']
     notification['data'][0]['pressure'] = copy.deepcopy(temp)
 
-    older = datetime(2001, 1, 2).isoformat()
-    newer = datetime(2002, 1, 2).isoformat()
+    older = datetime(2001, 1, 2, 0, 0, 0, 0, timezone.utc).isoformat()
+    newer = datetime(2002, 1, 2, 0, 0, 0, 0, timezone.utc).isoformat()
     e = notification['data'][0]
     e['temperature']['metadata']['dateModified']['value'] = older
     e['pressure']['metadata']['dateModified']['value'] = newer
