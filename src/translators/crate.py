@@ -233,7 +233,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
         if fiware_sp:
             # Match prefix of fiware service path
             clauses.append(" "+FIWARE_SERVICEPATH+" ~* '"+fiware_sp+"($|/.*)'")
-       else:
+        else:
             stmt = "insert into {} (table_name, entity_attrs) values (?,?) " \
                    "on conflict(table_name) DO UPDATE SET entity_attrs = excluded.entity_attrs"
         stmt = stmt.format(METADATA_TABLE_NAME)

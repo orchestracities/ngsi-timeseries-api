@@ -9,7 +9,6 @@ import os
 
 =======
 from datetime import datetime, timezone
->>>>>>> 42a20ae23f20f10b55f794b19d05ecea7a4eca14
 
 def test_db_version(translator):
     version = translator.get_db_version()
