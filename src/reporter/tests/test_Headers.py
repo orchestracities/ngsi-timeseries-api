@@ -15,8 +15,8 @@ def test_for_valid_headers(notification):
     notification['data'][0] = {
         'id': 'Room0',
         'type': 'Room',
-        'temperature': {'type': 'Number', 'value': '100', 'metadata': {'dateModified': {'type': 'DateTime','value': '1980-01-30T00:00:00.000'}}},
-        'pressure': {'type': 'Number', 'value': '10', 'metadata': {'dateModified': {'type': 'DateTime','value': '1980-01-30T00:00:00.000'}}},
+        'temperature': {'type': 'Number', 'value': '100', 'metadata': {'dateModified': {'type': 'DateTime','value': '1980-01-30T00:00:00.000+00:00'}}},
+        'pressure': {'type': 'Number', 'value': '10', 'metadata': {'dateModified': {'type': 'DateTime','value': '1980-01-30T00:00:00.000+00:00'}}},
     }
 
     res_post = requests.post('{}'.format(notify_url), data=json.dumps(notification),
@@ -34,7 +34,7 @@ def test_for_valid_headers(notification):
         "attributes": [{'attrName': 'pressure', 'values': [10.0]}, {'attrName': 'temperature', 'values': [100.0]}],
         "entityId": 'Room0',
         "index": [
-            '1980-01-30T00:00:00.000'
+            '1980-01-30T00:00:00.000+00:00'
         ]
     }
     assert res_get.json() == exp_values

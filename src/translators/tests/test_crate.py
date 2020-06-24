@@ -3,9 +3,13 @@ from translators.base_translator import BaseTranslator
 from translators.crate import NGSI_TEXT
 from conftest import crate_translator as translator, entity
 from utils.common import *
+<<<<<<< HEAD
 from utils.cfgreader import *
 import os
 
+=======
+from datetime import datetime, timezone
+>>>>>>> 42a20ae23f20f10b55f794b19d05ecea7a4eca14
 
 def test_db_version(translator):
     version = translator.get_db_version()
@@ -20,7 +24,7 @@ def test_insert(translator):
 
 
 def test_insert_entity(translator, entity):
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     now_iso = now.isoformat(timespec='milliseconds')
     entity[BaseTranslator.TIME_INDEX_NAME] = now_iso
 
@@ -240,7 +244,7 @@ def test_unsupported_ngsi_type(translator):
     e = {
         "type": "SoMeWeIrDtYpE",
         "id": "sOmEwEiRdId",
-        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
+        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
         "foo": {
             "type": "IgnoreThisDefinitivelyNotValidNGSITypeMessage",
             "value": "BaR",
@@ -259,7 +263,7 @@ def test_accept_unknown_ngsi_type(translator):
     e = {
         "type": "SoMeWeIrDtYpE",
         "id": "sOmEwEiRdId",
-        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
+        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
         "address": {
             "type": "PostalAddress",
             "value": {
@@ -283,7 +287,7 @@ def test_accept_special_chars(translator):
     e = {
         "type": "SoMe-WeIrD-tYpE",
         "id": "sOmE:wEiRd.Id",
-        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
+        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
         "address": {
             "type": "Address-Type",
             "value": {
@@ -302,7 +306,7 @@ def test_missing_type_defaults_to_string(translator):
     e = {
         "type": "SoMeWeIrDtYpE",
         "id": "sOmEwEiRdId",
-        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
+        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
         "foo": {
             "value": "BaR",
         },
@@ -321,7 +325,7 @@ def test_capitals(translator):
     e1 = {
         "type": entity_type,
         "id": "sOmEwEiRdId",
-        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
+        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
         "Foo": {
             "type": "Text",
             "value": "FoO",
@@ -340,7 +344,7 @@ def test_capitals(translator):
     e2 = e1.copy()
     e2['id'] = 'SOmEwEiRdId2'
     e2['NewAttr'] = {"type": "Text", "value": "NewAttrValue!"}
-    e2[TIME_INDEX_NAME] = datetime.now().isoformat(timespec='milliseconds')
+    e2[TIME_INDEX_NAME] = datetime.now(timezone.utc).isoformat(timespec='milliseconds')
 
     translator.insert([e2])
     entities = translator.query()
@@ -377,7 +381,7 @@ def test_long_json(translator):
     big_entity = {
         'id': 'entityId1',
         'type': 'type1',
-        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
+        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
         'foo': {
             'type': 'Text',
             'value': "SomeTextThatWillGetLong" * 2000
@@ -395,7 +399,7 @@ def test_geo_point(translator):
     entity = {
         'id': 'Room1',
         'type': 'Room',
-        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
+        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
         'location': {
             'type': 'geo:point',
             'value': "19.6389474, -98.9109537"  # lat, long
@@ -422,7 +426,7 @@ def test_geo_point_null_values(translator):
     entity = {
         'id': 'Room1',
         'type': 'Room',
-        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
+        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
         'location': {
             'type': 'geo:point',
             'value': "19.6389474, -98.9109537"  # lat, long
@@ -436,7 +440,7 @@ def test_geo_point_null_values(translator):
     entity_new = {
         'id': 'Room1',
         'type': 'Room',
-        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
+        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
         'temperature': {
             'type': 'Number',
             'value': "19"
@@ -460,7 +464,7 @@ def test_structured_value_to_array(translator):
     entity = {
         'id': '8906',
         'type': 'AirQualityObserved',
-        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
+        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
         'aqi': {'type': 'Number', 'value': 43},
         'city': {'type': 'Text', 'value': 'Antwerpen'},
         'h': {'type': 'Number', 'value': 93},
@@ -491,10 +495,10 @@ def test_ISO8601(translator):
     e = {
         "type": "MyType",
         "id": "MyId",
-        TIME_INDEX_NAME: datetime.now().isoformat(timespec='milliseconds'),
+        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
         "iso_attr": {
             "type": "ISO8601",
-            "value": "2018-03-20T13:26:38.722",
+            "value": "2018-03-20T13:26:38.722Z",
         },
     }
     translator.insert([e])
@@ -510,7 +514,7 @@ def test_ISO8601(translator):
 
 def test_air_quality_observed(translator, air_quality_observed):
     # Add TIME_INDEX as Reporter would
-    now = datetime.now().isoformat(timespec='milliseconds')
+    now = datetime.now(timezone.utc).isoformat(timespec='milliseconds')
     air_quality_observed[TIME_INDEX_NAME] = now
 
     translator.insert([air_quality_observed])
@@ -520,7 +524,7 @@ def test_air_quality_observed(translator, air_quality_observed):
 
 def test_traffic_flow_observed(translator, traffic_flow_observed):
     # Add TIME_INDEX as Reporter would
-    now = datetime.now().isoformat(timespec='milliseconds')
+    now = datetime.now(timezone.utc).isoformat(timespec='milliseconds')
     traffic_flow_observed[TIME_INDEX_NAME] = now
 
     translator.insert([traffic_flow_observed])

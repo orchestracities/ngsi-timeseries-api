@@ -1,10 +1,13 @@
-from exceptions.exceptions import NGSIUsageError
+from exceptions.exceptions import NGSIUsageError, InvalidParameterValue
 from flask import request
 from reporter.reporter import _validate_query_params
-from translators.crate import CrateTranslatorInstance
+from translators.factory import translator_for
 import logging
 from .geo_query_handler import handle_geo_query
 from utils.jsondict import lookup_string_match
+import dateutil.parser
+from datetime import datetime, timezone
+
 
 def query_1TNENA(entity_type=None,  # In Path
                  id_=None,  # In Query
@@ -48,7 +51,7 @@ def query_1TNENA(entity_type=None,  # In Path
     if id_:
         entity_ids = [s.strip() for s in id_.split(',') if s]
     try:
-        with CrateTranslatorInstance() as trans:
+        with translator_for(fiware_s) as trans:
             entities = trans.query(attr_names=attrs,
                                    entity_type=entity_type,
                                    entity_ids=entity_ids,
@@ -68,6 +71,12 @@ def query_1TNENA(entity_type=None,  # In Path
             "error": "{}".format(type(e)),
             "description": str(e)
         }, 400
+
+    except InvalidParameterValue as e:
+        return {
+            "error": "{}".format(type(e)),
+            "description": str(e)
+        }, 422
 
     except Exception as e:
         msg = "Something went wrong with QL. Error: {}".format(e)
@@ -104,7 +113,15 @@ def _prepare_response(entities, attrs, entity_type, entity_ids,
                 'attrName': at,
                 'values': e[at]['values']
             })
-        index = [from_date or '', to_date or ''] if aggr_method and not aggr_period else e['index']
+        try:
+            f_date = dateutil.parser.isoparse(from_date).replace(tzinfo=timezone.utc).isoformat()
+        except Exception as ex:
+            f_date = ''
+        try:
+            t_date = dateutil.parser.isoparse(to_date).replace(tzinfo=timezone.utc).isoformat()
+        except Exception as ex:
+            t_date = ''
+        index = [f_date, t_date] if aggr_method and not aggr_period else e['index']
         entity = {
                  'entityId': e['id'],
                  'index': index,

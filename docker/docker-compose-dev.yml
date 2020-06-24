@@ -38,8 +38,6 @@ services:
     image: grafana/grafana
     ports:
       - "3000:3000"
-    environment:
-      - GF_INSTALL_PLUGINS=crate-datasource,grafana-clock-panel,grafana-worldmap-panel
     depends_on:
       - crate
 
@@ -49,6 +47,27 @@ services:
       - "6379:6379"
     volumes:
       - redisdata:/data
+
+  timescale:
+    image: timescale/timescaledb-postgis:latest-pg10
+    ports:
+      - "5432:5432"
+      # Don't expose container port 5432 with the same number outside of the
+      # swarm. In the Travis test env, there's already a PG instance running
+      # on port 5432!
+    environment:
+      - POSTGRES_PASSWORD=*
+
+  quantumleap-db-setup:
+    build: ../timescale-container/
+    image: quantumleap-db-setup
+    depends_on:
+      - timescale
+    environment:
+      - QL_DB_PASS=*
+      - QL_DB_INIT_DIR=/ql-db-init
+      - PG_HOST=timescale
+      - PG_PASS=*
 
 volumes:
   mongodata:

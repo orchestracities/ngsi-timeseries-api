@@ -29,6 +29,9 @@ class BaseTranslator(object):
     def dispose(self):
         raise NotImplementedError
 
+    def get_health(self):
+        raise NotImplementedError
+
     def translate_to_ngsi(self, entries):
         raise NotImplementedError
 

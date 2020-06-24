@@ -6,13 +6,17 @@ import pytest
 import requests
 
 
-QL_HOST = os.environ.get('QL_HOST', "quantumleap")
+QL_HOST = os.environ.get('QL_HOST', 'quantumleap')
 QL_PORT = 8668
 QL_URL = "http://{}:{}/v2".format(QL_HOST, QL_PORT)
 QL_BASE_URL = "http://{}:{}".format(QL_HOST, QL_PORT)
+QL_DEFAULT_DB = os.environ.get('QL_DEFAULT_DB', 'crate')
 
 CRATE_HOST = os.environ.get('CRATE_HOST', 'crate')
 CRATE_PORT = 4200
+
+POSTGRES_HOST = os.environ.get('POSTGRES_HOST', 'timescale')
+POSTGRES_HOST = 5432
 
 REDIS_HOST = os.environ.get('REDIS_HOST', 'redis')
 REDIS_PORT = 6379
@@ -129,7 +133,6 @@ def crate_translator(clean_crate):
     with Translator(host=CRATE_HOST, port=CRATE_PORT) as trans:
         yield trans
 
-
 @pytest.fixture
 def entity():
     entity = {
@@ -164,7 +167,7 @@ def sameEntityWithDifferentAttrs():
                 'metadata': {
                     'dateModified': {
                         'type': 'DateTime',
-                        'value': '2019-05-09T15:28:30.000'
+                        'value': '2019-05-09T15:28:30.000Z'
                     }
                 }
             },
@@ -174,7 +177,7 @@ def sameEntityWithDifferentAttrs():
                 'metadata': {
                     'dateModified': {
                         'type': 'DateTime',
-                        'value': '2019-05-09T15:28:30.000'
+                        'value': '2019-05-09T15:28:30.000Z'
                     }
                 }
             }
@@ -188,7 +191,7 @@ def sameEntityWithDifferentAttrs():
                 'metadata': {
                     'dateModified': {
                         'type': 'DateTime',
-                        'value': '2019-05-09T15:29:30.000'
+                        'value': '2019-05-09T15:29:30.000Z'
                     }
                 }
             }
@@ -216,7 +219,7 @@ def air_quality_observed():
         },
         "dateObserved": {
             "type": "DateTime",
-            "value": "2016-03-14T17:00:00"
+            "value": "2016-03-14T17:00:00Z"
         },
         "location": {
             "value": {
@@ -286,7 +289,7 @@ def traffic_flow_observed():
         },
         'dateObservedFrom': {
             'type': 'Text',
-            'value': '2017-11-22T17:17:30.352635',
+            'value': '2017-11-22T17:17:30.352635Z',
         },
         'averageVehicleLength': {
             'type': 'Number',
@@ -318,7 +321,7 @@ def traffic_flow_observed():
         },
         'dateObservedTo': {
             'type': 'Text',
-            'value': '2017-11-22T17:17:40.352652'
+            'value': '2017-11-22T17:17:40.352652Z'
         },
         'location': {
             'type': 'StructuredValue',

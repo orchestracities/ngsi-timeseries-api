@@ -1,9 +1,9 @@
-from conftest import QL_URL, do_clean_crate
+from conftest import QL_URL
 import pytest
 import requests
 import time
 import urllib
-from .utils import send_notifications
+from reporter.tests.utils import send_notifications, delete_test_data
 
 
 entity_type = 'TestDevice'
@@ -16,6 +16,8 @@ attr2_value = 2
 
 entity1_id = 'd1'
 entity2_id = 'd2'
+
+services = ['t1', 't2']
 
 
 def mk_entity(eid):
@@ -40,43 +42,49 @@ def mk_entities():
     ]
 
 
-def insert_entities():
+def insert_entities(service):
     notification_data = [{'data': mk_entities()}]
-    send_notifications(notification_data)
+    send_notifications(service, notification_data)
+    time.sleep(1)
 
 
 @pytest.fixture(scope='module')
 def manage_db_entities():
-    insert_entities()
+    for service in services:
+        insert_entities(service)
     time.sleep(2)
 
     yield
 
-    do_clean_crate()
+    for service in services:
+        delete_test_data(service, [entity_type])
 
 
-def query_1t1e1a(entity_id, attr_name):
+def query_1t1e1a(service, entity_id, attr_name):
     escaped_attr_name = urllib.parse.quote(attr_name)
     url = "{}/entities/{}/attrs/{}".format(QL_URL, entity_id, escaped_attr_name)
-    response = requests.get(url)
+    h = {'Fiware-Service': service}
+    response = requests.get(url, headers=h)
     assert response.status_code == 200
     return response.json()
 
 
-def query_1tne1a(attr_name):
+def query_1tne1a(service, attr_name):
     escaped_attr_name = urllib.parse.quote(attr_name)
     url = "{}/types/{}/attrs/{}".format(QL_URL, entity_type, escaped_attr_name)
-    response = requests.get(url)
+    h = {'Fiware-Service': service}
+    response = requests.get(url, headers=h)
     assert response.status_code == 200
     return response.json()
 
 
-def query_1t1ena(entity_id, attr1_name, attr2_name):
+def query_1t1ena(service, entity_id, attr1_name, attr2_name):
     url = "{}/entities/{}".format(QL_URL, entity_id)
     query_params = {
         'attrs': attr1_name + ',' + attr2_name,
     }
-    response = requests.get(url, query_params)
+    h = {'Fiware-Service': service}
+    response = requests.get(url, params=query_params, headers=h)
     assert response.status_code == 200
     return response.json()
 
@@ -84,8 +92,9 @@ def query_1t1ena(entity_id, attr1_name, attr2_name):
 @pytest.mark.parametrize('attr_name', [
     attr1, 'attr1', 'atTr1'
 ])
-def test_1t1e1a(attr_name, manage_db_entities):
-    query_result = query_1t1e1a(entity1_id, attr_name)
+@pytest.mark.parametrize("service", services)
+def test_1t1e1a(service, attr_name, manage_db_entities):
+    query_result = query_1t1e1a(service, entity1_id, attr_name)
     query_result.pop('index', None)
     assert query_result == {
         'attrName': attr_name,
@@ -97,8 +106,9 @@ def test_1t1e1a(attr_name, manage_db_entities):
 @pytest.mark.parametrize('attr_name', [
     attr1, 'attr1', 'atTr1'
 ])
-def test_1tne1a(attr_name, manage_db_entities):
-    query_result = query_1tne1a(attr_name)
+@pytest.mark.parametrize("service", services)
+def test_1tne1a(service, attr_name, manage_db_entities):
+    query_result = query_1tne1a(service, attr_name)
     for e in query_result['entities']:
         e.pop('index', None)
 
@@ -121,8 +131,9 @@ def test_1tne1a(attr_name, manage_db_entities):
 @pytest.mark.parametrize('attr1_name, attr2_name', [
     (attr1, attr2), ('attr1', 'attr_2'), ('atTr1', 'ATtr_2')
 ])
-def test_1t1ena(attr1_name, attr2_name, manage_db_entities):
-    query_result = query_1t1ena(entity2_id, attr1_name, attr2_name)
+@pytest.mark.parametrize("service", services)
+def test_1t1ena(service, attr1_name, attr2_name, manage_db_entities):
+    query_result = query_1t1ena(service, entity2_id, attr1_name, attr2_name)
     query_result.pop('index', None)
 
     assert query_result == {

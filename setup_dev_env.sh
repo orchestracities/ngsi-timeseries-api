@@ -3,9 +3,12 @@
 # Usage: 
 #      $ source setup_dev_env.sh
 
+# stop at the first command that returns a non-zero exit code.
+set -e
+
 export PYTHONPATH=${PWD}/src:${PYTHONPATH}
 
-docker build -t quantumleap .
+docker build -t smartsdk/quantumleap .
 
 source deps.env
 
