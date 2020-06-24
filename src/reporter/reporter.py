@@ -27,24 +27,27 @@ interest and make QL actually perform the corresponding subscription to orion.
 I.e, QL must be told where orion is.
 """
 from flask import request
-from geocoding.geocache import GeoCodingCache
+from geocoding import geocoding
+from geocoding.factory import get_geo_cache, is_geo_coding_available
 from requests import RequestException
-from translators.sql_translator import NGSI_TEXT, SQLTranslator
+from translators.sql_translator import SQLTranslator
 from translators.factory import translator_for
 from utils.common import iter_entity_attrs, TIME_INDEX_NAME
 import json
 import logging
-import os
 import requests
 from reporter.subscription_builder import build_subscription
 from reporter.timex import select_time_index_value_as_iso, \
     TIME_INDEX_HEADER_NAME
 from geocoding.location import normalize_location
+from utils.cfgreader import EnvReader, StrVar
 
 
 def log():
-    LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
-    logging.basicConfig(level=LOGLEVEL)
+    r = EnvReader(log=logging.getLogger(__name__).info)
+    level = r.read(StrVar('LOGLEVEL', 'INFO')).upper()
+
+    logging.basicConfig(level=level)
     return logging.getLogger(__name__)
 
 
@@ -191,16 +194,8 @@ def notify():
 
 
 def add_geodata(entity):
-    # TODO: Move this setting to configuration (See GH issue #10)
-    use_geocoding = os.environ.get('USE_GEOCODING', False)
-    redis_host = os.environ.get('REDIS_HOST', None)
-
-    # No cache -> no geocoding by default
-    if use_geocoding and redis_host:
-        redis_port = os.environ.get('REDIS_PORT', 6379)
-        cache = GeoCodingCache(redis_host, redis_port)
-
-        from geocoding import geocoding
+    if is_geo_coding_available():
+        cache = get_geo_cache()
         geocoding.add_location(entity, cache=cache)
 
 

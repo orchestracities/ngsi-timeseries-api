@@ -9,6 +9,8 @@ from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
 import logging
 import os
 from .crate_geo_query import from_ngsi_query
+from utils.cfgreader import EnvReader, StrVar, IntVar
+
 
 # CRATE TYPES
 # https://crate.io/docs/crate/reference/en/latest/general/ddl/data-types.html
@@ -179,8 +181,10 @@ class CrateTranslator(sql_translator.SQLTranslator):
 
 @contextmanager
 def CrateTranslatorInstance():
-    DB_HOST = os.environ.get('CRATE_HOST', 'crate')
-    DB_PORT = os.environ.get('CRATE_PORT', 4200)
-    DB_NAME = "ngsi-tsdb"
-    with CrateTranslator(DB_HOST, DB_PORT, DB_NAME) as trans:
+    r = EnvReader(log=logging.getLogger(__name__).info)
+    db_host = r.read(StrVar('CRATE_HOST', 'crate'))
+    db_port = r.read(IntVar('CRATE_PORT', 4200))
+    db_name = "ngsi-tsdb"
+
+    with CrateTranslator(db_host, db_port, db_name) as trans:
         yield trans

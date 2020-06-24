@@ -1,8 +1,7 @@
 import logging
-import os
 from translators.crate import CrateTranslatorInstance
 from translators.timescale import postgres_translator_instance
-from utils.cfgreader import YamlReader
+from utils.cfgreader import EnvReader, YamlReader, StrVar, MaybeString
 from utils.jsondict import maybe_string_match
 
 
@@ -18,13 +17,22 @@ def log():
     return logging.getLogger(__name__)
 
 
-def translator_for(fiware_service: str):
-    reader = YamlReader(log=log().debug)
-    config = reader.from_env_file(QL_CONFIG_ENV_VAR, defaults={})
+def lookup_backend(fiware_service: str) -> MaybeString:
+    cfg_reader = YamlReader(log=log().debug)
+    env_reader = EnvReader(log=log().info)
 
-    backend = maybe_string_match(config, 'tenants', fiware_service, 'backend')\
-        or os.environ.get(QL_DEFAULT_DB_ENV_VAR, 'crate')\
-        or maybe_string_match(config, 'default-backend')
+    config = cfg_reader.from_env_file(QL_CONFIG_ENV_VAR, defaults={})
+    tenant_backend = maybe_string_match(config, 'tenants', fiware_service,
+                                        'backend')
+    default_backend = maybe_string_match(config, 'default-backend')
+
+    env_backend = env_reader.read(StrVar(QL_DEFAULT_DB_ENV_VAR, CRATE_BACKEND))
+
+    return tenant_backend or env_backend or default_backend
+
+
+def translator_for(fiware_service: str):
+    backend = lookup_backend(fiware_service)
     backend = backend.strip().lower() if backend is not None else ''
 
     if backend == CRATE_BACKEND:
