@@ -146,9 +146,8 @@ class CrateTranslator(sql_translator.SQLTranslator):
         if (major <= 3):
             stmt = "insert into {} (table_name, entity_attrs) values (?,?) " \
                    "on duplicate key update entity_attrs = values(entity_attrs)"
-<<<<<<< HEAD
-            else:
-                stmt = "insert into {} (table_name, entity_attrs) values (?,?) " \
+        else:
+            stmt = "insert into {} (table_name, entity_attrs) values (?,?) " \
                    "on conflict(table_name) DO UPDATE SET entity_attrs = excluded.entity_attrs"
             stmt = stmt.format(METADATA_TABLE_NAME)
             self.cursor.execute(stmt, (table_name, persisted_metadata))
@@ -234,9 +233,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
         if fiware_sp:
             # Match prefix of fiware service path
             clauses.append(" "+FIWARE_SERVICEPATH+" ~* '"+fiware_sp+"($|/.*)'")
-=======
->>>>>>> 42a20ae23f20f10b55f794b19d05ecea7a4eca14
-        else:
+       else:
             stmt = "insert into {} (table_name, entity_attrs) values (?,?) " \
                    "on conflict(table_name) DO UPDATE SET entity_attrs = excluded.entity_attrs"
         stmt = stmt.format(METADATA_TABLE_NAME)
