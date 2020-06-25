@@ -3,10 +3,12 @@ from geocoding.slf.geotypes import *
 from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption, \
     NGSIUsageError, InvalidParameterValue
 from translators import base_translator
+from utils.cfgreader import EnvReader, IntVar
 from utils.common import iter_entity_attrs
 import logging
 from geocoding.slf import SlfQuery
 import dateutil.parser
+import os
 
 # NGSI TYPES
 # Based on Orion output because official docs don't say much about these :(
@@ -337,9 +339,23 @@ class SQLTranslator(base_translator.BaseTranslator):
         select = ','.join(attrs)
         return select
 
+    @staticmethod
+    def _get_default_limit(env: dict = os.environ):
+        r = EnvReader(var_store=env, log=logging.getLogger(__name__).info)
+        env_var_name = 'DEFAULT_LIMIT'
+        fallback_limit = 10000
+        try:
+            return r.read(IntVar(env_var_name, fallback_limit))
+        except ValueError:
+            msg = "Environment variable {} set to non-numeric value; " +\
+                  "using fallback query limit of {}.".\
+                      format(env_var_name, fallback_limit)
+            logging.getLogger(__name__).warning(msg)
+            return fallback_limit
+
     def _get_limit(self, limit, last_n):
         # https://crate.io/docs/crate/reference/en/latest/general/dql/selects.html#limits
-        default_limit = 10000
+        default_limit = self._get_default_limit()
 
         if limit is None or limit > default_limit:
             limit = default_limit
