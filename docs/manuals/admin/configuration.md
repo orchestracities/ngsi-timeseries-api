@@ -8,6 +8,7 @@ To configure QuantumLeap you can use the following environment variables:
 | -------------------|-------------------------|
 | `CRATE_HOST`       | CrateDB Host            |
 | `CRATE_PORT`       | CrateDB Port            |
+| `DEFAULT_LIMIT`    | Max number of rows a query can retrieve |
 | `POSTGRES_HOST`    | PostgreSQL Host         |
 | `POSTGRES_PORT`    | PostgreSQL Port         |
 | `POSTGRES_DB_NAME` | PostgreSQL default db   |
