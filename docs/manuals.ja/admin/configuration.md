@@ -1,4 +1,27 @@
-# データベースの選択
+# 構成
+
+## 環境変数
+
+QuantumLeap を構成するには、次の環境変数を使用できます:
+
+| 変数               | 説明                       |
+| -------------------|----------------------------|
+| `CRATE_HOST`       | CrateDB ホスト             |
+| `CRATE_PORT`       | CrateDB ポート             |
+| `DEFAULT_LIMIT`    | クエリが取得できる最大行数 |
+| `POSTGRES_HOST`    | PostgreSQL ホスト          |
+| `POSTGRES_PORT`    | PostgreSQL ポート          |
+| `POSTGRES_DB_NAME` | PostgreSQL デフォルト db   |
+| `POSTGRES_DB_USER` | PostgreSQL ユーザ          |
+| `POSTGRES_DB_PASS` | PostgreSQL パスワード      |
+| `POSTGRES_USE_SSL` | `t` または `f` SSL 有効化  |
+| `REDIS_HOST`       | Redis ホスト               |
+| `REDIS_PORT`       | Redis ポート               |
+| `USE_GEOCODING`    | `True` または `False` ジオコーディングの有効化または無効化 |
+| `QL_CONFIG`        | テナント構成のパス名       |
+| `LOGLEVEL`         | すべてのサービスのログ・レベルを定義 (`DEBUG`, `INFO`, `WARNING` , `ERROR`) |
+
+## 異なるテナントごとのデータベースの選択
 
 QuantumLeap は、さまざまな時系列データベースを使用して、NGSI データを
 保持およびクエリできます。 現在、クエリ機能が Timescale でまだ利用

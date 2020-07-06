@@ -110,6 +110,17 @@ CrateDB が実行されている到達可能なホスト名を指定する必要
 [docker run reference](https://docs.docker.com/engine/reference/run/)
 を参照してください。
 
+## Kubernetes への QuantumLeap のデプロイ
+
+QuantumLeap サービスを Kubernetes にデプロイするには、
+[このリポジトリ](https://smartsdk-recipes.readthedocs.io/en/latest/data-management/quantumleap/readme/)
+の Helm チャートを活用できます。
+
+特に、以下のコンポーネントをデプロイする必要があります:
+* [CrateDB](https://github.com/orchestracities/charts/tree/master/charts/crate)
+* [オプション] Timescale - これについては、[Patroni Helm Chart](https://github.com/helm/charts/tree/master/incubator/patroni) を参照してください
+* [QuantumLeap](https://github.com/orchestracities/charts/tree/master/charts/quantumleap)
+
 ## FIWARE Releases の互換性
 
 現在のバージョンの QuantumLeap は、FIWARE release `6.3.1`
