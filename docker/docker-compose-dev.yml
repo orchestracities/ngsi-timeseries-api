@@ -49,7 +49,7 @@ services:
       - redisdata:/data
 
   timescale:
-    image: timescale/timescaledb-postgis:1.7.1-pg10
+    image: timescale/timescaledb-postgis:1.7.1-pg12
     ports:
       - "5432:5432"
       # Don't expose container port 5432 with the same number outside of the
