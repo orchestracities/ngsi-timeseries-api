@@ -5,10 +5,14 @@ from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption, \
 from translators import base_translator
 from utils.cfgreader import EnvReader, IntVar
 from utils.common import iter_entity_attrs
+from utils.jsondict import safe_get_value
+from utils.maybe import maybe_map
 import logging
 from geocoding.slf import SlfQuery
 import dateutil.parser
 import os
+import json
+from typing import List, Optional
 
 # NGSI TYPES
 # Based on Orion output because official docs don't say much about these :(
@@ -30,6 +34,13 @@ TYPE_PREFIX = 'et'
 TIME_INDEX = 'timeindex'
 VALID_AGGR_METHODS = ['count', 'sum', 'avg', 'min', 'max']
 VALID_AGGR_PERIODS = ['year', 'month', 'day', 'hour', 'minute', 'second']
+# The name of the column where we store the original JSON entity received
+# in the notification when its corresponding DB row can't be inserted.
+ORIGINAL_ENTITY_COL = '__original_ngsi_entity__'
+# The name of the entity ID and type columns.
+# TODO: replace each occurrence of these strings with the below constants.
+ENTITY_ID_COL = 'entity_id'
+ENTITY_TYPE_COL = 'entity_type'
 
 # Default Translation
 NGSI_TO_SQL = {
@@ -50,6 +61,39 @@ NGSI_TO_SQL = {
     NGSI_STRUCTURED_VALUE: 'text',
     TIME_INDEX: 'timestamp WITH TIME ZONE NOT NULL'
 }
+
+
+def current_timex() -> str:
+    """
+    :return: QuantumLeap time index value for the current point in time.
+    """
+    return datetime.utcnow().isoformat(timespec='milliseconds')
+
+
+# TODO: use below getters everywhere rather than entity id and type strings!
+
+def entity_id(entity: dict) -> Optional[str]:
+    """
+    Safely get the NGSI ID of the given entity.
+    The ID, if present, is expected to be a string, so we convert it if it
+    isn't.
+
+    :param entity: the entity.
+    :return: the ID string if there's an ID, `None` otherwise.
+    """
+    return maybe_map(str, safe_get_value(entity, NGSI_ID))
+
+
+def entity_type(entity: dict) -> Optional[str]:
+    """
+    Safely get the NGSI type of the given entity.
+    The type, if present, is expected to be a string, so we convert it if it
+    isn't.
+
+    :param entity: the entity.
+    :return: the type string if there's an type, `None` otherwise.
+    """
+    return maybe_map(str, safe_get_value(entity, NGSI_TYPE))
 
 
 # TODO: Refactor
@@ -143,6 +187,8 @@ class SQLTranslator(base_translator.BaseTranslator):
                                  fiware_service=None,
                                  fiware_servicepath=None):
         # All entities must be of the same type and have a time index
+        # Also, an entity can't have an attribute with the same name
+        # as that specified by ORIGINAL_ENTITY_COL_NAME.
         for e in entities:
             if e[NGSI_TYPE] != entity_type:
                 msg = "Entity {} is not of type {}."
@@ -153,8 +199,12 @@ class SQLTranslator(base_translator.BaseTranslator):
                 msg = "Translating entity without TIME_INDEX. " \
                       "It should have been inserted by the 'Reporter'. {}"
                 warnings.warn(msg.format(e))
-                now_iso = datetime.utcnow().isoformat(timespec='milliseconds')
-                e[self.TIME_INDEX_NAME] = now_iso
+                e[self.TIME_INDEX_NAME] = current_timex()
+
+            if ORIGINAL_ENTITY_COL in e:
+                raise ValueError(
+                    f"Entity {e[NGSI_ID]} has a reserved attribute name: " +
+                    "'{ORIGINAL_ENTITY_COL_NAME}'")
 
         # Define column types
         # {column_name -> crate_column_type}
@@ -162,7 +212,8 @@ class SQLTranslator(base_translator.BaseTranslator):
             'entity_id': self.NGSI_TO_SQL['Text'],
             'entity_type': self.NGSI_TO_SQL['Text'],
             self.TIME_INDEX_NAME: self.NGSI_TO_SQL[TIME_INDEX],
-            FIWARE_SERVICEPATH: self.NGSI_TO_SQL['Text']
+            FIWARE_SERVICEPATH: self.NGSI_TO_SQL['Text'],
+            ORIGINAL_ENTITY_COL: self.NGSI_TO_SQL[NGSI_TEXT]
         }
 
         # Preserve original attr names and types
@@ -230,12 +281,39 @@ class SQLTranslator(base_translator.BaseTranslator):
             entries.append(values)
 
         # Insert entities data
-        p1 = table_name
-        p2 = ', '.join(['"{}"'.format(c.lower()) for c in col_names])
-        p3 = ','.join(['?'] * len(col_names))
-        stmt = "insert into {} ({}) values ({})".format(p1, p2, p3)
-        self.cursor.executemany(stmt, entries)
+        self._insert_entity_rows(table_name, col_names, entries, entities)
         return self.cursor
+
+    def _insert_entity_rows(self, table_name: str, col_names: List[str],
+                            rows: List[List], entities: List[dict]):
+        col_list = ', '.join(['"{}"'.format(c.lower()) for c in col_names])
+        placeholders = ','.join(['?'] * len(col_names))
+        stmt = f"insert into {table_name} ({col_list}) values ({placeholders})"
+        try:
+            self.cursor.executemany(stmt, rows)
+        except Exception as e:
+            if not self._should_insert_original_entities(e):
+                raise
+
+            self.logger.exception(
+                'Failed to insert entities because of below error; ' +
+                'translator will try saving original JSON instead in ' +
+                f"{table_name}.{ORIGINAL_ENTITY_COL}"
+            )
+            self._insert_original_entities(table_name, entities)
+
+    def _should_insert_original_entities(self, insert_error: Exception) -> bool:
+        raise NotImplementedError
+
+    def _insert_original_entities(self, table_name: str, entities: List[dict]):
+        cols = f"{ENTITY_ID_COL}, {ENTITY_TYPE_COL}, {self.TIME_INDEX_NAME}" + \
+               f", {ORIGINAL_ENTITY_COL}"
+        stmt = f"insert into {table_name} ({cols}) values (?, ?, ?, ?)"
+        tix = current_timex()
+        rows = [[entity_id(e), entity_type(e), tix, json.dumps(e)]
+                for e in entities]
+
+        self.cursor.executemany(stmt, rows)
 
     def _attr_is_structured(self, a):
         if a['value'] is not None and isinstance(a['value'], dict):

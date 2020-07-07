@@ -7,7 +7,6 @@ from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
     NGSI_GEOJSON, NGSI_GEOPOINT, NGSI_TEXT, NGSI_STRUCTURED_VALUE, TIME_INDEX, \
     METADATA_TABLE_NAME, FIWARE_SERVICEPATH
 import logging
-import os
 from .crate_geo_query import from_ngsi_query
 from utils.cfgreader import EnvReader, StrVar, IntVar
 
@@ -136,6 +135,9 @@ class CrateTranslator(sql_translator.SQLTranslator):
                "(number_of_replicas = '2-all', column_policy = 'dynamic')".format(table_name, columns)
         self.cursor.execute(stmt)
 
+    def _should_insert_original_entities(self, insert_error: Exception) -> bool:
+        return isinstance(insert_error, exceptions.ProgrammingError)
+
     def _create_metadata_table(self):
         stmt = "create table if not exists {} " \
                "(table_name string primary key, entity_attrs object) " \
@@ -153,7 +155,6 @@ class CrateTranslator(sql_translator.SQLTranslator):
                    "on conflict(table_name) DO UPDATE SET entity_attrs = excluded.entity_attrs"
         stmt = stmt.format(METADATA_TABLE_NAME)
         self.cursor.execute(stmt, (table_name, persisted_metadata))
-
 
     def _compute_type(self, attr_t, attr):
         """
