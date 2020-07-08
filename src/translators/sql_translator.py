@@ -3,7 +3,7 @@ from geocoding.slf.geotypes import *
 from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption, \
     NGSIUsageError, InvalidParameterValue
 from translators import base_translator
-from utils.cfgreader import EnvReader, IntVar
+from translators.config import SQLTranslatorConfig
 from utils.common import iter_entity_attrs
 from utils.jsondict import safe_get_value
 from utils.maybe import maybe_map
@@ -105,6 +105,7 @@ def entity_type(entity: dict) -> Optional[str]:
 
 class SQLTranslator(base_translator.BaseTranslator):
     NGSI_TO_SQL = NGSI_TO_SQL
+    config = SQLTranslatorConfig()
 
     def _refresh(self, entity_types, fiware_service=None):
         """
@@ -417,23 +418,9 @@ class SQLTranslator(base_translator.BaseTranslator):
         select = ','.join(attrs)
         return select
 
-    @staticmethod
-    def _get_default_limit(env: dict = os.environ):
-        r = EnvReader(var_store=env, log=logging.getLogger(__name__).info)
-        env_var_name = 'DEFAULT_LIMIT'
-        fallback_limit = 10000
-        try:
-            return r.read(IntVar(env_var_name, fallback_limit))
-        except ValueError:
-            msg = "Environment variable {} set to non-numeric value; " +\
-                  "using fallback query limit of {}.".\
-                      format(env_var_name, fallback_limit)
-            logging.getLogger(__name__).warning(msg)
-            return fallback_limit
-
     def _get_limit(self, limit, last_n):
         # https://crate.io/docs/crate/reference/en/latest/general/dql/selects.html#limits
-        default_limit = self._get_default_limit()
+        default_limit = self.config.default_limit()
 
         if limit is None or limit > default_limit:
             limit = default_limit
@@ -442,11 +429,11 @@ class SQLTranslator(base_translator.BaseTranslator):
             last_n = limit
 
         if limit < 1:
-            raise InvalidParameterValue("{} should be >=1 and <= {"
-                                 "}.".format('limit', default_limit))
+            raise InvalidParameterValue(
+                f"limit should be >=1 and <= {default_limit}.")
         if last_n < 1:
-            raise InvalidParameterValue("{} should be >=1 and <= {"
-                                 "}.".format('last_n', default_limit))
+            raise InvalidParameterValue(
+                f"last_n should be >=1 and <= {default_limit}.")
         return min(last_n, limit)
 
     def _get_where_clause(self, entity_ids, from_date, to_date, fiware_sp=None,
