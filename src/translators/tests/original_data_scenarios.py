@@ -1,10 +1,12 @@
 import json
+import os
 import pytest
 import random
 from time import sleep
 from typing import Any, Callable, Generator, List
 
 from translators.base_translator import TIME_INDEX_NAME
+from translators.config import KEEP_RAW_ENTITY_VAR
 from translators.sql_translator import SQLTranslator, current_timex
 from translators.sql_translator import ORIGINAL_ENTITY_COL, ENTITY_ID_COL, \
     TYPE_PREFIX, TENANT_PREFIX
@@ -42,6 +44,11 @@ def gen_entity(entity_id: int, attr_type: str, attr_value) -> dict:
     }
 
 
+def assert_saved_original(actual_row, original_entity):
+    saved_entity = json.loads(actual_row[ORIGINAL_ENTITY_COL])
+    assert original_entity == saved_entity
+
+
 def assert_inserted_entity(actual_row, original_entity):
     assert actual_row['a_number'] == \
         maybe_value(original_entity, 'a_number', 'value')
@@ -55,8 +62,7 @@ def assert_failed_entity(actual_row, original_entity):
     assert actual_row['an_attr'] is None
     assert actual_row[ORIGINAL_ENTITY_COL] is not None
 
-    saved_entity = json.loads(actual_row[ORIGINAL_ENTITY_COL])
-    assert original_entity == saved_entity
+    assert_saved_original(actual_row, original_entity)
 
 
 def full_table_name(tenant: str) -> str:
@@ -149,3 +155,26 @@ class OriginalDataScenarios:
         assert_inserted_entity(rs[0], e1)
         assert_inserted_entity(rs[1], e2)
         assert_inserted_entity(rs[2], e3)
+
+    def _do_success_scenario_with_keep_raw_on(self):
+        tenant = gen_tenant_id()
+        e1, e2, e3 = [gen_entity(k + 1, 'Number', k + 1) for k in range(3)]
+
+        self.insert_entities(tenant, [e1])
+        self.insert_entities(tenant, [e2, e3])
+
+        rs = self.fetch_rows(tenant)
+
+        assert len(rs) == 3
+        assert_saved_original(rs[0], e1)
+        assert_saved_original(rs[1], e2)
+        assert_saved_original(rs[2], e3)
+
+    def run_success_scenario_with_keep_raw_on(self):
+        os.environ[KEEP_RAW_ENTITY_VAR] = 'true'
+        try:
+            self._do_success_scenario_with_keep_raw_on()
+        except Exception:
+            del os.environ[KEEP_RAW_ENTITY_VAR]
+            raise
+        del os.environ[KEEP_RAW_ENTITY_VAR]

@@ -39,3 +39,7 @@ def test_data_loss_scenario(with_timescale):
 
 def test_success_scenario(with_timescale):
     with_timescale.run_success_scenario()
+
+
+def test_success_scenario_with_keep_raw_on(with_timescale):
+    with_timescale.run_success_scenario_with_keep_raw_on()

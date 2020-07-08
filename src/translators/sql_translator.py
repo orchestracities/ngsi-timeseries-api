@@ -10,7 +10,6 @@ from utils.maybe import maybe_map
 import logging
 from geocoding.slf import SlfQuery
 import dateutil.parser
-import os
 import json
 from typing import List, Optional
 
@@ -287,8 +286,9 @@ class SQLTranslator(base_translator.BaseTranslator):
 
     def _insert_entity_rows(self, table_name: str, col_names: List[str],
                             rows: List[List], entities: List[dict]):
-        col_list = ', '.join(['"{}"'.format(c.lower()) for c in col_names])
-        placeholders = ','.join(['?'] * len(col_names))
+        col_list, placeholders, rows = \
+            self._build_insert_params_and_values(col_names, rows, entities)
+
         stmt = f"insert into {table_name} ({col_list}) values ({placeholders})"
         try:
             self.cursor.executemany(stmt, rows)
@@ -302,6 +302,24 @@ class SQLTranslator(base_translator.BaseTranslator):
                 f"{table_name}.{ORIGINAL_ENTITY_COL}"
             )
             self._insert_original_entities(table_name, entities)
+
+    def _build_insert_params_and_values(
+            self, col_names: List[str], rows: List[List],
+            entities: List[dict]) -> (str, str, List[List]):
+        if self.config.keep_raw_entity():
+            original_entity_col_index = col_names.index(ORIGINAL_ENTITY_COL)
+            for i, r in enumerate(rows):
+                r[original_entity_col_index] = json.dumps(entities[i])
+
+        col_list = ', '.join(['"{}"'.format(c.lower()) for c in col_names])
+        placeholders = ','.join(['?'] * len(col_names))
+        return col_list, placeholders, rows
+    # NOTE. Brittle code.
+    # This code, like the rest of the insert workflow implicitly assumes
+    # 1. col_names[k] <-> rows[k] <-> entities[k]
+    # 2. original entity column always gets added upfront
+    # But we never really check anywhere (1) and (2) always hold true,
+    # so slight changes to the insert workflow could cause nasty bugs...
 
     def _should_insert_original_entities(self, insert_error: Exception) -> bool:
         raise NotImplementedError

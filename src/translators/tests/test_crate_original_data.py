@@ -36,3 +36,7 @@ def test_data_loss_scenario(with_crate):
 
 def test_success_scenario(with_crate):
     with_crate.run_success_scenario()
+
+
+def test_success_scenario_with_keep_raw_on(with_crate):
+    with_crate.run_success_scenario_with_keep_raw_on()
