@@ -3,7 +3,6 @@ import pg8000
 from translators.timescale import postgres_translator_instance, \
     PostgresConnectionData
 
-
 from .original_data_scenarios import *
 
 
@@ -43,3 +42,9 @@ def test_success_scenario(with_timescale):
 
 def test_success_scenario_with_keep_raw_on(with_timescale):
     with_timescale.run_success_scenario_with_keep_raw_on()
+
+
+def test_query_failed_entities_scenario(with_timescale):
+    with_timescale.run_query_failed_entities_scenario(
+        fetch_batch_id_clause=f"({ORIGINAL_ENTITY_COL} ->> 'failedBatchID')"
+    )

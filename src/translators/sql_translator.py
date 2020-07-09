@@ -10,8 +10,9 @@ from utils.maybe import maybe_map
 import logging
 from geocoding.slf import SlfQuery
 import dateutil.parser
-import json
-from typing import List, Optional
+from typing import Any, List, Optional
+from uuid import uuid4
+
 
 # NGSI TYPES
 # Based on Orion output because official docs don't say much about these :(
@@ -213,7 +214,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             'entity_type': self.NGSI_TO_SQL['Text'],
             self.TIME_INDEX_NAME: self.NGSI_TO_SQL[TIME_INDEX],
             FIWARE_SERVICEPATH: self.NGSI_TO_SQL['Text'],
-            ORIGINAL_ENTITY_COL: self.NGSI_TO_SQL[NGSI_TEXT]
+            ORIGINAL_ENTITY_COL: self.NGSI_TO_SQL[NGSI_STRUCTURED_VALUE]
         }
 
         # Preserve original attr names and types
@@ -298,10 +299,11 @@ class SQLTranslator(base_translator.BaseTranslator):
 
             self.logger.exception(
                 'Failed to insert entities because of below error; ' +
-                'translator will try saving original JSON instead in ' +
+                'translator will still try saving original JSON in ' +
                 f"{table_name}.{ORIGINAL_ENTITY_COL}"
             )
-            self._insert_original_entities(table_name, entities)
+            self._insert_original_entities_in_failed_batch(
+                table_name, entities, e)
 
     def _build_insert_params_and_values(
             self, col_names: List[str], rows: List[List],
@@ -309,7 +311,8 @@ class SQLTranslator(base_translator.BaseTranslator):
         if self.config.keep_raw_entity():
             original_entity_col_index = col_names.index(ORIGINAL_ENTITY_COL)
             for i, r in enumerate(rows):
-                r[original_entity_col_index] = json.dumps(entities[i])
+                wrapper = self._build_original_data_value(entities[i])
+                r[original_entity_col_index] = wrapper
 
         col_list = ', '.join(['"{}"'.format(c.lower()) for c in col_names])
         placeholders = ','.join(['?'] * len(col_names))
@@ -321,15 +324,36 @@ class SQLTranslator(base_translator.BaseTranslator):
     # But we never really check anywhere (1) and (2) always hold true,
     # so slight changes to the insert workflow could cause nasty bugs...
 
+    def _build_original_data_value(self, entity: dict,
+                                   insert_error: Exception = None,
+                                   failed_batch_id: str = None) -> Any:
+        value = {
+            'data': entity
+        }
+        if failed_batch_id:
+            value['failedBatchID'] = failed_batch_id
+        if insert_error:
+            value['error'] = repr(insert_error)
+
+        return self._to_db_ngsi_structured_value(value)
+
+    @staticmethod
+    def _to_db_ngsi_structured_value(data: dict) -> Any:
+        return data
+
     def _should_insert_original_entities(self, insert_error: Exception) -> bool:
         raise NotImplementedError
 
-    def _insert_original_entities(self, table_name: str, entities: List[dict]):
+    def _insert_original_entities_in_failed_batch(
+            self, table_name: str, entities: List[dict],
+            insert_error: Exception):
         cols = f"{ENTITY_ID_COL}, {ENTITY_TYPE_COL}, {self.TIME_INDEX_NAME}" + \
                f", {ORIGINAL_ENTITY_COL}"
         stmt = f"insert into {table_name} ({cols}) values (?, ?, ?, ?)"
         tix = current_timex()
-        rows = [[entity_id(e), entity_type(e), tix, json.dumps(e)]
+        batch_id = uuid4().hex
+        rows = [[entity_id(e), entity_type(e), tix,
+                 self._build_original_data_value(e, insert_error, batch_id)]
                 for e in entities]
 
         self.cursor.executemany(stmt, rows)

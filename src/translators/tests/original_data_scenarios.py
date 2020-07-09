@@ -1,4 +1,3 @@
-import json
 import os
 import pytest
 import random
@@ -44,9 +43,14 @@ def gen_entity(entity_id: int, attr_type: str, attr_value) -> dict:
     }
 
 
-def assert_saved_original(actual_row, original_entity):
-    saved_entity = json.loads(actual_row[ORIGINAL_ENTITY_COL])
-    assert original_entity == saved_entity
+def assert_saved_original(actual_row, original_entity,
+                          should_have_batch_id=False):
+    saved_entity = actual_row[ORIGINAL_ENTITY_COL]
+    assert original_entity == saved_entity['data']
+    if should_have_batch_id:
+        assert saved_entity['failedBatchID']
+    else:
+        assert saved_entity.get('failedBatchID') is None
 
 
 def assert_inserted_entity(actual_row, original_entity):
@@ -62,7 +66,8 @@ def assert_failed_entity(actual_row, original_entity):
     assert actual_row['an_attr'] is None
     assert actual_row[ORIGINAL_ENTITY_COL] is not None
 
-    assert_saved_original(actual_row, original_entity)
+    assert_saved_original(actual_row, original_entity,
+                          should_have_batch_id=True)
 
 
 def full_table_name(tenant: str) -> str:
@@ -88,10 +93,7 @@ class OriginalDataScenarios:
             name = name.decode('utf-8')
         return name
 
-    def fetch_rows(self, tenant: str) -> List[dict]:
-        table = full_table_name(tenant)
-        stmt = f"select * from {table} order by {ENTITY_ID_COL}"
-
+    def query(self, stmt: str) -> List[dict]:
         if self.delay_query_by > 0:
             sleep(self.delay_query_by)
         self.cursor.execute(stmt)
@@ -99,6 +101,11 @@ class OriginalDataScenarios:
 
         keys = [self.col_name(k) for k in self.cursor.description]
         return [dict(zip(keys, row)) for row in rows]
+
+    def fetch_rows(self, tenant: str) -> List[dict]:
+        table = full_table_name(tenant)
+        stmt = f"select * from {table} order by {ENTITY_ID_COL}"
+        return self.query(stmt)
 
     def run_changed_attr_type_scenario(self):
         tenant = gen_tenant_id()
@@ -178,3 +185,32 @@ class OriginalDataScenarios:
             del os.environ[KEEP_RAW_ENTITY_VAR]
             raise
         del os.environ[KEEP_RAW_ENTITY_VAR]
+
+    def query_failed_inserts(self, tenant: str,
+                             fetch_batch_id_clause: str) -> List[dict]:
+        table = full_table_name(tenant)
+        stmt = f"select {fetch_batch_id_clause} as batch, count(*) as count" + \
+               f" from {table} where {fetch_batch_id_clause} is not null" + \
+               f" group by {fetch_batch_id_clause}"
+        return self.query(stmt)
+
+    def run_query_failed_entities_scenario(self, fetch_batch_id_clause: str):
+        tenant = gen_tenant_id()
+        good_entities = [gen_entity(k + 1, 'Number', 123) for k in range(2)]
+        bad_entities = [gen_entity(k + 1, 'Text', 'shud of been a nbr!')
+                        for k in range(3)]
+
+        self.insert_entities(tenant, [good_entities[0]])
+        self.insert_entities(tenant, [bad_entities[0]])
+        self.insert_entities(tenant, [good_entities[1]])
+        self.insert_entities(tenant, [bad_entities[1], bad_entities[2]])
+
+        rs = self.query_failed_inserts(tenant, fetch_batch_id_clause)
+
+        assert len(rs) == 2
+        assert rs[0]['batch']
+        assert rs[1]['batch']
+
+        counts = [rs[0]['count'], rs[1]['count']]
+        counts.sort()
+        assert counts == [1, 2]

@@ -156,6 +156,10 @@ class PostgresTranslator(sql_translator.SQLTranslator):
                     values.append(None)
         return values
 
+    @staticmethod
+    def _to_db_ngsi_structured_value(data: dict) -> pg8000.PGJsonb:
+        return pg8000.PGJsonb(data)
+
     def _should_insert_original_entities(self, insert_error: Exception) -> bool:
         return isinstance(insert_error, pg8000.ProgrammingError)
 

@@ -40,3 +40,9 @@ def test_success_scenario(with_crate):
 
 def test_success_scenario_with_keep_raw_on(with_crate):
     with_crate.run_success_scenario_with_keep_raw_on()
+
+
+def test_query_failed_entities_scenario(with_crate):
+    with_crate.run_query_failed_entities_scenario(
+        fetch_batch_id_clause=f"{ORIGINAL_ENTITY_COL}['failedBatchID']"
+    )
