@@ -123,6 +123,47 @@ def test_read_masked_value(store):
     assert 'x&y' not in log_msg
 
 
+def safe_read_var(store, var):
+    logs = {'captured': None}
+
+    def log(msg):
+        logs['captured'] = msg
+
+    reader = EnvReader(store, log=log)
+    return reader.safe_read(var), logs['captured']
+
+
+@pytest.mark.parametrize('value', unset_env_values)
+@pytest.mark.parametrize('var', [
+    IntVar('V', 123), BoolVar('V', True), StrVar('V', 'wada wada')
+])
+def test_safe_read_same_as_read_when_var_not_set(value, var):
+    store = {var.name: value}
+    read_value, _ = safe_read_var(store, var)
+    assert read_value == var.default_value
+
+
+@pytest.mark.parametrize('value, var', [
+    (-345, IntVar('V', 123)), (True, BoolVar('V', False)),
+    ('wada wada', StrVar('V', 'whoops!'))
+])
+def test_safe_read_same_as_read_when_var_set(value, var):
+    store = {var.name: str(value)}
+    read_value, _ = safe_read_var(store, var)
+    assert read_value == value
+
+
+def test_safe_read_return_default_on_parse_error():
+    var = IntVar('V', 123)
+    store = {var.name: 'not a int!'}
+    read_value, log = safe_read_var(store, var)
+
+    assert read_value == var.default_value
+    assert 'Error reading' in log
+    assert f"{var.name}" in log
+    assert f"{var.default_value}" in log
+
+
 yaml_file = os.path.join(os.path.dirname(__file__), 'test.yml')
 yaml_dict = {
     'x': {

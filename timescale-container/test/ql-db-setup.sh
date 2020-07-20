@@ -2,7 +2,7 @@
 
 set -e
 
-DOCKER_IMG=timescale/timescaledb-postgis:latest-pg10
+DOCKER_IMG=timescale/timescaledb-postgis:1.7.1-pg12
 PORT=5432
 PASS=abc123
 DATA=ql-db-init/mtutenant.etdevice.csv

@@ -3,7 +3,7 @@ version: '3'
 services:
 
   timescale:
-    image: timescale/timescaledb-postgis:latest-pg10
+    image: timescale/timescaledb-postgis:1.7.1-pg12
     ports:
       - "5432:5432"
     networks:

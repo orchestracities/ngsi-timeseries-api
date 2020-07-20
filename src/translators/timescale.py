@@ -1,11 +1,9 @@
 from contextlib import contextmanager
 import pg8000
-from datetime import datetime
 from translators import sql_translator
 from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
-    NGSI_GEOJSON, NGSI_GEOPOINT, NGSI_TEXT, NGSI_STRUCTURED_VALUE, TIME_INDEX, \
+    NGSI_GEOJSON, NGSI_TEXT, NGSI_STRUCTURED_VALUE, TIME_INDEX, \
     METADATA_TABLE_NAME, FIWARE_SERVICEPATH, TENANT_PREFIX
-import logging
 import geocoding.geojson.wktcodec
 from geocoding.slf.geotypes import *
 import geocoding.slf.wktcodec
@@ -157,6 +155,13 @@ class PostgresTranslator(sql_translator.SQLTranslator):
                     # so use None which will be inserted as NULL to the db.
                     values.append(None)
         return values
+
+    @staticmethod
+    def _to_db_ngsi_structured_value(data: dict) -> pg8000.PGJsonb:
+        return pg8000.PGJsonb(data)
+
+    def _should_insert_original_entities(self, insert_error: Exception) -> bool:
+        return isinstance(insert_error, pg8000.ProgrammingError)
 
     def _create_metadata_table(self):
         stmt = "create table if not exists {} " \
