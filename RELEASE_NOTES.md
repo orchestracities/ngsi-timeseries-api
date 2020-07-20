@@ -1,5 +1,63 @@
 # QuantumLeap Release Notes
 
+## 0.7.6
+
+#### New features
+- Save original data on translation error (#335)
+- Make maximum number of rows a query can retrieve configurable (#330)
+- Support CrateDB `4.x` series (#300)
+- History of attributes from different entities with different types (#294)
+- Introduce support for log level configuration (#299)
+- History of attributes from different entities of the same type (#293)
+- Make `entities` endpoint list IDs of all existing entities (#264)
+- Move `version`, `config` and `health` endpoint to API root path (#261)
+
+#### Bug fixes
+- Log values of environment variables when reading them in (#326)
+- Reduce code duplication between CrateDB and Timescale translators;
+  use UTC time consistently across the board for time indexing; fix
+  date time SQL injection vulnerability (#315)
+- Ignore attributes with null values (#298)
+- Accept quoted values in API `fromDate` and `toDate` parameters (#285)
+- Use standard header names for FiWare service and service path (#283)
+- Update tests for incomplete entities to take into account changes introduced
+  by PR #278 (#282)
+- Filter empty entities out of notification payload (#278)
+- Pin Python/Alpine docker image to avoid dependency hell (#271)
+- Make `/v2` return list of available API endpoints (#255)
+- Update network interface in Travis build (#260)
+- Update FIWARE CSS to avoid redirect URL (#252)
+
+#### Documentation
+- Update Japanese documentation to cater for CrateDB `4.x` and environment
+  variables (#333)
+- Update contributors list (#307)
+- Remove "Migrating STH Comet data" manual section as no longer supported (#267)
+- Document data format expected by `notify` endpoint (#268)
+- Timescale backend documentation (#263)
+- Update Japanese documents (#280)
+- Update broken link in in sanity check section of Japanese manual (#291)
+- Updated broken links in sanity check section of manual (#289)
+- Update broken links in CrateDB section of manual (#286)
+- Update GitHub issue template (#259)
+- State DB versions in README
+
+#### Important: Backward compatibility
+This release breaks API backward compatibility. Existing `0.7.5` clients may
+**not** be able to work with this new Quantum Leap version without code
+changes.
+In detail: version `0.7.6` changes the URL of the version, health and config
+endpoints as indicated below:
+
+      0.7.5           0.7.6
+      -----           -----
+    /v2/version      /version
+    /v2/config       /config
+    /v2/health       /health
+
+Note that the semantics of the endpoints remains the same as version
+ `0.7.5`.
+
 ## 0.7.5
 
 - Fix bug with lastN parameter (#249)
