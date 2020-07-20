@@ -1,4 +1,4 @@
-from translators.crate import METADATA_TABLE_NAME, TYPE_PREFIX
+from translators.sql_translator import METADATA_TABLE_NAME, TYPE_PREFIX
 from conftest import crate_translator as translator
 from utils.common import create_random_entities
 

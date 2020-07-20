@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from conftest import QL_URL
 from utils.common import assert_equal_time_index_arrays
 import copy
@@ -38,7 +38,7 @@ def test_invalid_no_type(notification, clean_mongo, clean_crate):
                       data=json.dumps(notification),
                       headers=HEADERS_PUT)
     assert r.status_code == 400
-    assert r.json() == {'detail': "'type' is a required property",
+    assert r.json() == {'detail': "'type' is a required property - 'data.0'",
                         'status': 400,
                         'title': 'Bad Request',
                         'type': 'about:blank'}
@@ -50,7 +50,7 @@ def test_invalid_no_id(notification, clean_mongo, clean_crate):
                       data=json.dumps(notification),
                       headers=HEADERS_PUT)
     assert r.status_code == 400
-    assert r.json() == {'detail': "'id' is a required property",
+    assert r.json() == {'detail': "'id' is a required property - 'data.0'",
                         'status': 400,
                         'title': 'Bad Request',
                         'type': 'about:blank'}
@@ -225,7 +225,7 @@ def test_multiple_data_elements(notification, sameEntityWithDifferentAttrs, clea
 
 def test_time_index(notification, clean_mongo, crate_translator):
     # If present, use entity-level dateModified as time_index
-    global_modified = datetime(2000, 1, 2).isoformat()
+    global_modified = datetime(2000, 1, 2, 0, 0, 0, 0, timezone.utc).isoformat()
     modified = {
         'type': 'DateTime',
         'value': global_modified
@@ -251,8 +251,8 @@ def test_time_index(notification, clean_mongo, crate_translator):
     temp = notification['data'][0]['temperature']
     notification['data'][0]['pressure'] = copy.deepcopy(temp)
 
-    older = datetime(2001, 1, 2).isoformat()
-    newer = datetime(2002, 1, 2).isoformat()
+    older = datetime(2001, 1, 2, 0, 0, 0, 0, timezone.utc).isoformat()
+    newer = datetime(2002, 1, 2, 0, 0, 0, 0, timezone.utc).isoformat()
     e = notification['data'][0]
     e['temperature']['metadata']['dateModified']['value'] = older
     e['pressure']['metadata']['dateModified']['value'] = newer
@@ -313,3 +313,138 @@ def test_no_value_in_notification(notification):
     url = '{}'.format(notify_url)
     r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
     assert r.status_code == 200
+
+    
+def test_no_value_for_attributes(notification):
+    # with empty value
+    notification['data'][0] = {
+        'id': '299531',
+        'type': 'AirQualityObserved',
+        'p': {'type': 'string', 'value': '', 'metadata': {}},
+        'pm10': {'type': 'string', 'value': '', 'metadata': {}},
+        'pm25': {'type': 'string', 'value': '', 'metadata': {}},
+    }
+    url = '{}'.format(notify_url)
+    get_url = "{}/entities/299531".format(QL_URL)
+    url_new = '{}'.format(get_url)
+    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    assert r.status_code == 200
+    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    assert res_get.status_code == 404
+    # entity with missing value string
+    notification['data'][0] = {
+        'id': '299531',
+        'type': 'AirQualityObserved',
+        'p': {'type': 'string'},
+        'pm10': {'type': 'string', 'value': '', 'metadata': {}},
+        'pm25': {'type': 'string', 'value': '', 'metadata': {}},
+    }
+    url = '{}'.format(notify_url)
+    get_url = "{}/entities/299531/attrs/p/value".format(QL_URL)
+    url_new = '{}'.format(get_url)
+    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    assert r.status_code == 200
+    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    assert res_get.status_code == 404
+    # entity has both valid and empty attributes
+    notification['data'][0] = {
+        'id': '299531',
+        'type': 'AirQualityObserved',
+        'p': {'type': 'string'},
+        'pm10': {'type': 'string', 'value': '10', 'metadata': {}},
+    }
+    url = '{}'.format(notify_url)
+    get_url_new = "{}/entities/299531/attrs/pm10/value".format(QL_URL)
+    url_new = '{}'.format(get_url_new)
+    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    assert r.status_code == 200
+    # Give time for notification to be processed
+    time.sleep(3)
+    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    assert res_get.status_code == 200
+    assert res_get.json()['values'][2] == '10'
+
+def test_no_value_no_type_for_attributes(notification):
+    # entity with no value and no type
+    notification['data'][0] = {
+        'id': 'Room1',
+        'type': 'Room',
+        'odour': {'type': 'Text', 'value': 'Good', 'metadata': {}},
+        'temperature': {'metadata': {}},
+        'pressure': {'type': 'Number', 'value': '26', 'metadata': {}},
+    }
+    url = '{}'.format(notify_url)
+    get_url = "{}/entities/Room1/attrs/temperature/value".format(QL_URL)
+    url_new = '{}'.format(get_url)
+    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    assert r.status_code == 200
+    # Give time for notification to be processed
+    time.sleep(3)
+    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    assert res_get.status_code == 404
+    # Get value of attribute having value
+    get_url_new = "{}/entities/Room1/attrs/pressure/value".format(QL_URL)
+    url_new = '{}'.format(get_url_new)
+    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    assert res_get.status_code == 200
+    assert res_get.json()['values'][0] == 26
+
+    # entity with value other than Null
+    notification['data'][0] = {
+        'id': 'Room1',
+        'type': 'Room',
+        'temperature': {'type': 'Number', 'value': '25', 'metadata': {}}
+    }
+    url = '{}'.format(notify_url)
+    get_url = "{}/entities/Room1/attrs/temperature/value".format(QL_URL)
+    url_new = '{}'.format(get_url)
+    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    assert r.status_code == 200
+    # Give time for notification to be processed
+    time.sleep(3)
+    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    assert res_get.status_code == 200
+    assert res_get.json()['values'][1] == '25'
+
+
+def test_with_value_no_type_for_attributes(notification):
+    # entity with value and no type
+    notification['data'][0] = {
+        'id': 'Kitchen1',
+        'type': 'Kitchen',
+        'odour': {'type': 'Text', 'value': 'Good', 'metadata': {}},
+        'temperature': {'value': '25', 'metadata': {}},
+        'pressure': {'type': 'Number', 'value': '26', 'metadata': {}},
+    }
+    url = '{}'.format(notify_url)
+    get_url = "{}/entities/Kitchen1/attrs/temperature/value".format(QL_URL)
+    url_new = '{}'.format(get_url)
+    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    assert r.status_code == 200
+    # Give time for notification to be processed
+    time.sleep(3)
+    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    assert res_get.status_code == 200
+    assert res_get.json()['values'][0] == '25'
+
+def test_no_value_with_type_for_attributes(notification):
+    # entity with one Null value and no type
+    notification['data'][0] = {
+        'id': 'Hall1',
+        'type': 'Hall',
+        'odour': {'type': 'Text', 'value': 'Good', 'metadata': {}},
+        'temperature': {'type': 'Number', 'metadata': {}},
+        'pressure': {'type': 'Number', 'value': '26', 'metadata': {}},
+    }
+    url = '{}'.format(notify_url)
+    get_url = "{}/entities/Hall1/attrs/temperature/value".format(QL_URL)
+    url_new = '{}'.format(get_url)
+    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    assert r.status_code == 200
+    # Give time for notification to be processed
+    time.sleep(3)
+    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    assert res_get.status_code == 200
+    assert res_get.json()['values'][0] == None
+
+

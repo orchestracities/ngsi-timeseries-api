@@ -3,7 +3,7 @@ import pytest
 import requests
 import time
 import urllib
-from .utils import send_notifications
+from reporter.tests.utils import send_notifications, delete_entity_type
 
 
 def mk_entity(eid, entity_type, attr_name):
@@ -17,33 +17,27 @@ def mk_entity(eid, entity_type, attr_name):
     }
 
 
-def insert_entity(entity):
+def insert_entity(service, entity):
     notification_data = [{'data': [entity]}]
-    send_notifications(notification_data)
+    send_notifications(service, notification_data)
+    time.sleep(1)
 
-    time.sleep(2)
 
-
-def query_entity(entity_id, attr_name):
+def query_entity(service, entity_id, attr_name):
     escaped_attr_name = urllib.parse.quote(attr_name)
     url = "{}/entities/{}/attrs/{}".format(QL_URL, entity_id, escaped_attr_name)
-    response = requests.get(url)
+    h = {'Fiware-Service': service}
+    response = requests.get(url, headers=h)
     assert response.status_code == 200
     return response.json()
 
 
-def delete_entities(entity_type):
-    delete_url = "{}/types/{}".format(QL_URL, entity_type)
-    response = requests.delete(delete_url)
-    assert response.ok
-
-
-def run_test(entity_type, attr_name):
+def run_test(service, entity_type, attr_name):
     entity = mk_entity('d1', entity_type, attr_name)
 
-    insert_entity(entity)
+    insert_entity(service, entity)
 
-    query_result = query_entity(entity['id'], attr_name)
+    query_result = query_entity(service, entity['id'], attr_name)
     query_result.pop('index', None)
     assert query_result == {
         'attrName': attr_name,
@@ -51,7 +45,7 @@ def run_test(entity_type, attr_name):
         'values': [entity[attr_name]['value']]
     }
 
-    delete_entities(entity['type'])
+    delete_entity_type(service, entity['type'])
 
 
 odd_chars = ['-', '+', '@', ':']
@@ -61,21 +55,30 @@ odd_chars = ['-', '+', '@', ':']
 
 
 @pytest.mark.parametrize('char', odd_chars)
-def test_odd_char_in_entity_type(char, clean_mongo, clean_crate):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_odd_char_in_entity_type(service, char, clean_mongo, clean_crate):
     entity_type = 'test{}device'.format(char)
     attr_name = 'plain_name'
-    run_test(entity_type, attr_name)
+    run_test(service, entity_type, attr_name)
 
 
 @pytest.mark.parametrize('char', odd_chars)
-def test_odd_char_in_attr_name(char, clean_mongo, clean_crate):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_odd_char_in_attr_name(service, char, clean_mongo, clean_crate):
     entity_type = 'test_device'
     attr_name = 'weird{}name'.format(char)
-    run_test(entity_type, attr_name)
+    run_test(service, entity_type, attr_name)
 
 
 @pytest.mark.parametrize('char', odd_chars)
-def test_odd_char_in_entity_type_and_attr_name(char, clean_mongo, clean_crate):
+@pytest.mark.parametrize("service", [
+    "t1", "t2"
+])
+def test_odd_char_in_entity_type_and_attr_name(service, char, clean_mongo, clean_crate):
     entity_type = 'test{}device'.format(char)
     attr_name = 'weird{}name'.format(char)
-    run_test(entity_type, attr_name)
+    run_test(service, entity_type, attr_name)

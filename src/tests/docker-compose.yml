@@ -1,0 +1,61 @@
+version: '3'
+
+services:
+
+  orion:
+    image: fiware/orion:${ORION_VERSION:-2.0.0}
+    ports:
+      - "1026:1026"
+    command: -logLevel DEBUG -noCache -dbhost mongo
+    depends_on:
+      - mongo
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:1026/version"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+
+  mongo:
+    image: mongo:3.2.19
+    ports:
+      - "27017:27017"
+
+  quantumleap:
+    image: ${QL_IMAGE:-smartsdk/quantumleap}
+    ports:
+      - "8668:8668"
+    depends_on:
+      - mongo
+      - orion
+      - crate
+    environment:
+      - CRATE_HOST=${CRATE_HOST:-crate}
+      - USE_GEOCODING=True
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - LOGLEVEL=DEBUG
+
+  crate:
+    image: crate:${CRATE_VERSION:-4.1.4}
+    command: crate -Cauth.host_based.enabled=false
+      -Ccluster.name=democluster -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*"
+    ports:
+      # Admin UI
+      - "4200:4200"
+      # Transport protocol
+      - "4300:4300"
+    volumes:
+      - cratedata:/data
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  cratedata:
+
+networks:
+    default:
+        driver_opts:
+            com.docker.network.driver.mtu: ${DOCKER_MTU:-1400}

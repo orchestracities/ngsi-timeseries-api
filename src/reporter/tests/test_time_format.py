@@ -13,7 +13,7 @@ def check_time_index(input_index, expected_index=None):
     n1 = get_notification('Room', 'Room0', 1, input_index[1])
     n2 = get_notification('Room', 'Room0', 2, input_index[2])
 
-    send_notifications([n0, n1, n2])
+    send_notifications(service='', notifications=[n0, n1, n2])
     time.sleep(1)
 
     # Query
@@ -39,9 +39,9 @@ def test_index_iso(translator):
         '2010-10-10T09:09:02.792',
     ]
     expected_index = [
-        '2010-10-10T07:09:00.792',
-        '2010-10-10T07:09:01.792',
-        '2010-10-10T07:09:02.792',
+        '2010-10-10T07:09:00.792+00:00',
+        '2010-10-10T07:09:01.792+00:00',
+        '2010-10-10T07:09:02.792+00:00',
     ]
     check_time_index(input_index, expected_index)
 
@@ -55,8 +55,8 @@ def test_index_iso_with_time_zone(translator):
         '2010-10-10T09:09:02.792+02:00',
     ]
     expected_index = [
-        '2010-10-10T07:09:00.792',
-        '2010-10-10T07:09:01.792',
-        '2010-10-10T07:09:02.792',
+        '2010-10-10T07:09:00.792+00:00',
+        '2010-10-10T07:09:01.792+00:00',
+        '2010-10-10T07:09:02.792+00:00',
     ]
     check_time_index(input_index, expected_index)

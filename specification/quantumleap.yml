@@ -89,7 +89,7 @@ definitions:
     example, if aggrPeriod is day, each value of course may not correspond
     to original measurements but rather the aggregate of measurements in
     each day."
-
+    
   IndexedValues:
     type: object
     properties:
@@ -121,16 +121,16 @@ definitions:
 # PARAMETERS: IN HEADERS
 ################################################################################
 parameters:
-  fiwareService:
+  fiware-Service:
     in: header
-    name: fiwareService
+    name: fiware-Service
     required: false
     type: string
     description: "The corresponding 'fiware-service' header.
     See http://fiware-orion.readthedocs.io/en/latest/user/multitenancy/index.html#multi-tenancy"
-  fiwareServicePath:
+  fiware-ServicePath:
     in: header
-    name: fiwareServicePath
+    name: fiware-ServicePath
     required: false
     type: string
     description: "The corresponding 'fiware-servicepath' header.
@@ -490,8 +490,8 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Notification'
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       tags:
         - input
       responses:
@@ -610,8 +610,8 @@ paths:
           receiving notifications containing this attribute, QL will use its value as
           a time series index for the entity being notified. If specified, it should
           refer to an entity attribute whose value is an ISO 8601 timestamp."
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       tags:
         - input
       responses:
@@ -640,6 +640,65 @@ paths:
 ################################################################################
 # PATHS: OUTPUT
 ################################################################################
+  /v2/entities:
+    get:
+      operationId: reporter.query_NTNE.query_NTNE
+      summary: "List of all the entityId"
+      description: "For example, query the entities for entityId available in database specific to fiware-Service and fiware-ServicePath."
+      tags:
+        - queries
+      parameters:
+        # In Query...
+        - $ref: '#/parameters/type'
+        - $ref: '#/parameters/fromDate'
+        - $ref: '#/parameters/toDate'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+        # In Header...
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              entityId:
+                type: string
+              index:
+                $ref: '#/definitions/IndexArray'
+              type:
+                type: string
+          examples:
+            application/json:
+              [{
+                    "id": "Kitchen1",
+                    "index": [
+                      "2018-01-07T15:44:59"],
+                    "type": "Kitchen"
+              },
+              {
+                    "id": "Kitchen2",
+                    "index": [
+                      "2018-01-07T15:44:59"],
+                    "type": "Kitchen"
+              }]
+        404:
+          description: "Not Found"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              description:
+                type: string
+          examples:
+            application/json:
+              {
+                "error": "Not Found",
+                "description": "No records were found for such query."
+              }
+
   /v2/entities/{entityId}/attrs/{attrName}:
     get:
       operationId: reporter.query_1T1E1A.query_1T1E1A
@@ -667,8 +726,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         200:
           description: OK
@@ -736,8 +795,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         200:
           description: OK
@@ -792,8 +851,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         200:
           description: OK
@@ -855,8 +914,8 @@ paths:
         - $ref: '#/parameters/fromDate'
         - $ref: '#/parameters/toDate'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         204:
           description: "Records successfully deleted."
@@ -906,8 +965,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         200:
           description: OK
@@ -983,8 +1042,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         200:
           description: OK
@@ -1050,8 +1109,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         200:
           description: OK
@@ -1085,8 +1144,8 @@ paths:
 
   /v2/types/{entityType}:
     get:
-      operationId: reporter.reporter.query_1TNENA
-      summary: "(To Be Implemented) History of N attributes of N entities of
+      operationId: reporter.query_1TNENA.query_1TNENA
+      summary: "History of N attributes of N entities of
       the same type."
       description: "For example, query the average pressure, temperature and
       humidity of this month in all the weather stations."
@@ -1111,11 +1170,9 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
-        501:
-          description: "Not implemented!"
         200:
           description: OK
           schema:
@@ -1189,8 +1246,8 @@ paths:
         - $ref: '#/parameters/fromDate'
         - $ref: '#/parameters/toDate'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         204:
           description: "Records successfully deleted."
@@ -1200,8 +1257,8 @@ paths:
 
   /v2/types/{entityType}/value:
     get:
-      operationId: reporter.reporter.query_1TNENA_value
-      summary: "(To Be Implemented) History of N attributes (values only) of N
+      operationId: reporter.query_1TNENA.query_1TNENA_value
+      summary: "History of N attributes (values only) of N
       entities of the same type."
       description: "For example, query the average pressure, temperature and
       humidity (values only, no metadata) of this month in all the weather
@@ -1227,11 +1284,9 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
-        501:
-          description: "Not implemented!"
         200:
           description: OK
           schema:
@@ -1294,8 +1349,8 @@ paths:
 
   /v2/attrs/{attrName}:
     get:
-      operationId: reporter.reporter.query_NTNE1A
-      summary: "(To Be Implemented) History of an attribute of N entities of N
+      operationId: reporter.query_NTNE1A.query_NTNE1A
+      summary: "History of an attribute of N entities of N
       types."
       description: "For example, query the average temperature of this month
       in all the devices capable of measuring temperature. In this case, you
@@ -1317,9 +1372,12 @@ paths:
         - $ref: '#/parameters/lastN'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/georel'
+        - $ref: '#/parameters/geometry'
+        - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         501:
           description: "Not implemented!"
@@ -1390,8 +1448,8 @@ paths:
 
   /v2/attrs/{attrName}/value:
     get:
-      operationId: reporter.reporter.query_NTNE1A_value
-      summary: "(To Be Implemented) History of an attribute (values only) of N
+      operationId: reporter.query_NTNE1A.query_NTNE1A_value
+      summary: "History of an attribute (values only) of N
       entities of N types."
       description: "For example, query the average temperature (values only, no
       metadata) of this month in all the devices capable of measuring
@@ -1418,8 +1476,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         501:
           description: "Not implemented!"
@@ -1489,8 +1547,8 @@ paths:
 
   /v2/attrs:
     get:
-      operationId: reporter.reporter.query_NTNENA
-      summary: "(To Be Implemented) History of N attributes of N entities of N
+      operationId: reporter.query_NTNENA.query_NTNENA
+      summary: "History of N attributes of N entities of N
       types."
       description: "This is sort of a query all. The response will likely not
       fit into a single response so an efficient paging mechanism and sensible
@@ -1515,8 +1573,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         501:
           description: "Not implemented!"
@@ -1597,8 +1655,8 @@ paths:
 
   /v2/attrs/value:
     get:
-      operationId: reporter.reporter.query_NTNENA_value
-      summary: "(To Be Implemented) History of N attributes (values only) of N
+      operationId: reporter.query_NTNENA.query_NTNENA_value
+      summary: "History of N attributes (values only) of N
       entities of N types."
       description: "This is sort of a query all. The response will likely not
       fit into a single response so an efficient paging mechanism and sensible
@@ -1623,8 +1681,8 @@ paths:
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
         # In Header...
-        - $ref: '#/parameters/fiwareService'
-        - $ref: '#/parameters/fiwareServicePath'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
       responses:
         501:
           description: "Not implemented!"

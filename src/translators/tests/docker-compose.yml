@@ -15,7 +15,7 @@ services:
 
   crate:
     image: crate:${CRATE_VERSION}
-    command: crate -Clicense.enterprise=false -Cauth.host_based.enabled=false
+    command: crate -Cauth.host_based.enabled=false
       -Ccluster.name=democluster -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*"
     ports:
       # Admin UI
@@ -38,7 +38,7 @@ services:
         - translatorstests
 
   timescale:
-    image: timescale/timescaledb-postgis:latest-pg10
+    image: timescale/timescaledb-postgis:1.7.1-pg12
     ports:
       - "54320:5432"
       # Don't expose container port 5432 with the same number outside of the

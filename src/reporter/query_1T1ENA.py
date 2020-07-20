@@ -1,7 +1,7 @@
-from exceptions.exceptions import NGSIUsageError
+from exceptions.exceptions import NGSIUsageError, InvalidParameterValue
 from flask import request
 from reporter.reporter import _validate_query_params
-from translators.crate import CrateTranslatorInstance
+from translators.factory import translator_for
 import logging
 from .geo_query_handler import handle_geo_query
 
@@ -41,7 +41,7 @@ def query_1T1ENA(entity_id,   # In Path
 
     entities = None
     try:
-        with CrateTranslatorInstance() as trans:
+        with translator_for(fiware_s) as trans:
             entities = trans.query(attr_names=attrs,
                                    entity_type=type_,
                                    entity_id=entity_id,
@@ -60,6 +60,12 @@ def query_1T1ENA(entity_id,   # In Path
             "error": "{}".format(type(e)),
             "description": str(e)
         }, 400
+
+    except InvalidParameterValue as e:
+        return {
+            "error": "{}".format(type(e)),
+            "description": str(e)
+        }, 422
 
     except Exception as e:
         # Temp workaround to debug test_not_found

@@ -85,7 +85,7 @@ class EnvReader:
     """
 
     @staticmethod
-    def get_log_msg(var: EVar, value: MaybeString):
+    def get_log_msg(var: EVar, value: MaybeString) -> str:
         msgs = {
             # (has value, mask value)
             (True, True): "Env variable {name} set, using its value.",
@@ -100,9 +100,14 @@ class EnvReader:
             name=var.name, value=value, default_value=var.default_value
         )
 
+    @staticmethod
+    def get_parse_error_log_msg(var: EVar, cause: Exception) -> str:
+        return f"Error reading env variable {var.name}: {cause}; " + \
+               f"using default value of {var.default_value}."
+
     def __init__(self, var_store: dict = os.environ, log=None):
         self.var_store = var_store
-        self.log = log if log else logging.getLogger(__name__).info
+        self.log = log if log else logging.getLogger(__name__).debug
 
     def read(self, var: EVar):
         """
@@ -119,6 +124,18 @@ class EnvReader:
         self.log(msg)
         return var.read(env_value)
 
+    def safe_read(self, var: EVar):
+        """
+        Same as `read` but return variable's default value if the one
+        found in the environment can't be parsed and log the error.
+        """
+        try:
+            return self.read(var)
+        except ValueError as e:
+            msg = self.get_parse_error_log_msg(var, e)
+            self.log(msg)
+            return var.default_value
+
 
 class YamlReader:
     """
@@ -133,7 +150,7 @@ class YamlReader:
 
     def __init__(self, var_store: dict = os.environ, log=None):
         self.var_store = var_store
-        self.log = log if log else logging.getLogger(__name__).info
+        self.log = log if log else logging.getLogger(__name__).debug
 
     def from_file(self, path: MaybeString, defaults: dict) -> dict:
         """

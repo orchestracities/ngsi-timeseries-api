@@ -22,23 +22,9 @@ services:
     volumes:
       - mongodata:/data/db
 
-  quantumleap:
-    image: ${QL_IMAGE:-smartsdk/quantumleap}
-    ports:
-      - "8668:8668"
-    depends_on:
-      - mongo
-      - orion
-      - crate
-    environment:
-      - CRATE_HOST=${CRATE_HOST:-crate}
-      - USE_GEOCODING=True
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-
   crate:
-    image: crate:${CRATE_VERSION:-3.1.2}
-    command: crate -Clicense.enterprise=false -Cauth.host_based.enabled=false
+    image: crate:${CRATE_VERSION:-4.1.4}
+    command: crate -Cauth.host_based.enabled=false
       -Ccluster.name=democluster -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*"
     ports:
       # Admin UI
@@ -52,21 +38,36 @@ services:
     image: grafana/grafana
     ports:
       - "3000:3000"
-    environment:
-      - GF_INSTALL_PLUGINS=crate-datasource,grafana-clock-panel,grafana-worldmap-panel
     depends_on:
       - crate
 
   redis:
     image: redis
-    deploy:
-      # Scaling Redis requires some extra work.
-      # See https://get-reddie.com/blog/redis4-cluster-docker-compose/
-      replicas: 1
     ports:
       - "6379:6379"
     volumes:
       - redisdata:/data
+
+  timescale:
+    image: timescale/timescaledb-postgis:1.7.1-pg12
+    ports:
+      - "5432:5432"
+      # Don't expose container port 5432 with the same number outside of the
+      # swarm. In the Travis test env, there's already a PG instance running
+      # on port 5432!
+    environment:
+      - POSTGRES_PASSWORD=*
+
+  quantumleap-db-setup:
+    build: ../timescale-container/
+    image: quantumleap-db-setup
+    depends_on:
+      - timescale
+    environment:
+      - QL_DB_PASS=*
+      - QL_DB_INIT_DIR=/ql-db-init
+      - PG_HOST=timescale
+      - PG_PASS=*
 
 volumes:
   mongodata:

@@ -1,8 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import pytest
 import random
 import string
-
+import dateutil.parser
 
 TIME_INDEX_NAME = 'time_index'
 
@@ -98,7 +98,7 @@ def create_random_entities(num_types=1,
     for u in range(num_updates):
         for nt in range(num_types):
             for ni in range(num_ids_per_type):
-                t = datetime.now().isoformat(timespec='milliseconds')
+                t = datetime.now(timezone.utc).isoformat(timespec='milliseconds')
                 entity = {
                     "type": "{}".format(nt),
                     "id": "{}-{}".format(nt, ni),
@@ -117,7 +117,7 @@ def create_random_entities(num_types=1,
                 if use_time:
                     month = round(random.uniform(1, 12))
                     day = round(random.uniform(1, 28))
-                    dt = datetime(1970, month, day, 0, 0, 0, 0)
+                    dt = datetime(1970, month, day, 0, 0, 0, 0, timezone.utc)
                     v_iso = dt.isoformat(timespec='milliseconds')
                     add_attr(entity, "attr_time", v_iso)
 
@@ -195,16 +195,9 @@ def assert_equal_time_index_arrays(index1, index2):
     """
     check both time_index are almost equal within QL's time tolerance.
     """
-    assert len(index1) == len(index2)
     for d0, d1 in zip(index1, index2):
-        try:
-            d0 = datetime.strptime(d0, "%Y-%m-%dT%H:%M:%S.%f")
-        except ValueError:
-            d0 = datetime.strptime(d0, "%Y-%m-%dT%H:%M:%S")
-        try:
-            d1 = datetime.strptime(d1, "%Y-%m-%dT%H:%M:%S.%f")
-        except ValueError:
-            d1 = datetime.strptime(d1, "%Y-%m-%dT%H:%M:%S")
+        d0 = dateutil.parser.isoparse(d0)
+        d1 = dateutil.parser.isoparse(d1)
         assert abs(d0-d1).microseconds < 1000
 
 
@@ -214,7 +207,7 @@ def check_notifications_record(notifications, records):
     (Translator Input) are correctly transformed to a set of records
     (Translator Output).
     """
-    from translators.crate import NGSI_DATETIME, NGSI_ISO8601
+    from translators.sql_translator import NGSI_DATETIME, NGSI_ISO8601
     assert len(notifications) > 0
     assert len(records) == 1
 
