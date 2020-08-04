@@ -191,7 +191,7 @@ def notify():
     except:
         msg = "Notification not processed or not updated"
         log().info(msg)
-        return msg,500
+        return msg, 500
     msg = 'Notification successfully processed'
     log().info(msg)
     return msg
