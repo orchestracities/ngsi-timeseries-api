@@ -185,9 +185,13 @@ def notify():
     payload = res_entity
     
     # Send valid entities to translator
-    with translator_for(fiware_s) as trans:
-        trans.insert(payload, fiware_s, fiware_sp)
-
+    try:
+        with translator_for(fiware_s) as trans:
+            trans.insert(payload, fiware_s, fiware_sp)
+    except:
+        msg = "Notification not processed or not updated"
+        log().error(msg)
+        return msg, 500
     msg = 'Notification successfully processed'
     log().info(msg)
     return msg
