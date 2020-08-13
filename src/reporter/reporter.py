@@ -47,7 +47,7 @@ def log():
     r = EnvReader(log=logging.getLogger(__name__).info)
     level = r.read(StrVar('LOGLEVEL', 'INFO')).upper()
 
-    logging.basicConfig(level=level, format='%(asctime)s.%(msecs)03d %(levelname)s:%(name)s:%(message)s',datefmt='%Y-%m-%d %I:%M:%S')
+    logging.basicConfig(level=level, format='%(asctime)s.%(msecs)03d %(levelname)s:%(name)s:%(message)s', datefmt='%Y-%m-%d %I:%M:%S')
     return logging.getLogger(__name__)
 
 
