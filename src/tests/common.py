@@ -4,33 +4,57 @@ import random
 import requests
 import time
 
-
 # INPUT VARIABLES
 QL_URL = os.environ.get("QL_URL", "http://localhost:8668")
 ORION_URL = os.environ.get("ORION_URL", "http://localhost:1026")
 ORION_URL_4QL = os.environ.get("ORION_URL_4QL", "http://orion:1026")
 QL_URL_4ORION = os.environ.get("QL_URL_4ORION", "http://quantumleap:8668")
+QL_DEFAULT_DB = os.environ.get("QL_DEFAULT_DB", "crate")
 
 # HELPER VARIABLES
 ENTITY_TYPE = "IntegrationTestEntity"
 
 
 class IntegrationTestEntity:
-    def __init__(self, e_id, fiware_service=None, fiware_servicepath=None):
+    def __init__(self, e_id, fiware_service=None, fiware_servicepath=None, keyValues=True):
         self.FIWARE_SERVICEPATH_KEY = 'Fiware-ServicePath'
         self.id = e_id
         self.type = ENTITY_TYPE
-
+        self.keyValues = keyValues
         self.fiware_service = fiware_service
         self.fiware_servicepath = fiware_servicepath
 
-        self.attrs = {
-            "int_attr": 120,
-            "float_attr": 0.5,
-            "text_attr": "blabla",
-            "bool_attr": False,
-            "obj_attr": {},
-        }
+        if keyValues:
+            self.attrs = {
+                "int_attr": 120,
+                "float_attr": 0.5,
+                "text_attr": "blabla",
+                "bool_attr": False,
+                "obj_attr": {},
+            }
+        else:
+            self.attrs = {
+                "int_attr": {
+                    "value": 120,
+                    "type" : "Number"
+                },
+                "float_attr": {
+                    "value": 0.5,
+                    "type": "Number"
+                },
+                "text_attr": {
+                    "value": "blabla",
+                    "type": "Text"
+                },
+                "bool_attr": {
+                    "value": False,
+                    "type": "Boolean"
+                },
+                "obj_attr": {
+                    "value": {},
+                    "type": "StructuredValue"
+                }
+            }
 
     def headers(self):
         h = {}
@@ -46,10 +70,10 @@ class IntegrationTestEntity:
     def update(self):
         self.attrs['int_attr'] += random.choice((1, -1))
         return {
-          "int_attr": {
-            "value": self.attrs['int_attr'],
-            "type": "Number"
-          }
+            "int_attr": {
+                "value": self.attrs['int_attr'],
+                "type": "Number"
+            }
         }
 
     def __repr__(self):
@@ -130,6 +154,36 @@ def load_data(is_old_ql_image=False):
     return entities
 
 
+def send_data_ql(entities, batch=False, is_old_ql_image=False):
+    check_ql_url(is_old_ql_image)
+
+    # Post Entities in QL
+    url = "{}/v2/notify".format(QL_URL)
+    if batch:
+        array = []
+        h = None
+        for e in entities:
+            h = {'Content-Type': 'application/json', **e.headers()}
+            array.append(e.payload())
+        data = {
+            "data": array
+        }
+        data = json.dumps(data)
+        res = requests.post(url, data=data, params=None, headers=h)
+        assert res.ok, res.text
+    else:
+        for e in entities:
+            h = {'Content-Type': 'application/json', **e.headers()}
+            array = []
+            array.append(e.payload())
+            data = {
+                "data": array
+            }
+            data = json.dumps(data)
+            res = requests.post(url, data=data, params=None, headers=h)
+            assert res.ok, res.text
+
+
 def check_data(entities):
     check_orion_url()
     check_ql_url()
@@ -160,6 +214,11 @@ def check_data(entities):
 
 
 def unload_data(entities):
+    delete_orion(entities)
+    delete_ql(entities)
+
+
+def delete_orion(entities):
     errors = []
     # Cleanup all Subscriptions
     for e in entities:
@@ -179,6 +238,9 @@ def unload_data(entities):
         if not r.ok:
             errors.append(r.text)
 
+
+def delete_ql(entities):
+    errors = []
     # Cleanup Historical Records
     deleted = set([])
     for e in entities:

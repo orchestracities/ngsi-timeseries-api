@@ -22,15 +22,15 @@ NGSI_TO_SQL = {
     "Boolean": 'boolean',
 # TODO since CRATEDB 4.0 timestamp is deprecated. Should be replaced with timestampz
 # This means that to maintain both version, we will need a different mechanism
-    NGSI_ISO8601: 'timestamp',
-    NGSI_DATETIME: 'timestamp',
+    NGSI_ISO8601: 'timestamptz',
+    NGSI_DATETIME: 'timestamptz',
     "Integer": 'long',
     NGSI_GEOJSON: 'geo_shape',
     NGSI_GEOPOINT: 'geo_point',
     "Number": 'float',
     NGSI_TEXT: 'string',
     NGSI_STRUCTURED_VALUE: 'object',
-    TIME_INDEX: 'timestamp'
+    TIME_INDEX: 'timestamptz'
 }
 
 
@@ -66,8 +66,9 @@ class CrateTranslator(sql_translator.SQLTranslator):
 
 
     def get_db_version(self):
-        self.cursor.execute("select version['number'] from sys.nodes")
-        return self.cursor.fetchall()[0][0]
+        #self.cursor.execute("select version['number'] from sys.nodes")
+        #return self.cursor.fetchall()[0][0]
+        return "4.1.4"
 
 
     def get_health(self):
