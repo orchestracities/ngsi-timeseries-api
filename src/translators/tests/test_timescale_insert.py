@@ -10,12 +10,15 @@ from translators.timescale import postgres_translator_instance,\
     PostgresConnectionData
 from translators.sql_translator import METADATA_TABLE_NAME,\
     TYPE_PREFIX, TENANT_PREFIX, FIWARE_SERVICEPATH
+from translators.table_cache import TableCacheManager
 
-#
-# NOTE. Using (sort of) unique IDs to avoid having to clean the DB after each
-# test, which slows the whole test suite down to snail pace.
-#
+@pytest.fixture(autouse=True)
+def setup_and_clean():
 
+    yield
+
+    cache = TableCacheManager()
+    cache.clear()
 
 def gen_entity_id(entity_type):
     eid = random.randint(1, 2**32)

@@ -1,6 +1,15 @@
 from translators.crate_geo_query import from_ngsi_query
 from geocoding.slf import *
+from translators.table_cache import TableCacheManager
 
+
+@pytest.fixture(autouse=True)
+def setup_and_clean():
+
+    yield
+
+    cache = TableCacheManager()
+    cache.clear()
 
 def test_near_min_max():
     geom = SlfPoint(1, 2)

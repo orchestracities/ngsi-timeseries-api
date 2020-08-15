@@ -14,7 +14,16 @@ The queries using FIWARE-ServicePath will work like...
 from datetime import datetime
 from utils.common import TIME_INDEX_NAME
 from conftest import crate_translator as translator
+from translators.table_cache import TableCacheManager
 
+
+@pytest.fixture(autouse=True)
+def setup_and_clean():
+
+    yield
+
+    cache = TableCacheManager()
+    cache.clear()
 
 def entity(entity_id):
     e = {

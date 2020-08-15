@@ -5,6 +5,8 @@ from utils.cfgreader import *
 
 from .original_data_scenarios import *
 
+from translators.table_cache import TableCacheManager
+
 
 @pytest.fixture(scope='module')
 def with_crate():
@@ -20,6 +22,8 @@ def with_crate():
 
     cursor.close()
     conn.close()
+    cache = TableCacheManager()
+    cache.clear()
 
 
 def test_changed_attr_type_scenario(with_crate):

@@ -4,6 +4,15 @@ from translators.crate import NGSI_TEXT
 from conftest import crate_translator as translator, entity
 from utils.common import *
 from datetime import datetime, timezone
+from translators.table_cache import TableCacheManager
+
+@pytest.fixture(autouse=True)
+def setup_and_clean():
+
+    yield
+
+    cache = TableCacheManager()
+    cache.clear()
 
 def test_db_version(translator):
     version = translator.get_db_version()

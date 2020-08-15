@@ -6,6 +6,7 @@ from translators import sql_translator
 from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
     NGSI_GEOJSON, NGSI_GEOPOINT, NGSI_TEXT, NGSI_STRUCTURED_VALUE, TIME_INDEX, \
     METADATA_TABLE_NAME, FIWARE_SERVICEPATH
+from translators.table_cache import TableCacheManager
 import logging
 from .crate_geo_query import from_ngsi_query
 from utils.cfgreader import EnvReader, StrVar, IntVar
@@ -37,9 +38,10 @@ NGSI_TO_SQL = {
 CRATE_TO_NGSI = dict((v, k) for (k,v) in NGSI_TO_SQL.items())
 CRATE_TO_NGSI['string_array'] = 'Array'
 
+CACHE = TableCacheManager()
+
 
 class CrateTranslator(sql_translator.SQLTranslator):
-
 
     NGSI_TO_SQL = NGSI_TO_SQL
 
@@ -130,11 +132,14 @@ class CrateTranslator(sql_translator.SQLTranslator):
         return values
 
     def _prepare_data_table(self, table_name, table, fiware_service):
-        columns = ', '.join('"{}" {}'.format(cn.lower(), ct)
-                            for cn, ct in table.items())
-        stmt = "create table if not exists {} ({}) with " \
-               "(number_of_replicas = '2-all', column_policy = 'dynamic')".format(table_name, columns)
-        self.cursor.execute(stmt)
+        cached_metadata = CACHE.get(table_name+'-create-stmt')
+        if not cached_metadata:
+            columns = ', '.join('"{}" {}'.format(cn.lower(), ct)
+                                for cn, ct in table.items())
+            stmt = "create table if not exists {} ({}) with " \
+                   "(number_of_replicas = '2-all', column_policy = 'dynamic')".format(table_name, columns)
+            self.cursor.execute(stmt)
+            CACHE.add(table_name+'-create-stmt', stmt)
 
     def _should_insert_original_entities(self, insert_error: Exception) -> bool:
         return isinstance(insert_error, exceptions.ProgrammingError)

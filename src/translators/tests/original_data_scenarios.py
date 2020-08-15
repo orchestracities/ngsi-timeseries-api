@@ -11,6 +11,7 @@ from translators.sql_translator import ORIGINAL_ENTITY_COL, ENTITY_ID_COL, \
     TYPE_PREFIX, TENANT_PREFIX
 from utils.jsondict import maybe_value
 
+from translators.table_cache import TableCacheManager
 
 ENTITY_TYPE = 'device'
 TranslatorFactory = Callable[[], Generator[SQLTranslator, Any, None]]
@@ -21,6 +22,13 @@ TranslatorFactory = Callable[[], Generator[SQLTranslator, Any, None]]
 # test suite.
 #
 
+@pytest.fixture(autouse=True)
+def setup_and_clean():
+
+    yield
+
+    cache = TableCacheManager()
+    cache.clear()
 
 def gen_tenant_id() -> str:
     tid = random.randint(1, 2**32)

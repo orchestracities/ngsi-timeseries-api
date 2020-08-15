@@ -10,6 +10,7 @@ from utils.maybe import maybe_map
 import logging
 from geocoding.slf import SlfQuery
 import dateutil.parser
+from translators.table_cache import TableCacheManager
 from typing import Any, List, Optional
 from uuid import uuid4
 
@@ -61,6 +62,8 @@ NGSI_TO_SQL = {
     NGSI_STRUCTURED_VALUE: 'text',
     TIME_INDEX: 'timestamp WITH TIME ZONE NOT NULL'
 }
+
+CACHE = TableCacheManager()
 
 
 def current_timex() -> str:
@@ -395,23 +398,30 @@ class SQLTranslator(base_translator.BaseTranslator):
             The dict mapping the matedata of each column. See original_attrs.
         """
 
-        self._create_metadata_table()
+        cached = CACHE.check("--meta--")
+        if not cached:
+            self._create_metadata_table()
+            CACHE.add("--meta--")
 
-        if self.cursor.rowcount:
+        if not cached and self.cursor.rowcount:
             # Table just created!
             persisted_metadata = {}
         else:
             # Bring translation table!
-            stmt = "select entity_attrs from {} where table_name = ?"
-            self.cursor.execute(stmt.format(METADATA_TABLE_NAME), [table_name])
-
-            # By design, one entry per table_name
-            res = self.cursor.fetchall()
-            persisted_metadata = res[0][0] if res else {}
+            cached_metadata = CACHE.get(table_name)
+            if not cached_metadata:
+                stmt = "select entity_attrs from {} where table_name = ?"
+                self.cursor.execute(stmt.format(METADATA_TABLE_NAME), [table_name])
+                # By design, one entry per table_name
+                res = self.cursor.fetchall()
+                persisted_metadata = res[0][0] if res else {}
+            else:
+                persisted_metadata = cached_metadata
 
         if metadata.keys() - persisted_metadata.keys():
             persisted_metadata.update(metadata)
             self._store_medatata(table_name, persisted_metadata)
+            CACHE.add(table_name, persisted_metadata)
         # TODO: concurrency.
         # This implementation paves
         # the way to lost updates...
@@ -1022,6 +1032,9 @@ class SQLTranslator(base_translator.BaseTranslator):
             self.cursor.execute(op, [table_name])
         except Exception as e:
             logging.error("{}".format(e))
+
+        CACHE.pop(table_name)
+        CACHE.pop(table_name + '-create-stmt')
 
         if self.cursor.rowcount == 0 and table_name.startswith('"'):
             # See GH #173

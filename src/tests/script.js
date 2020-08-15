@@ -4,10 +4,10 @@ import { check, sleep } from 'k6';
 export default function() {
   var url = 'http://192.0.0.1:8668/v2/notify';
   const before = new Date().getTime();
-  const T = 3; // time needed to complete a VU iteration
+  const T = 30; // time needed to complete a VU iteration
 
 
-  for (var i = 0; i < 10; i++){
+  for (var i = 0; i < 100; i++){
       var data = {
                 "id": "Room:1",
                 "type": "Room",

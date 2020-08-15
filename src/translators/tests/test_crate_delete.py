@@ -1,7 +1,16 @@
 from datetime import datetime
 from conftest import crate_translator as translator
 from utils.common import create_random_entities, TIME_INDEX_NAME
+from translators.table_cache import TableCacheManager
 
+
+@pytest.fixture(autouse=True)
+def setup_and_clean():
+
+    yield
+
+    cache = TableCacheManager()
+    cache.clear()
 
 def test_delete_entity_defaults(translator):
     num_types = 2

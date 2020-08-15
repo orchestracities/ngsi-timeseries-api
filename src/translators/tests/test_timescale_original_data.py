@@ -4,6 +4,7 @@ from translators.timescale import postgres_translator_instance, \
     PostgresConnectionData
 
 from .original_data_scenarios import *
+from translators.table_cache import TableCacheManager
 
 
 @pytest.fixture(scope='module')
@@ -22,6 +23,9 @@ def with_timescale():
 
     pg_cursor.close()
     pg_conn.close()
+
+    cache = TableCacheManager()
+    cache.clear()
 
 
 def test_changed_attr_type_scenario(with_timescale):

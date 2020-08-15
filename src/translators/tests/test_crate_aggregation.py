@@ -1,7 +1,16 @@
 from conftest import crate_translator as translator
 from utils.common import create_random_entities, TIME_INDEX_NAME, add_attr
 import datetime
+from translators.table_cache import TableCacheManager
 
+
+@pytest.fixture(autouse=True)
+def setup_and_clean():
+
+    yield
+
+    cache = TableCacheManager()
+    cache.clear()
 
 def test_aggr_per_second(translator):
     entities = create_random_entities(num_ids_per_type=2, num_updates=17)

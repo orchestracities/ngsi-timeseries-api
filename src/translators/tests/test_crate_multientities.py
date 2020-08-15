@@ -10,7 +10,16 @@ specified and unique.
 """
 from conftest import crate_translator as translator
 from utils.common import create_random_entities
+from translators.table_cache import TableCacheManager
 
+
+@pytest.fixture(autouse=True)
+def setup_and_clean():
+
+    yield
+
+    cache = TableCacheManager()
+    cache.clear()
 
 def test_query_multiple_ids(translator):
     # First insert some data
