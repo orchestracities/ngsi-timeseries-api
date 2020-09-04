@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from utils.hosts import LOCAL
 
 
@@ -10,3 +11,4 @@ if __name__ == '__main__':
                 # validate_responses=True, strict_validation=True
                 )
     app.run(host=LOCAL, port=8668)
+    application = app.app
