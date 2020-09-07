@@ -10,11 +10,12 @@ RUN cd /src/ngsi-timeseries-api && { pipenv lock -r > /requirements.txt; }
 RUN pip install -r /requirements.txt
 
 FROM base
-RUN apk --no-cache add curl supervisor
+RUN apk --no-cache add curl
 COPY --from=builder /usr/local /usr/local
 COPY . /src/ngsi-timeseries-api/
-COPY conf/supervisord.conf /etc/supervisord.conf
+WORKDIR /src/ngsi-timeseries-api/src
+ENV PYTHONPATH=$PWD:$PYTHONPATH
 
 EXPOSE 8668
 
-CMD ["supervisord", "-c", "/etc/supervisord.conf"]
+CMD ["gunicorn", "-b", "0.0.0.0:8668", "uwsgi", "--log-level", "debug", "--worker-class", "gevent", "--worker-connections", "10000", "--config", "gunicorn.conf.py"]
