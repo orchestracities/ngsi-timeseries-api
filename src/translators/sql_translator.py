@@ -239,6 +239,7 @@ class SQLTranslator(base_translator.BaseTranslator):
 
                 col = self._ea2cn(attr)
                 original_attrs[col] = (attr, attr_t)
+                entity_id = e.get('id')
 
                 if attr_t not in self.NGSI_TO_SQL:
                     # if attribute is complex assume it as an NGSI StructuredValue
@@ -249,11 +250,13 @@ class SQLTranslator(base_translator.BaseTranslator):
                     else:
                         # TODO fallback type should be defined by actual JSON type
                         supported_types = ', '.join(self.NGSI_TO_SQL.keys())
-                        msg = ("'{}' is not a supported NGSI type. "
+                        msg = ("'{}' is not a supported NGSI type"
+                               " for Attribute:  '{}' "
+                               " and id : '{}'. "
                                "Please use any of the following: {}. "
                                "Falling back to {}.")
                         self.logger.warning(msg.format(
-                            attr_t, supported_types, NGSI_TEXT))
+                            attr_t, attr, entity_id,supported_types, NGSI_TEXT))
 
                         table[col] = self.NGSI_TO_SQL[NGSI_TEXT]
 

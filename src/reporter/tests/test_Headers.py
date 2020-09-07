@@ -23,7 +23,7 @@ def test_for_valid_headers(notification):
                       headers=HEADERS_VALID)
     time.sleep(1)
     assert res_post.status_code == 200
-    assert res_post.json() == 'Notification successfully processed'
+    assert res_post.json().startswith('Notification successfully processed')
 
     get_url = "{}/entities/Room0".format(QL_URL)
     res_get = requests.get(get_url, headers=HEADERS_VALID)
@@ -51,7 +51,7 @@ def test_for_invalid_headers(notification):
                       headers=HEADERS_VALID)
 
     assert res_post.status_code == 200
-    assert res_post.json() == 'Notification successfully processed'
+    assert res_post.json().startswith('Notification successfully processed')
 
     get_url = "{}/entities/Room0".format(QL_URL)
     res_get = requests.get(get_url, headers=HEADERS_INVALID)
