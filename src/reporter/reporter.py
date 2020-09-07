@@ -189,9 +189,9 @@ def notify():
         with translator_for(fiware_s) as trans:
             trans.insert(payload, fiware_s, fiware_sp)
     except:
-        msg = "Notification not processed or not updated"
+        msg = "Notification not processed or not updated for payload: %s" % (payload)
         log().error(msg)
-        return msg, 50
+        return msg, 500
     msg = "Notification successfully processed for : 'tenant' %s, 'fiwareServicePath' %s, 'entity_id' %s" % (fiware_s, fiware_sp, entity_id)
     log().info(msg)
     return msg
