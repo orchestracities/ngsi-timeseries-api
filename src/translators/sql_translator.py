@@ -256,7 +256,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                                "Please use any of the following: {}. "
                                "Falling back to {}.")
                         self.logger.warning(msg.format(
-                            attr_t, attr, entity_id,supported_types, NGSI_TEXT))
+                            attr_t, attr, entity_id, supported_types, NGSI_TEXT))
 
                         table[col] = self.NGSI_TO_SQL[NGSI_TEXT]
 
