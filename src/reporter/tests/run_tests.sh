@@ -3,7 +3,7 @@
 docker build -t smartsdk/quantumleap ../../../
 
 docker-compose up -d
-sleep 12
+sleep 20
 
 cd ../../../
 pytest src/reporter/ --cov-report= --cov-config=.coveragerc --cov-append --cov=src/
