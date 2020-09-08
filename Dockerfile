@@ -1,8 +1,8 @@
 FROM python:3.8.3-alpine3.12 as base
 FROM base as builder
-RUN apk --no-cache --update-cache add gcc python3 python3-dev py-pip build-base wget libffi-dev
+RUN apk --no-cache --update-cache add gcc python3 python3-dev py-pip build-base wget
 RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
-RUN pip install pipenv gunicorn gevent
+RUN pip install pipenv
 RUN mkdir -p /src/ngsi-timeseries-api
 COPY Pipfile /src/ngsi-timeseries-api/Pipfile
 COPY Pipfile.lock /src/ngsi-timeseries-api/Pipfile.lock
@@ -18,4 +18,4 @@ ENV PYTHONPATH=$PWD:$PYTHONPATH
 
 EXPOSE 8668
 
-CMD ["gunicorn", "-b", "0.0.0.0:8668", "uwsgi", "--log-level", "debug", "--worker-class", "gevent", "--worker-connections", "10000", "--config", "gunicorn.conf.py"]
+CMD ["gunicorn", "server.wsgi", "--config", "server/gconfig.py"]
