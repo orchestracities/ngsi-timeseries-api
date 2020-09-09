@@ -17,5 +17,25 @@ WORKDIR /src/ngsi-timeseries-api/src
 ENV PYTHONPATH=$PWD:$PYTHONPATH
 
 EXPOSE 8668
-
-CMD ["gunicorn", "server.wsgi", "--config", "server/gconfig.py"]
+ENTRYPOINT ["python", "app.py"]
+# NOTE.
+# The above is basically the same as running:
+#
+#     gunicorn server.wsgi --config server/gconfig.py
+#
+# You can also pass any valid Gunicorn option as container command arguments
+# to add or override options in server/gconfig.py---see `server.grunner` for
+# the details.
+# In particular, a convenient way to reconfigure Gunicorn is to mount a config
+# file on the container and then run the container with the following option
+#
+#     --config /path/to/where/you/mounted/your/gunicorn.conf.py
+#
+# as in the below example
+#
+#     $ echo 'workers = 2' > gunicorn.conf.py
+#     $ docker run -it --rm \
+#                  -p 8668:8668 \
+#                  -v $(pwd)/gunicorn.conf.py:/gunicorn.conf.py
+#                  smartsdk/quantumleap --config /gunicorn.conf.py
+#

@@ -1,7 +1,15 @@
-import sys
+import server.wsgi as flask
+import server.grunner as gunicorn
+from utils.cfgreader import EnvReader, BoolVar
 
-from server.wsgi import run
+
+def use_flask() -> bool:
+    env_var = BoolVar('USE_FLASK', False)
+    return EnvReader().safe_read(env_var)
 
 
 if __name__ == '__main__':
-    sys.exit(run())
+    if use_flask():  # dev mode, run the WSGI app in Flask dev server
+        flask.run()
+    else:            # prod mode, run the WSGI app in Gunicorn
+        gunicorn.run()
