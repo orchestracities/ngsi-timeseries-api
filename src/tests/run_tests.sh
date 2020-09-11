@@ -24,7 +24,7 @@ docker run -ti --rm --network tests_default \
 # Restart QL on development version and CRATE on current version
 docker-compose stop quantumleap
 CRATE_VERSION=${CRATE_VERSION} QL_IMAGE=smartsdk/quantumleap docker-compose up -d
-sleep 30
+sleep 40
 
 # Backwards Compatibility Test
 cd ../../

@@ -1,12 +1,15 @@
-from utils.hosts import LOCAL
+import server.wsgi as flask
+import server.grunner as gunicorn
+from utils.cfgreader import EnvReader, BoolVar
+
+
+def use_flask() -> bool:
+    env_var = BoolVar('USE_FLASK', False)
+    return EnvReader().safe_read(env_var)
 
 
 if __name__ == '__main__':
-    import connexion
-    app = connexion.FlaskApp(__name__, specification_dir='../specification/')
-    app.add_api('quantumleap.yml',
-                arguments={'title': 'QuantumLeap V2 API'},
-                pythonic_params=True,
-                # validate_responses=True, strict_validation=True
-                )
-    app.run(host=LOCAL, port=8668)
+    if use_flask():  # dev mode, run the WSGI app in Flask dev server
+        flask.run()
+    else:            # prod mode, run the WSGI app in Gunicorn
+        gunicorn.run()
