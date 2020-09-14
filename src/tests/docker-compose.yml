@@ -21,7 +21,9 @@ services:
       - "27017:27017"
 
   quantumleap:
-    image: ${QL_IMAGE:-smartsdk/quantumleap}
+    image: ${QL_IMAGE:-smartsdk/quantumleap:latest}
+    sysctls:
+      net.core.somaxconn: 4096
     ports:
       - "8668:8668"
     depends_on:
@@ -33,7 +35,7 @@ services:
       - USE_GEOCODING=True
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - LOGLEVEL=DEBUG
+      - LOGLEVEL=ERROR
 
   crate:
     image: crate:${CRATE_VERSION:-4.1.4}

@@ -94,6 +94,8 @@ def test_entity_add_street_line(air_quality_observed):
     assert len(geo['coordinates']) > 1
 
 
+# TODO: see #358
+@pytest.mark.skip(reason="see #358")
 def test_entity_add_city_shape(air_quality_observed):
     air_quality_observed.pop('location')
 
