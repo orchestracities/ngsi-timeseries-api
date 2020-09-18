@@ -183,16 +183,16 @@ def notify():
             e_new = _filter_no_type_no_value_entities(e)
             res_entity.append(e_new)
     payload = res_entity
-    
+    entity_id = [i["id"] for i in payload]
     # Send valid entities to translator
     try:
         with translator_for(fiware_s) as trans:
             trans.insert(payload, fiware_s, fiware_sp)
     except:
-        msg = "Notification not processed or not updated"
+        msg = "Notification not processed or not updated for payload: %s" % (payload)
         log().error(msg)
         return msg, 500
-    msg = 'Notification successfully processed'
+    msg = "Notification successfully processed for : 'tenant' %s, 'fiwareServicePath' %s, 'entity_id' %s" % (fiware_s, fiware_sp, entity_id)
     log().info(msg)
     return msg
 

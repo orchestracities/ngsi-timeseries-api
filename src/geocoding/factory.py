@@ -21,7 +21,7 @@ class GeoCodingEnvReader:
     """
 
     def __init__(self):
-        self.env = EnvReader(log=logging.getLogger(__name__).info)
+        self.env = EnvReader(log=logging.getLogger(__name__).debug)
 
     def use_geocoding(self) -> bool:
         return self.env.read(BoolVar('USE_GEOCODING', False))
@@ -62,9 +62,9 @@ def get_geo_cache() -> MaybeGeoCache:
     """
     env = GeoCodingEnvReader()
     if is_geo_coding_available():
-        log().info("Geo Cache env variables set, building a cache.")
+        log().debug("Geo Cache env variables set, building a cache.")
 
         return GeoCodingCache(env.redis_host(), env.redis_port())
 
-    log().info("Geo Cache env variables indicate cache should not be used.")
+    log().debug("Geo Cache env variables indicate cache should not be used.")
     return None

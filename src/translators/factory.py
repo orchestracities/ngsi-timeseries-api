@@ -19,7 +19,7 @@ def log():
 
 def lookup_backend(fiware_service: str) -> MaybeString:
     cfg_reader = YamlReader(log=log().debug)
-    env_reader = EnvReader(log=log().info)
+    env_reader = EnvReader(log=log().debug)
 
     config = cfg_reader.from_env_file(QL_CONFIG_ENV_VAR, defaults={})
     tenant_backend = maybe_string_match(config, 'tenants', fiware_service,
@@ -45,6 +45,6 @@ def translator_for(fiware_service: str):
         translator = CrateTranslatorInstance()
         selected = CRATE_BACKEND
 
-    log().info(
+    log().debug(
         f"Backend selected for tenant '{fiware_service}' is: {selected}")
     return translator

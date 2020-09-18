@@ -76,9 +76,8 @@ def test_valid_notification(notification, clean_mongo, clean_crate):
     r = requests.post('{}'.format(notify_url),
                       data=json.dumps(notification),
                       headers=HEADERS_PUT)
-
     assert r.status_code == 200
-    assert r.json() == 'Notification successfully processed'
+    assert r.json().startswith('Notification successfully processed')
 
 
 def test_valid_no_modified(notification, clean_mongo, clean_crate):
@@ -87,7 +86,7 @@ def test_valid_no_modified(notification, clean_mongo, clean_crate):
                       data=json.dumps(notification),
                       headers=HEADERS_PUT)
     assert r.status_code == 200
-    assert r.json() == 'Notification successfully processed'
+    assert r.json().startswith('Notification successfully processed')
 
 def do_integration(entity, notify_url, orion_client, crate_translator):
     entity_id = entity['id']
@@ -220,7 +219,7 @@ def test_multiple_data_elements(notification, sameEntityWithDifferentAttrs, clea
     r = requests.post('{}'.format(notify_url), data=json.dumps(notification),
                       headers=HEADERS_PUT)
     assert r.status_code == 200
-    assert r.json() == 'Notification successfully processed'
+    assert r.json().startswith('Notification successfully processed')
 
 
 def test_time_index(notification, clean_mongo, crate_translator):
@@ -236,7 +235,7 @@ def test_time_index(notification, clean_mongo, crate_translator):
                       data=json.dumps(notification),
                       headers=HEADERS_PUT)
     assert r.status_code == 200
-    assert r.json() == 'Notification successfully processed'
+    assert r.json().startswith('Notification successfully processed')
 
     time.sleep(1)
     entity_type = notification['data'][0]['type']
@@ -261,7 +260,7 @@ def test_time_index(notification, clean_mongo, crate_translator):
                       data=json.dumps(notification),
                       headers=HEADERS_PUT)
     assert r.status_code == 200
-    assert r.json() == 'Notification successfully processed'
+    assert r.json().startswith('Notification successfully processed')
 
     time.sleep(1)
     crate_translator._refresh([entity_type])
@@ -278,7 +277,7 @@ def test_time_index(notification, clean_mongo, crate_translator):
                       data=json.dumps(notification),
                       headers=HEADERS_PUT)
     assert r.status_code == 200
-    assert r.json() == 'Notification successfully processed'
+    assert r.json().startswith('Notification successfully processed')
 
     time.sleep(1)
     crate_translator._refresh([entity_type])
