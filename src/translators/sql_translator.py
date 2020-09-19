@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from geocoding.slf.geotypes import *
 from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption, \
-    NGSIUsageError, InvalidParameterValue
+    NGSIUsageError, InvalidParameterValue, InvalidHeaderValue
 from translators import base_translator
 from translators.config import SQLTranslatorConfig
 from utils.common import iter_entity_attrs
@@ -170,16 +170,43 @@ class SQLTranslator(base_translator.BaseTranslator):
             msg = "Entities expected to be of type list, but got {}"
             raise TypeError(msg.format(type(entities)))
 
-        entities_by_type = {}
-        for e in entities:
-            entities_by_type.setdefault(e['type'], []).append(e)
+        service_paths = []
+        if fiware_servicepath:
+            clean_fiware_servicepath = fiware_servicepath.replace(" ", "")
+            service_paths = clean_fiware_servicepath.split(",")
+        else:
+            service_paths = [fiware_servicepath]
+        if len(service_paths) == 1:
+            entities_by_type = {}
+            for e in entities:
+                entities_by_type.setdefault(e['type'], []).append(e)
 
-        res = None
-        for et in entities_by_type.keys():
-            res = self._insert_entities_of_type(et,
-                                                entities_by_type[et],
-                                                fiware_service,
-                                                fiware_servicepath)
+            res = None
+            for et in entities_by_type.keys():
+                res = self._insert_entities_of_type(et,
+                                                    entities_by_type[et],
+                                                    fiware_service,
+                                                    service_paths[0])
+        elif len(service_paths) == len(entities):
+            entities_by_service_path = {}
+            for idx, path in enumerate(service_paths):
+                entities_by_service_path.setdefault(path, []).append(entities[idx])
+            res = None
+            for path in entities_by_service_path.keys():
+                entities_by_type = {}
+                for e in entities_by_service_path[path]:
+                    entities_by_type.setdefault(e['type'], []).append(e)
+
+                res = None
+                for et in entities_by_type.keys():
+                    res = self._insert_entities_of_type(et,
+                                                        entities_by_type[et],
+                                                        fiware_service,
+                                                        path)
+        else:
+            msg = 'Multiple servicePath are allowed only if their size is match the size of entities'
+            raise InvalidHeaderValue('Fiware-ServicePath', fiware_servicepath, msg)
+
         return res
 
     def _insert_entities_of_type(self,

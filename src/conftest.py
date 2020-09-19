@@ -5,7 +5,6 @@ import pymongo as pm
 import pytest
 import requests
 
-
 QL_HOST = os.environ.get('QL_HOST', 'quantumleap')
 QL_PORT = 8668
 QL_URL = "http://{}:{}/v2".format(QL_HOST, QL_PORT)
@@ -41,20 +40,34 @@ def clean_mongo():
     do_clean_mongo()
 
 
+def headers(service, service_path, content_type=True):
+    h = {}
+    if content_type:
+        h['Content-Type'] = 'application/json'
+    if service:
+        h['Fiware-Service'] = service
+    if service_path:
+        h['Fiware-ServicePath'] = service_path
+
+    return h
+
+
+# TODO we have fully fledged client library, why not using that?
 class OrionClient(object):
+
     def __init__(self, host, port):
         self.url = 'http://{}:{}'.format(host, port)
 
-    def subscribe(self, subscription):
+    def subscribe(self, subscription, service=None, service_path=None):
         r = requests.post('{}/v2/subscriptions'.format(self.url),
                           data=json.dumps(subscription),
-                          headers={'Content-Type': 'application/json'})
+                          headers=headers(service, service_path))
         return r
 
-    def insert(self, entity):
+    def insert(self, entity, service=None, service_path=None):
         r = requests.post('{}/v2/entities'.format(self.url),
                           data=json.dumps(entity),
-                          headers={'Content-Type': 'application/json'})
+                          headers=headers(service, service_path))
         return r
 
 
@@ -133,6 +146,7 @@ def crate_translator(clean_crate):
     with Translator(host=CRATE_HOST, port=CRATE_PORT) as trans:
         yield trans
 
+
 @pytest.fixture
 def entity():
     entity = {
@@ -150,6 +164,7 @@ def entity():
         }
     }
     return entity
+
 
 @pytest.fixture
 def sameEntityWithDifferentAttrs():
@@ -198,6 +213,71 @@ def sameEntityWithDifferentAttrs():
         }
     ]
     return entities
+
+
+@pytest.fixture
+def diffEntityWithDifferentAttrs():
+    """
+    Two updates for the same entity with different attributes.
+    The first update has temperature and pressure but the second update has only temperature.
+    """
+    entities = [
+        {
+            'id': 'Room1',
+            'type': 'Room',
+            'temperature': {
+                'value': 24.2,
+                'type': 'Number',
+                'metadata': {
+                    'dateModified': {
+                        'type': 'DateTime',
+                        'value': '2019-05-09T15:28:30.000Z'
+                    }
+                }
+            },
+            'pressure': {
+                'value': 720,
+                'type': 'Number',
+                'metadata': {
+                    'dateModified': {
+                        'type': 'DateTime',
+                        'value': '2019-05-09T15:28:30.000Z'
+                    }
+                }
+            }
+        },
+        {
+            'id': 'Room2',
+            'type': 'Room',
+            'temperature': {
+                'value': 25.2,
+                'type': 'Number',
+                'metadata': {
+                    'dateModified': {
+                        'type': 'DateTime',
+                        'value': '2019-05-09T15:28:30.000Z'
+                    }
+                }
+            }
+        }
+        ,
+        {
+            'id': 'Room3',
+            'type': 'Room',
+            'temperature': {
+                'value': 25.2,
+                'type': 'Number',
+                'metadata': {
+                    'dateModified': {
+                        'type': 'DateTime',
+                        'value': '2019-05-09T15:28:30.000Z'
+                    }
+                }
+            }
+        }
+    ]
+    return entities
+
 
 @pytest.fixture
 def air_quality_observed():
