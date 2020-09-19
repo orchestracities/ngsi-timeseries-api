@@ -8,6 +8,7 @@ class QLError(Exception):
         self.message = message
         super().__init__(self.message)
 
+
 class UnsupportedOption(QLError):
     """
     Used to flag usage of an unsupported/invalid option in any of the methods.
@@ -38,6 +39,7 @@ class InvalidParameterValue(QLError):
     def __init__(self, par_value='', par_name=''):
         msg = "The parameter value '{}' for parameter {} is not valid."
         QLError.__init__(self, msg.format(par_value, par_name))
+
 
 class InvalidHeaderValue(QLError):
     """

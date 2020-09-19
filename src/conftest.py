@@ -259,8 +259,7 @@ def diffEntityWithDifferentAttrs():
                     }
                 }
             }
-        }
-        ,
+        },
         {
             'id': 'Room3',
             'type': 'Room',

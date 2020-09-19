@@ -259,7 +259,7 @@ def test_integration_multiple_entities(diffEntityWithDifferentAttrs, orion_clien
 
     for idx, e in enumerate(diffEntityWithDifferentAttrs):
         orion_client.insert(e, "service", "/Root/{}".format(idx))
-    time.sleep(2 * SLEEP_TIME)  # Give time for notification to be processed.
+    time.sleep(4 * SLEEP_TIME)  # Give time for notification to be processed.
 
     entities_url = "{}/entities".format(QL_URL)
 

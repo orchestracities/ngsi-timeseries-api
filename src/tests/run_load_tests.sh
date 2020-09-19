@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-docker build --cache-from smartsdk/quantumleap -t smartsdk/quantumleap ../../
-
 docker-compose up -d
 docker-compose stop orion
 docker-compose stop mongo
@@ -15,4 +13,4 @@ docker run -i --rm loadimpact/k6 run --vus 100 --duration 120s - < notify-load-t
 
 sleep 10
 
-docker-compose down
+docker-compose down -v

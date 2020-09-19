@@ -50,7 +50,9 @@ def log():
     r = EnvReader(log=logging.getLogger(__name__).info)
     level = r.read(StrVar('LOGLEVEL', 'INFO')).upper()
 
-    logging.basicConfig(level=level, format='%(asctime)s.%(msecs)03d %(levelname)s:%(name)s:%(message)s', datefmt='%Y-%m-%d %I:%M:%S')
+    logging.basicConfig(level=level,
+                        format='%(asctime)s.%(msecs)03d %(levelname)s:%(name)s:%(message)s',
+                        datefmt='%Y-%m-%d %I:%M:%S')
     return logging.getLogger(__name__)
 
 
@@ -108,7 +110,7 @@ def _validate_payload(payload):
             payload[attr].update({'value': None})
             log().warning(
                 'An entity update is missing value for attribute {}'.format(attr))
-  
+
 
 def _filter_empty_entities(payload):
     log().debug('Received payload: {}'.format(payload))
@@ -125,7 +127,7 @@ def _filter_empty_entities(payload):
         return payload
     else:
         return None
- 
+
 
 def _filter_no_type_no_value_entities(payload):
     attrs = list(iter_entity_attrs(payload))
@@ -141,7 +143,6 @@ def _filter_no_type_no_value_entities(payload):
 
 
 def notify():
-
     if request.json is None:
         return 'Discarding notification due to lack of request body. ' \
                'Lost in a redirect maybe?', 400
@@ -151,7 +152,7 @@ def notify():
                'content.', 400
 
     payload = request.json['data']
-    
+
     # preprocess and validate each entity update
     for entity in payload:
         # Validate entity update
@@ -193,13 +194,18 @@ def notify():
         with translator_for(fiware_s) as trans:
             trans.insert(payload, fiware_s, fiware_sp)
     except Exception as e:
-        msg = "Notification not processed or not updated for payload: %s. %s" % (payload, str(e))
+        msg = "Notification not processed or not updated for payload: %s. " \
+              "%s" % (payload, str(e))
         log().error(msg)
         error_code = 500
-        if e.__class__ == InvalidHeaderValue or e.__class__ == InvalidParameterValue or e.__class__ == NGSIUsageError:
+        if e.__class__ == InvalidHeaderValue or \
+                e.__class__ == InvalidParameterValue or \
+                e.__class__ == NGSIUsageError:
             error_code = 400
         return msg, error_code
-    msg = "Notification successfully processed for : 'tenant' %s, 'fiwareServicePath' %s, 'entity_id' %s" % (fiware_s, fiware_sp, entity_id)
+    msg = "Notification successfully processed for : 'tenant' %s, " \
+          "'fiwareServicePath' %s, " \
+          "'entity_id' %s" % (fiware_s, fiware_sp, entity_id)
     log().info(msg)
     return msg
 
@@ -285,7 +291,7 @@ def subscribe(orion_url,
         msg = {
             "error": "Bad Request",
             "description": "Orion is not reachable by QuantumLeap at {}"
-            .format(orion_url)
+                .format(orion_url)
         }
         return msg, 400
 
