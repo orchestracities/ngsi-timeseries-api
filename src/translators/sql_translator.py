@@ -206,7 +206,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                                                         path)
         else:
             msg = 'Multiple servicePath are allowed only ' \
-                  'if their size is match the size of entities'
+                  'if their size match the size of entities'
             raise InvalidHeaderValue('Fiware-ServicePath',
                                      fiware_servicepath, msg)
 
