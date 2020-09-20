@@ -267,7 +267,7 @@ def test_integration_multiple_entities(diffEntityWithDifferentAttrs, orion_clien
     assert r.status_code == 200
     entities = r.json()
     assert len(entities) == 3
-    delete_entity_type("service", diffEntityWithDifferentAttrs[0]['type'])
+    delete_entity_type("service", diffEntityWithDifferentAttrs[0]['type'], "/Root")
 
 @pytest.mark.skip(reason="See issue #105")
 @pytest.mark.parametrize("service", services)
@@ -327,7 +327,7 @@ def test_multiple_data_elements(service, notification, diffEntityWithDifferentAt
     r = requests.get(entities_url, params=None, headers=query_header(service))
     entities = r.json()
     assert len(entities) == 3
-    delete_entity_type(None, diffEntityWithDifferentAttrs[0]['type'])
+    delete_entity_type(service, diffEntityWithDifferentAttrs[0]['type'])
 
 
 @pytest.mark.parametrize("service", services)
@@ -376,7 +376,7 @@ def test_multiple_data_elements_different_servicepath(service, notification, dif
     r = requests.get(entities_url, params=None, headers=query_headers)
     entities = r.json()
     assert len(entities) == 3
-    delete_entity_type(service, diffEntityWithDifferentAttrs[0]['type'])
+    delete_entity_type(service, diffEntityWithDifferentAttrs[0]['type'], '/Test')
 
 
 @pytest.mark.parametrize("service", services)
