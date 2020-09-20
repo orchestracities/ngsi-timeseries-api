@@ -1028,19 +1028,19 @@ class SQLTranslator(base_translator.BaseTranslator):
         table_name = self._et2tn(entity_type, fiware_service)
 
         # Delete only requested range
-        if from_date or to_date or fiware_servicepath:
-            entity_id = None
-            where_clause = self._get_where_clause(entity_id,
-                                                  from_date,
-                                                  to_date,
-                                                  fiware_servicepath)
-            op = "delete from {} {}".format(table_name, where_clause)
-            try:
-                self.cursor.execute(op)
-            except Exception as e:
-                logging.error("{}".format(e))
-                return 0
-            return self.cursor.rowcount
+        entity_id = None
+        where_clause = self._get_where_clause(entity_id,
+                                              from_date,
+                                              to_date,
+                                              fiware_servicepath)
+        op = "delete from {} {}".format(table_name, where_clause)
+        try:
+            self.cursor.execute(op)
+        except Exception as e:
+            logging.error("{}".format(e))
+            return 0
+
+        deleted_rows = self.cursor.rowcount
 
         # Drop whole table
         try:
@@ -1048,7 +1048,11 @@ class SQLTranslator(base_translator.BaseTranslator):
         except Exception as e:
             logging.error("{}".format(e))
             return 0
-        count = self.cursor.fetchone()[0]
+        #TODO why the result still keeps into account the deleted rows???
+        count = self.cursor.fetchall()[0][0] - deleted_rows
+
+        if count != 0:
+            return deleted_rows
 
         op = "drop table {}".format(table_name)
         try:
@@ -1072,7 +1076,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             except Exception as e:
                 logging.error("{}".format(e))
 
-        return count
+        return deleted_rows
 
     def _get_entity_type(self, entity_id, fiware_service):
         """

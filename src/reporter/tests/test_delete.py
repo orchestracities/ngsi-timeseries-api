@@ -10,7 +10,7 @@ import time
 notify_url = "{}/notify".format(QL_URL)
 
 
-def insert_test_data(service, entity_id=None):
+def insert_test_data(service, service_path=None, entity_id=None):
     # 3 entity types, 2 entities for each, 10 updates for each entity.
     for t in ("AirQualityObserved", "Room", "TrafficFlowObserved"):
         for e in range(2):
@@ -22,11 +22,14 @@ def insert_test_data(service, entity_id=None):
                     'Content-Type': 'application/json',
                     'Fiware-Service': service
                 }
+                if service_path:
+                    h['Fiware-ServicePath'] = service_path
                 r = requests.post(notify_url,
                                   data=data,
                                   headers=h)
                 assert r.status_code == 200, r.text
     time.sleep(1)
+
 
 @pytest.mark.parametrize("service", [
     "t1", "t2"
@@ -44,7 +47,7 @@ def test_delete_entity(service):
     h = {
         'Fiware-Service': service
     }
-    url = '{}/entities/{}'.format(QL_URL, entity_type+'0')
+    url = '{}/entities/{}'.format(QL_URL, entity_type + '0')
 
     # Values are there
     r = requests.get(url, params=params, headers=h)
@@ -61,7 +64,7 @@ def test_delete_entity(service):
     assert r.status_code == 404, r.text
 
     # But not for other entities of same type
-    url = '{}/entities/{}'.format(QL_URL, entity_type+'1')
+    url = '{}/entities/{}'.format(QL_URL, entity_type + '1')
     r = requests.get(url, params=params, headers=h)
     assert r.status_code == 200, r.text
     assert r.text != ''
@@ -124,7 +127,7 @@ def test_not_found(service):
     h = {
         'Fiware-Service': service
     }
-    url = '{}/entities/{}'.format(QL_URL, entity_type+'0')
+    url = '{}/entities/{}'.format(QL_URL, entity_type + '0')
 
     r = requests.delete(url, params=params, headers=h)
     assert r.status_code == 404, r.text
@@ -159,6 +162,7 @@ def test_no_type_not_unique(service):
     assert r.status_code == 204, r.text
     for t in ("AirQualityObserved", "Room", "TrafficFlowObserved"):
         delete_test_data(service, [t])
+
 
 @pytest.mark.parametrize("service", [
     "t1", "t2"
@@ -217,3 +221,143 @@ def test_delete_no_type_with_multitenancy(service):
     delete_test_data(service, ["Car"])
     delete_test_data('USA', ["Car"])
     delete_test_data('EU', ["Car"])
+
+
+def test_delete_347():
+    """
+    Test to replicate issue #347.
+    """
+    entity_type = "deletetestDuno"
+    service = 'bbbbb'
+    service_path = '/'
+    params = {
+        'type': entity_type,
+    }
+    h = {
+        'Fiware-Service': service,
+        'Fiware-ServicePath': service_path
+    }
+
+    data = {
+        'subscriptionId': 'ID_FROM_SUB',
+        'data': [{
+            'id': 'un3',
+            'type': 'deletetestDuno',
+            'batteryVoltage': {
+                'type': 'Text',
+                'value': 'ilariso'
+            }
+        }]
+    }
+
+    hn = {
+        'Content-Type': 'application/json',
+        'Fiware-Service': service,
+        'Fiware-ServicePath': service_path
+    }
+    r = requests.post(notify_url,
+                      data=json.dumps(data),
+                      headers=hn)
+    assert r.status_code == 200, r.text
+    time.sleep(1)
+    # check that value is in the database
+    url = '{}/entities/{}'.format(QL_URL, 'un3')
+    r = requests.get(url, params=params, headers=h)
+    assert r.status_code == 200, r.text
+    assert r.text != ''
+
+    # Delete call
+    time.sleep(1)
+    url = '{}/types/{}'.format(QL_URL, entity_type)
+    r = requests.delete(url, params=params, headers=h)
+    assert r.status_code == 204, r.text
+
+    # Values are gone
+    time.sleep(1)
+    url = '{}/entities/{}'.format(QL_URL, '{}{}'.format(entity_type, 'un3'))
+    r = requests.get(url, params=params, headers=h)
+    assert r.status_code == 404, r.text
+
+def test_delete_different_servicepaths():
+    """
+    Selective delete by service Path.
+    """
+    entity_type = "deletetestDuno"
+    service = 'bbbbb'
+    service_path = '/a'
+    params = {
+        'type': entity_type,
+    }
+    h = {
+        'Fiware-Service': service,
+        'Fiware-ServicePath': service_path
+    }
+
+    data = {
+        'subscriptionId': 'ID_FROM_SUB',
+        'data': [{
+            'id': 'un3',
+            'type': 'deletetestDuno',
+            'batteryVoltage': {
+                'type': 'Text',
+                'value': 'ilariso'
+            }
+        }]
+    }
+
+    hn = {
+        'Content-Type': 'application/json',
+        'Fiware-Service': service,
+        'Fiware-ServicePath': service_path
+    }
+    r = requests.post(notify_url,
+                      data=json.dumps(data),
+                      headers=hn)
+    assert r.status_code == 200, r.text
+
+    #insert the same entity in a different service path
+    service_path = '/b'
+    hn = {
+        'Content-Type': 'application/json',
+        'Fiware-Service': service,
+        'Fiware-ServicePath': service_path
+    }
+    r = requests.post(notify_url,
+                      data=json.dumps(data),
+                      headers=hn)
+    assert r.status_code == 200, r.text
+    time.sleep(1)
+    # check that value is in the database
+    url = '{}/entities/{}'.format(QL_URL, 'un3')
+    r = requests.get(url, params=params, headers=h)
+    assert r.status_code == 200, r.text
+    assert r.text != ''
+
+    # Delete /a
+    time.sleep(2)
+    url = '{}/types/{}'.format(QL_URL, entity_type)
+    r = requests.delete(url, params=params, headers=h)
+    assert r.status_code == 204, r.text
+
+    h = {
+        'Fiware-Service': service,
+        'Fiware-ServicePath': service_path
+    }
+
+    # 1 entity is still there
+    time.sleep(2)
+    url = '{}/entities/{}'.format(QL_URL, 'un3')
+    r = requests.get(url, params=params, headers=h)
+    assert r.status_code == 200, r.text
+
+    # Delete /b
+    time.sleep(2)
+    url = '{}/types/{}'.format(QL_URL, entity_type)
+    r = requests.delete(url, params=params, headers=h)
+    assert r.status_code == 204, r.text
+
+    # No entity
+    time.sleep(2)
+    url = '{}/entities/{}'.format(QL_URL, 'un3')
+    r = requests.get(url, params=params, headers=h)
+    assert r.status_code == 404, r.text
