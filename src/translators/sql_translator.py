@@ -1009,6 +1009,18 @@ class SQLTranslator(base_translator.BaseTranslator):
 
         # First delete entries from table
         table_name = self._et2tn(entity_type, fiware_service)
+
+        # how many rows in total?
+        try:
+            self.cursor.execute("select count(*) from {}".format(table_name))
+        except Exception as e:
+            logging.error("{}".format(e))
+            return 0
+        # TODO why the result still keeps into account the deleted rows???
+        # this query was moved up to make it "consistent" also with db that
+        # may execute delete instantly (this does not seem the case of crate)
+        count = self.cursor.fetchall()[0][0]
+
         where_clause = self._get_where_clause([entity_id, ],
                                               from_date,
                                               to_date,
@@ -1021,11 +1033,30 @@ class SQLTranslator(base_translator.BaseTranslator):
             logging.error("{}".format(e))
             return 0
 
-        return self.cursor.rowcount
+        deleted_rows = self.cursor.rowcount
+
+        count = count - deleted_rows
+
+        if count == 0:
+            # Drop whole table
+            self._drop_table(table_name)
+
+        return deleted_rows
 
     def delete_entities(self, entity_type, from_date=None, to_date=None,
                         fiware_service=None, fiware_servicepath=None):
         table_name = self._et2tn(entity_type, fiware_service)
+
+        # how many rows in total?
+        try:
+            self.cursor.execute("select count(*) from {}".format(table_name))
+        except Exception as e:
+            logging.error("{}".format(e))
+            return 0
+        # TODO why the result still keeps into account the deleted rows???
+        # this query was moved up to make it "consistent" also with db that
+        # may execute delete instantly (this does not seem the case of crate)
+        count = self.cursor.fetchall()[0][0]
 
         # Delete only requested range
         entity_id = None
@@ -1042,24 +1073,20 @@ class SQLTranslator(base_translator.BaseTranslator):
 
         deleted_rows = self.cursor.rowcount
 
-        # Drop whole table
-        try:
-            self.cursor.execute("select count(*) from {}".format(table_name))
-        except Exception as e:
-            logging.error("{}".format(e))
-            return 0
-        #TODO why the result still keeps into account the deleted rows???
-        count = self.cursor.fetchall()[0][0] - deleted_rows
+        count = count - deleted_rows
 
-        if count != 0:
-            return deleted_rows
+        if count == 0:
+            # Drop whole table
+            self._drop_table(table_name)
 
+        return deleted_rows
+
+    def _drop_table(self, table_name):
         op = "drop table {}".format(table_name)
         try:
             self.cursor.execute(op)
         except Exception as e:
             logging.error("{}".format(e))
-            return 0
 
         # Delete entry from metadata table
         op = "delete from {} where table_name = ?".format(METADATA_TABLE_NAME)
@@ -1075,8 +1102,6 @@ class SQLTranslator(base_translator.BaseTranslator):
                 self.cursor.execute(op, [old_tn])
             except Exception as e:
                 logging.error("{}".format(e))
-
-        return deleted_rows
 
     def _get_entity_type(self, entity_id, fiware_service):
         """
