@@ -51,7 +51,8 @@ def log():
     level = r.read(StrVar('LOGLEVEL', 'INFO')).upper()
 
     logging.basicConfig(level=level,
-                        format='%(asctime)s.%(msecs)03d %(levelname)s:%(name)s:%(message)s',
+                        format='%(asctime)s.%(msecs)03d '
+                               '%(levelname)s:%(name)s:%(message)s',
                         datefmt='%Y-%m-%d %I:%M:%S')
     return logging.getLogger(__name__)
 
@@ -290,8 +291,7 @@ def subscribe(orion_url,
     if r is None or not r.ok:
         msg = {
             "error": "Bad Request",
-            "description": "Orion is not reachable by QuantumLeap at {}"
-                .format(orion_url)
+            "description": "Orion is not reachable at {}".format(orion_url)
         }
         return msg, 400
 
