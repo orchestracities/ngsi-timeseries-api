@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+docker build --cache-from smartsdk/quantumleap -t smartsdk/quantumleap ../../
+
 docker-compose up -d
 docker-compose stop orion
 docker-compose stop mongo
