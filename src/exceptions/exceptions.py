@@ -4,6 +4,9 @@ class QLError(Exception):
     """
     Error raised in QuantumLeap usage.
     """
+    def __init__(self, message="Quantum Leap Error"):
+        self.message = message
+        super().__init__(self.message)
 
 
 class UnsupportedOption(QLError):
@@ -36,3 +39,12 @@ class InvalidParameterValue(QLError):
     def __init__(self, par_value='', par_name=''):
         msg = "The parameter value '{}' for parameter {} is not valid."
         QLError.__init__(self, msg.format(par_value, par_name))
+
+
+class InvalidHeaderValue(QLError):
+    """
+    Passed parameter value is not valid.
+    """
+    def __init__(self, header_value='', header_name='', message=''):
+        msg = "The header value '{}' for header {} is not valid. {}"
+        QLError.__init__(self, msg.format(header_value, header_name, message))

@@ -15,4 +15,4 @@ docker run -i --rm loadimpact/k6 run --vus 100 --duration 120s - < notify-load-t
 
 sleep 10
 
-docker-compose down
+docker-compose down -v

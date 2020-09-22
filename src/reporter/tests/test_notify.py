@@ -1,20 +1,55 @@
 from datetime import datetime, timezone
 from conftest import QL_URL
 from utils.common import assert_equal_time_index_arrays
+from reporter.tests.utils import delete_entity_type
 import copy
 import json
 import pytest
 import requests
 import time
+
 notify_url = "{}/notify".format(QL_URL)
 
-HEADERS_PUT = {'Content-Type': 'application/json'}
+services = ['t1', 't2']
+
+SLEEP_TIME = 1
 
 
-def test_invalid_no_body(clean_mongo, clean_crate):
+def query_url(entity_type='Room', eid='Room1', attr_name='temperature', values=False):
+    url = "{qlUrl}/entities/{entityId}/attrs/{attrName}"
+    if values:
+        url += '/value'
+    return url.format(
+        qlUrl=QL_URL,
+        entityId=eid,
+        attrName=attr_name,
+    )
+
+
+def notify_header(service=None, service_path=None):
+    return headers(service, service_path, True)
+
+
+def query_header(service=None, service_path=None):
+    return headers(service, service_path, False)
+
+
+def headers(service=None, service_path=None, content_type=True):
+    h = {}
+    if content_type:
+        h['Content-Type'] = 'application/json'
+    if service:
+        h['Fiware-Service'] = service
+    if service_path:
+        h['Fiware-ServicePath'] = service_path
+
+    return h
+
+@pytest.mark.parametrize("service", services)
+def test_invalid_no_body(service):
     r = requests.post('{}'.format(notify_url),
                       data=json.dumps(None),
-                      headers=HEADERS_PUT)
+                      headers=notify_header(service))
     assert r.status_code == 400
     assert r.json() == {
         'detail': 'Request body is not valid JSON',
@@ -24,19 +59,21 @@ def test_invalid_no_body(clean_mongo, clean_crate):
     }
 
 
-def test_invalid_empty_body(clean_mongo, clean_crate):
+@pytest.mark.parametrize("service", services)
+def test_invalid_empty_body(service):
     r = requests.post('{}'.format(notify_url),
                       data=json.dumps({}),
-                      headers=HEADERS_PUT)
+                      headers=notify_header(service))
     assert r.status_code == 400
     assert r.json()['detail'] == "'data' is a required property"
 
 
-def test_invalid_no_type(notification, clean_mongo, clean_crate):
+@pytest.mark.parametrize("service", services)
+def test_invalid_no_type(notification, service):
     notification['data'][0].pop('type')
     r = requests.post('{}'.format(notify_url),
                       data=json.dumps(notification),
-                      headers=HEADERS_PUT)
+                      headers=notify_header(service))
     assert r.status_code == 400
     assert r.json() == {'detail': "'type' is a required property - 'data.0'",
                         'status': 400,
@@ -44,11 +81,12 @@ def test_invalid_no_type(notification, clean_mongo, clean_crate):
                         'type': 'about:blank'}
 
 
-def test_invalid_no_id(notification, clean_mongo, clean_crate):
+@pytest.mark.parametrize("service", services)
+def test_invalid_no_id(notification, service):
     notification['data'][0].pop('id')
     r = requests.post('{}'.format(notify_url),
                       data=json.dumps(notification),
-                      headers=HEADERS_PUT)
+                      headers=notify_header(service))
     assert r.status_code == 400
     assert r.json() == {'detail': "'id' is a required property - 'data.0'",
                         'status': 400,
@@ -56,58 +94,96 @@ def test_invalid_no_id(notification, clean_mongo, clean_crate):
                         'type': 'about:blank'}
 
 
-def test_invalid_no_attr(notification, clean_mongo, clean_crate):
+@pytest.mark.parametrize("service", services)
+def test_invalid_no_attr(notification, service):
     notification['data'][0].pop('temperature')
     r = requests.post('{}'.format(notify_url),
                       data=json.dumps(notification),
-                      headers=HEADERS_PUT)
+                      headers=notify_header(service))
     assert r.status_code == 200
+    delete_entity_type(service, 'Room')
 
 
-def test_invalid_no_value(notification, clean_mongo, clean_crate):
+@pytest.mark.parametrize("service", services)
+def test_invalid_no_value(notification, service):
     notification['data'][0]['temperature'].pop('value')
     r = requests.post('{}'.format(notify_url),
                       data=json.dumps(notification),
-                      headers=HEADERS_PUT)
+                      headers=notify_header(service))
     assert r.status_code == 200
+    delete_entity_type(service, 'Room')
 
 
-def test_valid_notification(notification, clean_mongo, clean_crate):
+@pytest.mark.parametrize("service", services)
+def test_valid_notification(notification, service):
     r = requests.post('{}'.format(notify_url),
                       data=json.dumps(notification),
-                      headers=HEADERS_PUT)
+                      headers=notify_header(service))
     assert r.status_code == 200
     assert r.json().startswith('Notification successfully processed')
+    time.sleep(SLEEP_TIME)
+    r = requests.get(query_url(), params=None, headers=query_header(service))
+    assert r.status_code == 200, r.text
+    delete_entity_type(service, 'Room')
 
 
-def test_valid_no_modified(notification, clean_mongo, clean_crate):
+@pytest.mark.parametrize("service", services)
+def test_valid_no_modified(notification, service):
     notification['data'][0]['temperature']['metadata'].pop('dateModified')
     r = requests.post('{}'.format(notify_url),
                       data=json.dumps(notification),
-                      headers=HEADERS_PUT)
+                      headers=notify_header(service))
     assert r.status_code == 200
     assert r.json().startswith('Notification successfully processed')
+    time.sleep(SLEEP_TIME)
+    r = requests.get(query_url(), params=None, headers=query_header(service))
+    assert r.status_code == 200, r.text
+    delete_entity_type(service, 'Room')
 
-def do_integration(entity, notify_url, orion_client, crate_translator):
-    entity_id = entity['id']
+
+def do_integration(entity, subscription, orion_client, service=None, service_path=None):
+    orion_client.subscribe(subscription, service, service_path)
+    time.sleep(SLEEP_TIME)
+
+    orion_client.insert(entity, service, service_path)
+    time.sleep(4 * SLEEP_TIME)  # Give time for notification to be processed.
+
+    entities_url = "{}/entities".format(QL_URL)
+
+    r = requests.get(entities_url, params=None, headers=None)
+    assert r.status_code == 200
+    entities = r.json()
+    assert len(entities) == 1
+
+    assert entities[0]['id'] == entity['id']
+    assert entities[0]['type'] == entity['type']
+
+    delete_entity_type(None, entity['type'])
+
+
+def test_integration(entity, orion_client):
+    """
+    Test Reporter using input directly from an Orion notification and output
+    directly to Cratedb.
+    """
     subscription = {
         "description": "Integration Test subscription",
         "subject": {
             "entities": [
-              {
-                "id": entity_id,
-                "type": "Room"
-              }
+                {
+                    "id": entity['id'],
+                    "type": "Room"
+                }
             ],
             "condition": {
-              "attrs": [
-                "temperature",
-              ]
+                "attrs": [
+                    "temperature",
+                ]
             }
-          },
+        },
         "notification": {
             "http": {
-              "url": notify_url
+                "url": notify_url
             },
             "attrs": [
                 "temperature",
@@ -116,67 +192,86 @@ def do_integration(entity, notify_url, orion_client, crate_translator):
         },
         "throttling": 1,
     }
-    orion_client.subscribe(subscription)
-    time.sleep(2)
-
-    orion_client.insert(entity)
-    time.sleep(4)  # Give time for notification to be processed.
-    crate_translator._refresh([entity['type']])
-
-    entities = crate_translator.query()
-    assert len(entities) == 1
-
-    assert entities[0]['id'] == entity['id']
-    assert entities[0]['type'] == entity['type']
-    obtained_values = entities[0]['temperature']['values']
-
-    # Not exactly one because first insert generates 2 notifications, see...
-    # https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions
-    expected_value = entity['temperature']['value']
-    assert obtained_values[0] == pytest.approx(expected_value)
+    do_integration(entity, subscription, orion_client)
 
 
-def test_integration(entity, orion_client, clean_mongo, crate_translator):
-    """
-    Test Reporter using input directly from an Orion notification and output
-    directly to Cratedb.
-    """
-    do_integration(entity, notify_url, orion_client, crate_translator)
-
-def test_air_quality_observed(air_quality_observed, orion_client, clean_mongo,
-                              crate_translator):
+def test_air_quality_observed(air_quality_observed, orion_client):
     entity = air_quality_observed
     subscription = {
         "description": "Test subscription",
         "subject": {
             "entities": [
-              {
-                "id": entity['id'],
-                "type": entity['type']
-              }
+                {
+                    "id": entity['id'],
+                    "type": entity['type']
+                }
             ],
             "condition": {
-              "attrs": []  # all attributes
+                "attrs": []  # all attributes
             }
-          },
+        },
         "notification": {
             "http": {
-              "url": notify_url
+                "url": notify_url
             },
             "attrs": [],  # all attributes
             "metadata": ["dateCreated", "dateModified"]
         }
     }
-    orion_client.subscribe(subscription)
-    orion_client.insert(entity)
+    do_integration(entity, subscription, orion_client)
 
-    time.sleep(3)  # Give time for notification to be processed.
 
-    entities = crate_translator.query()
-    assert len(entities) == 1
+
+def test_integration_multiple_entities(diffEntityWithDifferentAttrs, orion_client):
+    """
+    Test Reporter using input directly from an Orion notification and output
+    directly to Cratedb.
+    """
+
+
+    subscription = {
+        "description": "Integration Test subscription",
+        "subject": {
+            "entities": [
+                {
+                    "idPattern": ".*",
+                    "type": "Room"
+                }
+            ],
+            "condition": {
+                "attrs": [
+                    "temperature",
+                ]
+            }
+        },
+        "notification": {
+            "http": {
+                "url": notify_url
+            },
+            "attrs": [
+                "temperature",
+            ],
+            "metadata": ["dateCreated", "dateModified"]
+        },
+        "throttling": 1,
+    }
+    orion_client.subscribe(subscription, "service", "/Root/#")
+
+    for idx, e in enumerate(diffEntityWithDifferentAttrs):
+        orion_client.insert(e, "service", "/Root/{}".format(idx))
+    time.sleep(10 * SLEEP_TIME)  # Give time for notification to be processed.
+
+    entities_url = "{}/entities".format(QL_URL)
+
+    r = requests.get(entities_url, params=None, headers=query_header("service", "/Root"))
+    assert r.status_code == 200
+    entities = r.json()
+    assert len(entities) == 3
+    delete_entity_type("service", diffEntityWithDifferentAttrs[0]['type'])
 
 @pytest.mark.skip(reason="See issue #105")
-def test_geocoding(notification, clean_mongo, crate_translator):
+@pytest.mark.parametrize("service", services)
+def test_geocoding(service, notification):
     # Add an address attribute to the entity
     notification['data'][0]['address'] = {
         'type': 'StructuredValue',
@@ -195,13 +290,17 @@ def test_geocoding(notification, clean_mongo, crate_translator):
     }
     r = requests.post('{}'.format(notify_url),
                       data=json.dumps(notification),
-                      headers=HEADERS_PUT)
+                      headers=notify_header(service))
     assert r.status_code == 200
     assert r.json() == 'Notification successfully processed'
 
-    time.sleep(3)  # Give time for notification to be processed.
+    time.sleep(2 * SLEEP_TIME)  # Give time for notification to be processed.
 
-    entities = crate_translator.query()
+    entities_url = "{}/entities".format(QL_URL)
+
+    r = requests.get(entities_url, params=None, headers=query_header(service))
+    assert r.status_code == 200
+    entities = r.json()
     assert len(entities) == 1
 
     assert 'location' in entities[0]
@@ -209,20 +308,79 @@ def test_geocoding(notification, clean_mongo, crate_translator):
     lon, lat = entities[0]['location']['values'][0].split(',')
     assert float(lon) == pytest.approx(60.1707129, abs=1e-2)
     assert float(lat) == pytest.approx(24.9412167, abs=1e-2)
+    delete_entity_type(service,  notification['data'][0]['type'])
 
 
-def test_multiple_data_elements(notification, sameEntityWithDifferentAttrs, clean_mongo, clean_crate):
+@pytest.mark.parametrize("service", services)
+def test_multiple_data_elements(service, notification, diffEntityWithDifferentAttrs):
     """
     Test that the notify API can process notifications containing multiple elements in the data array.
     """
-    notification['data'] = sameEntityWithDifferentAttrs
+    notification['data'] = diffEntityWithDifferentAttrs
     r = requests.post('{}'.format(notify_url), data=json.dumps(notification),
-                      headers=HEADERS_PUT)
+                      headers=notify_header(service))
     assert r.status_code == 200
     assert r.json().startswith('Notification successfully processed')
 
+    entities_url = "{}/entities".format(QL_URL)
+    time.sleep(SLEEP_TIME)
+    r = requests.get(entities_url, params=None, headers=query_header(service))
+    entities = r.json()
+    assert len(entities) == 3
+    delete_entity_type(None, diffEntityWithDifferentAttrs[0]['type'])
 
-def test_time_index(notification, clean_mongo, crate_translator):
+
+@pytest.mark.parametrize("service", services)
+def test_multiple_data_elements_invalid_different_servicepath(service, notification, diffEntityWithDifferentAttrs):
+    """
+    Test that the notify API can process notifications containing multiple elements in the data array
+    and different fiwareServicePath.
+    """
+
+    notify_headers = notify_header(service)
+
+    notify_headers['Fiware-ServicePath'] = '/Test/Path1, /Test/Path1, /Test/Path2, /Test/Path3'
+
+    notification['data'] = diffEntityWithDifferentAttrs
+
+    r = requests.post('{}'.format(notify_url), data=json.dumps(notification),
+                      headers=notify_headers)
+    assert r.status_code == 400
+    assert r.json().startswith('Notification not processed')
+
+
+@pytest.mark.parametrize("service", services)
+def test_multiple_data_elements_different_servicepath(service, notification, diffEntityWithDifferentAttrs):
+    """
+    Test that the notify API can process notifications containing multiple elements in the data array
+    and different fiwareServicePath.
+    """
+
+    notify_headers = notify_header(service)
+
+    notify_headers['Fiware-ServicePath'] = '/Test/Path1, /Test/Path1, /Test/Path2'
+
+    query_headers = query_header(service)
+
+    query_headers['Fiware-ServicePath'] = '/Test'
+
+    notification['data'] = diffEntityWithDifferentAttrs
+
+    r = requests.post('{}'.format(notify_url), data=json.dumps(notification),
+                      headers=notify_headers)
+    assert r.status_code == 200
+    assert r.json().startswith('Notification successfully processed')
+
+    entities_url = "{}/entities".format(QL_URL)
+    time.sleep(2*SLEEP_TIME)
+    r = requests.get(entities_url, params=None, headers=query_headers)
+    entities = r.json()
+    assert len(entities) == 3
+    delete_entity_type(service, diffEntityWithDifferentAttrs[0]['type'])
+
+
+@pytest.mark.parametrize("service", services)
+def test_time_index(service, notification):
     # If present, use entity-level dateModified as time_index
     global_modified = datetime(2000, 1, 2, 0, 0, 0, 0, timezone.utc).isoformat()
     modified = {
@@ -233,15 +391,17 @@ def test_time_index(notification, clean_mongo, crate_translator):
 
     r = requests.post('{}'.format(notify_url),
                       data=json.dumps(notification),
-                      headers=HEADERS_PUT)
+                      headers=notify_header(service))
     assert r.status_code == 200
     assert r.json().startswith('Notification successfully processed')
 
-    time.sleep(1)
+    time.sleep(SLEEP_TIME)
     entity_type = notification['data'][0]['type']
-    crate_translator._refresh([entity_type])
 
-    entities = crate_translator.query()
+    entities_url = "{}/entities".format(QL_URL)
+    time.sleep(SLEEP_TIME)
+    r = requests.get(entities_url, params=None, headers=query_header(service))
+    entities = r.json()
     assert len(entities) == 1
     assert_equal_time_index_arrays(entities[0]['index'], [global_modified])
 
@@ -258,13 +418,13 @@ def test_time_index(notification, clean_mongo, crate_translator):
 
     r = requests.post('{}'.format(notify_url),
                       data=json.dumps(notification),
-                      headers=HEADERS_PUT)
+                      headers=notify_header(service))
     assert r.status_code == 200
     assert r.json().startswith('Notification successfully processed')
 
-    time.sleep(1)
-    crate_translator._refresh([entity_type])
-    entities = crate_translator.query()
+    time.sleep(SLEEP_TIME)
+    r = requests.get(entities_url, params=None, headers=query_header(service))
+    entities = r.json()
     assert len(entities) == 1
     obtained = entities[0]['index']
     assert_equal_time_index_arrays(obtained, [global_modified, newer])
@@ -275,19 +435,21 @@ def test_time_index(notification, clean_mongo, crate_translator):
     notification['data'][0]['temperature'].pop('metadata')
     r = requests.post('{}'.format(notify_url),
                       data=json.dumps(notification),
-                      headers=HEADERS_PUT)
+                      headers=notify_header(service))
     assert r.status_code == 200
     assert r.json().startswith('Notification successfully processed')
 
-    time.sleep(1)
-    crate_translator._refresh([entity_type])
-    entities = crate_translator.query()
+    time.sleep(SLEEP_TIME)
+    r = requests.get(entities_url, params=None, headers=query_header(service))
+    entities = r.json()
     assert len(entities) == 1
     obtained = entities[0]['index']
     assert obtained[-1].startswith("{}".format(current.year))
+    delete_entity_type(service, notification['data'][0]['type'])
 
 
-def test_no_value_in_notification(notification):
+@pytest.mark.parametrize("service", services)
+def test_no_value_in_notification(service, notification):
     # No value
     notification['data'][0] = {
         'id': '299531',
@@ -298,7 +460,7 @@ def test_no_value_in_notification(notification):
         'pm25': {'type': 'string', 'value': '5', 'metadata': {}},
     }
     url = '{}'.format(notify_url)
-    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
     assert r.status_code == 200
 
     # Empty value
@@ -310,11 +472,13 @@ def test_no_value_in_notification(notification):
         'pm25': {'type': 'string', 'value': '', 'metadata': {}},
     }
     url = '{}'.format(notify_url)
-    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
     assert r.status_code == 200
+    delete_entity_type(service, notification['data'][0]['type'])
 
-    
-def test_no_value_for_attributes(notification):
+
+@pytest.mark.parametrize("service", services)
+def test_no_value_for_attributes(service, notification):
     # with empty value
     notification['data'][0] = {
         'id': '299531',
@@ -326,9 +490,11 @@ def test_no_value_for_attributes(notification):
     url = '{}'.format(notify_url)
     get_url = "{}/entities/299531".format(QL_URL)
     url_new = '{}'.format(get_url)
-    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
     assert r.status_code == 200
-    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    # Give time for notification to be processed
+    time.sleep(SLEEP_TIME)
+    res_get = requests.get(url_new, headers=notify_header(service))
     assert res_get.status_code == 404
     # entity with missing value string
     notification['data'][0] = {
@@ -341,9 +507,11 @@ def test_no_value_for_attributes(notification):
     url = '{}'.format(notify_url)
     get_url = "{}/entities/299531/attrs/p/value".format(QL_URL)
     url_new = '{}'.format(get_url)
-    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
     assert r.status_code == 200
-    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    # Give time for notification to be processed
+    time.sleep(SLEEP_TIME)
+    res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 404
     # entity has both valid and empty attributes
     notification['data'][0] = {
@@ -355,15 +523,18 @@ def test_no_value_for_attributes(notification):
     url = '{}'.format(notify_url)
     get_url_new = "{}/entities/299531/attrs/pm10/value".format(QL_URL)
     url_new = '{}'.format(get_url_new)
-    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
     assert r.status_code == 200
     # Give time for notification to be processed
-    time.sleep(3)
-    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    time.sleep(SLEEP_TIME)
+    res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 200
-    assert res_get.json()['values'][2] == '10'
+    assert res_get.json()['values'][0] == '10'
+    delete_entity_type(service, notification['data'][0]['type'])
 
-def test_no_value_no_type_for_attributes(notification):
+
+@pytest.mark.parametrize("service", services)
+def test_no_value_no_type_for_attributes(service, notification):
     # entity with no value and no type
     notification['data'][0] = {
         'id': 'Room1',
@@ -375,16 +546,16 @@ def test_no_value_no_type_for_attributes(notification):
     url = '{}'.format(notify_url)
     get_url = "{}/entities/Room1/attrs/temperature/value".format(QL_URL)
     url_new = '{}'.format(get_url)
-    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
     assert r.status_code == 200
     # Give time for notification to be processed
-    time.sleep(3)
-    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    time.sleep(SLEEP_TIME)
+    res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 404
     # Get value of attribute having value
     get_url_new = "{}/entities/Room1/attrs/pressure/value".format(QL_URL)
     url_new = '{}'.format(get_url_new)
-    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 200
     assert res_get.json()['values'][0] == 26
 
@@ -397,16 +568,18 @@ def test_no_value_no_type_for_attributes(notification):
     url = '{}'.format(notify_url)
     get_url = "{}/entities/Room1/attrs/temperature/value".format(QL_URL)
     url_new = '{}'.format(get_url)
-    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
     assert r.status_code == 200
     # Give time for notification to be processed
-    time.sleep(3)
-    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    time.sleep(SLEEP_TIME)
+    res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 200
     assert res_get.json()['values'][1] == '25'
+    delete_entity_type(service, notification['data'][0]['type'])
 
 
-def test_with_value_no_type_for_attributes(notification):
+@pytest.mark.parametrize("service", services)
+def test_with_value_no_type_for_attributes(service, notification):
     # entity with value and no type
     notification['data'][0] = {
         'id': 'Kitchen1',
@@ -418,15 +591,18 @@ def test_with_value_no_type_for_attributes(notification):
     url = '{}'.format(notify_url)
     get_url = "{}/entities/Kitchen1/attrs/temperature/value".format(QL_URL)
     url_new = '{}'.format(get_url)
-    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
     assert r.status_code == 200
     # Give time for notification to be processed
-    time.sleep(3)
-    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    time.sleep(SLEEP_TIME)
+    res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 200
     assert res_get.json()['values'][0] == '25'
+    delete_entity_type(service, notification['data'][0]['type'])
 
-def test_no_value_with_type_for_attributes(notification):
+
+@pytest.mark.parametrize("service", services)
+def test_no_value_with_type_for_attributes(service, notification):
     # entity with one Null value and no type
     notification['data'][0] = {
         'id': 'Hall1',
@@ -438,12 +614,11 @@ def test_no_value_with_type_for_attributes(notification):
     url = '{}'.format(notify_url)
     get_url = "{}/entities/Hall1/attrs/temperature/value".format(QL_URL)
     url_new = '{}'.format(get_url)
-    r = requests.post(url, data=json.dumps(notification), headers=HEADERS_PUT)
+    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
     assert r.status_code == 200
     # Give time for notification to be processed
-    time.sleep(3)
-    res_get = requests.get(url_new, headers=HEADERS_PUT)
+    time.sleep(SLEEP_TIME)
+    res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 200
     assert res_get.json()['values'][0] == None
-
-
+    delete_entity_type(service, notification['data'][0]['type'])

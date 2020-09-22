@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from geocoding.slf.geotypes import *
 from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption, \
-    NGSIUsageError, InvalidParameterValue
+    NGSIUsageError, InvalidParameterValue, InvalidHeaderValue
 from translators import base_translator
 from translators.config import SQLTranslatorConfig
 from utils.common import iter_entity_attrs
@@ -12,7 +12,6 @@ from geocoding.slf import SlfQuery
 import dateutil.parser
 from typing import Any, List, Optional
 from uuid import uuid4
-
 
 # NGSI TYPES
 # Based on Orion output because official docs don't say much about these :(
@@ -147,7 +146,8 @@ class SQLTranslator(base_translator.BaseTranslator):
         """
         et = '"{}{}"'.format(TYPE_PREFIX, entity_type.lower())
         if fiware_service:
-            return '"{}{}".{}'.format(TENANT_PREFIX, fiware_service.lower(), et)
+            return '"{}{}".{}'.format(TENANT_PREFIX, fiware_service.lower(),
+                                      et)
         return et
 
     def _ea2cn(self, entity_attr):
@@ -170,16 +170,46 @@ class SQLTranslator(base_translator.BaseTranslator):
             msg = "Entities expected to be of type list, but got {}"
             raise TypeError(msg.format(type(entities)))
 
-        entities_by_type = {}
-        for e in entities:
-            entities_by_type.setdefault(e['type'], []).append(e)
+        service_paths = []
+        if fiware_servicepath:
+            clean_fiware_servicepath = fiware_servicepath.replace(" ", "")
+            service_paths = clean_fiware_servicepath.split(",")
+        else:
+            service_paths = [fiware_servicepath]
+        if len(service_paths) == 1:
+            entities_by_type = {}
+            for e in entities:
+                entities_by_type.setdefault(e['type'], []).append(e)
 
-        res = None
-        for et in entities_by_type.keys():
-            res = self._insert_entities_of_type(et,
-                                                entities_by_type[et],
-                                                fiware_service,
-                                                fiware_servicepath)
+            res = None
+            for et in entities_by_type.keys():
+                res = self._insert_entities_of_type(et,
+                                                    entities_by_type[et],
+                                                    fiware_service,
+                                                    service_paths[0])
+        elif len(service_paths) == len(entities):
+            entities_by_service_path = {}
+            for idx, path in enumerate(service_paths):
+                entities_by_service_path.setdefault(path, []).append(
+                    entities[idx])
+            res = None
+            for path in entities_by_service_path.keys():
+                entities_by_type = {}
+                for e in entities_by_service_path[path]:
+                    entities_by_type.setdefault(e['type'], []).append(e)
+
+                res = None
+                for et in entities_by_type.keys():
+                    res = self._insert_entities_of_type(et,
+                                                        entities_by_type[et],
+                                                        fiware_service,
+                                                        path)
+        else:
+            msg = 'Multiple servicePath are allowed only ' \
+                  'if their size is match the size of entities'
+            raise InvalidHeaderValue('Fiware-ServicePath',
+                                     fiware_servicepath, msg)
+
         return res
 
     def _insert_entities_of_type(self,
@@ -256,7 +286,8 @@ class SQLTranslator(base_translator.BaseTranslator):
                                "Please use any of the following: {}. "
                                "Falling back to {}.")
                         self.logger.warning(msg.format(
-                            attr_t, attr, entity_id, supported_types, NGSI_TEXT))
+                            attr_t, attr, entity_id, supported_types,
+                            NGSI_TEXT))
 
                         table[col] = self.NGSI_TO_SQL[NGSI_TEXT]
 
@@ -281,7 +312,8 @@ class SQLTranslator(base_translator.BaseTranslator):
         col_names = sorted(table.keys())
         entries = []  # raw values in same order as column names
         for e in entities:
-            values = self._preprocess_values(e, table, col_names, fiware_servicepath)
+            values = self._preprocess_values(e, table, col_names,
+                                             fiware_servicepath)
             entries.append(values)
 
         # Insert entities data
@@ -320,6 +352,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         col_list = ', '.join(['"{}"'.format(c.lower()) for c in col_names])
         placeholders = ','.join(['?'] * len(col_names))
         return col_list, placeholders, rows
+
     # NOTE. Brittle code.
     # This code, like the rest of the insert workflow implicitly assumes
     # 1. col_names[k] <-> rows[k] <-> entities[k]
@@ -344,7 +377,8 @@ class SQLTranslator(base_translator.BaseTranslator):
     def _to_db_ngsi_structured_value(data: dict) -> Any:
         return data
 
-    def _should_insert_original_entities(self, insert_error: Exception) -> bool:
+    def _should_insert_original_entities(self,
+                                         insert_error: Exception) -> bool:
         raise NotImplementedError
 
     def _insert_original_entities_in_failed_batch(
@@ -450,7 +484,8 @@ class SQLTranslator(base_translator.BaseTranslator):
             if aggr_period:
                 attrs.append(
                     "DATE_TRUNC('{}',{}) as {}".format(
-                        aggr_period, self.TIME_INDEX_NAME, self.TIME_INDEX_NAME)
+                        aggr_period, self.TIME_INDEX_NAME,
+                        self.TIME_INDEX_NAME)
                 )
             # TODO: https://github.com/smartsdk/ngsi-timeseries-api/issues/106
             m = '{}("{}") as "{}"'
@@ -492,11 +527,13 @@ class SQLTranslator(base_translator.BaseTranslator):
             clauses.append(" {} >= '{}'".format(self.TIME_INDEX_NAME,
                                                 self._parse_date(from_date)))
         if to_date:
-            clauses.append(" {} <= '{}'".format(self.TIME_INDEX_NAME, self._parse_date(to_date)))
+            clauses.append(" {} <= '{}'".format(self.TIME_INDEX_NAME,
+                                                self._parse_date(to_date)))
 
         if fiware_sp:
             # Match prefix of fiware service path
-            clauses.append(" " + FIWARE_SERVICEPATH + " ~* '" + fiware_sp + "($|/.*)'")
+            clauses.append(
+                " " + FIWARE_SERVICEPATH + " ~* '" + fiware_sp + "($|/.*)'")
         else:
             # Match prefix of fiware service path
             clauses.append(" " + FIWARE_SERVICEPATH + " = ''")
@@ -549,7 +586,8 @@ class SQLTranslator(base_translator.BaseTranslator):
             if aggr_period:
                 # consider always ordering by entity_id also
                 order_by.extend(["entity_type", "entity_id"])
-                order_by.append("{} {}".format(self.TIME_INDEX_NAME, direction))
+                order_by.append(
+                    "{} {}".format(self.TIME_INDEX_NAME, direction))
         else:
             order_by.append("{} {}".format(self.TIME_INDEX_NAME, direction))
 

@@ -85,7 +85,9 @@ def insert_test_data(service, entity_types, n_entities=1, index_size=30,
 
 
 def delete_entity_type(service, entity_type):
-    h = {'Fiware-Service': service}
+    h = {}
+    if service:
+        h = {'Fiware-Service': service}
     url = '{}/types/{}'.format(QL_URL, entity_type)
 
     r = requests.delete(url, headers=h)

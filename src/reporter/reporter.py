@@ -26,6 +26,7 @@ attributes.
 interest and make QL actually perform the corresponding subscription to orion.
 I.e, QL must be told where orion is.
 """
+
 from flask import request
 from geocoding import geocoding
 from geocoding.factory import get_geo_cache, is_geo_coding_available
@@ -41,13 +42,18 @@ from reporter.timex import select_time_index_value_as_iso, \
     TIME_INDEX_HEADER_NAME
 from geocoding.location import normalize_location
 from utils.cfgreader import EnvReader, StrVar
+from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption, \
+    NGSIUsageError, InvalidParameterValue, InvalidHeaderValue
 
 
 def log():
     r = EnvReader(log=logging.getLogger(__name__).info)
     level = r.read(StrVar('LOGLEVEL', 'INFO')).upper()
 
-    logging.basicConfig(level=level, format='%(asctime)s.%(msecs)03d %(levelname)s:%(name)s:%(message)s', datefmt='%Y-%m-%d %I:%M:%S')
+    logging.basicConfig(level=level,
+                        format='%(asctime)s.%(msecs)03d '
+                               '%(levelname)s:%(name)s:%(message)s',
+                        datefmt='%Y-%m-%d %I:%M:%S')
     return logging.getLogger(__name__)
 
 
@@ -105,24 +111,24 @@ def _validate_payload(payload):
             payload[attr].update({'value': None})
             log().warning(
                 'An entity update is missing value for attribute {}'.format(attr))
-  
+
 
 def _filter_empty_entities(payload):
     log().debug('Received payload: {}'.format(payload))
     attrs = list(iter_entity_attrs(payload))
-    Flag = False
+    empty = False
     attrs.remove('time_index')
     for j in attrs:
         value = payload[j]['value']
         if isinstance(value, int) and value is not None:
-            Flag = True
+            empty = True
         elif value:
-            Flag = True
-    if Flag:
+            empty = True
+    if empty:
         return payload
     else:
         return None
- 
+
 
 def _filter_no_type_no_value_entities(payload):
     attrs = list(iter_entity_attrs(payload))
@@ -138,7 +144,6 @@ def _filter_no_type_no_value_entities(payload):
 
 
 def notify():
-
     if request.json is None:
         return 'Discarding notification due to lack of request body. ' \
                'Lost in a redirect maybe?', 400
@@ -148,12 +153,13 @@ def notify():
                'content.', 400
 
     payload = request.json['data']
-    
+
     # preprocess and validate each entity update
     for entity in payload:
         # Validate entity update
         error = _validate_payload(entity)
         if error:
+            # TODO in this way we return error for even if only one entity is wrong
             return error, 400
         # Add TIME_INDEX attribute
         custom_index = request.headers.get(TIME_INDEX_HEADER_NAME, None)
@@ -188,11 +194,19 @@ def notify():
     try:
         with translator_for(fiware_s) as trans:
             trans.insert(payload, fiware_s, fiware_sp)
-    except:
-        msg = "Notification not processed or not updated for payload: %s" % (payload)
+    except Exception as e:
+        msg = "Notification not processed or not updated for payload: %s. " \
+              "%s" % (payload, str(e))
         log().error(msg)
-        return msg, 500
-    msg = "Notification successfully processed for : 'tenant' %s, 'fiwareServicePath' %s, 'entity_id' %s" % (fiware_s, fiware_sp, entity_id)
+        error_code = 500
+        if e.__class__ == InvalidHeaderValue or \
+                e.__class__ == InvalidParameterValue or \
+                e.__class__ == NGSIUsageError:
+            error_code = 400
+        return msg, error_code
+    msg = "Notification successfully processed for : 'tenant' %s, " \
+          "'fiwareServicePath' %s, " \
+          "'entity_id' %s" % (fiware_s, fiware_sp, entity_id)
     log().info(msg)
     return msg
 
@@ -277,8 +291,7 @@ def subscribe(orion_url,
     if r is None or not r.ok:
         msg = {
             "error": "Bad Request",
-            "description": "Orion is not reachable by QuantumLeap at {}"
-            .format(orion_url)
+            "description": "Orion is not reachable at {}".format(orion_url)
         }
         return msg, 400
 

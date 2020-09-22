@@ -13,7 +13,7 @@ def test_invalid_wrong_orion_url(clean_mongo, clean_crate):
     assert r.status_code == 400
     assert r.json() == {
         "error": "Bad Request",
-        "description": "Orion is not reachable by QuantumLeap at blabla"
+        "description": "Orion is not reachable at blabla"
     }
 
 
