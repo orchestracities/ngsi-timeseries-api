@@ -91,7 +91,7 @@ def delete_entity_type(service, entity_type, service_path=None):
     if service_path:
         h['Fiware-ServicePath'] = service_path
 
-    url = '{}/types/{}'.format(QL_URL, entity_type)
+    url = '{}/storage/{}'.format(QL_URL, entity_type)
 
     r = requests.delete(url, headers=h)
 #    assert r.status_code == 204

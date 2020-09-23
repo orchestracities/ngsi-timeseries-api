@@ -1,7 +1,7 @@
 swagger: '2.0'  # For 3.0 see (https://github.com/zalando/connexion/issues/420)
 info:
   title: "QuantumLeap API"
-  version: "0.7.5"      # we'll keep it aligned with QL version
+  version: "0.7.6"      # we'll keep it aligned with QL version
 host: "localhost:8668"  # it'll run in the same container, hence localhost.
 produces:
   - text/plain
@@ -1759,3 +1759,21 @@ paths:
                     }
                   ]
               }
+
+  /v2/storage/{entityType}:
+    delete:
+      operationId: reporter.delete.drop_entity_storage
+      summary: "Drop supporting storage for the given entity type."
+      description: "Given an entity type, delete all the records of that
+      type, drop the table in which they were stored, and clean up the
+      metadata table accordingly."
+      tags:
+        - input
+      parameters:
+        # In Path...
+        - $ref: '#/parameters/entityTypeInPath'
+        # In Header...
+        - $ref: '#/parameters/fiware-Service'
+      responses:
+        204:
+          description: "Storage successfully deleted."

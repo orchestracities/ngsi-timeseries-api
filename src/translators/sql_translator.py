@@ -992,96 +992,48 @@ class SQLTranslator(base_translator.BaseTranslator):
 
         return [entities[k] for k in sorted(entities.keys())]
 
-    def delete_entity(self, entity_id, entity_type=None, from_date=None,
+    def delete_entity(self, eid, etype=None, from_date=None,
                       to_date=None, fiware_service=None,
                       fiware_servicepath=None):
-        if not entity_id:
+        if not eid:
             raise NGSIUsageError("entity_id cannot be None nor empty")
 
-        if not entity_type:
-            entity_type = self._get_entity_type(entity_id, fiware_service)
+        if not etype:
+            # TODO: rahter make entity type mandatory and bail out if not
+            # present.
+            # In fact, _get_entity_type will scan **all** DB tables to
+            # figure out candidate entity types for the given entity ID!
 
-            if not entity_type:
+            etype = self._get_entity_type(eid, fiware_service)
+
+            if not etype:
                 return 0
 
-            if len(entity_type.split(',')) > 1:
-                raise AmbiguousNGSIIdError(entity_id)
+            if len(etype.split(',')) > 1:
+                raise AmbiguousNGSIIdError(eid)
 
-        # First delete entries from table
-        table_name = self._et2tn(entity_type, fiware_service)
+        return self.delete_entities(etype, eid=[eid],
+                                    from_date=from_date, to_date=to_date,
+                                    fiware_service=fiware_service,
+                                    fiware_servicepath=fiware_servicepath)
 
-        # how many rows in total?
-        try:
-            self.cursor.execute("select count(*) from {}".format(table_name))
-        except Exception as e:
-            logging.error("{}".format(e))
-            return 0
-        # TODO why the result still keeps into account the deleted rows???
-        # this query was moved up to make it "consistent" also with db that
-        # may execute delete instantly (this does not seem the case of crate)
-        count = self.cursor.fetchall()[0][0]
-
-        where_clause = self._get_where_clause([entity_id, ],
-                                              from_date,
-                                              to_date,
-                                              fiware_servicepath)
-        op = "delete from {} {}".format(table_name, where_clause)
-
-        try:
-            self.cursor.execute(op)
-        except Exception as e:
-            logging.error("{}".format(e))
-            return 0
-
-        deleted_rows = self.cursor.rowcount
-
-        count = count - deleted_rows
-
-        if count == 0:
-            # Drop whole table
-            self._drop_table(table_name)
-
-        return deleted_rows
-
-    def delete_entities(self, entity_type, from_date=None, to_date=None,
+    def delete_entities(self, etype, eid=None, from_date=None, to_date=None,
                         fiware_service=None, fiware_servicepath=None):
-        table_name = self._et2tn(entity_type, fiware_service)
-
-        # how many rows in total?
-        try:
-            self.cursor.execute("select count(*) from {}".format(table_name))
-        except Exception as e:
-            logging.error("{}".format(e))
-            return 0
-        # TODO why the result still keeps into account the deleted rows???
-        # this query was moved up to make it "consistent" also with db that
-        # may execute delete instantly (this does not seem the case of crate)
-        count = self.cursor.fetchall()[0][0]
-
-        # Delete only requested range
-        entity_id = None
-        where_clause = self._get_where_clause(entity_id,
+        table_name = self._et2tn(etype, fiware_service)
+        where_clause = self._get_where_clause(eid,
                                               from_date,
                                               to_date,
                                               fiware_servicepath)
         op = "delete from {} {}".format(table_name, where_clause)
         try:
             self.cursor.execute(op)
+            return self.cursor.rowcount
         except Exception as e:
             logging.error("{}".format(e))
             return 0
 
-        deleted_rows = self.cursor.rowcount
-
-        count = count - deleted_rows
-
-        if count == 0:
-            # Drop whole table
-            self._drop_table(table_name)
-
-        return deleted_rows
-
-    def _drop_table(self, table_name):
+    def drop_table(self, etype, fiware_service=None):
+        table_name = self._et2tn(etype, fiware_service)
         op = "drop table {}".format(table_name)
         try:
             self.cursor.execute(op)
