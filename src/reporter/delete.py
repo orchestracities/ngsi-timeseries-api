@@ -1,20 +1,17 @@
 from exceptions.exceptions import AmbiguousNGSIIdError
-from flask import request
+from .http import fiware_s, fiware_sp
 from translators import crate
 
 
 def delete_entity(entity_id, type_=None, from_date=None, to_date=None):
-    fiware_s = request.headers.get('fiware-service', None)
-    fiware_sp = request.headers.get('fiware-servicepath', None)
-
     try:
         with crate.CrateTranslatorInstance() as trans:
             deleted = trans.delete_entity(eid=entity_id,
                                           etype=type_,
                                           from_date=from_date,
                                           to_date=to_date,
-                                          fiware_service=fiware_s,
-                                          fiware_servicepath=fiware_sp,)
+                                          fiware_service=fiware_s(),
+                                          fiware_servicepath=fiware_sp(),)
     except AmbiguousNGSIIdError as e:
         return {
             "error": "AmbiguousNGSIIdError",
@@ -33,15 +30,12 @@ def delete_entity(entity_id, type_=None, from_date=None, to_date=None):
 
 
 def delete_entities(entity_type, from_date=None, to_date=None):
-    fiware_s = request.headers.get('fiware-service', None)
-    fiware_sp = request.headers.get('fiware-servicepath', None)
-
     with crate.CrateTranslatorInstance() as trans:
         deleted = trans.delete_entities(etype=entity_type,
                                         from_date=from_date,
                                         to_date=to_date,
-                                        fiware_service=fiware_s,
-                                        fiware_servicepath=fiware_sp,)
+                                        fiware_service=fiware_s(),
+                                        fiware_servicepath=fiware_sp(),)
         if deleted == 0:
             r = {
                 "error": "Not Found",
@@ -54,6 +48,5 @@ def delete_entities(entity_type, from_date=None, to_date=None):
 
 
 def drop_entity_storage(entity_type: str):
-    fiware_s = request.headers.get('fiware-service', None)
     with crate.CrateTranslatorInstance() as trans:
-        trans.drop_table(etype=entity_type, fiware_service=fiware_s)
+        trans.drop_table(etype=entity_type, fiware_service=fiware_s())
