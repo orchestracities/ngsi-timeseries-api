@@ -1,11 +1,11 @@
 from exceptions.exceptions import AmbiguousNGSIIdError
 from .http import fiware_s, fiware_sp
-from translators import crate
+from translators.factory import translator_for
 
 
 def delete_entity(entity_id, type_=None, from_date=None, to_date=None):
     try:
-        with crate.CrateTranslatorInstance() as trans:
+        with translator_for(fiware_s()) as trans:
             deleted = trans.delete_entity(eid=entity_id,
                                           etype=type_,
                                           from_date=from_date,
@@ -30,7 +30,7 @@ def delete_entity(entity_id, type_=None, from_date=None, to_date=None):
 
 
 def delete_entities(entity_type, from_date=None, to_date=None):
-    with crate.CrateTranslatorInstance() as trans:
+    with translator_for(fiware_s()) as trans:
         deleted = trans.delete_entities(etype=entity_type,
                                         from_date=from_date,
                                         to_date=to_date,
@@ -48,5 +48,5 @@ def delete_entities(entity_type, from_date=None, to_date=None):
 
 
 def drop_entity_storage(entity_type: str):
-    with crate.CrateTranslatorInstance() as trans:
+    with translator_for(fiware_s()) as trans:
         trans.drop_table(etype=entity_type, fiware_service=fiware_s())
