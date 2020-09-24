@@ -7,17 +7,16 @@ from typing import Any, Optional, Sequence
 from geocoding.slf.querytypes import SlfQuery
 from translators import sql_translator
 from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
-    NGSI_GEOJSON, NGSI_GEOPOINT, NGSI_TEXT, NGSI_STRUCTURED_VALUE, TIME_INDEX, \
-    METADATA_TABLE_NAME, FIWARE_SERVICEPATH
+    NGSI_GEOJSON, NGSI_GEOPOINT, NGSI_TEXT, NGSI_STRUCTURED_VALUE, \
+    NGSI_LD_GEOMETRY, TIME_INDEX, METADATA_TABLE_NAME, FIWARE_SERVICEPATH
 import logging
 from .crate_geo_query import from_ngsi_query
 from utils.cfgreader import EnvReader, StrVar, IntVar
-
+from utils.connection_manager import ConnectionManager
 
 # CRATE TYPES
 # https://crate.io/docs/crate/reference/en/latest/general/ddl/data-types.html
 CRATE_ARRAY_STR = 'array(string)'
-
 
 # Translation
 NGSI_TO_SQL = {
@@ -30,6 +29,7 @@ NGSI_TO_SQL = {
     NGSI_DATETIME: 'timestamp',
     "Integer": 'long',
     NGSI_GEOJSON: 'geo_shape',
+    NGSI_LD_GEOMETRY: 'geo_shape',
     NGSI_GEOPOINT: 'geo_point',
     "Number": 'float',
     NGSI_TEXT: 'string',
@@ -37,26 +37,33 @@ NGSI_TO_SQL = {
     TIME_INDEX: 'timestamp'
 }
 
-
-CRATE_TO_NGSI = dict((v, k) for (k,v) in NGSI_TO_SQL.items())
+CRATE_TO_NGSI = dict((v, k) for (k, v) in NGSI_TO_SQL.items())
 CRATE_TO_NGSI['string_array'] = 'Array'
 
 
 class CrateTranslator(sql_translator.SQLTranslator):
-
-
     NGSI_TO_SQL = NGSI_TO_SQL
-
 
     def __init__(self, host, port=4200, db_name="ngsi-tsdb"):
         super(CrateTranslator, self).__init__(host, port, db_name)
         self.logger = logging.getLogger(__name__)
-
+        self.ccm = None
+        self.connection = None
+        self.cursor = None
 
     def setup(self):
         url = "{}:{}".format(self.host, self.port)
-        self.conn = client.connect([url], error_trace=True)
-        self.cursor = self.conn.cursor()
+        self.ccm = ConnectionManager()
+        self.connection = self.ccm.get_connection('crate')
+        if self.connection is None:
+            try:
+                self.connection = client.connect([url], error_trace=True)
+                self.ccm.set_connection('crate', self.connection)
+            except Exception as e:
+                self.logger.warning(str(e), exc_info=True)
+                raise e
+
+        self.cursor = self.connection.cursor()
         # TODO this reduce queries to crate,
         # but only within a single API call to QUANTUMLEAP
         # we need to think if we want to cache this information
@@ -76,16 +83,19 @@ class CrateTranslator(sql_translator.SQLTranslator):
             NGSI_TO_SQL["Number"] = 'real'
             NGSI_TO_SQL[NGSI_TEXT] = 'text'
 
-
     def dispose(self):
+        super(CrateTranslator, self).dispose()
         self.cursor.close()
-        self.conn.close()
 
+    def sql_error_handler(self, exception):
+        return
 
     def get_db_version(self):
-        self.cursor.execute("select version['number'] from sys.nodes")
-        return self.cursor.fetchall()[0][0]
-
+        stmt = "select version['number'] from sys.nodes"
+        res = self._execute_query_via_cache("crate",
+                                            "dbversion",
+                                            stmt, None, 6000)
+        return res[0][0]
 
     def get_health(self):
         """
@@ -120,8 +130,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
 
         return health
 
-
-    def _preprocess_values(self, e, table, col_names, fiware_servicepath):
+    def _preprocess_values(self, e, original_attrs, col_names, fiware_servicepath):
         values = []
         for cn in col_names:
             if cn == 'entity_type':
@@ -135,24 +144,45 @@ class CrateTranslator(sql_translator.SQLTranslator):
             else:
                 # Normal attributes
                 try:
-                    if 'type' in e[cn] and e[cn]['type'] == 'geo:point':
-                        lat, lon = e[cn]['value'].split(',')
-                        values.append([float(lon), float(lat)])
-                    else:
-                        values.append(e[cn]['value'])
+                    attr = original_attrs[cn][0]
+                    value = e[attr].get('value', None)
+                    if 'type' in e[attr] and e[attr]['type'] == 'geo:point':
+                        lat, lon = e[attr]['value'].split(',')
+                        value = [float(lon), float(lat)]
+                    elif 'type' in e[attr] and e[attr]['type'] == 'Property' \
+                         and 'value' in e[attr] \
+                         and isinstance(e[attr]['value'], dict) \
+                         and '@type' in e[attr]['value'] \
+                         and e[attr]['value']['@type'] == 'DateTime':
+                        value = e[attr]['value']['@value']
+                    elif 'type' in e[attr] and e[attr]['type'] == 'Relationship':
+                        value = e[attr].get('value', None) or \
+                                e[attr].get('object', None)
+
+                    values.append(value)
                 except KeyError:
-                    # this entity update does not have a value for the column so use None which will be inserted as NULL to the db.
-                    values.append( None )
+                    # this entity update does not have a value for the column
+                    # so use None which will be inserted as NULL to the db.
+                    values.append(None)
         return values
 
-    def _prepare_data_table(self, table_name, table, fiware_service):
+    def _create_data_table(self, table_name, table, fiware_service):
         columns = ', '.join('"{}" {}'.format(cn.lower(), ct)
                             for cn, ct in table.items())
         stmt = "create table if not exists {} ({}) with " \
-               "(number_of_replicas = '2-all', column_policy = 'dynamic')".format(table_name, columns)
+               "(number_of_replicas = '2-all', " \
+               "column_policy = 'strict')".format(table_name, columns)
         self.cursor.execute(stmt)
 
-    def _should_insert_original_entities(self, insert_error: Exception) -> bool:
+    def _update_data_table(self, table_name, new_columns, fiware_service):
+        #crate allows to add only one column for alter command!
+        for cn in new_columns:
+            alt_cols = 'add column "{}" {}'.format(cn.lower(), new_columns[cn])
+            stmt = "alter table {} {};".format(table_name, alt_cols)
+            self.cursor.execute(stmt)
+
+    def _should_insert_original_entities(self,
+                                         insert_error: Exception) -> bool:
         return isinstance(insert_error, exceptions.ProgrammingError)
 
     def _create_metadata_table(self):
@@ -162,18 +192,20 @@ class CrateTranslator(sql_translator.SQLTranslator):
         op = stmt.format(METADATA_TABLE_NAME)
         self.cursor.execute(op)
 
-    def _store_medatata(self, table_name, persisted_metadata):
+    def _store_metadata(self, table_name, persisted_metadata):
         major = int(self.db_version.split('.')[0])
         if (major <= 3):
             stmt = "insert into {} (table_name, entity_attrs) values (?,?) " \
-                   "on duplicate key update entity_attrs = values(entity_attrs)"
+                   "on duplicate key " \
+                   "update entity_attrs = values(entity_attrs)"
         else:
             stmt = "insert into {} (table_name, entity_attrs) values (?,?) " \
-                   "on conflict(table_name) DO UPDATE SET entity_attrs = excluded.entity_attrs"
+                   "on conflict(table_name) " \
+                   "DO UPDATE SET entity_attrs = excluded.entity_attrs"
         stmt = stmt.format(METADATA_TABLE_NAME)
         self.cursor.execute(stmt, (table_name, persisted_metadata))
 
-    def _compute_type(self, attr_t, attr):
+    def _compute_db_specific_type(self, attr_t, attr):
         """
         Github issue 44: Disable indexing for long string
         """
@@ -236,7 +268,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
 
 @contextmanager
 def CrateTranslatorInstance():
-    r = EnvReader(log=logging.getLogger(__name__).info)
+    r = EnvReader(log=logging.getLogger(__name__).debug)
     db_host = r.read(StrVar('CRATE_HOST', 'crate'))
     db_port = r.read(IntVar('CRATE_PORT', 4200))
     db_name = "ngsi-tsdb"

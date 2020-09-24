@@ -6,15 +6,17 @@ from typing import Any, Sequence
 
 from translators import sql_translator
 from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
-    NGSI_GEOJSON, NGSI_TEXT, NGSI_STRUCTURED_VALUE, TIME_INDEX, \
-    METADATA_TABLE_NAME, FIWARE_SERVICEPATH, TENANT_PREFIX
+    NGSI_LD_GEOMETRY, NGSI_GEOJSON, NGSI_TEXT, NGSI_STRUCTURED_VALUE, \
+    TIME_INDEX, METADATA_TABLE_NAME, FIWARE_SERVICEPATH, TENANT_PREFIX
 from translators.timescale_geo_query import from_ngsi_query
+import logging
 import geocoding.geojson.wktcodec
 from geocoding.slf.geotypes import *
 import geocoding.slf.jsoncodec
 from geocoding.slf.querytypes import SlfQuery
 import geocoding.slf.wktcodec
 from utils.cfgreader import *
+from utils.connection_manager import ConnectionManager
 
 # POSTGRES TYPES
 PG_JSON_ARRAY = 'jsonb'
@@ -27,6 +29,7 @@ NGSI_TO_SQL = {
     NGSI_DATETIME: 'timestamp WITH TIME ZONE',
     "Integer": 'bigint',
     NGSI_GEOJSON: 'geometry',
+    NGSI_LD_GEOMETRY: 'geometry',
     SlfPoint.ngsi_type(): 'geometry',
     SlfLine.ngsi_type(): 'geometry',
     SlfPolygon.ngsi_type(): 'geometry',
@@ -34,7 +37,7 @@ NGSI_TO_SQL = {
     "Number": 'float',
     NGSI_TEXT: 'text',
     NGSI_STRUCTURED_VALUE: 'jsonb',
-# hyper-table requires a non-null time index
+    # hyper-table requires a non-null time index
     TIME_INDEX: 'timestamp WITH TIME ZONE NOT NULL'
 }
 
@@ -52,7 +55,7 @@ class PostgresConnectionData:
         self.db_pass = db_pass
 
     def read_env(self, env: dict = os.environ):
-        r = EnvReader(env, log=logging.getLogger(__name__).info)
+        r = EnvReader(env, log=logging.getLogger(__name__).debug)
         self.host = r.read(StrVar('POSTGRES_HOST', self.host))
         self.port = r.read(IntVar('POSTGRES_PORT', self.port))
         self.use_ssl = r.read(BoolVar('POSTGRES_USE_SSL', self.use_ssl))
@@ -63,7 +66,6 @@ class PostgresConnectionData:
 
 
 class PostgresTranslator(sql_translator.SQLTranslator):
-
     NGSI_TO_SQL = NGSI_TO_SQL
 
     def __init__(self, conn_data=PostgresConnectionData()):
@@ -73,30 +75,48 @@ class PostgresTranslator(sql_translator.SQLTranslator):
         self.db_user = conn_data.db_user
         self.db_pass = conn_data.db_pass
         self.ssl = {} if conn_data.use_ssl else None
-        self.conn = None
+        self.ccm = None
+        self.connection = None
         self.cursor = None
+        self.logger = logging.getLogger(__name__)
 
     def setup(self):
-        pg8000.paramstyle = "qmark"
-        self.conn = pg8000.connect(host=self.host, port=self.port, ssl_context=self.ssl,
-                                   database=self.db_name,
-                                   user=self.db_user, password=self.db_pass)
-        self.conn.autocommit = True
-        self.cursor = self.conn.cursor()
+        self.ccm = ConnectionManager()
+        self.connection = self.ccm.get_connection('timescale')
+        if self.connection is None:
+            try:
+                pg8000.paramstyle = "qmark"
+                self.connection = pg8000.connect(host=self.host, port=self.port,
+                                                 ssl_context=self.ssl,
+                                                 database=self.db_name,
+                                                 user=self.db_user,
+                                                 password=self.db_pass)
+                self.connection.autocommit = True
+                self.ccm.set_connection('timescale', self.connection)
+            except Exception as e:
+                self.logger.warning(str(e), exc_info=True)
+                raise e
+
+        self.cursor = self.connection.cursor()
 
     def dispose(self):
+        super(PostgresTranslator, self).dispose()
         self.cursor.close()
-        self.conn.close()
+
+    def sql_error_handler(self, exception):
+        if exception.__class__ == BrokenPipeError:
+            self.ccm.reset_connection('timescale')
+            self.setup()
 
     @staticmethod
     def _svc_to_schema_name(fiware_service):
         if fiware_service:
             return '"{}{}"'.format(TENANT_PREFIX, fiware_service.lower())
 
-    def _compute_type(self, attr_t, attr):
+    def _compute_db_specific_type(self, attr_t, attr):
         return NGSI_TO_SQL[attr_t]
 
-    def _prepare_data_table(self, table_name, table, fiware_service):
+    def _create_data_table(self, table_name, table, fiware_service):
         schema = self._svc_to_schema_name(fiware_service)
         if schema:
             stmt = "create schema if not exists {}".format(schema)
@@ -120,11 +140,19 @@ class PostgresTranslator(sql_translator.SQLTranslator):
         self.cursor.execute(stmt)
 
         ix_name = '"ix_{}_eid_and_tx"'.format(table_name.replace('"', ''))
-        stmt = f"create index if not exists {ix_name} " +\
+        stmt = f"create index if not exists {ix_name} " + \
                f"on {table_name} (entity_id, {self.TIME_INDEX_NAME} desc)"
         self.cursor.execute(stmt)
 
-    def _preprocess_values(self, e, table, col_names, fiware_servicepath):
+    def _update_data_table(self, table_name, new_columns, fiware_service):
+
+        alt_cols = ', '.join('add column if not exists "{}" {}'
+                             .format(cn.lower(), ct)
+                             for cn, ct in new_columns.items())
+        stmt = "alter table {} {};".format(table_name, alt_cols)
+        self.cursor.execute(stmt)
+
+    def _preprocess_values(self, e, original_attrs, col_names, fiware_servicepath):
         values = []
         for cn in col_names:
             if cn == 'entity_type':
@@ -138,11 +166,13 @@ class PostgresTranslator(sql_translator.SQLTranslator):
             else:
                 # Normal attributes
                 try:
-                    mapped_type = table[cn]
-                    ngsi_value = e[cn]['value']
+                    attr = original_attrs[cn][0]
+                    attr_t = original_attrs[cn][1]
+                    ngsi_value = e[attr]['value']
+                    mapped_type = self._compute_type(e['id'], attr_t, e[attr])
 
-                    if SlfGeometry.is_ngsi_slf_attr(e[cn]):
-                        ast = SlfGeometry.build_from_ngsi_dict(e[cn])
+                    if SlfGeometry.is_ngsi_slf_attr(e[attr]):
+                        ast = SlfGeometry.build_from_ngsi_dict(e[attr])
                         mapped_value = geocoding.slf.wktcodec.encode_as_wkt(
                             ast, srid=4326)
                     elif mapped_type == NGSI_TO_SQL[NGSI_GEOJSON]:
@@ -155,6 +185,16 @@ class PostgresTranslator(sql_translator.SQLTranslator):
                         mapped_value = str(ngsi_value)
                     elif mapped_type == PG_JSON_ARRAY:
                         mapped_value = pg8000.PGJsonb(ngsi_value)
+                    elif 'type' in e[attr] and e[attr]['type'] == 'Property' \
+                            and 'value' in e[attr] \
+                            and isinstance(e[attr]['value'], dict) \
+                            and '@type' in e[attr]['value'] \
+                            and e[attr]['value']['@type'] == 'DateTime':
+                        mapped_value = e[attr]['value']['@value']
+                    elif 'type' in e[attr] and e[attr][
+                            'type'] == 'Relationship':
+                        mapped_value = e[attr].get('value', None) or \
+                                       e[attr].get('object', None)
                     else:
                         mapped_value = ngsi_value
 
@@ -186,6 +226,7 @@ class PostgresTranslator(sql_translator.SQLTranslator):
             return geocoding.geojson.wktcodec.decode_wkb_hexstr(db_value)
 
         return db_value
+
     # NOTE. Implicit conversions.
     # 1. JSON. NGSI struct values and arrays get inserted as `jsonb`. When
     # reading `jsonb` values back from the DB, pg8000 automatically converts
@@ -197,7 +238,8 @@ class PostgresTranslator(sql_translator.SQLTranslator):
     def _to_db_ngsi_structured_value(data: dict) -> pg8000.PGJsonb:
         return pg8000.PGJsonb(data)
 
-    def _should_insert_original_entities(self, insert_error: Exception) -> bool:
+    def _should_insert_original_entities(self,
+                                         insert_error: Exception) -> bool:
         return isinstance(insert_error, pg8000.ProgrammingError)
 
     def _create_metadata_table(self):
@@ -206,7 +248,7 @@ class PostgresTranslator(sql_translator.SQLTranslator):
         op = stmt.format(METADATA_TABLE_NAME)
         self.cursor.execute(op)
 
-    def _store_medatata(self, table_name, persisted_metadata):
+    def _store_metadata(self, table_name, persisted_metadata):
         stmt = "insert into {} (table_name, entity_attrs) values (?, ?) " \
                "on conflict (table_name) " \
                "do update set entity_attrs = ?"

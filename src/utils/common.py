@@ -133,7 +133,7 @@ def create_random_entities(num_types=1,
 
 def iter_entity_attrs(entity):
     for attr in entity:
-        if attr not in ['type', 'id']:
+        if attr not in ['type', 'id', '@context']:
             yield attr
 
 

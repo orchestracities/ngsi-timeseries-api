@@ -11,6 +11,7 @@ install:
 
 before_script:
   - pipenv install
+  - sudo service postgresql stop
 
 script:
   - source setup_dev_env.sh

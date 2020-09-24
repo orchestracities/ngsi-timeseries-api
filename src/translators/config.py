@@ -15,7 +15,7 @@ class SQLTranslatorConfig:
 
     def __init__(self, env: dict = os.environ):
         self.store = EnvReader(var_store=env,
-                               log=logging.getLogger(__name__).info)
+                               log=logging.getLogger(__name__).debug)
 
     def default_limit(self) -> int:
         fallback_limit = 10000

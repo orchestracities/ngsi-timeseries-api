@@ -47,3 +47,4 @@ def test_aggr_per_second(translator):
             'values': [5, 15, 25, 32],
         }
     }
+    translator.clean()

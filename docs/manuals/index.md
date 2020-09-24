@@ -128,8 +128,15 @@ to its shared-nothing architecture which lends itself well to
 manage a containerised CrateDB database cluster, e.g. using Kubernetes.
 Moreover, CrateDB uses [SQL][crate-doc.sql] to query data, with
 built-in extensions for temporal and [geographical queries][crate-doc.geo].
-Also of note, Grafana ships with a [plugin][grafana.pg] that can
-be used to visualise time series stored in CrateDB.
+CrateDB offers as well a Postgres API, making simpler its integration. 
+For example, you can leverage Grafana [PostgreSQL plugin][grafana.pg]
+to visualise time series stored in CrateDB.
+
+QuantumLeap stores NGSI entities in CrateDB using the `notify` endpoint.
+
+    -------------------------          ---------------
+    |        CrateDB        |  <-----  | QuantumLeap |-----O notify
+    -------------------------          ---------------
 
 ### Timescale back end
 [Timescale][timescale] is another time series databases that can be
@@ -138,8 +145,9 @@ Indeed, QuantumLeap provides full support for storing NGSI entities in
 Timescale, including geographical features (encoded as GeoJSON or NGSI
 Simple Location Format), structured types and arrays.
 
-QuantumLeap stores NGSI entities in Timescale using the existing
-`notify` endpoint. The Timescale back end is made up of [PostgreSQL][postgres]
+QuantumLeap stores NGSI entities in Timescale using the
+`notify` endpoint (as for CrateDB). 
+The Timescale back end is made up of [PostgreSQL][postgres]
 with both Timescale and [PostGIS][postgis] extensions enabled:
 
     -------------------------
@@ -166,13 +174,48 @@ contains quite a number of examples of how NGSI data are stored in
 Timescale.
 
 #### Note: querying & retrieving data
-At the moment, QuantumLeap does **not** implement any querying or
-retrieving of data through the QuantumLeap REST API as is available
-for the Crate back end. This means that for now the only way to access
-your data is to query the Timescale DB directly. However, data querying
-and retrieval through the REST API is planned for the upcoming
-QuantumLeap major release.
+At the moment, QuantumLeap implement experimental querying
+of data through the QuantumLeap REST API. 
+This means that while REST API on top of CrateDB
+have been tested in production, this is not the case for
+Timescale.
 
+## Cache Back End
+
+To reduce queries to databases or to geocoding APIs, QuantumLeap
+leverages a cache. The only cache backend supported so far
+is Redis.
+Caching support for queries to databases is *experimental*.
+
+    --------------------          ---------------
+    |        DB        |  ------  | QuantumLeap |-----O notify
+    --------------------          ---------------
+                                         |
+                                         |                                         
+                                  ---------------
+                                  |    Redis    |
+                                  ---------------                                        
+
+As of today, the query caching stores:
+* Version of CrateDB. Different version of CrateDB supports different SQL
+  dialects, so at each request we check which version of CrateDB
+  we are using. By caching this information, each thread will ask
+  this information only once. Of course this could be passed as variable,
+  but then live updates would require QL down time. Currently, you can
+  update from a Crate version to another with almost zero down time (except
+  the one caused by Crate not being in ready state), you would need
+  only to clear the key `crate` from redis cache. TTL in this case is
+  1 hour, i.e. after one hour version will be checked again against CrateDB.
+* Metadata table. The metadata table is used to store information about the
+  mapping between original NGSI attributes (including type) to db column names.
+  Basically this information is required to perform "consistent" data injection
+  and to correctly NGSI type retrieved attributes by queries. Given concurrency due
+  to the support of multithread and ha deployment, cache in this case has by default
+  a shorter TTL (60 sec). Cache is anyhow re-set every time a change to Metadata
+  table occurs (e.g. in case the incoming payload include a new entityType or
+  a new attribute for an existing entityType). **Metadata** for a specific
+  entityType are removed only if a entityType is dropped, not in case
+  all its values are removed.
 
 ## Further Readings
 
@@ -180,7 +223,7 @@ QuantumLeap major release.
   QuantumLeap.
 * The [User Manual][ql-man.user] delves into how to use it and connect
   it to other complementary services.
-* [FiWare Time Series][ql-tut]: a complete, step-by-step, hands-on tutorial
+* [FIWARE Time Series][ql-tut]: a complete, step-by-step, hands-on tutorial
   to learn how to set up and use QuantumLeap.
 * The [SmartSDK guided tour][smartsdk.tour] has a section about using
   QuantumLeap in a FiWare cloud.
@@ -227,7 +270,7 @@ QuantumLeap major release.
 [ql-spec]: https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb
     "NGSI-TSDB Specification"
 [ql-tut]: https://fiware-tutorials.readthedocs.io/en/latest/time-series-data/
-    "FiWare Tutorials - Time Series Data"
+    "FIWARE Tutorials - Time Series Data"
 [rethink]: https://www.rethinkdb.com/
     "RethinkDB Home"
 [smartsdk.tour]: http://guided-tour-smartsdk.readthedocs.io/en/latest/

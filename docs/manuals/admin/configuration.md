@@ -19,8 +19,11 @@ To configure QuantumLeap you can use the following environment variables:
 | `REDIS_HOST`       | Redis Host              |
 | `REDIS_PORT`       | Redis Port              |
 | `USE_GEOCODING`    | `True` or `False` enable or disable geocoding |
+| `DEFAULT_CACHE_TTL`| Time to live of metadata cache, default: 60 (seconds) |                              |
 | `QL_CONFIG`        | Pathname for tenant  configuration  |
-| `LOGLEVEL`         | define the log level for all services (`DEBUG`, `INFO`, `WARNING` , `ERROR`)      |
+| `QL_DEFAULT_DB`    | Default backend: `timescale` or `crate`  |
+| `USE_FLASK`        | `True` or `False` to use flask server or gunicorn. Default to `False`  |
+| `LOGLEVEL`         | Define the log level for all services (`DEBUG`, `INFO`, `WARNING` , `ERROR`)      |
 
 **NOTE**
 * `DEFAULT_LIMIT`. This variable specifies the upper limit L of rows a query

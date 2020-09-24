@@ -27,3 +27,4 @@ def test_default_replication(translator):
     translator.cursor.execute(op.format(METADATA_TABLE_NAME))
     res = translator.cursor.fetchall()
     assert res[0] == ['2-all']
+    translator.clean()

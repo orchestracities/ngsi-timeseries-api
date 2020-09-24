@@ -9,6 +9,7 @@ CENTROID_ATTR_NAME = 'location_centroid'
 _TYPE_ATTR_NAME = 'type'
 _VALUE_ATTR_NAME = 'value'
 _GEOJSON_TYPE = 'geo:json'
+_GEOJSON_LD_TYPE = 'GeoProperty'
 
 
 class LocationAttribute:
@@ -24,7 +25,8 @@ class LocationAttribute:
         return self._location.get(_VALUE_ATTR_NAME, None)
 
     def is_geojson(self):
-        return self.geometry_type() == _GEOJSON_TYPE
+        return self.geometry_type() == _GEOJSON_TYPE or \
+               self.geometry_type() == _GEOJSON_LD_TYPE
 
     def _compute_geojson_centroid(self):
         lon_lat = geojson_centroid(self.geometry_value())

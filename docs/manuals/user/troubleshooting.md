@@ -46,6 +46,15 @@ Make sure you have enough data points in your database and that your selection
 of time slice (on the top-right corner of grafana) is actually covering a time
 range in which you have data.
 
+#### 3D Coordinates are not working when using CrateDB as backend.
+
+If you spot an error such as:
+```
+crate.client.exceptions.ProgrammingError: SQLActionException[ColumnValidationException: Validation failed for location: Cannot cast {"coordinates"=[51.716783624, 8.752131611, 23], "type"='Point'} to type geo_shape]
+```
+This related to the fact that CrateDB does not support 3D coordinates,
+as documented in [admin documentation](../admin/crate.md).
+
 ## Bug reporting
 
 Bugs should be reported in the form of

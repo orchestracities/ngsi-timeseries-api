@@ -1,9 +1,10 @@
-from conftest import QL_URL, ORION_URL, entity, clean_mongo, clean_crate
+from conftest import QL_URL, ORION_URL, entity, clean_mongo
 import json
 import time
 import requests
+from .utils import delete_entity_type
 
-def test_integration(entity, clean_mongo, clean_crate):
+def test_integration(entity, clean_mongo):
     # Subscribe QL to Orion
     params = {
         'orionUrl': ORION_URL,
@@ -55,9 +56,10 @@ def test_integration(entity, clean_mongo, clean_crate):
     assert set(pressures).issubset(set([720.0, 721.0, 722.0, 723.0]))
     temperatures = data['attributes'][1]['values']
     assert set(temperatures).issubset(set([24.2, 25.2, 26.2, 27.2]))
+    delete_entity_type(None, entity['type'])
 
 
-def test_integration_custom_index(entity, clean_mongo, clean_crate):
+def test_integration_custom_index(entity, clean_mongo):
     # Subscribe QL to Orion
     params = {
         'orionUrl': ORION_URL,
@@ -110,3 +112,4 @@ def test_integration_custom_index(entity, clean_mongo, clean_crate):
     # Note some notifications may have been lost
     assert data['attributes'][0]['values'] == data['index']
     assert len(data['index']) > 1
+    delete_entity_type(None, entity['type'])

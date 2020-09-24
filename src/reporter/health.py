@@ -2,6 +2,7 @@ import os
 
 from geocoding import geocoding
 from geocoding.factory import get_geo_cache, is_geo_coding_available
+from cache.factory import get_cache, is_cache_available
 
 
 # TODO having now multiple backends, health check needs update
@@ -16,14 +17,14 @@ def check_crate():
         return crate_health
 
 
-def check_geocache():
+def check_cache():
     """
-    Geocache is relevant only when geocoding usage is enabled.
+    Cache check.
     """
-    if not is_geo_coding_available():
+    if not is_cache_available():
         return {'status': 'pass'}
 
-    cache = get_geo_cache()
+    cache = get_cache()
     return cache.get_health()
 
 
@@ -68,7 +69,7 @@ def get_health(with_geocoder=False):
         res.setdefault('details', {})['crateDB'] = 'cannot reach crate'
 
     # Check geocache (critical)
-    health = check_geocache()
+    health = check_cache()
     if health['status'] != 'pass':
         res.setdefault('details', {})['redis'] = health
         if health['status'] == 'fail' or res['status'] == 'pass':

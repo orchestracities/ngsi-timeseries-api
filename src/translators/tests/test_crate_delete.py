@@ -28,6 +28,7 @@ def test_delete_entity_defaults(translator):
 
     survivors = translator.query(entity_type=deleted_type, entity_id=deleted_id)
     assert len(survivors) == 0
+    translator.clean()
 
 
 def test_delete_entity_customs(translator):
@@ -63,6 +64,7 @@ def test_delete_entity_customs(translator):
     assert unaffected['id'] != deleted_id
     assert unaffected['type'] == deleted_type
     assert len(unaffected['index']) == 10
+    translator.clean()
 
 
 def test_delete_entity_with_tenancy(translator):
@@ -93,6 +95,7 @@ def test_delete_entity_with_tenancy(translator):
                                    fiware_service=fs,
                                    fiware_servicepath=fsp)
     assert res == 5
+    translator.clean(fs)
 
 
 def test_delete_entities_defaults(translator):
@@ -108,6 +111,7 @@ def test_delete_entities_defaults(translator):
     remaining = translator.query()
     assert len(remaining) == (3-1) * 2
     assert all([r['type'] != type_to_delete for r in remaining])
+    translator.clean()
 
 
 def test_delete_entities_customs(translator):
@@ -128,6 +132,7 @@ def test_delete_entities_customs(translator):
 
     remaining = translator.query()
     assert sum([len(r['index']) for r in remaining]) == ((4 * 4) - 3)
+    translator.clean()
 
 
 def test_delete_entities_with_tenancy(translator):
@@ -151,3 +156,4 @@ def test_delete_entities_with_tenancy(translator):
                                      fiware_service=fs,
                                      fiware_servicepath=fsp)
     assert res == 10
+    translator.clean(fs)

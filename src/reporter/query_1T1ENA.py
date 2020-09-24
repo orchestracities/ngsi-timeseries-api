@@ -56,12 +56,16 @@ def query_1T1ENA(entity_id,   # In Path
                                    fiware_servicepath=fiware_sp,
                                    geo_query=geo_query)
     except NGSIUsageError as e:
+        msg = "Bad Request Error: {}".format(e)
+        logging.getLogger(__name__).error(msg, exc_info=True)
         return {
             "error": "{}".format(type(e)),
             "description": str(e)
         }, 400
 
     except InvalidParameterValue as e:
+        msg = "Bad Request Error: {}".format(e)
+        logging.getLogger(__name__).error(msg, exc_info=True)
         return {
             "error": "{}".format(type(e)),
             "description": str(e)
@@ -70,7 +74,7 @@ def query_1T1ENA(entity_id,   # In Path
     except Exception as e:
         # Temp workaround to debug test_not_found
         msg = "Something went wrong with QL. Error: {}".format(e)
-        logging.getLogger().error(msg, exc_info=True)
+        logging.getLogger(__name__).error(msg, exc_info=True)
         return msg, 500
 
     if entities:
@@ -93,12 +97,14 @@ def query_1T1ENA(entity_id,   # In Path
             'index': index,
             'attributes': attributes
         }
+        logging.getLogger(__name__).info("Query processed successfully")
         return res
 
     r = {
         "error": "Not Found",
         "description": "No records were found for such query."
     }
+    logging.getLogger(__name__).info("No value found for query")
     return r, 404
 
 

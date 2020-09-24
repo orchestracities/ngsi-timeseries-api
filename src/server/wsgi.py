@@ -1,5 +1,5 @@
 from connexion import FlaskApp
-
+import logging
 import server
 
 
@@ -16,6 +16,9 @@ def new_wrapper() -> FlaskApp:
     """
     wrapper = FlaskApp(__name__,
                        specification_dir=SPEC_DIR)
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.ERROR)
+
     wrapper.add_api(SPEC,
                     arguments={'title': 'QuantumLeap V2 API'},
                     pythonic_params=True,

@@ -32,10 +32,10 @@ services:
       - crate
     environment:
       - CRATE_HOST=${CRATE_HOST:-crate}
-      - USE_GEOCODING=True
+      - USE_GEOCODING=False
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - LOGLEVEL=ERROR
+      - LOGLEVEL=INFO
 
   crate:
     image: crate:${CRATE_VERSION:-4.1.4}

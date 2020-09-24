@@ -66,10 +66,12 @@ def query_NTNENA(id_=None,  # In Query
                                    geo_query=geo_query)
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)
-        logging.getLogger().error(msg, exc_info=True)
+        logging.getLogger(__name__).error(msg, exc_info=True)
         return msg, 400
 
     except InvalidParameterValue as e:
+        msg = "Bad Request Error: {}".format(e)
+        logging.getLogger(__name__).error(msg, exc_info=True)
         return {
             "error": "{}".format(type(e)),
             "description": str(e)
@@ -77,7 +79,7 @@ def query_NTNENA(id_=None,  # In Query
 
     except Exception as e:
         msg = "Something went wrong with QL. Error: {}".format(e)
-        logging.getLogger().error(msg, exc_info=True)
+        logging.getLogger(__name__).error(msg, exc_info=True)
         return msg, 500
 
     attributes = []
@@ -139,11 +141,13 @@ def query_NTNENA(id_=None,  # In Query
         res = {
              'attrs': attrs_values
               }
+        logging.getLogger(__name__).info("Query processed successfully")
         return res
     r = {
         "error": "Not Found",
         "description": "No records were found for such query."
         }
+    logging.getLogger(__name__).info("No value found for query")
     return r, 404
 
 

@@ -66,7 +66,7 @@ threads = 1
 # Logging config section.
 #
 
-loglevel = 'debug'
+loglevel = 'error'
 
 
 # TODO: other settings.

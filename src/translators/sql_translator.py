@@ -12,12 +12,18 @@ from geocoding.slf import SlfQuery
 import dateutil.parser
 from typing import Any, List, Optional, Sequence
 from uuid import uuid4
+import pickle
+import types
+
+from cache.factory import get_cache, is_cache_available
+from utils.connection_manager import Borg
 
 # NGSI TYPES
 # Based on Orion output because official docs don't say much about these :(
 NGSI_DATETIME = 'DateTime'
 NGSI_ID = 'id'
 NGSI_GEOJSON = 'geo:json'
+NGSI_LD_GEOMETRY = 'GeoProperty'
 NGSI_GEOPOINT = 'geo:point'
 NGSI_ISO8601 = 'ISO8601'
 NGSI_STRUCTURED_VALUE = 'StructuredValue'
@@ -50,6 +56,7 @@ NGSI_TO_SQL = {
     "Integer": 'bigint',
     # NOT all databases supports geometry
     NGSI_GEOJSON: 'text',
+    NGSI_LD_GEOMETRY: 'text',
     SlfPoint.ngsi_type(): 'text',
     SlfLine.ngsi_type(): 'text',
     SlfPolygon.ngsi_type(): 'text',
@@ -102,9 +109,34 @@ def entity_type(entity: dict) -> Optional[str]:
 # many calls on each insert! Perhaps we should come up with a more efficient
 # design or at least consider stored procs.
 
+# Recent changes reduced number of queries via caching.
+# Regarding SQLAlchemy, investigations showed it does not support
+# geographic types for Crate.
+
 class SQLTranslator(base_translator.BaseTranslator):
     NGSI_TO_SQL = NGSI_TO_SQL
     config = SQLTranslatorConfig()
+
+    start_time = None
+
+    def __init__(self, host, port, db_name):
+        super(SQLTranslator, self).__init__(host, port, db_name)
+        qcm = QueryCacheManager()
+        self.cache = qcm.get_query_cache()
+        self.default_ttl = None
+        if self.cache:
+            self.default_ttl = self.cache.default_ttl
+        self.start_time = datetime.now()
+
+    def dispose(self):
+        dt = datetime.now() - self.start_time
+        time_difference = (
+                                      dt.days * 24 * 60 * 60 + dt.seconds) * 1000 + dt.microseconds / 1000.0
+        self.logger.debug("Translation completed | time={} msec".format(
+            str(time_difference)))
+
+    def sql_error_handler(self, exception):
+        raise NotImplementedError
 
     def _refresh(self, entity_types, fiware_service=None):
         """
@@ -117,7 +149,10 @@ class SQLTranslator(base_translator.BaseTranslator):
         table_names.append(METADATA_TABLE_NAME)
         self.cursor.execute("refresh table {}".format(','.join(table_names)))
 
-    def _prepare_data_table(self, table_name, table, fiware_service):
+    def _create_data_table(self, table_name, table, fiware_service):
+        raise NotImplementedError
+
+    def _update_data_table(self, table_name, new_columns, fiware_service):
         raise NotImplementedError
 
     def _create_metadata_table(self):
@@ -256,63 +291,62 @@ class SQLTranslator(base_translator.BaseTranslator):
         }
 
         for e in entities:
+            entity_id = e.get('id')
             for attr in iter_entity_attrs(e):
                 if attr == self.TIME_INDEX_NAME:
                     continue
 
-                if isinstance(e[attr], dict) and 'type' in e[attr]:
+                if isinstance(e[attr], dict) and 'type' in e[attr] \
+                        and e[attr]['type'] != 'Property':
                     attr_t = e[attr]['type']
+                elif isinstance(e[attr], dict) and 'type' in e[attr] \
+                        and e[attr]['type'] == 'Property' \
+                        and 'value' in e[attr] \
+                        and isinstance(e[attr]['value'], dict) \
+                        and '@type' in e[attr]['value'] \
+                        and e[attr]['value']['@type'] == 'DateTime':
+                    attr_t = NGSI_DATETIME
+                elif isinstance(e[attr], dict) and 'value' in e[attr]:
+                    value = e[attr]['value']
+                    if isinstance(value, list):
+                        attr_t = NGSI_STRUCTURED_VALUE
+                    elif value is not None and isinstance(value, dict):
+                        attr_t = NGSI_STRUCTURED_VALUE
+                    elif isinstance(value, int):
+                        attr_t = 'Integer'
+                    elif isinstance(value, float):
+                        attr_t = 'Number'
+                    elif isinstance(value, bool):
+                        attr_t = 'Boolean'
+                    elif self._is_iso_date(value):
+                        attr_t = NGSI_DATETIME
+                    else:
+                        attr_t = NGSI_TEXT
                 else:
-                    # Won't guess the type if user did't specify the type.
-                    # TODO Guess Type!
-                    attr_t = NGSI_TEXT
+                    attr_t = None
 
                 col = self._ea2cn(attr)
                 original_attrs[col] = (attr, attr_t)
-                entity_id = e.get('id')
 
-                if attr_t not in self.NGSI_TO_SQL:
-                    # if attribute is complex assume it as an NGSI StructuredValue
-                    # TODO we should support type name different from NGSI types
-                    # but mapping to NGSI types
-                    if self._attr_is_structured(e[attr]):
-                        table[col] = self.NGSI_TO_SQL[NGSI_STRUCTURED_VALUE]
-                    else:
-                        # TODO fallback type should be defined by actual JSON type
-                        supported_types = ', '.join(self.NGSI_TO_SQL.keys())
-                        msg = ("'{}' is not a supported NGSI type"
-                               " for Attribute:  '{}' "
-                               " and id : '{}'. "
-                               "Please use any of the following: {}. "
-                               "Falling back to {}.")
-                        self.logger.warning(msg.format(
-                            attr_t, attr, entity_id, supported_types,
-                            NGSI_TEXT))
-
-                        table[col] = self.NGSI_TO_SQL[NGSI_TEXT]
-
-                else:
-                    # Github issue 44: Disable indexing for long string
-                    sql_type = self._compute_type(attr_t, e[attr])
-
-                    # Github issue 24: StructuredValue == object or array
-                    is_list = isinstance(e[attr].get('value', None), list)
-                    if attr_t == NGSI_STRUCTURED_VALUE and is_list:
-                        sql_type = self.NGSI_TO_SQL['Array']
-
-                    table[attr] = sql_type
+                table[col] = self._compute_type(entity_id, attr_t, e[attr])
 
         # Create/Update metadata table for this type
         table_name = self._et2tn(entity_type, fiware_service)
-        self._update_metadata_table(table_name, original_attrs)
+        modified = self._update_metadata_table(table_name, original_attrs)
         # Sort out data table.
-        self._prepare_data_table(table_name, table, fiware_service)
+        if modified and modified == original_attrs.keys():
+            self._create_data_table(table_name, table, fiware_service)
+        elif modified:
+            new_columns = {}
+            for k in modified:
+                new_columns[k] = table[k]
+            self._update_data_table(table_name, new_columns, fiware_service)
 
         # Gather attribute values
         col_names = sorted(table.keys())
         entries = []  # raw values in same order as column names
         for e in entities:
-            values = self._preprocess_values(e, table, col_names,
+            values = self._preprocess_values(e, original_attrs, col_names,
                                              fiware_servicepath)
             entries.append(values)
 
@@ -327,8 +361,15 @@ class SQLTranslator(base_translator.BaseTranslator):
 
         stmt = f"insert into {table_name} ({col_list}) values ({placeholders})"
         try:
+            start_time = datetime.now()
             self.cursor.executemany(stmt, rows)
+            dt = datetime.now() - start_time
+            time_difference = (
+                                          dt.days * 24 * 60 * 60 + dt.seconds) * 1000 + dt.microseconds / 1000.0
+            self.logger.debug("Query completed | time={} msec".format(
+                str(time_difference)))
         except Exception as e:
+            self.sql_error_handler(e)
             if not self._should_insert_original_entities(e):
                 raise
 
@@ -410,7 +451,8 @@ class SQLTranslator(base_translator.BaseTranslator):
         # factor this logic out and keep it in just one place!
         return attr_type == NGSI_TEXT or attr_type not in NGSI_TO_SQL
 
-    def _preprocess_values(self, e, table, col_names, fiware_servicepath):
+    def _preprocess_values(self, e, original_attrs, col_names,
+                           fiware_servicepath):
         raise NotImplementedError
 
     def _update_metadata_table(self, table_name, metadata):
@@ -432,24 +474,50 @@ class SQLTranslator(base_translator.BaseTranslator):
             The dict mapping the matedata of each column. See original_attrs.
         """
 
-        self._create_metadata_table()
+        if not self._is_query_in_cache("quantumleap", METADATA_TABLE_NAME):
+            self._create_metadata_table()
+            self._cache("quantumleap",
+                        METADATA_TABLE_NAME,
+                        None,
+                        self.default_ttl)
 
         # Bring translation table!
-        stmt = "select entity_attrs from {} where table_name = ?"
-        self.cursor.execute(stmt.format(METADATA_TABLE_NAME), [table_name])
+        stmt = "select entity_attrs from {} where table_name = ?".format(
+            METADATA_TABLE_NAME)
 
         # By design, one entry per table_name
-        res = self.cursor.fetchall()
-        persisted_metadata = res[0][0] if res else {}
+        try:
+            res = self._execute_query_via_cache("quantumleap",
+                                                table_name,
+                                                stmt,
+                                                [table_name],
+                                                self.default_ttl)
+            persisted_metadata = res[0][0] if res else {}
+        except Exception as e:
+            self.sql_error_handler(e)
+            # Metadata table still not created
+            logging.debug(str(e), exc_info=True)
+            # Attempt to re-create metadata table
+            self._create_metadata_table()
+            persisted_metadata = {}
 
-        if metadata.keys() - persisted_metadata.keys():
-            persisted_metadata.update(metadata)
-            self._store_medatata(table_name, persisted_metadata)
+        diff = metadata.keys() - persisted_metadata.keys()
+        if diff:
+            # we update using the difference to "not" corrupt the metadata
+            # by previous insert
+            update = dict((k, metadata[k]) for k in diff if k in metadata)
+            persisted_metadata.update(update)
+            self._store_metadata(table_name, persisted_metadata)
+            self._cache("quantumleap",
+                        table_name,
+                        [[persisted_metadata]],
+                        self.default_ttl)
+        return diff
         # TODO: concurrency.
         # This implementation paves
         # the way to lost updates...
 
-    def _store_medatata(self, table_name, persisted_metadata):
+    def _store_metadata(self, table_name, persisted_metadata):
         raise NotImplementedError
 
     def _get_et_table_names(self, fiware_service=None):
@@ -457,20 +525,26 @@ class SQLTranslator(base_translator.BaseTranslator):
         Return the names of all the tables representing entity types.
         :return: list(unicode)
         """
-        op = "select distinct table_name from {} ".format(METADATA_TABLE_NAME)
+        stmt = "select distinct table_name from {}".format(METADATA_TABLE_NAME)
+        key = None
         if fiware_service:
-            where = "where table_name ~* '\"{}{}\"[.].*'"
-            op += where.format(TENANT_PREFIX, fiware_service.lower())
-
+            key = fiware_service.lower()
+            where = " where table_name ~* '\"{}{}\"[.].*'"
+            stmt += where.format(TENANT_PREFIX, key)
+        else:
+            where = " where table_name !~* '\"{}{}\"[.].*'"
+            stmt += where.format(TENANT_PREFIX, '.*')
         try:
-            self.cursor.execute(op)
-            rows = self.cursor.fetchall()
-            return [r[0] for r in rows]
+            table_names = self._execute_query_via_cache(key,
+                                                        "tableNames",
+                                                        stmt,
+                                                        [],
+                                                        self.default_ttl)
         except Exception as e:
-            # Metadata table still not created
-            msg = "Could not retrieve METADATA_TABLE. Empty database maybe?. {}"
-            logging.debug(msg.format(e))
+            self.sql_error_handler(e)
+            self.logger.error(str(e), exc_info=True)
             return []
+        return [r[0] for r in table_names]
 
     def _get_select_clause(self, attr_names, aggr_method, aggr_period):
         if not attr_names:
@@ -554,6 +628,13 @@ class SQLTranslator(base_translator.BaseTranslator):
             return dateutil.parser.isoparse(date.strip('\"')).isoformat()
         except Exception as e:
             raise InvalidParameterValue(date, "**fromDate** or **toDate**")
+
+    def _is_iso_date(self, date):
+        try:
+            dateutil.parser.isoparse(date.strip('\"')).isoformat()
+            return True
+        except Exception as e:
+            return False
 
     def _parse_limit(sefl, limit):
         if (not (limit is None or isinstance(limit, int))):
@@ -811,12 +892,13 @@ class SQLTranslator(base_translator.BaseTranslator):
                 # TODO due to this except in case of sql errors,
                 # all goes fine, and users gets 404 as result
                 # Reason 1: fiware_service_path column in legacy dbs.
-                logging.error("{}".format(e))
+                self.sql_error_handler(e)
+                self.logger.error(str(e), exc_info=True)
                 entities = []
             else:
                 res = self.cursor.fetchall()
                 col_names = self._column_names_from_query_meta(
-                                                        self.cursor.description)
+                    self.cursor.description)
                 entities = self._format_response(res,
                                                  col_names,
                                                  tn,
@@ -867,43 +949,53 @@ class SQLTranslator(base_translator.BaseTranslator):
         len_tn = 0
         result = []
         stmt = ''
-        for tn in sorted(table_names):
-            len_tn += 1
-            if len_tn != len(table_names):
-                stmt += "select entity_id, entity_type, max(time_index) as time_index " \
-                        "from {tn} {where_clause} " \
-                        "group by entity_id, entity_type " \
-                        "union all ".format(
-                    tn=tn,
-                    where_clause=where_clause
-                )
+        if len(table_names) > 0:
+            for tn in sorted(table_names):
+                len_tn += 1
+                if len_tn != len(table_names):
+                    stmt += "select " \
+                            "entity_id, " \
+                            "entity_type, " \
+                            "max(time_index) as time_index " \
+                            "from {tn} {where_clause} " \
+                            "group by entity_id, entity_type " \
+                            "union all ".format(
+                        tn=tn,
+                        where_clause=where_clause
+                    )
+                else:
+                    stmt += "select " \
+                            "entity_id, " \
+                            "entity_type, " \
+                            "max(time_index) as time_index " \
+                            "from {tn} {where_clause} " \
+                            "group by entity_id, entity_type ".format(
+                        tn=tn,
+                        where_clause=where_clause
+                    )
+
+            # TODO ORDER BY time_index asc is removed for the time being
+            #  till we have a solution for
+            #  https://github.com/crate/crate/issues/9854
+            op = stmt + "limit {limit} offset {offset}".format(
+                offset=offset,
+                limit=limit
+            )
+
+            try:
+                self.cursor.execute(op)
+            except Exception as e:
+                self.sql_error_handler(e)
+                self.logger.error(str(e), exc_info=True)
+                entities = []
             else:
-                stmt += "select entity_id, entity_type, max(time_index) as time_index " \
-                        "from {tn} {where_clause} " \
-                        "group by entity_id, entity_type ".format(
-                    tn=tn,
-                    where_clause=where_clause
-                )
-
-        # TODO ORDER BY time_index asc is removed for the time being till we have a solution for https://github.com/crate/crate/issues/9854
-        op = stmt + "limit {limit} offset {offset}".format(
-            offset=offset,
-            limit=limit
-        )
-
-        try:
-            self.cursor.execute(op)
-        except Exception as e:
-            logging.debug("{}".format(e))
-            entities = []
-        else:
-            res = self.cursor.fetchall()
-            col_names = ['entity_id', 'entity_type', 'time_index']
-            entities = self._format_response(res,
-                                             col_names,
-                                             tn,
-                                             None)
-        result.extend(entities)
+                res = self.cursor.fetchall()
+                col_names = ['entity_id', 'entity_type', 'time_index']
+                entities = self._format_response(res,
+                                                 col_names,
+                                                 tn,
+                                                 None)
+            result.extend(entities)
         return result
 
     def _format_response(self, resultset, col_names, table_name, last_n):
@@ -954,8 +1046,24 @@ class SQLTranslator(base_translator.BaseTranslator):
         """
         stmt = "select entity_attrs from {} " \
                "where table_name = ?".format(METADATA_TABLE_NAME)
-        self.cursor.execute(stmt, [table_name])
-        res = self.cursor.fetchall()
+        try:
+            # TODO we tested using cache here, but with current "delete"
+            #  approach this causes issues scenario triggering the issue is:
+            #  a entity is create, delete is used to delete all values what
+            #  happens is that the table is empty, but metadata are still
+            #  there, so caching the query with res =
+            #  self._execute_query_via_cache(table_name, "metadata", stmt,
+            #  [table_name], self.default_ttl) actually create an entry in
+            #  the cache table_name, "metadata" in a following query call (
+            #  below ttl) the same cache can be called despite there is no
+            #  data. a possible solution is to create a cache based on query
+            #  parameters that would cache all the results
+            self.cursor.execute(stmt, [table_name])
+            res = self.cursor.fetchall()
+        except Exception as e:
+            self.sql_error_handler(e)
+            self.logger.error(str(e), exc_info=True)
+            res = {}
 
         if len(res) == 0:
             # See GH #173
@@ -1044,9 +1152,15 @@ class SQLTranslator(base_translator.BaseTranslator):
         op = "delete from {} {}".format(table_name, where_clause)
         try:
             self.cursor.execute(op)
+            key = None
+            if fiware_service:
+                key = fiware_service.lower()
+            self._remove_from_cache("quantumleap", table_name)
+            self._remove_from_cache(key, "tableNames")
             return self.cursor.rowcount
         except Exception as e:
-            logging.error("{}".format(e))
+            self.sql_error_handler(e)
+            self.logger.error(str(e), exc_info=True)
             return 0
 
     def drop_table(self, etype, fiware_service=None):
@@ -1055,14 +1169,21 @@ class SQLTranslator(base_translator.BaseTranslator):
         try:
             self.cursor.execute(op)
         except Exception as e:
-            logging.error("{}".format(e))
+            self.sql_error_handler(e)
+            self.logger.error(str(e), exc_info=True)
 
         # Delete entry from metadata table
         op = "delete from {} where table_name = ?".format(METADATA_TABLE_NAME)
         try:
             self.cursor.execute(op, [table_name])
+            self._remove_from_cache("quantumleap", table_name)
+            key = None
+            if fiware_service:
+                key = fiware_service.lower()
+            self._remove_from_cache(key, "tableNames")
         except Exception as e:
-            logging.error("{}".format(e))
+            self.sql_error_handler(e)
+            self.logger.error(str(e), exc_info=True)
 
         if self.cursor.rowcount == 0 and table_name.startswith('"'):
             # See GH #173
@@ -1070,16 +1191,13 @@ class SQLTranslator(base_translator.BaseTranslator):
             try:
                 self.cursor.execute(op, [old_tn])
             except Exception as e:
-                logging.error("{}".format(e))
+                self.sql_error_handler(e)
+                self.logger.error(str(e), exc_info=True)
 
-    def _get_entity_type(self, entity_id, fiware_service):
+    def query_entity_types(self, fiware_service=None, fiware_servicepath=None):
         """
-        Find the type of the given entity_id.
-        :returns: unicode
-            Empty value if there is no entity with such entity_id.
-            Or just the entity_type of the given entity_id if unique.
-            Or a comma-separated list of entity_types with at least one record
-            with such entity_id.
+        Find the types of for a given fiware_service and fiware_servicepath.
+        :return: list of strings.
         """
         # Filter using tenant information
         if fiware_service is None:
@@ -1095,15 +1213,70 @@ class SQLTranslator(base_translator.BaseTranslator):
             METADATA_TABLE_NAME,
             wc
         )
+
         try:
             self.cursor.execute(stmt)
-
+            table_names = self.cursor.fetchall()
         except Exception as e:
-            logging.error("{}".format(e))
+            self.sql_error_handler(e)
+            self.logger.error(str(e), exc_info=True)
             return None
 
         else:
-            all_types = [et[0] for et in self.cursor.fetchall()]
+            matching_types = []
+
+            all_types = [tn[0] for tn in table_names]
+
+            for et in all_types:
+                stmt = "select distinct(entity_type) from {}".format(et)
+                if fiware_servicepath == '/':
+                    stmt = stmt + " WHERE {} ~* '/.*'" \
+                        .format(FIWARE_SERVICEPATH)
+                elif fiware_servicepath:
+                    stmt = stmt + " WHERE {} ~* '{}($|/.*)'" \
+                        .format(FIWARE_SERVICEPATH, fiware_servicepath)
+                self.cursor.execute(stmt)
+                types = [t[0] for t in self.cursor.fetchall()]
+                matching_types.extend(types)
+
+        return matching_types
+
+    def _get_entity_type(self, entity_id, fiware_service):
+        """
+        Find the type of the given entity_id.
+        :returns: unicode
+            Empty value if there is no entity with such entity_id.
+            Or just the entity_type of the given entity_id if unique.
+            Or a comma-separated list of entity_types with at least one record
+            with such entity_id.
+        """
+        # Filter using tenant information
+        key = None
+        if fiware_service is None:
+            wc = "where table_name NOT like '\"{}%.%'".format(TENANT_PREFIX)
+        else:
+            # Old is prior QL 0.6.0. GH #173
+            old_prefix = '{}{}'.format(TENANT_PREFIX, fiware_service.lower())
+            prefix = self._et2tn("FooType", fiware_service).split('.')[0]
+            wc = "where table_name like '{}.%' " \
+                 "or table_name like '{}.%'".format(old_prefix, prefix)
+            key = fiware_service.lower()
+
+        stmt = "select distinct(table_name) from {} {}".format(
+            METADATA_TABLE_NAME,
+            wc
+        )
+
+        try:
+            self.cursor.execute(stmt)
+            entity_types = self.cursor.fetchall()
+        except Exception as e:
+            self.sql_error_handler(e)
+            self.logger.error(str(e), exc_info=True)
+            return None
+
+        else:
+            all_types = [et[0] for et in entity_types]
 
         matching_types = []
         for et in all_types:
@@ -1115,5 +1288,112 @@ class SQLTranslator(base_translator.BaseTranslator):
 
         return ','.join(matching_types)
 
-    def _compute_type(self, attr_t, attr):
+    def _compute_type(self, entity_id, attr_t, attr):
+
+        if attr_t not in self.NGSI_TO_SQL:
+            # if attribute is complex assume it as an NGSI StructuredValue
+            # TODO we should support type name different from NGSI types
+            # but mapping to NGSI types
+            if self._attr_is_structured(attr):
+                return self.NGSI_TO_SQL[NGSI_STRUCTURED_VALUE]
+            else:
+                value = attr.get('value', None) or attr.get('object', None)
+                sql_type = self.NGSI_TO_SQL[NGSI_TEXT]
+                if isinstance(value, list):
+                    sql_type = self.NGSI_TO_SQL['Array']
+                elif value is not None and isinstance(value, dict):
+                    if attr_t == 'Property' \
+                            and '@type' in value \
+                            and value['@type'] == 'DateTime':
+                        sql_type = self.NGSI_TO_SQL[NGSI_DATETIME]
+                    else:
+                        sql_type = self.NGSI_TO_SQL[NGSI_STRUCTURED_VALUE]
+                elif isinstance(value, int):
+                    sql_type = self.NGSI_TO_SQL['Integer']
+                elif isinstance(value, float):
+                    sql_type = self.NGSI_TO_SQL['Number']
+                elif isinstance(value, bool):
+                    sql_type = self.NGSI_TO_SQL['Boolean']
+                elif self._is_iso_date(value):
+                    sql_type = self.NGSI_TO_SQL[NGSI_DATETIME]
+
+                supported_types = ', '.join(self.NGSI_TO_SQL.keys())
+                msg = ("'{}' is not a supported NGSI type"
+                       " for Attribute:  '{}' "
+                       " and id : '{}'. "
+                       "Please use any of the following: {}. "
+                       "Falling back to {}.")
+                self.logger.warning(msg.format(
+                    attr_t, attr, entity_id, supported_types,
+                    sql_type))
+
+                return sql_type
+
+        else:
+            # Github issue 44: Disable indexing for long string
+            sql_type = self._compute_db_specific_type(attr_t, attr)
+
+            # Github issue 24: StructuredValue == object or array
+            is_list = isinstance(attr.get('value', None), list)
+            if attr_t == NGSI_STRUCTURED_VALUE and is_list:
+                sql_type = self.NGSI_TO_SQL['Array']
+            return sql_type
+
+    def _compute_db_specific_type(self, attr_t, attr):
         raise NotImplementedError
+
+    def _execute_query_via_cache(self, tenant_name, key, stmt, parameters=None,
+                                 ex=None):
+        if self.cache:
+            try:
+                value = self.cache.get(tenant_name, key)
+                if value:
+                    res = pickle.loads(value)
+                    return res
+            except Exception as e:
+                self.logger.warning(str(e), exc_info=True)
+
+        self.cursor.execute(stmt, parameters)
+        res = self.cursor.fetchall()
+        if res:
+            self._cache(tenant_name, key, res, ex)
+        return res
+
+    def _is_query_in_cache(self, tenant_name, key):
+        if self.cache:
+            try:
+                return self.cache.exists(tenant_name, key)
+            except Exception as e:
+                self.logger.warning(str(e), exc_info=True)
+        return False
+
+    def _cache(self, tenant_name, key, value=None, ex=None):
+        if self.cache:
+            try:
+                if value:
+                    value = pickle.dumps(value)
+                self.cache.put(tenant_name, key, value, ex)
+            except Exception as e:
+                self.logger.warning(str(e), exc_info=True)
+
+    def _remove_from_cache(self, tenant_name, key):
+        if self.cache:
+            try:
+                self.cache.delete(tenant_name, key)
+            except Exception as e:
+                self.logger.warning(str(e), exc_info=True)
+
+
+class QueryCacheManager(Borg):
+    cache = None
+
+    def __init__(self):
+        super(QueryCacheManager, self).__init__()
+        if is_cache_available() and self.cache is None:
+            try:
+                self.cache = get_cache()
+            except Exception as e:
+                self.logger.warning(str(e), exc_info=True)
+
+    def get_query_cache(self):
+        return self.cache

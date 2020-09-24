@@ -141,29 +141,46 @@ You need to make sure your NGSI entities are using the valid NGSI types for the
 attributes, which are documented in the *Specification* section of the [NGSI API](http://telefonicaid.github.io/fiware-orion/api/v2/latest/). See the first
 column of the translation table below, and mind its capitalisation.
 
-The table below shows which attribute types will be translated to which
-[CrateDB Data Types](https://crate.io/docs/crate/reference/sql/data_types.html).
+The tables below show which attribute types will be translated to which
+[CrateDB](https://crate.io/docs/crate/reference/sql/data_types.html)
+or [TimescaleDB](https://www.postgresql.org/docs/current/datatype.html) data types.
 
-**CrateDB Translation Table**
+**CrateDB (v4.x) Translation Table**
 
 | NGSI Type          | CrateDB Type          | Observation |
 | ------------------ |:-----------------------:| :-----------|
 |Array               | [array(string)](https://crate.io/docs/crate/reference/sql/data_types.html#array)           | [Issue 36: Support arrays of other types](https://github.com/smartsdk/ngsi-timeseries-api/issues/36) |
 |Boolean             | [boolean](https://crate.io/docs/crate/reference/sql/data_types.html#boolean)                 | - |
-|DateTime            | [timestamp](https://crate.io/docs/crate/reference/sql/data_types.html#timestamp)                 | 'ISO8601' can be used as equivalent of 'DateTime'. |
-|Integer             | [long](https://crate.io/docs/crate/reference/sql/data_types.html#numeric-types)                  | - |
+|DateTime            | [timestampz](https://crate.io/docs/crate/reference/en/4.3/general/ddl/data-types.html#timestamp-with-time-zone)                 | 'ISO8601' can be used as equivalent of 'DateTime'. |
+|Integer             | [bigint](https://crate.io/docs/crate/reference/sql/data_types.html#numeric-types)                  | - |
 |[geo:point](http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities)            | [geo_point](https://crate.io/docs/crate/reference/sql/data_types.html#geo-point)               | **Attention!** NGSI uses "lat, long" order whereas CrateDB stores points in [long, lat] order.|
 |[geo:json](http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities)            | [geo_shape](https://crate.io/docs/crate/reference/sql/data_types.html#geo-shape)               | - |
-|Number              | [float](https://crate.io/docs/crate/reference/sql/data_types.html#numeric-types)                   |-|
-|Text                | [string](https://crate.io/docs/crate/reference/sql/data_types.html#string)                  | This is the default type if the provided NGSI Type is unsupported or wrong. |
+|Number              | [real](https://crate.io/docs/crate/reference/sql/data_types.html#numeric-types)                   |-|
+|Text                | [text](https://crate.io/docs/crate/reference/sql/data_types.html#data-type-text)                  | This is the default type if the provided NGSI Type is unsupported or wrong. |
 |StructuredValue     | [object](https://crate.io/docs/crate/reference/sql/data_types.html#object)                  |-|
+
+**TimescaleDB (v12.x) Translation Table**
+
+| NGSI Type          | TimescaleDB Type          | Observation |
+| ------------------ |:-----------------------:| :-----------|
+|Array               | [jsonb](https://www.postgresql.org/docs/current/datatype-json.html)           |  |
+|Boolean             | [boolean](https://www.postgresql.org/docs/current/datatype-boolean.html)                 | - |
+|DateTime            | [timestamp WITH TIME ZONE](https://www.postgresql.org/docs/current/datatype-datetime.html)                 | 'ISO8601' can be used as equivalent of 'DateTime'. |
+|Integer             | [bigint](https://www.postgresql.org/docs/current/datatype-numeric.html#DATATYPE-INT)                  | - |
+|[geo:point](http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities)            | [geometry](https://postgis.net/docs/geometry.html)               | **Attention!** NGSI uses "lat, long" order whereas PostGIS/WGS84 stores points in [long, lat] order.|
+|[geo:json](http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities)            | [geometry](https://postgis.net/docs/geometry.html)               | - |
+|Number              | [float](https://www.postgresql.org/docs/current/datatype-numeric.html#DATATYPE-FLOAT)                   |-|
+|Text                | [text](https://www.postgresql.org/docs/current/datatype-character.html)                  | This is the default type if the provided NGSI Type is unsupported or wrong. |
+|StructuredValue     | [jsonb](https://www.postgresql.org/docs/current/datatype-json.html)                  |-|
+
+
 
 If the type of any of the received attributes is not present in the column
 *NGSI Type* of the previous table, the value of such attribute will be treated
 internally as a string. So, if you use `Float` for your attribute type (not
-valid), your attribute will be stored as a `string`.
+valid), your attribute will be stored as a `text`.
 
-### Time Index
+### [Time Index](#timeindex)
 
 A fundamental element in the time-series database is the **time index**.
 You may be wondering... where is it stored? QuantumLeap will persist the
@@ -270,7 +287,8 @@ Note there are a lot of possibilities, but not all of them are fully
 implemented yet.
 
 If you want to, you can interact directly with the database. For more details
-refer to the [CrateDB](../admin/crate.md) section of the docs. What you need to
+refer to the [CrateDB](../admin/crate.md) or to the [Timescale](../admin/timescale.md)
+section of the docs. What you need to
 know in this case is that QuantumLeap will create one table per each entity
 type. Table names are formed with a prefix (et) plus the lowercase version of
 the entity type. I.e, if your entity type is *AirQualityObserved*, the
@@ -310,8 +328,10 @@ headers will have to be used in order to retrieve such data.
 
 In case you are interacting directly with the database, you need to know that
 QuantumLeap will use the `FIWARE-Service` as the
-[database schema](https://crate.io/docs/crate/reference/en/latest/general/ddl/create-table.html?highlight=scheme#schemas)
-for crate, with a specific prefix. This way, if you insert an entity of type
+database schema for
+[crate](https://crate.io/docs/crate/reference/en/latest/general/ddl/create-table.html?highlight=scheme#schemas)
+or [timescale](https://www.postgresql.org/docs/current/ddl-schemas.html),
+with a specific prefix. This way, if you insert an entity of type
 `Room` using the `Fiware-Service: magic` header, you should expect to find your
 table as `mtmagic.etroom`. This information is also useful for example if you
 are configuring the Grafana datasource, as explained in the

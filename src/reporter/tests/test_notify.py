@@ -45,6 +45,7 @@ def headers(service=None, service_path=None, content_type=True):
 
     return h
 
+
 @pytest.mark.parametrize("service", services)
 def test_invalid_no_body(service):
     r = requests.post('{}'.format(notify_url),
@@ -219,7 +220,6 @@ def test_air_quality_observed(air_quality_observed, orion_client):
         }
     }
     do_integration(entity, subscription, orion_client)
-
 
 
 def test_integration_multiple_entities(diffEntityWithDifferentAttrs, orion_client):
@@ -541,7 +541,7 @@ def test_no_value_no_type_for_attributes(service, notification):
         'type': 'Room',
         'odour': {'type': 'Text', 'value': 'Good', 'metadata': {}},
         'temperature': {'metadata': {}},
-        'pressure': {'type': 'Number', 'value': '26', 'metadata': {}},
+        'pressure': {'type': 'Number', 'value': 26, 'metadata': {}},
     }
     url = '{}'.format(notify_url)
     get_url = "{}/entities/Room1/attrs/temperature/value".format(QL_URL)
@@ -563,7 +563,7 @@ def test_no_value_no_type_for_attributes(service, notification):
     notification['data'][0] = {
         'id': 'Room1',
         'type': 'Room',
-        'temperature': {'type': 'Number', 'value': '25', 'metadata': {}}
+        'temperature': {'type': 'Number', 'value': 25, 'metadata': {}}
     }
     url = '{}'.format(notify_url)
     get_url = "{}/entities/Room1/attrs/temperature/value".format(QL_URL)
@@ -574,7 +574,7 @@ def test_no_value_no_type_for_attributes(service, notification):
     time.sleep(SLEEP_TIME)
     res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 200
-    assert res_get.json()['values'][1] == '25'
+    assert res_get.json()['values'][1] == 25
     delete_entity_type(service, notification['data'][0]['type'])
 
 
@@ -585,8 +585,8 @@ def test_with_value_no_type_for_attributes(service, notification):
         'id': 'Kitchen1',
         'type': 'Kitchen',
         'odour': {'type': 'Text', 'value': 'Good', 'metadata': {}},
-        'temperature': {'value': '25', 'metadata': {}},
-        'pressure': {'type': 'Number', 'value': '26', 'metadata': {}},
+        'temperature': {'value': 25, 'metadata': {}},
+        'pressure': {'type': 'Number', 'value': 26, 'metadata': {}},
     }
     url = '{}'.format(notify_url)
     get_url = "{}/entities/Kitchen1/attrs/temperature/value".format(QL_URL)
@@ -597,7 +597,7 @@ def test_with_value_no_type_for_attributes(service, notification):
     time.sleep(SLEEP_TIME)
     res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 200
-    assert res_get.json()['values'][0] == '25'
+    assert res_get.json()['values'][0] == 25
     delete_entity_type(service, notification['data'][0]['type'])
 
 
@@ -609,7 +609,7 @@ def test_no_value_with_type_for_attributes(service, notification):
         'type': 'Hall',
         'odour': {'type': 'Text', 'value': 'Good', 'metadata': {}},
         'temperature': {'type': 'Number', 'metadata': {}},
-        'pressure': {'type': 'Number', 'value': '26', 'metadata': {}},
+        'pressure': {'type': 'Number', 'value': 26, 'metadata': {}},
     }
     url = '{}'.format(notify_url)
     get_url = "{}/entities/Hall1/attrs/temperature/value".format(QL_URL)
@@ -621,4 +621,112 @@ def test_no_value_with_type_for_attributes(service, notification):
     res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 200
     assert res_get.json()['values'][0] == None
+    delete_entity_type(service, notification['data'][0]['type'])
+
+
+@pytest.mark.parametrize("service", services)
+def test_issue_382(service, notification):
+    # entity with one Null value and no type
+    notification['data'][0] =     {
+        "id": "urn:ngsi-ld:Test:0002",
+        "type": "Test",
+        "errorNumber": {
+            "type": "Integer",
+            "value": 2
+        },
+        "refVacuumPump": {
+            "type": "Relationship",
+            "value": "urn:ngsi-ld:VacuumPump:FlexEdgePump"
+        },
+        "refOutgoingPallet": {
+            "type": "Array",
+            "value": [
+                "urn:ngsi-ld:Pallet:0003",
+                "urn:ngsi-ld:Pallet:0004"
+            ]
+        }
+    }
+    url = '{}'.format(notify_url)
+    get_url = "{}/entities/urn:ngsi-ld:Test:0002/attrs/errorNumber/value".format(QL_URL)
+    url_new = '{}'.format(get_url)
+    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
+    assert r.status_code == 200
+    # Give time for notification to be processed
+    time.sleep(SLEEP_TIME)
+    res_get = requests.get(url_new, headers=query_header(service))
+    assert res_get.status_code == 200
+    assert res_get.json()['values'][0] == 2
+    delete_entity_type(service, notification['data'][0]['type'])
+
+@pytest.mark.parametrize("service", services)
+def test_json_ld(service, notification):
+    # entity with one Null value and no type
+    notification['data'][0] = {
+        "id": "urn:ngsi-ld:Streetlight:streetlight:guadalajara:4567",
+        "type": "Streetlight",
+        "location": {
+            "type": "GeoProperty",
+            "value": {
+                "type": "Point",
+                "coordinates": [-3.164485591715449, 40.62785133667262]
+            }
+        },
+        "areaServed": {
+            "type": "Property",
+            "value": "Roundabouts city entrance"
+        },
+        "status": {
+            "type": "Property",
+            "value": "ok"
+        },
+        "refStreetlightGroup": {
+            "type": "Relationship",
+            "object": "urn:ngsi-ld:StreetlightGroup:streetlightgroup:G345"
+        },
+        "refStreetlightModel": {
+            "type": "Relationship",
+            "object": "urn:ngsi-ld:StreetlightModel:streetlightmodel:STEEL_Tubular_10m"
+        },
+        "circuit": {
+            "type": "Property",
+            "value": "C-456-A467"
+        },
+        "lanternHeight": {
+            "type": "Property",
+            "value": 10
+        },
+        "locationCategory": {
+            "type": "Property",
+            "value": "centralIsland"
+        },
+        "powerState": {
+            "type": "Property",
+            "value": "off"
+        },
+        "controllingMethod": {
+            "type": "Property",
+            "value": "individual"
+        },
+        "dateLastLampChange": {
+            "type": "Property",
+            "value": {
+                "@type": "DateTime",
+                "@value": "2016-07-08T08:02:21.753Z"
+            }
+        },
+        "@context": [
+            "https://schema.lab.fiware.org/ld/context",
+            "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+        ]
+    }
+    url = '{}'.format(notify_url)
+    get_url = "{}/entities/urn:ngsi-ld:Streetlight:streetlight:guadalajara:4567/attrs/lanternHeight/value".format(QL_URL)
+    url_new = '{}'.format(get_url)
+    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
+    assert r.status_code == 200
+    # Give time for notification to be processed
+    time.sleep(SLEEP_TIME)
+    res_get = requests.get(url_new, headers=query_header(service))
+    assert res_get.status_code == 200
+    assert res_get.json()['values'][0] == 10
     delete_entity_type(service, notification['data'][0]['type'])

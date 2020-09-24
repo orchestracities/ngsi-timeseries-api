@@ -5,6 +5,9 @@ from conftest import crate_translator as translator, entity
 from utils.common import *
 from datetime import datetime, timezone
 
+from src.utils.common import create_random_entities
+
+
 def test_db_version(translator):
     version = translator.get_db_version()
     major = int(version.split('.')[0])
@@ -15,6 +18,7 @@ def test_insert(translator):
     entities = create_random_entities(1, 2, 3, use_time=True, use_geo=True)
     result = translator.insert(entities)
     assert result.rowcount > 0
+    translator.clean()
 
 
 def test_insert_entity(translator, entity):
@@ -29,6 +33,7 @@ def test_insert_entity(translator, entity):
     assert len(loaded_entities) == 1
 
     check_notifications_record([entity], loaded_entities)
+    translator.clean()
 
 def test_insert_same_entity_with_different_attrs( translator, sameEntityWithDifferentAttrs ):
     """
@@ -45,6 +50,7 @@ def test_insert_same_entity_with_different_attrs( translator, sameEntityWithDiff
     assert len(loaded_entities) == 1
 
     check_notifications_record( sameEntityWithDifferentAttrs, loaded_entities)
+    translator.clean()
 
 def test_insert_multiple_types(translator):
     args = {
@@ -62,6 +68,7 @@ def test_insert_multiple_types(translator):
     entities = create_random_entities(**args)
     result = translator.insert(entities)
     assert result.rowcount > 0
+    translator.clean()
 
 
 def test_query_all_before_insert(translator):
@@ -80,6 +87,7 @@ def test_query_all_before_insert(translator):
                                        fiware_service="openiot",
                                        fiware_servicepath="/")
     assert len(loaded_entities) == 0
+    translator.clean()
 
 
 def test_query_all(translator):
@@ -104,6 +112,7 @@ def test_query_all(translator):
         notifications = [e for e in entities if e['id'] == i]
         records = [e for e in loaded_entities if e['id'] == i]
         check_notifications_record(notifications, records)
+    translator.clean()
 
 
 def test_limit_0(translator):
@@ -116,6 +125,7 @@ def test_limit_0(translator):
 
     loaded_entities = translator.query(limit=0)
     assert loaded_entities == []
+    translator.clean()
 
 
 def test_limit_overrides_lastN(translator):
@@ -125,6 +135,7 @@ def test_limit_overrides_lastN(translator):
 
     loaded_entities = translator.query(last_n=5, limit=3)
     assert len(loaded_entities[0]['index']) == 3
+    translator.clean()
 
 
 def test_lastN_ordering(translator):
@@ -136,6 +147,7 @@ def test_lastN_ordering(translator):
     index = loaded_entities[0]['index']
     assert len(index) == 3
     assert index[-1] > index[0]
+    translator.clean()
 
 
 def test_attrs_by_entity_id(translator):
@@ -165,6 +177,7 @@ def test_attrs_by_entity_id(translator):
     # nonexistent id should return no data
     loaded_entities = translator.query(entity_id='some_nonexistent_id')
     assert len(loaded_entities) == 0
+    translator.clean()
 
 
 def test_attrs_by_id_ambiguity(translator):
@@ -184,6 +197,7 @@ def test_attrs_by_id_ambiguity(translator):
     # NOT OK otherwise
     with pytest.raises(AmbiguousNGSIIdError):
         translator.query(entity_id='repeated_id')
+    translator.clean()
 
 
 WITHIN_EAST_HEMISPHERE = "within(attr_geo, " \
@@ -226,6 +240,7 @@ def test_query_per_attribute(translator, attr_name, clause, tester):
                                   "Not expected from an " \
                                   "uniform random distribution"
     assert all(map(tester, entities))
+    translator.clean()
 
 
 def test_unsupported_ngsi_type(translator):
@@ -241,6 +256,7 @@ def test_unsupported_ngsi_type(translator):
     translator.insert([e])
     entities = translator.query()
     check_notifications_record([e], entities)
+    translator.clean()
 
 def test_accept_unknown_ngsi_type(translator):
     """
@@ -265,6 +281,7 @@ def test_accept_unknown_ngsi_type(translator):
     translator.insert([e])
     entities = translator.query()
     check_notifications_record([e], entities)
+    translator.clean()
 
 def test_accept_special_chars(translator):
     """
@@ -289,6 +306,7 @@ def test_accept_special_chars(translator):
     translator.insert([e])
     entities = translator.query()
     check_notifications_record([e], entities)
+    translator.clean()
 
 def test_missing_type_defaults_to_string(translator):
     e = {
@@ -306,6 +324,7 @@ def test_missing_type_defaults_to_string(translator):
     # Response will include the type
     e["foo"]["type"] = NGSI_TEXT
     check_notifications_record([e], entities)
+    translator.clean()
 
 
 def test_capitals(translator):
@@ -344,6 +363,7 @@ def test_capitals(translator):
     # Note that old entity gets None for the new attribute
     assert entities[1]['id'] == e1['id']
     assert entities[1]['NewAttr']['values'] == [None]
+    translator.clean()
 
 
 @pytest.mark.filterwarnings("ignore")
@@ -362,6 +382,7 @@ def test_no_time_index(translator):
     records = translator.query()
     assert len(records) == 1
     assert len(records[0]['index']) == 1
+    translator.clean()
 
 
 def test_long_json(translator):
@@ -380,6 +401,7 @@ def test_long_json(translator):
     r = translator.query()
     assert len(r) == 1
     check_notifications_record([big_entity], r)
+    translator.clean()
 
 
 def test_geo_point(translator):
@@ -407,6 +429,7 @@ def test_geo_point(translator):
 
     # Check entity is retrieved as it was inserted
     check_notifications_record([entity], entities)
+    translator.clean()
 
 
 def test_geo_point_null_values(translator):
@@ -431,7 +454,7 @@ def test_geo_point_null_values(translator):
         TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
         'temperature': {
             'type': 'Number',
-            'value': "19"
+            'value': 19
         }
     }
     translator.insert([entity_new])
@@ -445,7 +468,8 @@ def test_geo_point_null_values(translator):
     res = translator.cursor.fetchall()
     assert len(res) == 2
     assert res[0] == [19.6389474, -98.9109537, None]
-    assert res[1] == [None, None, '19']
+    assert res[1] == [None, None, 19]
+    translator.clean()
 
 
 def test_structured_value_to_array(translator):
@@ -474,6 +498,7 @@ def test_structured_value_to_array(translator):
 
     r = translator.query()
     check_notifications_record([entity], r)
+    translator.clean()
 
 
 def test_ISO8601(translator):
@@ -494,6 +519,7 @@ def test_ISO8601(translator):
     loaded = translator.query()
     assert len(loaded) > 0
     check_notifications_record([e], loaded)
+    translator.clean()
 
 
 ################################################################################
@@ -508,6 +534,7 @@ def test_air_quality_observed(translator, air_quality_observed):
     translator.insert([air_quality_observed])
     loaded = translator.query()
     check_notifications_record([air_quality_observed], loaded)
+    translator.clean()
 
 
 def test_traffic_flow_observed(translator, traffic_flow_observed):
@@ -518,3 +545,4 @@ def test_traffic_flow_observed(translator, traffic_flow_observed):
     translator.insert([traffic_flow_observed])
     loaded = translator.query()
     check_notifications_record([traffic_flow_observed], loaded)
+    translator.clean()
