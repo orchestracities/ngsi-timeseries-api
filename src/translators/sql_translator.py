@@ -137,7 +137,8 @@ class SQLTranslator(base_translator.BaseTranslator):
         utc = datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc) + d
         return utc.isoformat(timespec='milliseconds')
 
-    def _et2tn(self, entity_type, fiware_service=None):
+    @staticmethod
+    def _et2tn(entity_type, fiware_service=None):
         """
         Return table name based on entity type.
         When specified, fiware_service will define the table schema.
