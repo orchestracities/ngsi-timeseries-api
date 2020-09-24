@@ -313,6 +313,19 @@ parameters:
     `40 42' 51'',74 0' 21''`.
     Full details can be found in the Geographical Queries section of the specification:
     http://fiware.github.io/specifications/ngsiv2/stable/."
+  dropTable:
+    in: query
+    name: dropTable
+    type: boolean
+    default: false
+    description: "Optional. Drop the table storing an entity type. When deleting
+    by entity type, setting this parameter to true will result in all entity
+    data for the given type being deleted, the entity table will be dropped
+    and the corresponding entry removed from the metadata table. This option
+    should only be used for maintenance after the devices whose data is written
+    to the table are decommissioned and no further writes are possible. In fact,
+    race conditions are possible if entities of that type are POSTed to the
+    notify endpoint while the underlying clean-up procedure is in progress."
 
 ################################################################################
 # PATHS: META
@@ -1245,6 +1258,7 @@ paths:
         # In Query...
         - $ref: '#/parameters/fromDate'
         - $ref: '#/parameters/toDate'
+        - $ref: '#/parameters/dropTable'
         # In Header...
         - $ref: '#/parameters/fiware-Service'
         - $ref: '#/parameters/fiware-ServicePath'
@@ -1759,21 +1773,3 @@ paths:
                     }
                   ]
               }
-
-  /v2/storage/{entityType}:
-    delete:
-      operationId: reporter.delete.drop_entity_storage
-      summary: "Drop supporting storage for the given entity type."
-      description: "Given an entity type, delete all the records of that
-      type, drop the table in which they were stored, and clean up the
-      metadata table accordingly."
-      tags:
-        - input
-      parameters:
-        # In Path...
-        - $ref: '#/parameters/entityTypeInPath'
-        # In Header...
-        - $ref: '#/parameters/fiware-Service'
-      responses:
-        204:
-          description: "Storage successfully deleted."

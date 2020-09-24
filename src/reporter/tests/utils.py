@@ -90,10 +90,13 @@ def delete_entity_type(service, entity_type, service_path=None):
         h['Fiware-Service'] = service
     if service_path:
         h['Fiware-ServicePath'] = service_path
+    query_params = {
+        'dropTable': True
+    }
 
-    url = '{}/storage/{}'.format(QL_URL, entity_type)
+    url = '{}/types/{}'.format(QL_URL, entity_type)
 
-    r = requests.delete(url, headers=h)
+    r = requests.delete(url, headers=h, params=query_params)
 #    assert r.status_code == 204
 
 

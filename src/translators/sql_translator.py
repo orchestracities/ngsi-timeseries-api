@@ -1000,11 +1000,6 @@ class SQLTranslator(base_translator.BaseTranslator):
             raise NGSIUsageError("entity_id cannot be None nor empty")
 
         if not etype:
-            # TODO: rahter make entity type mandatory and bail out if not
-            # present.
-            # In fact, _get_entity_type will scan **all** DB tables to
-            # figure out candidate entity types for the given entity ID!
-
             etype = self._get_entity_type(eid, fiware_service)
 
             if not etype:

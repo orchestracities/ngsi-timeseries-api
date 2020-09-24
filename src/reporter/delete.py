@@ -29,8 +29,13 @@ def delete_entity(entity_id, type_=None, from_date=None, to_date=None):
         return '{} records successfully deleted.'.format(deleted), 204
 
 
-def delete_entities(entity_type, from_date=None, to_date=None):
+def delete_entities(entity_type, from_date=None, to_date=None,
+                    drop_table=False):
     with translator_for(fiware_s()) as trans:
+        if drop_table:
+            trans.drop_table(etype=entity_type, fiware_service=fiware_s())
+            return 'entity table dropped', 204
+
         deleted = trans.delete_entities(etype=entity_type,
                                         from_date=from_date,
                                         to_date=to_date,
@@ -45,8 +50,3 @@ def delete_entities(entity_type, from_date=None, to_date=None):
 
         if deleted > 0:
             return '{} records successfully deleted.'.format(deleted), 204
-
-
-def drop_entity_storage(entity_type: str):
-    with translator_for(fiware_s()) as trans:
-        trans.drop_table(etype=entity_type, fiware_service=fiware_s())
