@@ -22,6 +22,7 @@ NGSI_TO_SQL = {
     "Boolean": 'boolean',
     # TODO since CRATEDB 4.0 timestamp is deprecated,
     # when moving to release 0.8, we will deprecate support for CRATE 3.x
+    # https://crate.io/docs/crate/reference/en/4.2/appendices/release-notes/4.0.0.html#general
     NGSI_ISO8601: 'timestamp',
     NGSI_DATETIME: 'timestamp',
     "Integer": 'long',
@@ -68,6 +69,9 @@ class CrateTranslator(sql_translator.SQLTranslator):
             NGSI_TO_SQL[NGSI_ISO8601] = 'timestamptz'
             NGSI_TO_SQL[NGSI_DATETIME] = 'timestamptz'
             NGSI_TO_SQL[TIME_INDEX] = 'timestamptz'
+            NGSI_TO_SQL["Integer"] = 'bigint'
+            NGSI_TO_SQL["Number"] = 'real'
+            NGSI_TO_SQL[NGSI_TEXT] = 'text'
 
 
     def dispose(self):
