@@ -242,6 +242,90 @@ def test_1T1ENA_fromDate_toDate(service, reporter_dataset):
 
 
 @pytest.mark.parametrize("service", services)
+def test_1T1ENA_fromDate(service, reporter_dataset):
+    # Query
+    query_params = {
+        'type': entity_type,
+        'fromDate': "1970-01-24T00:00:00+00:00"
+    }
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
+    assert r.status_code == 200, r.text
+
+    # Expect only last N
+    expected_temperatures = list(range(23, 30))
+    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_index = [
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
+    ]
+    assert len(expected_index) == 7
+    assert expected_index[0] == "1970-01-24T00:00:00+00:00"
+    assert expected_index[-1] == "1970-01-30T00:00:00+00:00"
+
+    # Assert
+    expected = {
+        'entityId': entity_id,
+        'index': expected_index,
+        'attributes': [
+            {
+                'attrName': pressure,
+                'values': expected_pressures,
+            },
+            {
+                'attrName': temperature,
+                'values': expected_temperatures,
+            }
+        ]
+    }
+    obtained = r.json()
+    assert_1T1ENA_response(obtained, expected)
+
+#see #353
+@pytest.mark.parametrize("service", services)
+@pytest.mark.parametrize("last", [1, 3, 10, 10000])
+def test_1T1ENA_fromDate_and_last(service, last, reporter_dataset):
+    # Query
+    query_params = {
+        'type': entity_type,
+        'lastN': last,
+        'fromDate': "1970-01-24T00:00:00+00:00"
+    }
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
+    assert r.status_code == 200, r.text
+
+    # Expect only last N
+    max_range = 7
+    if last < 7:
+        max_range = last
+    expected_temperatures = list(range(30 - max_range, 30))
+    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_index = [
+        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
+    ]
+    assert len(expected_index) == max_range
+
+    # Assert
+    expected = {
+        'entityId': entity_id,
+        'index': expected_index,
+        'attributes': [
+            {
+                'attrName': pressure,
+                'values': expected_pressures,
+            },
+            {
+                'attrName': temperature,
+                'values': expected_temperatures,
+            }
+        ]
+    }
+    obtained = r.json()
+    assert_1T1ENA_response(obtained, expected)
+
+@pytest.mark.parametrize("service", services)
 def test_1T1ENA_fromDate_toDate_with_quotes(service, reporter_dataset):
     # Query
     query_params = {
