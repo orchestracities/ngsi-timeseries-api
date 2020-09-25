@@ -52,7 +52,8 @@ def log():
 
     logging.basicConfig(level=level,
                         format='%(asctime)s.%(msecs)03d '
-                               '%(levelname)s:%(name)s:%(message)s',
+                               '%(levelname)s:%(name)s:%(message)s '
+                               'Thread ID: [%(thread)d]  Process ID: [%(process)d]',
                         datefmt='%Y-%m-%d %I:%M:%S')
     return logging.getLogger(__name__)
 

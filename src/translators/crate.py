@@ -20,8 +20,9 @@ CRATE_ARRAY_STR = 'array(string)'
 NGSI_TO_SQL = {
     "Array": CRATE_ARRAY_STR,  # TODO #36: Support numeric arrays
     "Boolean": 'boolean',
-# TODO since CRATEDB 4.0 timestamp is deprecated. Should be replaced with timestampz
-# This means that to maintain both version, we will need a different mechanism
+    # TODO since CRATEDB 4.0 timestamp is deprecated,
+    # when moving to release 0.8, we will deprecate support for CRATE 3.x
+    # https://crate.io/docs/crate/reference/en/4.2/appendices/release-notes/4.0.0.html#general
     NGSI_ISO8601: 'timestamp',
     NGSI_DATETIME: 'timestamp',
     "Integer": 'long',
@@ -58,6 +59,19 @@ class CrateTranslator(sql_translator.SQLTranslator):
         # we need to think if we want to cache this information
         # and save few msec for evey API call
         self.db_version = self.get_db_version()
+
+        major = int(self.db_version.split('.')[0])
+        if major <= 2:
+            logging.warning("CRATE 2.x support is deprecated")
+        elif major <= 3:
+            logging.warning("CRATE 3.x will be deprecated in release 0.8")
+        elif major >= 4:
+            NGSI_TO_SQL[NGSI_ISO8601] = 'timestamptz'
+            NGSI_TO_SQL[NGSI_DATETIME] = 'timestamptz'
+            NGSI_TO_SQL[TIME_INDEX] = 'timestamptz'
+            NGSI_TO_SQL["Integer"] = 'bigint'
+            NGSI_TO_SQL["Number"] = 'real'
+            NGSI_TO_SQL[NGSI_TEXT] = 'text'
 
 
     def dispose(self):
