@@ -137,7 +137,8 @@ class SQLTranslator(base_translator.BaseTranslator):
         utc = datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc) + d
         return utc.isoformat(timespec='milliseconds')
 
-    def _et2tn(self, entity_type, fiware_service=None):
+    @staticmethod
+    def _et2tn(entity_type, fiware_service=None):
         """
         Return table name based on entity type.
         When specified, fiware_service will define the table schema.
@@ -206,7 +207,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                                                         path)
         else:
             msg = 'Multiple servicePath are allowed only ' \
-                  'if their size is match the size of entities'
+                  'if their number match the number of entities'
             raise InvalidHeaderValue('Fiware-ServicePath',
                                      fiware_servicepath, msg)
 
@@ -992,70 +993,48 @@ class SQLTranslator(base_translator.BaseTranslator):
 
         return [entities[k] for k in sorted(entities.keys())]
 
-    def delete_entity(self, entity_id, entity_type=None, from_date=None,
+    def delete_entity(self, eid, etype=None, from_date=None,
                       to_date=None, fiware_service=None,
                       fiware_servicepath=None):
-        if not entity_id:
+        if not eid:
             raise NGSIUsageError("entity_id cannot be None nor empty")
 
-        if not entity_type:
-            entity_type = self._get_entity_type(entity_id, fiware_service)
+        if not etype:
+            etype = self._get_entity_type(eid, fiware_service)
 
-            if not entity_type:
+            if not etype:
                 return 0
 
-            if len(entity_type.split(',')) > 1:
-                raise AmbiguousNGSIIdError(entity_id)
+            if len(etype.split(',')) > 1:
+                raise AmbiguousNGSIIdError(eid)
 
-        # First delete entries from table
-        table_name = self._et2tn(entity_type, fiware_service)
-        where_clause = self._get_where_clause([entity_id, ],
+        return self.delete_entities(etype, eid=[eid],
+                                    from_date=from_date, to_date=to_date,
+                                    fiware_service=fiware_service,
+                                    fiware_servicepath=fiware_servicepath)
+
+    def delete_entities(self, etype, eid=None, from_date=None, to_date=None,
+                        fiware_service=None, fiware_servicepath=None):
+        table_name = self._et2tn(etype, fiware_service)
+        where_clause = self._get_where_clause(eid,
                                               from_date,
                                               to_date,
                                               fiware_servicepath)
         op = "delete from {} {}".format(table_name, where_clause)
-
         try:
             self.cursor.execute(op)
-        except Exception as e:
-            logging.error("{}".format(e))
-            return 0
-
-        return self.cursor.rowcount
-
-    def delete_entities(self, entity_type, from_date=None, to_date=None,
-                        fiware_service=None, fiware_servicepath=None):
-        table_name = self._et2tn(entity_type, fiware_service)
-
-        # Delete only requested range
-        if from_date or to_date or fiware_servicepath:
-            entity_id = None
-            where_clause = self._get_where_clause(entity_id,
-                                                  from_date,
-                                                  to_date,
-                                                  fiware_servicepath)
-            op = "delete from {} {}".format(table_name, where_clause)
-            try:
-                self.cursor.execute(op)
-            except Exception as e:
-                logging.error("{}".format(e))
-                return 0
             return self.cursor.rowcount
-
-        # Drop whole table
-        try:
-            self.cursor.execute("select count(*) from {}".format(table_name))
         except Exception as e:
             logging.error("{}".format(e))
             return 0
-        count = self.cursor.fetchone()[0]
 
+    def drop_table(self, etype, fiware_service=None):
+        table_name = self._et2tn(etype, fiware_service)
         op = "drop table {}".format(table_name)
         try:
             self.cursor.execute(op)
         except Exception as e:
             logging.error("{}".format(e))
-            return 0
 
         # Delete entry from metadata table
         op = "delete from {} where table_name = ?".format(METADATA_TABLE_NAME)
@@ -1071,8 +1050,6 @@ class SQLTranslator(base_translator.BaseTranslator):
                 self.cursor.execute(op, [old_tn])
             except Exception as e:
                 logging.error("{}".format(e))
-
-        return count
 
     def _get_entity_type(self, entity_id, fiware_service):
         """
