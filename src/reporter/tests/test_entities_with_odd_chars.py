@@ -58,7 +58,7 @@ odd_chars = ['-', '+', '@', ':']
 @pytest.mark.parametrize("service", [
     "t1", "t2"
 ])
-def test_odd_char_in_entity_type(service, char, clean_mongo, clean_crate):
+def test_odd_char_in_entity_type(service, char):
     entity_type = 'test{}device'.format(char)
     attr_name = 'plain_name'
     run_test(service, entity_type, attr_name)
@@ -68,7 +68,7 @@ def test_odd_char_in_entity_type(service, char, clean_mongo, clean_crate):
 @pytest.mark.parametrize("service", [
     "t1", "t2"
 ])
-def test_odd_char_in_attr_name(service, char, clean_mongo, clean_crate):
+def test_odd_char_in_attr_name(service, char):
     entity_type = 'test_device'
     attr_name = 'weird{}name'.format(char)
     run_test(service, entity_type, attr_name)
@@ -78,7 +78,7 @@ def test_odd_char_in_attr_name(service, char, clean_mongo, clean_crate):
 @pytest.mark.parametrize("service", [
     "t1", "t2"
 ])
-def test_odd_char_in_entity_type_and_attr_name(service, char, clean_mongo, clean_crate):
+def test_odd_char_in_entity_type_and_attr_name(service, char):
     entity_type = 'test{}device'.format(char)
     attr_name = 'weird{}name'.format(char)
     run_test(service, entity_type, attr_name)
