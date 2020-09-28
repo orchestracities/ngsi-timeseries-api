@@ -1,5 +1,8 @@
 from contextlib import contextmanager
+from datetime import datetime, timezone
 import pg8000
+from typing import Sequence
+
 from translators import sql_translator
 from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
     NGSI_GEOJSON, NGSI_TEXT, NGSI_STRUCTURED_VALUE, TIME_INDEX, \
@@ -181,6 +184,25 @@ class PostgresTranslator(sql_translator.SQLTranslator):
     def _get_geo_clause(self, geo_query):
         #TODO implement geo clause
         return ""
+
+    @staticmethod
+    def _col_name(column_description: List) -> str:
+        name = column_description[0]
+        if isinstance(name, bytes):
+            name = name.decode('utf-8')
+        return name
+
+    @staticmethod
+    def _column_names_from_query_meta(cursor_description: Sequence) -> [str]:
+        return [PostgresTranslator._col_name(x) for x in cursor_description]
+
+    @staticmethod
+    def _get_isoformat(timestamp_with_timezone: Optional[datetime]) -> str:
+        if timestamp_with_timezone is None:
+            return 'NULL'
+        utc = timestamp_with_timezone.astimezone(timezone.utc)
+        return utc.isoformat(timespec='milliseconds')
+
 
 @contextmanager
 def postgres_translator_instance():

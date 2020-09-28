@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from geocoding.slf.geotypes import *
 from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption, \
     NGSIUsageError, InvalidParameterValue, InvalidHeaderValue
@@ -10,7 +10,7 @@ from utils.maybe import maybe_map
 import logging
 from geocoding.slf import SlfQuery
 import dateutil.parser
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Sequence
 from uuid import uuid4
 
 # NGSI TYPES
@@ -123,19 +123,18 @@ class SQLTranslator(base_translator.BaseTranslator):
     def _create_metadata_table(self):
         raise NotImplementedError
 
-    def _get_isoformat(self, ms_since_epoch):
+    @staticmethod
+    def _get_isoformat(db_timestamp: Any) -> str:
         """
-        :param ms_since_epoch:
-            As stated in CrateDB docs: Timestamps are always returned as long
-            values (ms from epoch).
-        :return: str
-            The equivalent datetime in ISO 8601.
+        Converts a DB timestamp value to the equivalent date-time string
+        in ISO 8601 format.
+
+        :param db_timestamp: the value of a DB timestamp field. We assume
+            all date-time values get stored with the same type by the
+            insert procedure.
+        :return: the ISO 8601 string.
         """
-        if ms_since_epoch is None:
-            return "NULL"
-        d = timedelta(milliseconds=ms_since_epoch)
-        utc = datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc) + d
-        return utc.isoformat(timespec='milliseconds')
+        raise NotImplementedError
 
     @staticmethod
     def _et2tn(entity_type, fiware_service=None):
@@ -469,12 +468,13 @@ class SQLTranslator(base_translator.BaseTranslator):
 
         try:
             self.cursor.execute(op)
+            rows = self.cursor.fetchall()
+            return [r[0] for r in rows]
         except Exception as e:
             # Metadata table still not created
             msg = "Could not retrieve METADATA_TABLE. Empty database maybe?. {}"
             logging.debug(msg.format(e))
             return []
-        return [r[0] for r in self.cursor.rows]
 
     def _get_select_clause(self, attr_names, aggr_method, aggr_period):
         if not attr_names:
@@ -810,13 +810,25 @@ class SQLTranslator(base_translator.BaseTranslator):
                 entities = []
             else:
                 res = self.cursor.fetchall()
-                col_names = [x[0] for x in self.cursor.description]
+                col_names = self._column_names_from_query_meta(
+                                                        self.cursor.description)
                 entities = self._format_response(res,
                                                  col_names,
                                                  tn,
                                                  last_n)
             result.extend(entities)
         return result
+
+    @staticmethod
+    def _column_names_from_query_meta(cursor_description: Sequence) -> [str]:
+        """
+        List the name of the columns returned by a query.
+
+        :param cursor_description: the value of the cursor's `description`
+            attribute after fetching the query results.
+        :return: the column names.
+        """
+        raise NotImplementedError
 
     def query_ids(self,
                   entity_type=None,

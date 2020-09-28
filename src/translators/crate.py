@@ -1,7 +1,8 @@
 from contextlib import contextmanager
 from crate import client
 from crate.client import exceptions
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+from typing import Optional, Sequence
 from translators import sql_translator
 from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
     NGSI_GEOJSON, NGSI_GEOPOINT, NGSI_TEXT, NGSI_STRUCTURED_VALUE, TIME_INDEX, \
@@ -189,9 +190,27 @@ class CrateTranslator(sql_translator.SQLTranslator):
                     crate_t += ' STORAGE WITH (columnstore = false)'
         return crate_t
 
-
     def _get_geo_clause(self, geo_query):
         return from_ngsi_query(geo_query)
+
+    @staticmethod
+    def _column_names_from_query_meta(cursor_description: Sequence) -> [str]:
+        return [x[0] for x in cursor_description]
+
+    @staticmethod
+    def _get_isoformat(ms_since_epoch: Optional[int]) -> str:
+        """
+        :param ms_since_epoch:
+            As stated in CrateDB docs: Timestamps are always returned as long
+            values (ms from epoch).
+        :return: str
+            The equivalent datetime in ISO 8601.
+        """
+        if ms_since_epoch is None:
+            return 'NULL'
+        d = timedelta(milliseconds=ms_since_epoch)
+        utc = datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc) + d
+        return utc.isoformat(timespec='milliseconds')
 
 
 @contextmanager
