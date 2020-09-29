@@ -520,6 +520,7 @@ class SQLTranslator(base_translator.BaseTranslator):
     def _get_where_clause(self, entity_ids, from_date, to_date, fiware_sp=None,
                           geo_query=None):
         clauses = []
+        where_clause = ""
 
         if entity_ids:
             ids = ",".join("'{}'".format(e) for e in entity_ids)
@@ -533,8 +534,12 @@ class SQLTranslator(base_translator.BaseTranslator):
 
         if fiware_sp:
             # Match prefix of fiware service path
-            clauses.append(
-                " " + FIWARE_SERVICEPATH + " ~* '" + fiware_sp + "($|/.*)'")
+            if fiware_sp == '/':
+                clauses.append(
+                    " " + FIWARE_SERVICEPATH + " ~* '($|/.*)'")
+            else:
+                clauses.append(
+                    " " + FIWARE_SERVICEPATH + " ~* '" + fiware_sp + "($|/.*)'")
         else:
             # Match prefix of fiware service path
             clauses.append(" " + FIWARE_SERVICEPATH + " = ''")
@@ -543,12 +548,13 @@ class SQLTranslator(base_translator.BaseTranslator):
         if geo_clause:
             clauses.append(geo_clause)
 
-        where_clause = "where " + "and ".join(clauses)
+        if len(clauses) > 0:
+            where_clause = "where" + " and ".join(clauses)
         return where_clause
 
     def _parse_date(self, date):
         try:
-            return dateutil.parser.isoparse(date.strip('\"'))
+            return dateutil.parser.isoparse(date.strip('\"')).isoformat()
         except Exception as e:
             raise InvalidParameterValue(date, "**fromDate** or **toDate**")
 
@@ -805,8 +811,10 @@ class SQLTranslator(base_translator.BaseTranslator):
             try:
                 self.cursor.execute(op)
             except Exception as e:
+                #TODO due to this except in case of sql errors,
+                #all goes fine, and users gets 404 as result
                 # Reason 1: fiware_service_path column in legacy dbs.
-                logging.debug("{}".format(e))
+                logging.error("{}".format(e))
                 entities = []
             else:
                 res = self.cursor.fetchall()
