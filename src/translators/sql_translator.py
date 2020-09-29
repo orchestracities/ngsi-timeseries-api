@@ -539,7 +539,8 @@ class SQLTranslator(base_translator.BaseTranslator):
                     " " + FIWARE_SERVICEPATH + " ~* '($|/.*)'")
             else:
                 clauses.append(
-                    " " + FIWARE_SERVICEPATH + " ~* '" + fiware_sp + "($|/.*)'")
+                    " " + FIWARE_SERVICEPATH + " ~* '"
+                    + fiware_sp + "($|/.*)'")
         else:
             # Match prefix of fiware service path
             clauses.append(" " + FIWARE_SERVICEPATH + " = ''")
@@ -811,8 +812,8 @@ class SQLTranslator(base_translator.BaseTranslator):
             try:
                 self.cursor.execute(op)
             except Exception as e:
-                #TODO due to this except in case of sql errors,
-                #all goes fine, and users gets 404 as result
+                # TODO due to this except in case of sql errors,
+                # all goes fine, and users gets 404 as result
                 # Reason 1: fiware_service_path column in legacy dbs.
                 logging.error("{}".format(e))
                 entities = []
