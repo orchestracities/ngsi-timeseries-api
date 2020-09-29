@@ -562,7 +562,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             raise InvalidParameterValue(last_n, "last_n")
         return last_n
 
-    def _get_geo_clause(self, geo_query):
+    def _get_geo_clause(self, geo_query: SlfQuery = None) -> Optional[str]:
         raise NotImplementedError
 
     def _get_order_group_clause(self, aggr_method, aggr_period,

@@ -7,8 +7,10 @@ from translators import sql_translator
 from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
     NGSI_GEOJSON, NGSI_TEXT, NGSI_STRUCTURED_VALUE, TIME_INDEX, \
     METADATA_TABLE_NAME, FIWARE_SERVICEPATH, TENANT_PREFIX
+from translators.timescale_geo_query import from_ngsi_query
 import geocoding.geojson.wktcodec
 from geocoding.slf.geotypes import *
+from geocoding.slf.querytypes import SlfQuery
 import geocoding.slf.wktcodec
 from utils.cfgreader import *
 
@@ -181,9 +183,8 @@ class PostgresTranslator(sql_translator.SQLTranslator):
         self.cursor.execute(stmt, (table_name, entity_attrs_value,
                                    entity_attrs_value))
 
-    def _get_geo_clause(self, geo_query):
-        #TODO implement geo clause
-        return ""
+    def _get_geo_clause(self, geo_query: SlfQuery = None) -> Optional[str]:
+        return from_ngsi_query(geo_query)
 
     @staticmethod
     def _col_name(column_description: List) -> str:

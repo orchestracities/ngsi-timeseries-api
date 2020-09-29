@@ -51,3 +51,10 @@ def test_tree_with_params():
            & (var('z') <= qmark_param())
     expected = "(((x = ?) and (y > 2)) and (z <= ?))"
     assert expected == term.eval()
+
+
+def test_tree_with_negation():
+    term = (var('x') == qmark_param()) & ~(var('y') > 2) \
+           & (var('z') <= qmark_param())
+    expected = "(((x = ?) and not (y > 2)) and (z <= ?))"
+    assert expected == term.eval()

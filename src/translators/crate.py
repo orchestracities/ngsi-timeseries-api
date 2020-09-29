@@ -3,6 +3,8 @@ from crate import client
 from crate.client import exceptions
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Sequence
+
+from geocoding.slf.querytypes import SlfQuery
 from translators import sql_translator
 from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
     NGSI_GEOJSON, NGSI_GEOPOINT, NGSI_TEXT, NGSI_STRUCTURED_VALUE, TIME_INDEX, \
@@ -190,7 +192,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
                     crate_t += ' STORAGE WITH (columnstore = false)'
         return crate_t
 
-    def _get_geo_clause(self, geo_query):
+    def _get_geo_clause(self, geo_query: SlfQuery = None) -> Optional[str]:
         return from_ngsi_query(geo_query)
 
     @staticmethod
