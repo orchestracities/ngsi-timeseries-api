@@ -507,7 +507,7 @@ class SQLTranslator(base_translator.BaseTranslator):
 
     def _parse_date(self, date):
         try:
-            return dateutil.parser.isoparse(date.strip('\"'))
+            return dateutil.parser.isoparse(date.strip('\"')).isoformat()
         except Exception as e:
             raise InvalidParameterValue(date, "**fromDate** or **toDate**")
 
@@ -764,7 +764,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                 self.cursor.execute(op)
             except Exception as e:
                 # Reason 1: fiware_service_path column in legacy dbs.
-                logging.debug("{}".format(e))
+                logging.error("{}".format(e))
                 entities = []
             else:
                 res = self.cursor.fetchall()
