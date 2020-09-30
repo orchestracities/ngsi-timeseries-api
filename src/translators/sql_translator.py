@@ -536,7 +536,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             # Match prefix of fiware service path
             if fiware_sp == '/':
                 clauses.append(
-                    " " + FIWARE_SERVICEPATH + " ~* '($|/.*)'")
+                    " " + FIWARE_SERVICEPATH + " ~* '/.*'")
             else:
                 clauses.append(
                     " " + FIWARE_SERVICEPATH + " ~* '"
