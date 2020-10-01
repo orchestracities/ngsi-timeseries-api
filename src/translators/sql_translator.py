@@ -982,12 +982,6 @@ class SQLTranslator(base_translator.BaseTranslator):
                 e = entities.setdefault(e_id, {})
                 original_name, original_type = entity_attrs[k]
 
-                # CrateDBs and NGSI use different geo:point coordinates order.
-                if original_type == NGSI_GEOPOINT:
-                    if v is not None:
-                        lon, lat = v
-                        v = "{}, {}".format(lat, lon)
-
                 if original_name in (NGSI_TYPE, NGSI_ID):
                     e[original_name] = v
 
@@ -997,13 +991,23 @@ class SQLTranslator(base_translator.BaseTranslator):
 
                 else:
                     attr_dict = e.setdefault(original_name, {})
-
-                    if original_type in (NGSI_DATETIME, NGSI_ISO8601):
-                        v = self._get_isoformat(v)
+                    v = self._db_value_to_ngsi(v, original_type)
                     attr_dict.setdefault('values', []).append(v)
                     attr_dict['type'] = original_type
 
         return [entities[k] for k in sorted(entities.keys())]
+
+    def _db_value_to_ngsi(self, db_value: Any, ngsi_type: str) -> Any:
+        """
+        Transform a DB value to its corresponding NGSI value.
+        This procedure should be the inverse of the one used to transform NGSI
+        entity attribute values to DB values when inserting entities.
+
+        :param db_value: the value to transform.
+        :param ngsi_type: the target NGSI type.
+        :return: the NGSI value.
+        """
+        raise NotImplementedError
 
     def delete_entity(self, eid, etype=None, from_date=None,
                       to_date=None, fiware_service=None,

@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from crate import client
 from crate.client import exceptions
 from datetime import datetime, timedelta, timezone
-from typing import Optional, Sequence
+from typing import Any, Optional, Sequence
 
 from geocoding.slf.querytypes import SlfQuery
 from translators import sql_translator
@@ -213,6 +213,20 @@ class CrateTranslator(sql_translator.SQLTranslator):
         d = timedelta(milliseconds=ms_since_epoch)
         utc = datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc) + d
         return utc.isoformat(timespec='milliseconds')
+
+    def _db_value_to_ngsi(self, db_value: Any, ngsi_type: str) -> Any:
+        if db_value is None:
+            return None
+
+        # CrateDBs and NGSI use different geo:point coordinates order.
+        if ngsi_type == NGSI_GEOPOINT:
+            lon, lat = db_value
+            return "{}, {}".format(lat, lon)
+
+        if ngsi_type in (NGSI_DATETIME, NGSI_ISO8601):
+            return self._get_isoformat(db_value)
+
+        return db_value
 
 
 @contextmanager

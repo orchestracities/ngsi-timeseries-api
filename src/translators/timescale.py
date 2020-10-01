@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 from datetime import datetime, timezone
 import pg8000
-from typing import Sequence
+from typing import Any, Sequence
 
 from translators import sql_translator
 from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
@@ -10,6 +10,7 @@ from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
 from translators.timescale_geo_query import from_ngsi_query
 import geocoding.geojson.wktcodec
 from geocoding.slf.geotypes import *
+import geocoding.slf.jsoncodec
 from geocoding.slf.querytypes import SlfQuery
 import geocoding.slf.wktcodec
 from utils.cfgreader import *
@@ -160,6 +161,29 @@ class PostgresTranslator(sql_translator.SQLTranslator):
                     # so use None which will be inserted as NULL to the db.
                     values.append(None)
         return values
+
+    def _db_value_to_ngsi(self, db_value: Any, ngsi_type: str) -> Any:
+        if db_value is None:
+            return None
+
+        if ngsi_type in (NGSI_DATETIME, NGSI_ISO8601):
+            return self._get_isoformat(db_value)
+
+        if SlfGeometry.is_ngsi_slf_attr({'type': ngsi_type}):
+            geo_json = geocoding.geojson.wktcodec.decode_wkb_hexstr(db_value)
+            slf_geom = geocoding.slf.jsoncodec.decode(geo_json, ngsi_type)
+            return slf_geom.to_ngsi_attribute()['value'] if slf_geom else None
+
+        if ngsi_type == NGSI_GEOJSON:
+            return geocoding.geojson.wktcodec.decode_wkb_hexstr(db_value)
+
+        return db_value
+    # NOTE. Implicit conversions.
+    # 1. JSON. NGSI struct values and arrays get inserted as `jsonb`. When
+    # reading `jsonb` values back from the DB, pg8000 automatically converts
+    # them to Python dictionaries and arrays, respectively.
+    # 2. Basic types (int, float, boolean and text). They also get converted
+    # back to their corresponding Python types.
 
     @staticmethod
     def _to_db_ngsi_structured_value(data: dict) -> pg8000.PGJsonb:
