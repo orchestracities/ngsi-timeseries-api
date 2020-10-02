@@ -36,7 +36,8 @@ class GeoDistanceTerm(Term):
 
     def eval(self):
         pt_from = geo_shape_term(self.point_from)
-        return f"ST_DWithin({self.column_name}, {pt_from}, {self.dist})"
+        dist_rep = f"{self.dist:.16f}".rstrip('0').rstrip('.')
+        return f"ST_DWithin({self.column_name}, {pt_from}, {dist_rep})"
 
 
 def equals(column: str, geometry: SlfGeometry) -> GeoIncidenceTerm:

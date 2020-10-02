@@ -9,12 +9,14 @@ def from_near_query(query: NearQuery) -> Term:
     max_d = query.max_distance()
 
     min_q = distance(CENTROID_ATTR_NAME, query.centroid()) >= min_d \
-        if min_d else None
+        if min_d is not None else None
     max_q = distance(CENTROID_ATTR_NAME, query.centroid()) <= max_d \
-        if max_d else None
+        if max_d is not None else None
 
     qs = filter(lambda x: x is not None, [min_q, max_q])
     return reduce(lambda t, q: t & q, qs)
+# NOTE. This ^ assumes at least one of min_d, max_d is there which is the case
+# otherwise the query parser would've thrown an exception.
 
 
 def from_covered_by_query(query: CoveredByQuery) -> Term:
