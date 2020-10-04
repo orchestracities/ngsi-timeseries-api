@@ -434,17 +434,13 @@ class SQLTranslator(base_translator.BaseTranslator):
 
         self._create_metadata_table()
 
-        if self.cursor.rowcount:
-            # Table just created!
-            persisted_metadata = {}
-        else:
-            # Bring translation table!
-            stmt = "select entity_attrs from {} where table_name = ?"
-            self.cursor.execute(stmt.format(METADATA_TABLE_NAME), [table_name])
+        # Bring translation table!
+        stmt = "select entity_attrs from {} where table_name = ?"
+        self.cursor.execute(stmt.format(METADATA_TABLE_NAME), [table_name])
 
-            # By design, one entry per table_name
-            res = self.cursor.fetchall()
-            persisted_metadata = res[0][0] if res else {}
+        # By design, one entry per table_name
+        res = self.cursor.fetchall()
+        persisted_metadata = res[0][0] if res else {}
 
         if metadata.keys() - persisted_metadata.keys():
             persisted_metadata.update(metadata)

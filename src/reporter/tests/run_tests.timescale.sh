@@ -19,7 +19,6 @@ pytest src/reporter/ \
        --ignore=src/reporter/tests/test_geo_queries_1t1e.py \
        --ignore=src/reporter/tests/test_geo_query_1tne1a.py \
        --ignore=src/reporter/tests/test_health.py \
-       --ignore=src/reporter/tests/test_incomplete_entities.py \
        --ignore=src/reporter/tests/test_integration.py \
        --ignore=src/reporter/tests/test_multitenancy.py \
        --ignore=src/reporter/tests/test_notify.py \
@@ -43,14 +42,6 @@ exit $r
 #   and then the test_geo* should be updated so that in the case of Timescale
 #   we check equality works!
 # * test_health: Endpoint hardcoded to work w/ Crate only.
-# * test_incomplete_entities: it looks like null text attrs wind up in the
-#   DB as a "None" string instead of DB null. Also there's issues when
-#   transforming a query result set into JSON (_format_response & friends)
-#   where in some cases some attrs in the result set get ditched from the
-#   returned JSON. This happens in
-#   test_can_add_new_attribute_even_without_specifying_old_ones where
-#   the query returns the two attrs in the table (a1 and a2) but then
-#   QL outputs a JSON with only a2.
 # * test_integration: works w/ Crate, possibly not needed for Timescale.
 # * test_multitenancy: ditto.
 # * test_notify: test_no_value_no_type_for_attributes is broken but it
