@@ -149,7 +149,8 @@ class PostgresTranslator(sql_translator.SQLTranslator):
                             ngsi_value, srid=4326)
                     elif mapped_type == NGSI_TO_SQL[NGSI_STRUCTURED_VALUE]:
                         mapped_value = pg8000.PGJsonb(ngsi_value)
-                    elif mapped_type == NGSI_TO_SQL[NGSI_TEXT]:
+                    elif mapped_type == NGSI_TO_SQL[NGSI_TEXT] \
+                            and ngsi_value is not None:
                         mapped_value = str(ngsi_value)
                     elif mapped_type == PG_JSON_ARRAY:
                         mapped_value = pg8000.PGJsonb(ngsi_value)
