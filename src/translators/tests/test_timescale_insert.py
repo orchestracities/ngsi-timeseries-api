@@ -62,7 +62,9 @@ def gen_entity(entity_type):
             'type': 'geo:json',
             'value': {
                 'type': 'LineString',
-                'coordinates': [[30, 10], [10, 30], [40, 40]]
+                'coordinates': [[30, 10], [10, 30], [40, 40]],
+                'crs': {'properties': {'name': 'EPSG4326'}, 'type': 'name'},
+                'meta': {'srid': 4326}
             }
         },
         'a_text': {
@@ -91,6 +93,8 @@ def assert_inserted_entity_values(entity, row):
     assert row['a_datetime'] == datetime(2019, 7, 22, 11, 46, 45, 123000,
                                          tzinfo=timezone.utc)
     assert decode_wkb_hexstr(row['a_point']) == {
+        'crs': {'properties': {'name': 'EPSG4326'}, 'type': 'name'},
+        'meta': {'srid': 4326},
         'type': 'Point',
         'coordinates': [1.0, 2.0]  # note how lat/lon get swapped
     }

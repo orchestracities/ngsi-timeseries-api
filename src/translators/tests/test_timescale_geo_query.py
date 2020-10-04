@@ -2,59 +2,60 @@ from translators.timescale_geo_query import from_ngsi_query
 from geocoding.slf import *
 
 
+def slf_pt() -> SlfPoint:
+    return SlfPoint(1.0, 2.0)
+
+
+def wkt_pt() -> str:
+    return "'SRID=4326;POINT (2.0 1.0)'"
+
+
 def test_near_min_max():
-    geom = SlfPoint(1, 2)
-    query = NearQuery(geometry=geom, min_distance=10, max_distance=20)
+    query = NearQuery(geometry=slf_pt(), min_distance=10, max_distance=20)
     expected = \
-        "(not ST_DWithin(location_centroid, 'POINT (2.0 1.0)', 0.00009) " + \
-        "and ST_DWithin(location_centroid, 'POINT (2.0 1.0)', 0.00018))"
+        f"(not ST_DWithin(location_centroid, {wkt_pt()}, 0.00009) " + \
+        f"and ST_DWithin(location_centroid, {wkt_pt()}, 0.00018))"
 
     assert expected == from_ngsi_query(query)
 
 
 def test_near_min():
-    geom = SlfPoint(1, 2)
-    query = NearQuery(geometry=geom, min_distance=10, max_distance=None)
-    expected = "not ST_DWithin(location_centroid, 'POINT (2.0 1.0)', 0.00009)"
+    query = NearQuery(geometry=slf_pt(), min_distance=10, max_distance=None)
+    expected = f"not ST_DWithin(location_centroid, {wkt_pt()}, 0.00009)"
 
     assert expected == from_ngsi_query(query)
 
 
 def test_near_max():
-    geom = SlfPoint(1, 2)
-    query = NearQuery(geometry=geom, min_distance=None, max_distance=20)
-    expected = "ST_DWithin(location_centroid, 'POINT (2.0 1.0)', 0.00018)"
+    query = NearQuery(geometry=slf_pt(), min_distance=None, max_distance=20)
+    expected = f"ST_DWithin(location_centroid, {wkt_pt()}, 0.00018)"
 
     assert expected == from_ngsi_query(query)
 
 
 def test_covered_by():
-    geom = SlfPoint(1, 2)
-    query = CoveredByQuery(geom)
-    expected = "ST_Within(location, 'POINT (2 1)')"
+    query = CoveredByQuery(slf_pt())
+    expected = f"ST_Within(location, {wkt_pt()})"
 
     assert expected == from_ngsi_query(query)
 
 
 def test_intersects():
-    geom = SlfPoint(1, 2)
-    query = IntersectsQuery(geom)
-    expected = "ST_Intersects(location, 'POINT (2 1)')"
+    query = IntersectsQuery(slf_pt())
+    expected = f"ST_Intersects(location, {wkt_pt()})"
 
     assert expected == from_ngsi_query(query)
 
 
 def test_disjoint():
-    geom = SlfPoint(1, 2)
-    query = DisjointQuery(geom)
-    expected = "ST_Disjoint(location, 'POINT (2 1)')"
+    query = DisjointQuery(slf_pt())
+    expected = f"ST_Disjoint(location, {wkt_pt()})"
 
     assert expected == from_ngsi_query(query)
 
 
 def test_equals():
-    geom = SlfPoint(1, 2)
-    query = EqualsQuery(geom)
-    expected = "ST_Equals(location, 'POINT (2 1)')"
+    query = EqualsQuery(slf_pt())
+    expected = f"ST_Equals(location, {wkt_pt()})"
 
     assert expected == from_ngsi_query(query)

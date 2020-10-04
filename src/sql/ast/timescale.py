@@ -1,8 +1,17 @@
 from enum import Enum
 
-from geocoding.slf import SlfGeometry, SlfPoint
-from .crate import geo_shape_term
-from .terms import Term
+from geocoding.slf import SlfGeometry, SlfPoint, encode_as_wkt
+from .terms import Term, lit
+
+
+def geo_shape_term(geometry: SlfGeometry) -> str:
+    geo_shape = encode_as_wkt(geometry, srid=4326)  # (*)
+    return lit(geo_shape).eval()
+# (*) nasty dependencies. This SRID thingie is a nasty implicit dependency
+# scattered about two other places: timescale translator and timescale geo
+# query. Put some thought in refactoring the translator to keep the code
+# modular---keep together that which changes for the same reason, old Parnas
+# said.
 
 
 class GeoIncidenceType(Enum):

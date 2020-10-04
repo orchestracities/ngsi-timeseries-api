@@ -113,6 +113,8 @@ def gen_entity(entity_id: int,
             'value': slf_box_v
         }
     }
+# TODO: factor out?
+# Similar to gen_entity in test_timescale_insert module in translators.tests.
 
 
 def insert_entities(entities: Union[List[dict], dict],
@@ -198,7 +200,11 @@ def test_entity_with_all_supported_types():
                    timex=current_timex() + '+00:00',
                    array_v=[123, {}, False],
                    structured_v={'x': 1},
-                   geoj_v={'type': 'Point', 'coordinates': [30.02, 10.03]},
+                   geoj_v={'type': 'Point', 'coordinates': [30.02, 10.03],
+                           'crs': {'properties': {'name': 'EPSG4326'},
+                                   'type': 'name'},
+                           'meta': {'srid': 4326}
+                           },
                    slf_point_v='41.3763726, 2.186447514',
                    slf_line_v=['1.0, 2.0', '3.0, 4.0'],
                    slf_polygon_v=['0.0, 0.0', '1.0, 0.0', '0.0, 1.0',

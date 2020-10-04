@@ -142,10 +142,11 @@ class PostgresTranslator(sql_translator.SQLTranslator):
 
                     if SlfGeometry.is_ngsi_slf_attr(e[cn]):
                         ast = SlfGeometry.build_from_ngsi_dict(e[cn])
-                        mapped_value = geocoding.slf.wktcodec.encode_as_wkt(ast)
+                        mapped_value = geocoding.slf.wktcodec.encode_as_wkt(
+                            ast, srid=4326)
                     elif mapped_type == NGSI_TO_SQL[NGSI_GEOJSON]:
                         mapped_value = geocoding.geojson.wktcodec.encode_as_wkt(
-                            ngsi_value)
+                            ngsi_value, srid=4326)
                     elif mapped_type == NGSI_TO_SQL[NGSI_STRUCTURED_VALUE]:
                         mapped_value = pg8000.PGJsonb(ngsi_value)
                     elif mapped_type == NGSI_TO_SQL[NGSI_TEXT]:

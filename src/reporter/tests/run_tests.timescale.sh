@@ -36,9 +36,21 @@ docker-compose -f docker-compose.timescale.yml down -v
 exit $r
 
 # NOTE. Failing tests.
-# * test_geo*: Timescale geo-queries not implemented yet.
+# * test_geo*: They all pass but there's a glitch. We check equality tests
+#   fail even though equality queries actually work just fine in Timescale.
+#   What the heck? Well, equality isn't supported in Crate and the reporter
+#   blindly returns a 422 regardless of backend. That will have to change
+#   and then the test_geo* should be updated so that in the case of Timescale
+#   we check equality works!
 # * test_health: Endpoint hardcoded to work w/ Crate only.
-# * test_incomplete_entities: ??
+# * test_incomplete_entities: it looks like null text attrs wind up in the
+#   DB as a "None" string instead of DB null. Also there's issues when
+#   transforming a query result set into JSON (_format_response & friends)
+#   where in some cases some attrs in the result set get ditched from the
+#   returned JSON. This happens in
+#   test_can_add_new_attribute_even_without_specifying_old_ones where
+#   the query returns the two attrs in the table (a1 and a2) but then
+#   QL outputs a JSON with only a2.
 # * test_integration: works w/ Crate, possibly not needed for Timescale.
 # * test_multitenancy: ditto.
 # * test_notify: test_no_value_no_type_for_attributes is broken but it
