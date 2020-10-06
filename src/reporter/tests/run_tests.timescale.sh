@@ -16,8 +16,6 @@ cd ../../../
 
 pytest src/reporter/ \
        --cov-report= --cov-config=.coveragerc --cov-append --cov=src/ \
-       --ignore=src/reporter/tests/test_geo_queries_1t1e.py \
-       --ignore=src/reporter/tests/test_geo_query_1tne1a.py \
        --ignore=src/reporter/tests/test_health.py \
        --ignore=src/reporter/tests/test_integration.py \
        --ignore=src/reporter/tests/test_multitenancy.py \
@@ -34,23 +32,5 @@ unset POSTGRES_PORT
 docker-compose -f docker-compose.timescale.yml down -v
 exit $r
 
-# NOTE. Failing tests.
-# * test_geo*: They all pass but there's a glitch. We check equality tests
-#   fail even though equality queries actually work just fine in Timescale.
-#   What the heck? Well, equality isn't supported in Crate and the reporter
-#   blindly returns a 422 regardless of backend. That will have to change
-#   and then the test_geo* should be updated so that in the case of Timescale
-#   we check equality works!
-# * test_health: Endpoint hardcoded to work w/ Crate only.
-# * test_integration: works w/ Crate, possibly not needed for Timescale.
-# * test_multitenancy: ditto.
-# * test_notify: test_no_value_no_type_for_attributes is broken but it
-#   looks like the test was wrong to start with. In fact, the test checks
-#   (among other things) that a numeric attribute (temperature) with a string
-#   value ('25') is inserted in Crate with a text column type. The Timescale
-#   backend inserts it as float, which is correct?
-# * test_sql_injection: needs some massaging to make it work with Timescale
-#   too.
-# * test_subscribe: ditto.
-# * test_time_format: in principle these tests should be able to work with
-#   both backends but during test setup we connect to Crate.
+# NOTE. Ignored tests.
+# See https://github.com/smartsdk/ngsi-timeseries-api/issues/378
