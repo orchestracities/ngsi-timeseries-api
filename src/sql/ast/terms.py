@@ -39,9 +39,23 @@ class Term:
     def __ge__(self, other):
         return BinOp(self, '>=', self.to_term(other))
 
+    def __invert__(self):
+        return UnaryOp('not', self)
+
 # NOTE. Typing.
 # Or lack thereof! Combining terms this way doesn't prevent you from shooting
 # yourself in the foot, as in: ('wot?!' and (x < true))
+
+
+class UnaryOp(Term):
+
+    def __init__(self, operator: str, rhs: Term):
+        self.operator = operator
+        self.rhs = rhs
+
+    def eval(self):
+        return '{} {}'.format(self.operator,
+                              self.rhs.eval())
 
 
 class BinOp(Term):

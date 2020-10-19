@@ -27,7 +27,7 @@ Below is bird-eye view of the components in the ``slf`` package.
 
 
 from .geotypes import *
-from .jsoncodec import encode
+from .jsoncodec import decode, encode
 from .locparser import from_location_attribute
 from .queryparser import from_geo_params
 from .querytypes import *

@@ -1,11 +1,17 @@
 from contextlib import contextmanager
+from datetime import datetime, timezone
 import pg8000
+from typing import Any, Sequence
+
 from translators import sql_translator
 from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
     NGSI_GEOJSON, NGSI_TEXT, NGSI_STRUCTURED_VALUE, TIME_INDEX, \
     METADATA_TABLE_NAME, FIWARE_SERVICEPATH, TENANT_PREFIX
+from translators.timescale_geo_query import from_ngsi_query
 import geocoding.geojson.wktcodec
 from geocoding.slf.geotypes import *
+import geocoding.slf.jsoncodec
+from geocoding.slf.querytypes import SlfQuery
 import geocoding.slf.wktcodec
 from utils.cfgreader import *
 
@@ -136,13 +142,15 @@ class PostgresTranslator(sql_translator.SQLTranslator):
 
                     if SlfGeometry.is_ngsi_slf_attr(e[cn]):
                         ast = SlfGeometry.build_from_ngsi_dict(e[cn])
-                        mapped_value = geocoding.slf.wktcodec.encode_as_wkt(ast)
+                        mapped_value = geocoding.slf.wktcodec.encode_as_wkt(
+                            ast, srid=4326)
                     elif mapped_type == NGSI_TO_SQL[NGSI_GEOJSON]:
                         mapped_value = geocoding.geojson.wktcodec.encode_as_wkt(
-                            ngsi_value)
+                            ngsi_value, srid=4326)
                     elif mapped_type == NGSI_TO_SQL[NGSI_STRUCTURED_VALUE]:
                         mapped_value = pg8000.PGJsonb(ngsi_value)
-                    elif mapped_type == NGSI_TO_SQL[NGSI_TEXT]:
+                    elif mapped_type == NGSI_TO_SQL[NGSI_TEXT] \
+                            and ngsi_value is not None:
                         mapped_value = str(ngsi_value)
                     elif mapped_type == PG_JSON_ARRAY:
                         mapped_value = pg8000.PGJsonb(ngsi_value)
@@ -155,6 +163,29 @@ class PostgresTranslator(sql_translator.SQLTranslator):
                     # so use None which will be inserted as NULL to the db.
                     values.append(None)
         return values
+
+    def _db_value_to_ngsi(self, db_value: Any, ngsi_type: str) -> Any:
+        if db_value is None:
+            return None
+
+        if ngsi_type in (NGSI_DATETIME, NGSI_ISO8601):
+            return self._get_isoformat(db_value)
+
+        if SlfGeometry.is_ngsi_slf_attr({'type': ngsi_type}):
+            geo_json = geocoding.geojson.wktcodec.decode_wkb_hexstr(db_value)
+            slf_geom = geocoding.slf.jsoncodec.decode(geo_json, ngsi_type)
+            return slf_geom.to_ngsi_attribute()['value'] if slf_geom else None
+
+        if ngsi_type == NGSI_GEOJSON:
+            return geocoding.geojson.wktcodec.decode_wkb_hexstr(db_value)
+
+        return db_value
+    # NOTE. Implicit conversions.
+    # 1. JSON. NGSI struct values and arrays get inserted as `jsonb`. When
+    # reading `jsonb` values back from the DB, pg8000 automatically converts
+    # them to Python dictionaries and arrays, respectively.
+    # 2. Basic types (int, float, boolean and text). They also get converted
+    # back to their corresponding Python types.
 
     @staticmethod
     def _to_db_ngsi_structured_value(data: dict) -> pg8000.PGJsonb:
@@ -178,9 +209,27 @@ class PostgresTranslator(sql_translator.SQLTranslator):
         self.cursor.execute(stmt, (table_name, entity_attrs_value,
                                    entity_attrs_value))
 
-    def _get_geo_clause(self, geo_query):
-        #TODO implement geo clause
-        return ""
+    def _get_geo_clause(self, geo_query: SlfQuery = None) -> Optional[str]:
+        return from_ngsi_query(geo_query)
+
+    @staticmethod
+    def _col_name(column_description: List) -> str:
+        name = column_description[0]
+        if isinstance(name, bytes):
+            name = name.decode('utf-8')
+        return name
+
+    @staticmethod
+    def _column_names_from_query_meta(cursor_description: Sequence) -> [str]:
+        return [PostgresTranslator._col_name(x) for x in cursor_description]
+
+    @staticmethod
+    def _get_isoformat(timestamp_with_timezone: Optional[datetime]) -> str:
+        if timestamp_with_timezone is None:
+            return 'NULL'
+        utc = timestamp_with_timezone.astimezone(timezone.utc)
+        return utc.isoformat(timespec='milliseconds')
+
 
 @contextmanager
 def postgres_translator_instance():

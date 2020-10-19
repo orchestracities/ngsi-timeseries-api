@@ -3,17 +3,30 @@ This module provides functions to convert GeoJSON to/from WKT and WKB.
 """
 
 from geomet import wkt, wkb
+from typing import Optional
 
 
-def encode_as_wkt(geo_json: dict, decimals=16) -> str:
+def encode_as_wkt(geo_json: dict, decimals: int = 16,
+                  srid: Optional[int] = None) -> str:
     """
     Convert the given GeoJSON to WKT.
 
     :param geo_json: the GeoJSON data to convert.
     :param decimals: how many decimal digits to use for numbers, defaults to 16.
+    :param srid: optional spatial reference system ID to include in the shape
+        metadata. If given, prepend ``SRID=srid;`` to the WKT string. Notice
+        that SRID isn't part of the WKT spec, but is an additional feature
+        specified by OpenGIS. Keep this in mind when adding a SRID! Also notice
+        that if the input GeoJSON already contains a SRID (``meta.srid`` or
+        ``crs.properties.name`` property), that value will be used instead.
     :return: the corresponding WKT string.
     """
-    return wkt.dumps(geo_json, decimals)
+    wkt_shape = wkt.dumps(geo_json, decimals)
+    if wkt_shape.lstrip().startswith('SRID'):
+        return wkt_shape
+
+    meta = f"SRID={srid};" if srid is not None else ''
+    return meta + wkt_shape
 
 
 def encode_as_wkb(geo_json: dict, big_endian=True) -> bytes:

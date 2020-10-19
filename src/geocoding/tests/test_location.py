@@ -147,7 +147,7 @@ def test_normalize_get_json_polygon_and_add_or_update_centroid(entity):
         'type': 'geo:json',
         'value': {
             'type': 'Polygon',
-            'coordinates': [[2, 1], [4, 1], [4, -1], [2, -1]]
+            'coordinates': [[[2, 1], [4, 1], [4, -1], [2, -1]]]
         }
     }
 
@@ -173,7 +173,7 @@ def test_normalize_get_json_from_box_and_add_or_update_centroid(entity):
         'type': 'geo:json',
         'value': {
             'type': 'Polygon',
-            'coordinates': [[2, 1], [4, 1], [4, -1], [2, -1], [2, 1]]
+            'coordinates': [[[2, 1], [4, 1], [4, -1], [2, -1], [2, 1]]]
         }
     }
 
