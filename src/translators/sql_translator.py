@@ -945,7 +945,11 @@ class SQLTranslator(base_translator.BaseTranslator):
                     attr_dict = e.setdefault(original_name, {})
 
                     if original_type in (NGSI_DATETIME, NGSI_ISO8601):
-                        v = self._get_isoformat(v)
+                        try:
+                            v = self._get_isoformat(v)
+                        except Exception as e:
+                            #There is a type mismatch.
+                            logging.warning("Column '{}' type is not TIMESTAMP".format(k))
                     attr_dict.setdefault('values', []).append(v)
                     attr_dict['type'] = original_type
 
