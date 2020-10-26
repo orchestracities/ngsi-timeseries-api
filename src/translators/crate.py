@@ -224,7 +224,12 @@ class CrateTranslator(sql_translator.SQLTranslator):
             return "{}, {}".format(lat, lon)
 
         if ngsi_type in (NGSI_DATETIME, NGSI_ISO8601):
-            return self._get_isoformat(db_value)
+            try:
+                v = self._get_isoformat(db_value)
+            except Exception as e:
+                # There is a type mismatch.
+                logging.warning("Column '{}' type is not TIMESTAMP".format(k))
+            return v
 
         return db_value
 
