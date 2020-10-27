@@ -1,3 +1,4 @@
+import logging
 from contextlib import contextmanager
 from datetime import datetime, timezone
 import pg8000
@@ -169,7 +170,12 @@ class PostgresTranslator(sql_translator.SQLTranslator):
             return None
 
         if ngsi_type in (NGSI_DATETIME, NGSI_ISO8601):
-            return self._get_isoformat(db_value)
+            try:
+                v = self._get_isoformat(db_value)
+            except Exception as e:
+                # There is a type mismatch.
+                logging.warning("Column '{}' type is not TIMESTAMP".format(k))
+            return v
 
         if SlfGeometry.is_ngsi_slf_attr({'type': ngsi_type}):
             geo_json = geocoding.geojson.wktcodec.decode_wkb_hexstr(db_value)
