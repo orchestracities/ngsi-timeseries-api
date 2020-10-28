@@ -1,5 +1,5 @@
 from exceptions.exceptions import AmbiguousNGSIIdError
-from .http import fiware_s, fiware_sp
+from .httputil import fiware_s, fiware_sp
 from translators.factory import translator_for
 
 

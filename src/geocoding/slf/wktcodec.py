@@ -27,12 +27,17 @@ def to_wkt_format_string(geom: SlfGeometry) -> Optional[str]:
     return None
 
 
-def encode_as_wkt(geom: SlfGeometry) -> Optional[str]:
+def encode_as_wkt(geom: SlfGeometry, srid: Optional[int] = None) \
+        -> Optional[str]:
     """
     Convert the given Simple Location Format shape to the corresponding
     WKT shape.
 
     :param geom: the Simple Location Format shape to convert.
+    :param srid: optional spatial reference system ID to include in the shape
+        metadata. If given, prepend ``SRID=srid;`` to the WKT string. Notice
+        that SRID isn't part of the WKT spec, but is an additional feature
+        specified by OpenGIS. Keep this in mind when adding a SRID!
     :return: the WKT string if the input shape is of a known type;
         ``None`` otherwise.
     """
@@ -41,7 +46,10 @@ def encode_as_wkt(geom: SlfGeometry) -> Optional[str]:
 
     ps = to_wkt_coords_list(geom._points())
     str_rep = to_wkt_format_string(geom)
-    return str_rep.format(ps) if str_rep else None
+    if str_rep:
+        meta = f"SRID={srid};" if srid is not None else ''
+        return meta + str_rep.format(ps)
+    return None
 
 # TODO. Use shapely.
 # A better option than the above code would be the following which uses the
