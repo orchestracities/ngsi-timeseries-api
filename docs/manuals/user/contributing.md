@@ -42,6 +42,38 @@ pipenv install
 # if you want to set up a dev env to test everything locally, you'll need to...
 source setup_dev_env.sh
 ```
+Details on how to use Quantum Leap WSGI app in Gunicorn:
+
+```
+cd ngsi-timeseries-api/src
+gunicorn server.wsgi --config server/gconfig.py
+```
+Security Settings:
+
+###### limit_request_line
+```
+--limit-request-line INT
+4094
+```
+The maximum size of HTTP request line in bytes.This parameter is used to limit the allowed size of a 
+client’s HTTP request-line.
+
+###### limit_request_fields
+
+```
+--limit-request-fields INT
+100
+```
+This parameter is used to limit the number of headers in a request to prevent DDOS attack. 
+Used with the limit_request_field_size it allows more safety. By default this value is 100 and can’t be larger than 32768.
+
+###### limit_request_field_size
+```
+--limit-request-field_size INT
+8190
+```
+Limit the allowed size of an HTTP request header field.
+Value is a positive number or 0. Setting it to 0 will allow unlimited header field sizes.
 
 [pytest](https://docs.pytest.org/en/latest/) is used as the testing framework,
 but since most of QL's functionality is integration of components, you'll find
