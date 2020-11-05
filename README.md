@@ -10,6 +10,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/smartsdk/ngsi-timeseries-api/badge.svg?branch=master)](https://coveralls.io/github/smartsdk/ngsi-timeseries-api?branch=master)
 ![Status](https://nexus.lab.fiware.org/static/badges/statuses/quantum-leap.svg)
 [![Swagger Validator](https://img.shields.io/swagger/valid/2.0/https/raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v2.0/json/petstore-expanded.json.svg)](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4394/badge)](https://bestpractices.coreinfrastructure.org/projects/4394)
 
 QuantumLeap is the first implementation of [an API](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
 that supports the storage of [FIWARE NGSIv2](http://docs.orioncontextbroker.apiary.io/#)
