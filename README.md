@@ -65,7 +65,7 @@ section.
 ## Contributing
 
 Refer to the [Contributing](https://quantumleap.readthedocs.io/en/latest/user/contributing/)
-section and to the [project's contribution guidelines](https://github.com/smartsdk/ngsi-timeseries-api/blob/master/CONTRIBUTING.md).
+section and to the [contribution guidelines](./CONTRIBUTING.md).
 
 ## Extra resources
 

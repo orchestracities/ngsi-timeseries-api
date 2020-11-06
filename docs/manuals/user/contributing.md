@@ -3,7 +3,7 @@
 We welcome contributions and value your ideas. Please use GitHub Issues
 if you would like to suggest ideas, request new features or enhancements,
 or report bugs. To contribute code, open a GitHub Pull Requests. If you
-are new to the project, we kindly ask you to review [QuantumLeap]'s
+are new to the project, we kindly ask you to review QuantumLeap's
 [contribution guidelines][contrib] as well as FIWARE's [contribution
 requirements][fiware-contrib].
 
