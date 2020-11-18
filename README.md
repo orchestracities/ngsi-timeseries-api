@@ -42,9 +42,12 @@ QuantumLeap supports both Crate DB and Timescale as time-series DB
 backends but please bear in mind that at the moment we only support
 the following versions:
 
-* Crate backend: Crate DB version `3.3.*` (will be deprecated from QL `0.8` version) and `4.*`
+* Crate backend: Crate DB version `3.3.*` (will be deprecated from QL `0.9` version) and `4.*`
 * Timescale backend: Postgres version `10.*` or `11.*` +
   Timescale extension `1.3.*` + Postgis extension `2.5.*`.
+  
+PR #373 introduced basic support for NGSI-LD. In short this means that using
+the current endpoint you are able to store NGSI-LD payloads with few caveats (see #398)
 
 ## Usage
 

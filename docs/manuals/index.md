@@ -29,8 +29,49 @@ to transparently support multiple database back ends. In fact,
 presently QuantumLeap supports both [CrateDB][crate] and
 [Timescale][timescale] as back end databases.
 
+## NGSI-LD support
+PR #373 introduced basic support for basic NGSI-LD relying on v2 API.
+In short this means that using the current endpoint QL can
+store NGSI-LD payloads with few caveats (see #398):
+* temporal attributes are not supported (#395) - what is relevant here is
+   that this attributes are
+   used to create the time index of the series
+* other attributes may be added as well in future (not a priority probably,
+  so may not be tackled any time #396)
+* context is currently not stored.
+* query endpoints returns NGSIv2 data types.
+
+NGSI-LD temporal queries seem to have a semantic that implies that
+only numeric values are tracked in time series. This was never the case
+for QL that trace over time any attribute (also not numeric ones),
+since they may change as well.
+
+NGSI-LD semantics also seem to track values over time
+of single attributes. QL to enable to retrieve full entity values in a given
+point in time stores the whole entity in a single table (this avoids the need
+for JOINs that are notoriously time consuming - but on the other hand generates
+more sparse data). In doing so, we create for the entity a single time index,
+this is due to the fact that while different dateTime attributes can be defined
+and hence queried, only one can be used to index time series in
+all modern timeseries DB (to achieve performance).
+This imply that we have a policy to compute such time index (either custom
+and referring to an attribute of the entity, or using the "latest" time
+metadata linked to the entity or to an attribute).
+The issue is that if the notification payload sent to QL includes all attributes,
+also not update ones, QL will "timestamp" all values (also old ones)
+with that timestamp.
+
+This means that the ability to track a specific value
+of an attribute in a point in time depends on the actual notification.
+
+In short, given that we aim to ensure both forward compatibility
+(data store as NGSIv2 can be queried in future as NGSI-LD)
+and backward compatibility (data store as NGSI-LD can be queried as NGSIv2),
+implementing NGSI-LD temporal api, may not be 100% compliant with
+the specs.
+
 #### Relation to STH Comet
-Although QuantumLeap and FiWare [STH Comet][comet] share similar
+Although QuantumLeap and FIWARE [STH Comet][comet] share similar
 goals, Comet doesn't support multiple database back ends (only
 MongoDB is available) and doesn't support NGSI v2 either. While
 Comet per se is a fine piece of software, some of the needs and
