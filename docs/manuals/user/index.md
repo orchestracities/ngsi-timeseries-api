@@ -176,9 +176,28 @@ or [TimescaleDB](https://www.postgresql.org/docs/current/datatype.html) data typ
 
 
 If the type of any of the received attributes is not present in the column
-*NGSI Type* of the previous table, the value of such attribute will be treated
-internally as a string. So, if you use `Float` for your attribute type (not
-valid), your attribute will be stored as a `text`.
+*NGSI Type* of the previous table, the *NGSI Type* (and hence the SQL type)
+will be derived from the value. Using the following logic:
+
+```
+       if a_type not in NGSI
+            type = Text
+            if a_value is a list:
+               type = Array
+            elif a_value is not None and a_value is an Object:
+                if a_type is 'Property' and a_value['@type'] is 'DateTime':
+                    type = DateTime
+                else:
+                    type = StructuredValue
+            elif a_value is int:
+                type = Integer
+            elif a_value is float:
+                type = Number
+            elif a_value is bool:
+                type = Boolean
+            elif a_value is an ISO DateTime:
+                type = DateTime
+```
 
 ### [Time Index](#timeindex)
 

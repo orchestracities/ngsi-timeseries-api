@@ -22,7 +22,7 @@ To configure QuantumLeap you can use the following environment variables:
 | `DEFAULT_CACHE_TTL`| Time to live of metadata cache, default: 60 (seconds) |                              |
 | `QL_CONFIG`        | Pathname for tenant  configuration  |
 | `QL_DEFAULT_DB`    | Default backend: `timescale` or `crate`  |
-| `USE_FLASK`        | `True` or `False` to use flask server or gunicorn. Default to `False`  |
+| `USE_FLASK`        | `True` or `False` to use flask server (only for Dev) or gunicorn. Default to `False`  |
 | `LOGLEVEL`         | Define the log level for all services (`DEBUG`, `INFO`, `WARNING` , `ERROR`)      |
 
 **NOTE**

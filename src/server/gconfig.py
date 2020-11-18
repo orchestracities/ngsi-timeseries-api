@@ -59,6 +59,8 @@ worker_class = 'gthread'
 # We did some initial quick & dirty benchmarking to get these results.
 # We'll likely have to measure better and also understand better the
 # way the various Gunicorn worker types actually work. (Pun intended.)
+# IMPORTANT: current implementation of ConnectionManager is not thread safe,
+# keep this value to 1.
 threads = 1
 
 
