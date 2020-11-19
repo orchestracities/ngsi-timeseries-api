@@ -48,6 +48,14 @@ services:
     volumes:
       - redisdata:/data
 
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+    - REDIS_HOSTS=local:redis:6379:1
+    ports:
+    - "8081:8081"
+
   timescale:
     image: timescale/timescaledb-postgis:${TIMESCALE_VERSION}
     ports:
@@ -57,6 +65,18 @@ services:
       # on port 5432!
     environment:
       - POSTGRES_PASSWORD=*
+
+  pgadmin:
+    image: dpage/pgadmin4:4.26
+    restart: always
+    environment:
+      - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
+      - PGADMIN_CONFIG_SERVER_MODE=False
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.org
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_LISTEN_PORT=80
+    ports:
+      - "8080:80"
 
   quantumleap-db-setup:
     build: ../timescale-container/

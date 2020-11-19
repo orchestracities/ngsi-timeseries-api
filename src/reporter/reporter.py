@@ -27,7 +27,7 @@ interest and make QL actually perform the corresponding subscription to orion.
 I.e, QL must be told where orion is.
 """
 
-from flask import request
+from flask import has_request_context, request
 from geocoding import geocoding
 from geocoding.factory import get_geo_cache, is_geo_coding_available
 from requests import RequestException
@@ -40,22 +40,13 @@ import requests
 from reporter.subscription_builder import build_subscription
 from reporter.timex import select_time_index_value_as_iso, \
     TIME_INDEX_HEADER_NAME
-from geocoding.location import normalize_location
-from utils.cfgreader import EnvReader, StrVar
+from geocoding.location import normalize_location, LOCATION_ATTR_NAME
 from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption, \
     NGSIUsageError, InvalidParameterValue, InvalidHeaderValue
 
-
 def log():
-    r = EnvReader(log=logging.getLogger(__name__).info)
-    level = r.read(StrVar('LOGLEVEL', 'INFO')).upper()
-
-    logging.basicConfig(level=level,
-                        format='%(asctime)s.%(msecs)03d '
-                               '%(levelname)s:%(name)s:%(message)s '
-                               'Thread ID: [%(thread)d]  Process ID: [%(process)d]',
-                        datefmt='%Y-%m-%d %I:%M:%S')
-    return logging.getLogger(__name__)
+    logger = logging.getLogger(__name__)
+    return logger
 
 
 def is_text(attr_type):
@@ -103,19 +94,20 @@ def _validate_payload(payload):
     # (i.e, the changed value)
     attrs = list(iter_entity_attrs(payload))
     if len(attrs) == 0:
-        log().warning("Received notification containing an entity update without attributes " +
-                      "other than 'type' and 'id'")
+        log().warning("Received notification containing an entity update "
+                      "without attributes other than 'type' and 'id'")
 
     # Attributes should have a value and the modification time
     for attr in attrs:
         if not has_value(payload, attr):
             payload[attr].update({'value': None})
             log().warning(
-                'An entity update is missing value for attribute {}'.format(attr))
+                'An entity update is missing value '
+                'for attribute {}'.format(attr))
 
 
 def _filter_empty_entities(payload):
-    log().debug('Received payload: {}'.format(payload))
+    log().debug('Received payload')
     attrs = list(iter_entity_attrs(payload))
     empty = False
     attrs.remove('time_index')
@@ -160,17 +152,23 @@ def notify():
         # Validate entity update
         error = _validate_payload(entity)
         if error:
-            # TODO in this way we return error for even if only one entity is wrong
+            # TODO in this way we return error for even if only one entity
+            #  is wrong
             return error, 400
         # Add TIME_INDEX attribute
         custom_index = request.headers.get(TIME_INDEX_HEADER_NAME, None)
         entity[TIME_INDEX_NAME] = \
             select_time_index_value_as_iso(custom_index, entity)
         # Add GEO-DATE if enabled
-        add_geodata(entity)
+        if not entity.get(LOCATION_ATTR_NAME, None):
+            add_geodata(entity)
         # Always normalize location if there's one
         normalize_location(entity)
 
+    # Get FIWARE CORRELATOR - if any
+    fiware_c = request.headers.get('fiware_correlator', None)
+    # Get Remote address
+    remote_addr = request.remote_addr
     # Define FIWARE tenant
     fiware_s = request.headers.get('fiware-service', None)
     # It seems orion always sends a 'Fiware-Servicepath' header with value '/'
@@ -196,18 +194,15 @@ def notify():
         with translator_for(fiware_s) as trans:
             trans.insert(payload, fiware_s, fiware_sp)
     except Exception as e:
-        msg = "Notification not processed or not updated for payload: %s. " \
-              "%s" % (payload, str(e))
-        log().error(msg)
+        msg = "Notification not processed or not updated: {}"
+        log().error(msg.format(e), exc_info=True)
         error_code = 500
         if e.__class__ == InvalidHeaderValue or \
                 e.__class__ == InvalidParameterValue or \
                 e.__class__ == NGSIUsageError:
             error_code = 400
         return msg, error_code
-    msg = "Notification successfully processed for : 'tenant' %s, " \
-          "'fiwareServicePath' %s, " \
-          "'entity_id' %s" % (fiware_s, fiware_sp, entity_id)
+    msg = "Notification successfully processed"
     log().info(msg)
     return msg
 
@@ -218,6 +213,7 @@ def add_geodata(entity):
         geocoding.add_location(entity, cache=cache)
 
 
+# TODO check that following methods can be removed
 def query_1TNENA():
     r = {
         "error": "Not Implemented",

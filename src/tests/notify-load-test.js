@@ -12,8 +12,8 @@ export default function() {
                 "id": "Room:1",
                 "type": "Room",
                 "temperature": {
-                        "value": 23,
-                        "type": "Float"
+                        "value": 23.3,
+                        "type": "Number"
                 },
                 "pressure": {
                         "value": 720,

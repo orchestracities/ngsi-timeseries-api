@@ -1,7 +1,7 @@
 from conftest import crate_translator as translator
 from reporter.tests.test_1T1E1A import query_url as query_1T1E1A, \
     assert_1T1E1A_response
-from reporter.tests.utils import get_notification, send_notifications
+from reporter.tests.utils import get_notification, send_notifications, delete_entity_type
 import requests
 import time
 
@@ -29,6 +29,7 @@ def check_time_index(input_index, expected_index=None):
         'values': [0, 1, 2]
     }
     assert_1T1E1A_response(obtained, expected)
+    delete_entity_type('', 'Room')
 
 
 def test_index_iso(translator):

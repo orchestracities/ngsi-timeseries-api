@@ -22,3 +22,4 @@ nav:
     - 'Timescale': 'admin/timescale.md'
     - 'Grafana': 'admin/grafana.md'
     - 'Data-Migration': 'admin/dataMigration.md'
+    - 'Bechmarks': 'admin/benchmarks.md'

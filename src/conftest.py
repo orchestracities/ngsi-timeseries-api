@@ -70,6 +70,18 @@ class OrionClient(object):
                           headers=headers(service, service_path))
         return r
 
+    def delete(self, entity_id, service=None, service_path=None):
+        r = requests.delete('{}/v2/entities/{}'.format(self.url, entity_id),
+                            headers=headers(service, service_path))
+        return r
+
+    def delete_subscription(self, subscription_id, service=None,
+                            service_path=None):
+        r = requests.delete(
+            '{}/v2/subscriptions/{}'.format(self.url, subscription_id),
+            headers=headers(service, service_path))
+        return r
+
 
 @pytest.fixture
 def orion_client():
@@ -79,7 +91,8 @@ def orion_client():
 
 def do_clean_crate():
     from crate import client
-    conn = client.connect(["{}:{}".format(CRATE_HOST, CRATE_PORT)], error_trace=True)
+    conn = client.connect(["{}:{}".format(CRATE_HOST, CRATE_PORT)],
+                          error_trace=True)
     cursor = conn.cursor()
 
     try:
@@ -143,6 +156,30 @@ def crate_translator(clean_crate):
                 pass
             return r
 
+        def entity_types(self, fiware_service=None, **kwargs):
+            r = CrateTranslator.query_entity_types(self, entity_type=None,
+                                                   fiware_service=fiware_service,
+                                                   **kwargs)
+            try:
+                self._refresh(r, fiware_service=fiware_service)
+            except exceptions.ProgrammingError:
+                pass
+            return r
+
+        def clean(self, fiware_service=None, **kwargs):
+            types = CrateTranslator.query_entity_types(self,
+                                                       fiware_service=fiware_service,
+                                                       **kwargs)
+            if types:
+                for t in types:
+                    CrateTranslator.drop_table(self, t,
+                                               fiware_service=fiware_service,
+                                               **kwargs)
+                try:
+                    self._refresh(types, fiware_service=fiware_service)
+                except exceptions.ProgrammingError:
+                    pass
+
     with Translator(host=CRATE_HOST, port=CRATE_PORT) as trans:
         yield trans
 
@@ -169,8 +206,9 @@ def entity():
 @pytest.fixture
 def sameEntityWithDifferentAttrs():
     """
-    Two updates for the same entity with different attributes.
-    The first update has temperature and pressure but the second update has only temperature.
+    Two updates for the same entity with different attributes. The first
+    update has temperature and pressure but the second update has only
+    temperature.
     """
     entities = [
         {
@@ -218,8 +256,9 @@ def sameEntityWithDifferentAttrs():
 @pytest.fixture
 def diffEntityWithDifferentAttrs():
     """
-    Two updates for the same entity with different attributes.
-    The first update has temperature and pressure but the second update has only temperature.
+    Two updates for the same entity with different attributes. The first
+    update has temperature and pressure but the second update has only
+    temperature.
     """
     entities = [
         {

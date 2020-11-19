@@ -63,10 +63,12 @@ def query_NTNE1A(attr_name,  # In Path
                                    geo_query=geo_query)
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)
-        logging.getLogger().error(msg, exc_info=True)
+        logging.getLogger(__name__).error(msg, exc_info=True)
         return msg, 400
 
     except InvalidParameterValue as e:
+        msg = "Bad Request Error: {}".format(e)
+        logging.getLogger(__name__).error(msg, exc_info=True)
         return {
             "error": "{}".format(type(e)),
             "description": str(e)
@@ -74,7 +76,7 @@ def query_NTNE1A(attr_name,  # In Path
 
     except Exception as e:
         msg = "Internal server Error: {}".format(e)
-        logging.getLogger().error(msg, exc_info=True)
+        logging.getLogger(__name__).error(msg, exc_info=True)
         return msg, 500
     attributes = []
     entries = []
@@ -123,11 +125,13 @@ def query_NTNE1A(attr_name,  # In Path
             'attrName': attr_name,
             'types': entity_type
         }
+        logging.getLogger(__name__).info("Query processed successfully")
         return res
     r = {
         "error": "Not Found",
         "description": "No records were found for such query."
     }
+    logging.getLogger(__name__).info("No value found for query")
     return r, 404
 
 

@@ -13,8 +13,12 @@
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4394/badge)](https://bestpractices.coreinfrastructure.org/projects/4394)
 
 QuantumLeap is the first implementation of [an API](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
-that supports the storage of [FIWARE NGSIv2](http://docs.orioncontextbroker.apiary.io/#)
+that supports the storage of [FIWARE NGSIv2](https://fiware.github.io/specifications/ngsiv2/stable/)
 data into a [time series database](https://en.wikipedia.org/wiki/Time_series_database).
+It currently also experimentally supports the injection of
+[NGSI-LD](https://www.etsi.org/deliver/etsi_gs/CIM/001_099/009/01.01.01_60/gs_CIM009v010101p.pdf) in 
+a backward compatible way with NGSI-v2 API. I.e. you can retrieve NGSI-LD stored data via NGSI v2
+API and retrieve data will be describe following NGSI v2 format.
 
 Want to know more? Refer to the [docs](https://quantumleap.readthedocs.io/en/latest/)
 or checkout the Extra Resources below.
@@ -42,9 +46,12 @@ QuantumLeap supports both Crate DB and Timescale as time-series DB
 backends but please bear in mind that at the moment we only support
 the following versions:
 
-* Crate backend: Crate DB version `3.3.*` (will be deprecated from QL `0.8` version) and `4.*`
+* Crate backend: Crate DB version `3.3.*` (will be deprecated from QL `0.9` version) and `4.*`
 * Timescale backend: Postgres version `10.*` or `11.*` +
   Timescale extension `1.3.*` + Postgis extension `2.5.*`.
+  
+PR #373 introduced basic support for NGSI-LD. In short this means that using
+the current endpoint you are able to store NGSI-LD payloads with few caveats (see #398)
 
 ## Usage
 
@@ -78,4 +85,4 @@ consistency.
 
 QuantumLeap is licensed under the [MIT](LICENSE) License
 
-© 2017-2019 Martel Innovate
+© 2017-2020 Martel Innovate

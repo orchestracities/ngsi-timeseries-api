@@ -44,9 +44,10 @@ def get_notification(et, ei, attr_value, mod_value):
 
 def send_notifications(service, notifications):
     assert isinstance(notifications, list)
+    h = {'Content-Type': 'application/json'}
+    if service:
+        h['Fiware-Service'] = service
     for n in notifications:
-        h = {'Content-Type': 'application/json',
-             'Fiware-Service': service}
         r = requests.post(notify_url(), data=json.dumps(n), headers=h)
         assert r.ok
 

@@ -43,6 +43,7 @@ def test_fiware_tenant(translator):
     # Query WITH tenant -> Result
     entities = translator.query(fiware_service=fs, fiware_servicepath=fsp)
     assert len(entities) == 1
+    translator.clean(fs)
 
 
 def test_fiware_tenant_services(translator):
@@ -63,6 +64,8 @@ def test_fiware_tenant_services(translator):
     entities = translator.query(fiware_service="B", fiware_servicepath="/")
     assert len(entities) == 1
     assert entities[0]['id'] == "Y"
+    translator.clean("A")
+    translator.clean("B")
 
 
 def test_fiware_tenant_servicepath(translator):
@@ -95,6 +98,7 @@ def test_fiware_tenant_servicepath(translator):
     entities = translator.query(fiware_service="EU",
                                 fiware_servicepath="/eu/greece/athens")
     assert len(entities) == 1
+    translator.clean("EU")
 
 
 def test_fiware_empty_tenant_is_no_tenant(translator):
@@ -115,6 +119,7 @@ def test_fiware_empty_tenant_is_no_tenant(translator):
     # Query with EMPTY tenant -> get results
     entities = translator.query()
     assert len(entities) == 2
+    translator.clean()
 
 
 def test_fiware_tenant_reserved_word(translator):
@@ -125,3 +130,4 @@ def test_fiware_tenant_reserved_word(translator):
 
     entities = translator.query(fiware_service=fs, fiware_servicepath=fsp)
     assert len(entities) == 1
+    translator.clean(fs)
