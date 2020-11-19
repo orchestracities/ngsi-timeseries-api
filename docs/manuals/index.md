@@ -7,7 +7,7 @@
 ## Overview
 
 QuantumLeap is a REST service for storing, querying and retrieving
-[NGSI v2][ngsi-spec] spatial-temporal data. QuantumLeap converts
+[NGSI v2][ngsi-spec] and [NGSI-LD][nsgi-ld-spec] spatial-temporal data. QuantumLeap converts
 NGSI semi-structured data into tabular format and stores it in a
 [time-series database][tsdb], associating each database record with
 a time index and, if present in the NGSI data, a location on Earth.
@@ -29,8 +29,8 @@ to transparently support multiple database back ends. In fact,
 presently QuantumLeap supports both [CrateDB][crate] and
 [Timescale][timescale] as back end databases.
 
-## NGSI-LD support
-PR #373 introduced basic support for basic NGSI-LD relying on v2 API.
+### NGSI-LD support
+PR #373 introduced basic support for basic [NGSI-LD][nsgi-ld-spec] relying on v2 API.
 In short this means that using the current endpoint QL can
 store NGSI-LD payloads with few caveats (see #398):
 * temporal attributes are not supported (#395) - what is relevant here is
@@ -292,6 +292,8 @@ As of today, the query caching stores:
     "InfluxDB Documentation"
 [ngsi-spec]: https://fiware.github.io/specifications/ngsiv2/stable/
     "FIWARE-NGSI v2 Specification"
+[ngsi-ld-spec]: https://www.etsi.org/deliver/etsi_gs/CIM/001_099/009/01.01.01_60/gs_CIM009v010101p.pdf
+    "ETSI NGSI-LD API Specification"
 [orion]: https://fiware-orion.readthedocs.io
     "Orion Context Broker Home"
 [osm]: https://www.openstreetmap.org
