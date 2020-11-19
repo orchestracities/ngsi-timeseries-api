@@ -7,7 +7,8 @@
 ## Overview
 
 QuantumLeap is a REST service for storing, querying and retrieving
-[NGSI v2][ngsi-spec] and [NGSI-LD][nsgi-ld-spec] spatial-temporal data. QuantumLeap converts
+[NGSI v2][ngsi-spec] and [NGSI-LD][nsgi-ld-spec] (*experimental support*)
+spatial-temporal data. QuantumLeap converts
 NGSI semi-structured data into tabular format and stores it in a
 [time-series database][tsdb], associating each database record with
 a time index and, if present in the NGSI data, a location on Earth.
@@ -30,14 +31,18 @@ presently QuantumLeap supports both [CrateDB][crate] and
 [Timescale][timescale] as back end databases.
 
 ### NGSI-LD support
-PR #373 introduced basic support for basic [NGSI-LD][nsgi-ld-spec] relying on v2 API.
+PR [#373](https://github.com/smartsdk/ngsi-timeseries-api/pulls/373) 
+introduced basic support for basic [NGSI-LD][nsgi-ld-spec] relying on v2 API.
 In short this means that using the current endpoint QL can
-store NGSI-LD payloads with few caveats (see #398):
-* temporal attributes are not supported (#395) - what is relevant here is
-   that this attributes are
+store NGSI-LD payloads with few caveats (see 
+[#398](https://github.com/smartsdk/ngsi-timeseries-api/issues/398)):
+* temporal attributes are not currently supported
+  ([#395](https://github.com/smartsdk/ngsi-timeseries-api/issues/395));
+   what is relevant here is that this attributes are
    used to create the time index of the series
 * other attributes may be added as well in future (not a priority probably,
-  so may not be tackled any time #396)
+  so may not be tackled any time
+  [#396](https://github.com/smartsdk/ngsi-timeseries-api/issues/396))
 * context is currently not stored.
 * query endpoints returns NGSIv2 data types.
 
@@ -70,7 +75,7 @@ and backward compatibility (data store as NGSI-LD can be queried as NGSIv2),
 implementing NGSI-LD temporal api, may not be 100% compliant with
 the specs.
 
-#### Relation to STH Comet
+### Relation to STH Comet
 Although QuantumLeap and FIWARE [STH Comet][comet] share similar
 goals, Comet doesn't support multiple database back ends (only
 MongoDB is available) and doesn't support NGSI v2 either. While

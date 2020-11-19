@@ -13,8 +13,12 @@
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4394/badge)](https://bestpractices.coreinfrastructure.org/projects/4394)
 
 QuantumLeap is the first implementation of [an API](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
-that supports the storage of [FIWARE NGSIv2](http://docs.orioncontextbroker.apiary.io/#)
+that supports the storage of [FIWARE NGSIv2](https://fiware.github.io/specifications/ngsiv2/stable/)
 data into a [time series database](https://en.wikipedia.org/wiki/Time_series_database).
+It currently also experimentally supports the injection of
+[NGSI-LD](https://www.etsi.org/deliver/etsi_gs/CIM/001_099/009/01.01.01_60/gs_CIM009v010101p.pdf) in 
+a backward compatible way with NGSI-v2 API. I.e. you can retrieve NGSI-LD stored data via NGSI v2
+API and retrieve data will be describe following NGSI v2 format.
 
 Want to know more? Refer to the [docs](https://quantumleap.readthedocs.io/en/latest/)
 or checkout the Extra Resources below.
@@ -81,4 +85,4 @@ consistency.
 
 QuantumLeap is licensed under the [MIT](LICENSE) License
 
-© 2017-2019 Martel Innovate
+© 2017-2020 Martel Innovate
