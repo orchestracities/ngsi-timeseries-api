@@ -65,7 +65,7 @@ section.
 ## Contributing
 
 Refer to the [Contributing](https://quantumleap.readthedocs.io/en/latest/user/contributing/)
-section.
+section and to the [contribution guidelines](./CONTRIBUTING.md).
 
 ## Extra resources
 

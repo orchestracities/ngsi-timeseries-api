@@ -1,13 +1,13 @@
 ## Contributions
 
-Contributions are more than welcome in the form of pull requests.
+We welcome contributions and value your ideas. Please use GitHub Issues
+if you would like to suggest ideas, request new features or enhancements,
+or report bugs. To contribute code, open a GitHub Pull Requests. If you
+are new to the project, we kindly ask you to review QuantumLeap's
+[contribution guidelines][contrib] as well as FIWARE's [contribution
+requirements][fiware-contrib].
 
-You can either pick one of the [open issues](https://github.com/smartsdk/ngsi-timeseries-api/issues)
-to work on, or provide enhancements according to your own needs. In any case,
-we suggest getting in touch beforehand to make sure the contribution will be
-aligned with the current development status.
-
-To contribute:
+To contribute code:
 
 1. Fork the repository and clone the fork to your local development environment
 1. Identify a modular contribution to the code (avoid too large contributions
@@ -26,8 +26,6 @@ contributions"
    - Repeat until approval
 1. Done :) You can delete the branch in your repository.
 
-Ultimately, contributing guides should keep aligned with those suggested by
-FIWARE (see [here](https://github.com/Fiware/developmentGuidelines/blob/master/external_contributions.mediawiki)).
 
 ## Development Setup
 
@@ -100,3 +98,11 @@ In the current project tree structure you can find:
         - `translators`: Specific translators for each time-series databases,
         responsible for interacting with the lower-level database details.
         - `utils`: Common shared stuff looking for a better place to live in.
+
+
+
+
+[contrib]: https://github.com/smartsdk/ngsi-timeseries-api/blob/master/CONTRIBUTING.md
+    "Contributing to QuantumLeap"
+[fiware-contrib]: https://github.com/FIWARE/contribution-requirements/
+    "FIWARE Platform Contribution Requirements"
