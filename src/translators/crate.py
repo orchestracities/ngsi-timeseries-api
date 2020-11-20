@@ -70,7 +70,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
         # and save few msec for evey API call
         self.db_version = self.get_db_version()
         self.active_shards = EnvReader(log=logging.getLogger(__name__).debug)\
-            .read(StrVar('CRATE_WAIT_ACTIV_SHARDS', '1'))
+            .read(StrVar('CRATE_WAIT_ACTIVE_SHARDS', '1'))
 
         major = int(self.db_version.split('.')[0])
         if major <= 2:

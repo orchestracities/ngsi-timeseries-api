@@ -22,7 +22,7 @@ To configure QuantumLeap you can use the following environment variables:
 | `DEFAULT_CACHE_TTL`| Time to live of metadata cache, default: 60 (seconds) |                              |
 | `QL_CONFIG`        | Pathname for tenant  configuration  |
 | `QL_DEFAULT_DB`    | Default backend: `timescale` or `crate`  |
-| `CRATE_WAIT_ACTIV_SHARDS` | Specifies the number of shard copies that need to be active for write operations to proceed. Default `1`. See related [crate documentation](https://crate.io/docs/crate/reference/en/4.3/sql/statements/create-table.html#write-wait-for-active-shards). |
+| `CRATE_WAIT_ACTIVE_SHARDS` | Specifies the number of shard copies that need to be active for write operations to proceed. Default `1`. See related [crate documentation](https://crate.io/docs/crate/reference/en/4.3/sql/statements/create-table.html#write-wait-for-active-shards). |
 | `USE_FLASK`        | `True` or `False` to use flask server (only for Dev) or gunicorn. Default to `False`  |
 | `LOGLEVEL`         | Define the log level for all services (`DEBUG`, `INFO`, `WARNING` , `ERROR`)      |
 
