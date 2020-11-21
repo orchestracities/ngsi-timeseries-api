@@ -1,5 +1,5 @@
 """
-Test Crate queries that span across multiple entities (of the same type for
+Test queries that span across multiple entities (of the same type for
 now).
 
 Query has historically accepted an entity_id parameter (the id of the entity).
@@ -8,10 +8,19 @@ It has been refactored to be called entity_ids and be a list of ids.
 For now, having more than one element in this list requires the type to be
 specified and unique.
 """
-from conftest import crate_translator as translator
 from utils.common import create_random_entities
+from conftest import crate_translator, timescale_translator
+
+import pytest
 
 
+translators = [
+    pytest.lazy_fixture('crate_translator'),
+    pytest.lazy_fixture('timescale_translator')
+]
+
+
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_query_multiple_ids(translator):
     # First insert some data
     num_updates = 3
@@ -32,6 +41,7 @@ def test_query_multiple_ids(translator):
     translator.clean()
 
 
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_query_multiple_ids_bak(translator):
     # Should not break old usage of one single entity_id
     num_updates = 3
@@ -46,6 +56,7 @@ def test_query_multiple_ids_bak(translator):
     translator.clean()
 
 
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_query_multiple_ids_with_invalids(translator):
     # Nonexistent ids should be ignored
     num_updates = 3

@@ -1,6 +1,4 @@
-from exceptions.exceptions import AmbiguousNGSIIdError
-from translators.base_translator import BaseTranslator
-from translators.crate import NGSI_TEXT
+from translators.sql_translator import METADATA_TABLE_NAME, TYPE_PREFIX
 from conftest import crate_translator as translator, entity
 from utils.common import *
 from datetime import datetime, timezone
@@ -81,10 +79,29 @@ def test_geo_point_null_values(translator):
     assert res[1] == [None, None, 19]
     translator.clean()
 
-def within_east_hemisphere(e):
-    return e["attr_geo"]["values"][0]["coordinates"][0] > 0
 
+def test_default_replication(translator):
+    """
+    By default there should be 2-all replicas
 
-def beyond_mid_epoch(e):
-    mid_epoch = datetime(1970, 6, 28).isoformat(timespec='milliseconds')
-    return e["attr_time"]["values"][0] > mid_epoch
+    https://crate.io/docs/crate/reference/en/latest/general/ddl/replication.html
+    """
+    entities = create_random_entities(1, 2, 10)
+    entity = entities[0]
+    e_type = entity['type']
+
+    translator.insert(entities)
+
+    et = '{}{}'.format(TYPE_PREFIX, e_type.lower())
+    # same as in translator._et2tn but without double quotes
+    op = "select number_of_replicas from information_schema.tables where " \
+         "table_name = '{}'"
+    translator.cursor.execute(op.format(et))
+    res = translator.cursor.fetchall()
+    assert res[0] == ['2-all']
+
+    # Metadata table should also be replicated
+    translator.cursor.execute(op.format(METADATA_TABLE_NAME))
+    res = translator.cursor.fetchall()
+    assert res[0] == ['2-all']
+    translator.clean()
