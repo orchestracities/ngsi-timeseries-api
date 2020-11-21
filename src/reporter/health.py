@@ -68,12 +68,12 @@ def get_health(with_geocoder=False):
         res['status'] = 'fail'
         res.setdefault('details', {})['crateDB'] = 'cannot reach crate'
 
-    # Check geocache (critical)
+    # Check cache (not critical)
     health = check_cache()
     if health['status'] != 'pass':
         res.setdefault('details', {})['redis'] = health
-        if health['status'] == 'fail' or res['status'] == 'pass':
-            res['status'] = health['status']
+        if res['status'] == 'pass':
+            res['status'] = 'warn'
 
     # Check geocoder (not critical)
     if with_geocoder:
