@@ -223,7 +223,10 @@ class PostgresTranslator(sql_translator.SQLTranslator):
             return slf_geom.to_ngsi_attribute()['value'] if slf_geom else None
 
         if ngsi_type == NGSI_GEOJSON:
-            return geocoding.geojson.wktcodec.decode_wkb_hexstr(db_value)
+            geojson = geocoding.geojson.wktcodec.decode_wkb_hexstr(db_value)
+            geojson.pop('meta')
+            geojson.pop('crs')
+            return geojson
 
         return db_value
 

@@ -1,8 +1,16 @@
 from datetime import datetime
-from conftest import crate_translator as translator
+from conftest import crate_translator, timescale_translator
 from utils.common import create_random_entities, TIME_INDEX_NAME
+import pytest
 
 
+translators = [
+    pytest.lazy_fixture('crate_translator'),
+    pytest.lazy_fixture('timescale_translator')
+]
+
+
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_delete_entity_defaults(translator):
     num_types = 2
     num_ids_per_type = 2
@@ -31,6 +39,7 @@ def test_delete_entity_defaults(translator):
     translator.clean()
 
 
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_delete_entity_customs(translator):
     entities = create_random_entities(num_types=1,
                                       num_ids_per_type=2,
@@ -67,6 +76,7 @@ def test_delete_entity_customs(translator):
     translator.clean()
 
 
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_delete_entity_with_tenancy(translator):
     entities = create_random_entities(num_types=2,
                                       num_ids_per_type=2,
@@ -98,6 +108,7 @@ def test_delete_entity_with_tenancy(translator):
     translator.clean(fs)
 
 
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_delete_entities_defaults(translator):
     entities = create_random_entities(num_types=3,
                                       num_ids_per_type=2,
@@ -114,6 +125,7 @@ def test_delete_entities_defaults(translator):
     translator.clean()
 
 
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_delete_entities_customs(translator):
     entities = create_random_entities(num_types=4,
                                       num_ids_per_type=1,
@@ -135,6 +147,7 @@ def test_delete_entities_customs(translator):
     translator.clean()
 
 
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_delete_entities_with_tenancy(translator):
     fs = 'fs'
     fsp = 'fsp'

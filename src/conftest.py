@@ -15,7 +15,7 @@ CRATE_HOST = os.environ.get('CRATE_HOST', 'crate')
 CRATE_PORT = 4200
 
 POSTGRES_HOST = os.environ.get('POSTGRES_HOST', 'timescale')
-POSTGRES_HOST = 5432
+POSTGRES_PORT = 5432
 
 REDIS_HOST = os.environ.get('REDIS_HOST', 'redis')
 REDIS_PORT = 6379
@@ -183,6 +183,52 @@ def crate_translator(clean_crate):
     with Translator(host=CRATE_HOST, port=CRATE_PORT) as trans:
         yield trans
 
+
+@pytest.fixture()
+def timescale_translator():
+    from src.translators.timescale import PostgresTranslator,\
+        PostgresConnectionData
+
+    class Translator(PostgresTranslator):
+
+        def insert(self, entities,
+                   fiware_service=None, fiware_servicepath=None):
+            r = PostgresTranslator.insert(self, entities,
+                                       fiware_service, fiware_servicepath)
+            return r
+
+        def delete_entity(self, entity_id, entity_type=None,
+                          fiware_service=None, **kwargs):
+            r = PostgresTranslator.delete_entity(self, entity_id, entity_type,
+                                              fiware_service=fiware_service,
+                                              **kwargs)
+            return r
+
+        def delete_entities(self, entity_type=None, fiware_service=None,
+                            **kwargs):
+            r = PostgresTranslator.delete_entities(self, entity_type,
+                                                fiware_service=fiware_service,
+                                                **kwargs)
+            return r
+
+        def entity_types(self, fiware_service=None, **kwargs):
+            r = PostgresTranslator.query_entity_types(self, entity_type=None,
+                                                   fiware_service=fiware_service,
+                                                   **kwargs)
+            return r
+
+        def clean(self, fiware_service=None, **kwargs):
+            types = PostgresTranslator.query_entity_types(self,
+                                                       fiware_service=fiware_service,
+                                                       **kwargs)
+            if types:
+                for t in types:
+                    PostgresTranslator.drop_table(self, t,
+                                               fiware_service=fiware_service,
+                                               **kwargs)
+
+    with Translator(PostgresConnectionData(host=POSTGRES_HOST, port=POSTGRES_PORT)) as trans:
+        yield trans
 
 @pytest.fixture
 def entity():
