@@ -10,6 +10,11 @@ corresponding FIWARE-ServicePath.
 
 The queries using FIWARE-ServicePath will work like...
     select * from entityX where path ~ '/path/here($|/.*)';
+
+
+To test a single translator use the -k parameter followed by either
+timescale or crate.
+See https://docs.pytest.org/en/stable/example/parametrize.html
 """
 from datetime import datetime
 from utils.common import TIME_INDEX_NAME

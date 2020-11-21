@@ -1,3 +1,7 @@
+# To test a single translator use the -k parameter followed by either
+# timescale or crate.
+# See https://docs.pytest.org/en/stable/example/parametrize.html
+
 from exceptions.exceptions import AmbiguousNGSIIdError
 from translators.base_translator import BaseTranslator
 from translators.sql_translator import NGSI_TEXT
