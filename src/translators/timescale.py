@@ -168,7 +168,6 @@ class PostgresTranslator(sql_translator.SQLTranslator):
                 try:
                     attr = original_attrs[cn][0]
                     attr_t = original_attrs[cn][1]
-                    ngsi_value = e[attr]['value']
                     mapped_type = self._compute_type(e['id'], attr_t, e[attr])
 
                     if SlfGeometry.is_ngsi_slf_attr(e[attr]):
@@ -177,14 +176,14 @@ class PostgresTranslator(sql_translator.SQLTranslator):
                             ast, srid=4326)
                     elif mapped_type == NGSI_TO_SQL[NGSI_GEOJSON]:
                         mapped_value = geocoding.geojson.wktcodec.encode_as_wkt(
-                            ngsi_value, srid=4326)
+                            e[attr]['value'], srid=4326)
                     elif mapped_type == NGSI_TO_SQL[NGSI_STRUCTURED_VALUE]:
-                        mapped_value = pg8000.PGJsonb(ngsi_value)
+                        mapped_value = pg8000.PGJsonb(e[attr]['value'])
                     elif mapped_type == NGSI_TO_SQL[NGSI_TEXT] \
-                            and ngsi_value is not None:
-                        mapped_value = str(ngsi_value)
+                            and 'value' in e[attr] and e[attr]['value'] is not None:
+                        mapped_value = str(e[attr]['value'])
                     elif mapped_type == PG_JSON_ARRAY:
-                        mapped_value = pg8000.PGJsonb(ngsi_value)
+                        mapped_value = pg8000.PGJsonb(e[attr]['value'])
                     elif 'type' in e[attr] and e[attr]['type'] == 'Property' \
                             and 'value' in e[attr] \
                             and isinstance(e[attr]['value'], dict) \
@@ -196,7 +195,7 @@ class PostgresTranslator(sql_translator.SQLTranslator):
                         mapped_value = e[attr].get('value', None) or \
                                        e[attr].get('object', None)
                     else:
-                        mapped_value = ngsi_value
+                        mapped_value = e[attr]['value']
 
                     values.append(mapped_value)
                 except KeyError:
@@ -222,7 +221,7 @@ class PostgresTranslator(sql_translator.SQLTranslator):
             slf_geom = geocoding.slf.jsoncodec.decode(geo_json, ngsi_type)
             return slf_geom.to_ngsi_attribute()['value'] if slf_geom else None
 
-        if ngsi_type == NGSI_GEOJSON:
+        if ngsi_type == NGSI_GEOJSON or ngsi_type == NGSI_LD_GEOMETRY:
             geojson = geocoding.geojson.wktcodec.decode_wkb_hexstr(db_value)
             geojson.pop('meta')
             geojson.pop('crs')

@@ -510,3 +510,21 @@ def test_traffic_flow_observed(translator, traffic_flow_observed):
     loaded = translator.query()
     check_notifications_record([traffic_flow_observed], loaded)
     translator.clean()
+
+
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
+def test_ngsi_ld(translator, ngsi_ld):
+    # Add TIME_INDEX as Reporter would
+    now = datetime.now(timezone.utc).isoformat(timespec='milliseconds')
+    ngsi_ld[TIME_INDEX_NAME] = now
+    # Remove @context as Reporter would
+    ngsi_ld.pop('@context')
+
+    translator.insert([ngsi_ld])
+    loaded = translator.query()
+
+    assert ngsi_ld['id'] == loaded[0]['id']
+    assert ngsi_ld['refStreetlightModel']['object'] == loaded[0]['refStreetlightModel']['values'][0]
+    assert ngsi_ld['location']['value'] == loaded[0]['location']['values'][0]
+
+    translator.clean()

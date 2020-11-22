@@ -500,3 +500,71 @@ def traffic_flow_observed():
         }
     }
     return entity
+
+
+@pytest.fixture
+def ngsi_ld():
+    """
+    :return: dict
+        The NGSI LD model as received within an Orion notification.
+    """
+    entity = {
+        "id": "urn:ngsi-ld:Streetlight:streetlight:guadalajara:4567",
+        "type": "Streetlight",
+        "location": {
+            "type": "GeoProperty",
+            "value": {
+                "type": "Point",
+                "coordinates": [-3.164485591715449, 40.62785133667262]
+            }
+        },
+        "areaServed": {
+            "type": "Property",
+            "value": "Roundabouts city entrance"
+        },
+        "status": {
+            "type": "Property",
+            "value": "ok"
+        },
+        "refStreetlightGroup": {
+            "type": "Relationship",
+            "object": "urn:ngsi-ld:StreetlightGroup:streetlightgroup:G345"
+        },
+        "refStreetlightModel": {
+            "type": "Relationship",
+            "object": "urn:ngsi-ld:StreetlightModel:streetlightmodel:STEEL_Tubular_10m"
+        },
+        "circuit": {
+            "type": "Property",
+            "value": "C-456-A467"
+        },
+        "lanternHeight": {
+            "type": "Property",
+            "value": 10
+        },
+        "locationCategory": {
+            "type": "Property",
+            "value": "centralIsland"
+        },
+        "powerState": {
+            "type": "Property",
+            "value": "off"
+        },
+        "controllingMethod": {
+            "type": "Property",
+            "value": "individual"
+        },
+        "dateLastLampChange": {
+            "type": "Property",
+            "value": {
+                "@type": "DateTime",
+                "@value": "2016-07-08T08:02:21.753Z"
+            }
+        },
+        "@context": [
+            "https://schema.lab.fiware.org/ld/context",
+            "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+        ]
+    }
+
+    return entity

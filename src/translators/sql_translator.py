@@ -437,7 +437,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         self.cursor.executemany(stmt, rows)
 
     def _attr_is_structured(self, a):
-        if a['value'] is not None and isinstance(a['value'], dict):
+        if 'value' in a and a['value'] is not None and isinstance(a['value'], dict):
             self.logger.debug("attribute {} has 'value' attribute of type dict"
                               .format(a))
             return True
