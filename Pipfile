@@ -25,6 +25,7 @@ redis = "~=2.10"
 requests = ">=2.20"
 rethinkdb = "==2.3"
 pickle-mixin = "==1.0.2"
+pytest-lazy-fixture = "*"
 
 [dev-packages]
 
