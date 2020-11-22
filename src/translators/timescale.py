@@ -108,6 +108,25 @@ class PostgresTranslator(sql_translator.SQLTranslator):
             self.ccm.reset_connection('timescale')
             self.setup()
 
+    def get_health(self):
+        health = {}
+
+        op = "SELECT * FROM information_schema.tables"
+        health['time'] = datetime.utcnow().isoformat(timespec='milliseconds')
+        try:
+            self.cursor.execute(op)
+
+        except Exception as e:
+            msg = "{}".format(e)
+            logging.debug(msg)
+            health['status'] = 'fail'
+            health['output'] = msg
+
+        else:
+            health['status'] = 'pass'
+
+        return health
+
     @staticmethod
     def _svc_to_schema_name(fiware_service):
         if fiware_service:
