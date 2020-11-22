@@ -255,6 +255,8 @@ class PostgresTranslator(sql_translator.SQLTranslator):
     # 2. Basic types (int, float, boolean and text). They also get converted
     # back to their corresponding Python types.
 
+    # TODO with the new pg8000 PGJsonb is removed...
+    # it simply replace with json dumps()
     @staticmethod
     def _to_db_ngsi_structured_value(data: dict) -> pg8000.PGJsonb:
         return pg8000.PGJsonb(data)
