@@ -46,6 +46,21 @@ def _get_http_code(res):
     return code
 
 
+def _check_not_critical(health, res, service):
+    if health['status'] != 'pass':
+        res.setdefault('details', {})[service] = health
+        if res['status'] == 'pass':
+            res['status'] = 'warn'
+    return res
+
+
+def _check_critical(health, res, service):
+    if health['status'] != 'pass':
+        res['status'] = health['status']
+        res.setdefault('details', {})[service] = health
+    return res
+
+
 def get_health(with_geocoder=False):
     """
     Return status of QuantumLeap service, taking into account status of the
@@ -56,32 +71,23 @@ def get_health(with_geocoder=False):
 
     This endpoint should be memoized (with timeout of course).
     """
-    res = {}
+    res = {
+        'status': 'pass'
+    }
 
     # Check crateDB (critical)
     try:
-        health = check_crate()
-        res['status'] = health['status']
-        if health['status'] != 'pass':
-            res.setdefault('details', {})['crateDB'] = health
+        res = _check_critical(check_crate(), res, 'crateDB')
     except Exception:
         res['status'] = 'fail'
         res.setdefault('details', {})['crateDB'] = 'cannot reach crate'
 
-    # Check geocache (critical)
-    health = check_cache()
-    if health['status'] != 'pass':
-        res.setdefault('details', {})['redis'] = health
-        if health['status'] == 'fail' or res['status'] == 'pass':
-            res['status'] = health['status']
+    # Check cache (not critical)
+    res = _check_not_critical(check_cache(), res, 'redis')
 
     # Check geocoder (not critical)
     if with_geocoder:
-        health = check_geocoder()
-        if health['status'] != 'pass':
-            res.setdefault('details', {})['osm'] = health
-            if res['status'] == 'pass':
-                res['status'] = 'warn'
+        res = _check_not_critical(check_geocoder(), res, 'osm')
 
     # Determine HTTP code
     code = _get_http_code(res)
