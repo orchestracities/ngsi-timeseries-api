@@ -79,6 +79,7 @@ class PostgresTranslator(sql_translator.SQLTranslator):
         self.connection = None
         self.cursor = None
         self.logger = logging.getLogger(__name__)
+        self.dbCacheName = 'timescale'
 
     def setup(self):
         self.ccm = ConnectionManager()
@@ -241,10 +242,7 @@ class PostgresTranslator(sql_translator.SQLTranslator):
             return slf_geom.to_ngsi_attribute()['value'] if slf_geom else None
 
         if ngsi_type == NGSI_GEOJSON or ngsi_type == NGSI_LD_GEOMETRY:
-            geojson = geocoding.geojson.wktcodec.decode_wkb_hexstr(db_value)
-            geojson.pop('meta')
-            geojson.pop('crs')
-            return geojson
+            return geocoding.geojson.wktcodec.decode_wkb_hexstr(db_value)
 
         return db_value
 

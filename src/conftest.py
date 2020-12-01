@@ -70,6 +70,12 @@ class OrionClient(object):
                           headers=headers(service, service_path))
         return r
 
+    def update_attr(self, entity_id, attrs, service=None, service_path=None):
+        r = requests.patch('{}/v2/entities/{}/attrs'.format(self.url, entity_id),
+                           data=json.dumps(attrs),
+                           headers=headers(service, service_path))
+        return r
+
     def delete(self, entity_id, service=None, service_path=None):
         r = requests.delete('{}/v2/entities/{}'.format(self.url, entity_id),
                             headers=headers(service, service_path))

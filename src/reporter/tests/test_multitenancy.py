@@ -12,18 +12,23 @@ a query using either the same or just "/eu/" service path. It will not return
 results if used with "/eu/greece" or any other deviation from the path used at
 insertion.
 """
-from conftest import QL_URL, ORION_URL, entity, clean_mongo, clean_crate
+from conftest import QL_URL, ORION_URL, entity, clean_mongo
+from reporter.tests.utils import delete_test_data
 import json
 import time
 import requests
+import pytest
 
-def test_integration_with_orion(clean_mongo, clean_crate, entity):
+services = ['t1', 't2']
+
+@pytest.mark.parametrize("service", services)
+def test_integration_with_orion(clean_mongo, service, entity):
     """
     Make sure QL correctly handles headers in Orion's notification
     """
     h = {
         'Content-Type': 'application/json',
-        'Fiware-Service': 'myservice',
+        'Fiware-Service': service,
         'Fiware-ServicePath': '/',
     }
 
@@ -59,3 +64,4 @@ def test_integration_with_orion(clean_mongo, clean_crate, entity):
     # Query WITHOUT headers
     r = requests.get(url, params=query_params)
     assert r.status_code == 404, r.text
+    delete_test_data(service, ["Room"])

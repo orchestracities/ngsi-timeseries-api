@@ -15,7 +15,8 @@ services = ['t1', 't2']
 SLEEP_TIME = 1
 
 
-def query_url(entity_type='Room', eid='Room1', attr_name='temperature', values=False):
+def query_url(entity_type='Room', eid='Room1', attr_name='temperature',
+              values=False):
     url = "{qlUrl}/entities/{entityId}/attrs/{attrName}"
     if values:
         url += '/value'
@@ -142,7 +143,8 @@ def test_valid_no_modified(notification, service):
     delete_entity_type(service, 'Room')
 
 
-def do_integration(entity, subscription, orion_client, service=None, service_path=None):
+def do_integration(entity, subscription, orion_client, service=None,
+                   service_path=None):
     orion_client.subscribe(subscription, service, service_path)
     time.sleep(SLEEP_TIME)
 
@@ -151,7 +153,9 @@ def do_integration(entity, subscription, orion_client, service=None, service_pat
 
     entities_url = "{}/entities".format(QL_URL)
 
-    r = requests.get(entities_url, params=None, headers=None)
+    h = headers(service=service, service_path=service_path, content_type=False)
+
+    r = requests.get(entities_url, params=None, headers=h)
     assert r.status_code == 200
     entities = r.json()
     assert len(entities) == 1
@@ -159,10 +163,11 @@ def do_integration(entity, subscription, orion_client, service=None, service_pat
     assert entities[0]['id'] == entity['id']
     assert entities[0]['type'] == entity['type']
 
-    delete_entity_type(None, entity['type'])
+    delete_entity_type(service, entity['type'], service_path)
 
 
-def test_integration(entity, orion_client):
+@pytest.mark.parametrize("service", services)
+def test_integration(service, entity, orion_client):
     """
     Test Reporter using input directly from an Orion notification and output
     directly to Cratedb.
@@ -193,10 +198,11 @@ def test_integration(entity, orion_client):
         },
         "throttling": 1,
     }
-    do_integration(entity, subscription, orion_client)
+    do_integration(entity, subscription, orion_client, service, "/")
 
 
-def test_air_quality_observed(air_quality_observed, orion_client):
+@pytest.mark.parametrize("service", services)
+def test_air_quality_observed(service, air_quality_observed, orion_client):
     entity = air_quality_observed
     subscription = {
         "description": "Test subscription",
@@ -219,15 +225,16 @@ def test_air_quality_observed(air_quality_observed, orion_client):
             "metadata": ["dateCreated", "dateModified"]
         }
     }
-    do_integration(entity, subscription, orion_client)
+    do_integration(entity, subscription, orion_client, service, "/")
 
 
-def test_integration_multiple_entities(diffEntityWithDifferentAttrs, orion_client):
+@pytest.mark.parametrize("service", services)
+def test_integration_multiple_entities(service, diffEntityWithDifferentAttrs,
+                                       orion_client):
     """
     Test Reporter using input directly from an Orion notification and output
     directly to Cratedb.
     """
-
 
     subscription = {
         "description": "Integration Test subscription",
@@ -255,19 +262,167 @@ def test_integration_multiple_entities(diffEntityWithDifferentAttrs, orion_clien
         },
         "throttling": 1,
     }
-    orion_client.subscribe(subscription, "service", "/Root/#")
+    orion_client.subscribe(subscription, service, "/Root/#")
 
     for idx, e in enumerate(diffEntityWithDifferentAttrs):
-        orion_client.insert(e, "service", "/Root/{}".format(idx))
+        orion_client.insert(e, service, "/Root/{}".format(idx))
     time.sleep(10 * SLEEP_TIME)  # Give time for notification to be processed.
 
     entities_url = "{}/entities".format(QL_URL)
 
-    r = requests.get(entities_url, params=None, headers=query_header("service", "/Root"))
+    r = requests.get(entities_url, params=None,
+                     headers=query_header(service, "/Root"))
     assert r.status_code == 200
     entities = r.json()
     assert len(entities) == 3
-    delete_entity_type("service", diffEntityWithDifferentAttrs[0]['type'], "/Root")
+    delete_entity_type(service, diffEntityWithDifferentAttrs[0]['type'],
+                       "/Root")
+
+
+@pytest.mark.skip("weird")
+@pytest.mark.parametrize("service", services)
+def test_integration_multiple_values(service, entity, orion_client,
+                                     clean_mongo):
+    subscription = {
+        "description": "Integration Test subscription",
+        "subject": {
+            "entities": [
+                {
+                    "id": entity['id'],
+                    "type": "Room"
+                }
+            ],
+            "condition": {
+                "attrs": []  # all attributes
+            }
+        },
+        "notification": {
+            "http": {
+                "url": notify_url
+            },
+            "attrs": [],  # all attributes
+            "metadata": ["dateCreated", "dateModified"]
+        },
+        "throttling": 1,
+    }
+
+    orion_client.subscribe(subscription, service, '/')
+    time.sleep(SLEEP_TIME)
+
+    orion_client.insert(entity, service, '/')
+    time.sleep(4 * SLEEP_TIME)  # Give time for notification to be processed.
+
+    # Update values in Orion
+    for i in range(1, 4):
+        attrs = {
+            'temperature': {
+                'value': entity['temperature']['value'] + i,
+                'type': 'Number',
+            },
+            'pressure': {
+                'value': entity['pressure']['value'] + i,
+                'type': 'Number',
+            },
+        }
+        orion_client.update_attr(entity['id'], attrs, service, '/')
+        time.sleep(1)
+
+    # Query in Quantumleap
+    query_params = {
+        'type': entity['type'],
+    }
+    query_url = "{qlUrl}/entities/{entityId}".format(
+        qlUrl=QL_URL,
+        entityId=entity['id'],
+    )
+    r = requests.get(query_url, params=query_params,
+                     headers=query_header(service, "/"))
+    assert r.status_code == 200, r.text
+    data = r.json()
+    assert len(data['index']) > 1
+    assert len(data['attributes']) == 2
+
+    # Note some notifications may have been lost
+    pressures = data['attributes'][0]['values']
+    assert set(pressures).issubset(set([720.0, 721.0, 722.0, 723.0]))
+    temperatures = data['attributes'][1]['values']
+    assert set(temperatures).issubset(set([24.2, 25.2, 26.2, 27.2]))
+    delete_entity_type(service, entity['type'], "/")
+
+
+@pytest.mark.skip("weird")
+@pytest.mark.parametrize("service", services)
+def test_integration_custom_index(service, entity, orion_client, clean_mongo):
+    subscription = {
+        "description": "Integration Test subscription",
+        "subject": {
+            "entities": [
+                {
+                    "id": entity['id'],
+                    "type": "Room"
+                }
+            ],
+            "condition": {
+                "attrs": []  # all attributes
+            }
+        },
+        "notification": {
+            "httpCustom": {
+                "url": notify_url,
+                "headers": {
+                    "Fiware-TimeIndex-Attribute": "myCustomIndex"
+                },
+            },
+            "attrs": [],  # all attributes
+            "metadata": ["dateCreated", "dateModified"]
+        },
+        "throttling": 1,
+    }
+
+    orion_client.subscribe(subscription, service, '/')
+    time.sleep(SLEEP_TIME)
+
+    # Insert values in Orion
+    entity['myCustomIndex'] = {
+        'value': '2019-08-22T18:22:00',
+        'type': 'DateTime',
+        'metadata': {}
+    }
+    entity.pop('temperature')
+    entity.pop('pressure')
+
+    orion_client.insert(entity, service, '/')
+    time.sleep(4 * SLEEP_TIME)  # Give time for notification to be processed.
+
+    # Update values in Orion
+    for i in range(1, 4):
+        attrs = {
+            'myCustomIndex': {
+                'value': '2019-08-22T18:22:0{}'.format(i),
+                'type': 'DateTime',
+            },
+        }
+        orion_client.update_attr(entity['id'], attrs, service, '/')
+        time.sleep(1)
+
+    # Query in Quantumleap
+    query_params = {
+        'type': entity['type'],
+    }
+    query_url = "{qlUrl}/entities/{entityId}".format(
+        qlUrl=QL_URL,
+        entityId=entity['id'],
+    )
+    r = requests.get(query_url, params=query_params,
+                     headers=query_header(service, "/"))
+    assert r.status_code == 200, r.text
+
+    data = r.json()
+    # Note some notifications may have been lost
+    assert data['attributes'][0]['values'] == data['index']
+    assert len(data['index']) > 1
+    delete_entity_type(service, entity['type'], '/')
+
 
 @pytest.mark.skip(reason="See issue #105")
 @pytest.mark.parametrize("service", services)
@@ -308,11 +463,12 @@ def test_geocoding(service, notification):
     lon, lat = entities[0]['location']['values'][0].split(',')
     assert float(lon) == pytest.approx(60.1707129, abs=1e-2)
     assert float(lat) == pytest.approx(24.9412167, abs=1e-2)
-    delete_entity_type(service,  notification['data'][0]['type'])
+    delete_entity_type(service, notification['data'][0]['type'])
 
 
 @pytest.mark.parametrize("service", services)
-def test_multiple_data_elements(service, notification, diffEntityWithDifferentAttrs):
+def test_multiple_data_elements(service, notification,
+                                diffEntityWithDifferentAttrs):
     """
     Test that the notify API can process notifications containing multiple elements in the data array.
     """
@@ -331,7 +487,9 @@ def test_multiple_data_elements(service, notification, diffEntityWithDifferentAt
 
 
 @pytest.mark.parametrize("service", services)
-def test_multiple_data_elements_invalid_different_servicepath(service, notification, diffEntityWithDifferentAttrs):
+def test_multiple_data_elements_invalid_different_servicepath(service,
+                                                              notification,
+                                                              diffEntityWithDifferentAttrs):
     """
     Test that the notify API can process notifications containing multiple elements in the data array
     and different fiwareServicePath.
@@ -339,7 +497,8 @@ def test_multiple_data_elements_invalid_different_servicepath(service, notificat
 
     notify_headers = notify_header(service)
 
-    notify_headers['Fiware-ServicePath'] = '/Test/Path1, /Test/Path1, /Test/Path2, /Test/Path3'
+    notify_headers[
+        'Fiware-ServicePath'] = '/Test/Path1, /Test/Path1, /Test/Path2, /Test/Path3'
 
     notification['data'] = diffEntityWithDifferentAttrs
 
@@ -350,7 +509,8 @@ def test_multiple_data_elements_invalid_different_servicepath(service, notificat
 
 
 @pytest.mark.parametrize("service", services)
-def test_multiple_data_elements_different_servicepath(service, notification, diffEntityWithDifferentAttrs):
+def test_multiple_data_elements_different_servicepath(service, notification,
+                                                      diffEntityWithDifferentAttrs):
     """
     Test that the notify API can process notifications containing multiple elements in the data array
     and different fiwareServicePath.
@@ -358,7 +518,8 @@ def test_multiple_data_elements_different_servicepath(service, notification, dif
 
     notify_headers = notify_header(service)
 
-    notify_headers['Fiware-ServicePath'] = '/Test/Path1, /Test/Path1, /Test/Path2'
+    notify_headers[
+        'Fiware-ServicePath'] = '/Test/Path1, /Test/Path1, /Test/Path2'
 
     query_headers = query_header(service)
 
@@ -372,17 +533,19 @@ def test_multiple_data_elements_different_servicepath(service, notification, dif
     assert r.json().startswith('Notification successfully processed')
 
     entities_url = "{}/entities".format(QL_URL)
-    time.sleep(2*SLEEP_TIME)
+    time.sleep(2 * SLEEP_TIME)
     r = requests.get(entities_url, params=None, headers=query_headers)
     entities = r.json()
     assert len(entities) == 3
-    delete_entity_type(service, diffEntityWithDifferentAttrs[0]['type'], '/Test')
+    delete_entity_type(service, diffEntityWithDifferentAttrs[0]['type'],
+                       '/Test')
 
 
 @pytest.mark.parametrize("service", services)
 def test_time_index(service, notification):
     # If present, use entity-level dateModified as time_index
-    global_modified = datetime(2000, 1, 2, 0, 0, 0, 0, timezone.utc).isoformat()
+    global_modified = datetime(2000, 1, 2, 0, 0, 0, 0,
+                               timezone.utc).isoformat()
     modified = {
         'type': 'DateTime',
         'value': global_modified
@@ -460,7 +623,8 @@ def test_no_value_in_notification(service, notification):
         'pm25': {'type': 'string', 'value': '5', 'metadata': {}},
     }
     url = '{}'.format(notify_url)
-    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
+    r = requests.post(url, data=json.dumps(notification),
+                      headers=notify_header(service))
     assert r.status_code == 200
 
     # Empty value
@@ -472,7 +636,8 @@ def test_no_value_in_notification(service, notification):
         'pm25': {'type': 'string', 'value': '', 'metadata': {}},
     }
     url = '{}'.format(notify_url)
-    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
+    r = requests.post(url, data=json.dumps(notification),
+                      headers=notify_header(service))
     assert r.status_code == 200
     delete_entity_type(service, notification['data'][0]['type'])
 
@@ -490,7 +655,8 @@ def test_no_value_for_attributes(service, notification):
     url = '{}'.format(notify_url)
     get_url = "{}/entities/299531".format(QL_URL)
     url_new = '{}'.format(get_url)
-    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
+    r = requests.post(url, data=json.dumps(notification),
+                      headers=notify_header(service))
     assert r.status_code == 200
     # Give time for notification to be processed
     time.sleep(SLEEP_TIME)
@@ -507,7 +673,8 @@ def test_no_value_for_attributes(service, notification):
     url = '{}'.format(notify_url)
     get_url = "{}/entities/299531/attrs/p/value".format(QL_URL)
     url_new = '{}'.format(get_url)
-    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
+    r = requests.post(url, data=json.dumps(notification),
+                      headers=notify_header(service))
     assert r.status_code == 200
     # Give time for notification to be processed
     time.sleep(SLEEP_TIME)
@@ -523,7 +690,8 @@ def test_no_value_for_attributes(service, notification):
     url = '{}'.format(notify_url)
     get_url_new = "{}/entities/299531/attrs/pm10/value".format(QL_URL)
     url_new = '{}'.format(get_url_new)
-    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
+    r = requests.post(url, data=json.dumps(notification),
+                      headers=notify_header(service))
     assert r.status_code == 200
     # Give time for notification to be processed
     time.sleep(SLEEP_TIME)
@@ -546,7 +714,8 @@ def test_no_value_no_type_for_attributes(service, notification):
     url = '{}'.format(notify_url)
     get_url = "{}/entities/Room1/attrs/temperature/value".format(QL_URL)
     url_new = '{}'.format(get_url)
-    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
+    r = requests.post(url, data=json.dumps(notification),
+                      headers=notify_header(service))
     assert r.status_code == 200
     # Give time for notification to be processed
     time.sleep(SLEEP_TIME)
@@ -568,7 +737,8 @@ def test_no_value_no_type_for_attributes(service, notification):
     url = '{}'.format(notify_url)
     get_url = "{}/entities/Room1/attrs/temperature/value".format(QL_URL)
     url_new = '{}'.format(get_url)
-    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
+    r = requests.post(url, data=json.dumps(notification),
+                      headers=notify_header(service))
     assert r.status_code == 200
     # Give time for notification to be processed
     time.sleep(SLEEP_TIME)
@@ -591,7 +761,8 @@ def test_with_value_no_type_for_attributes(service, notification):
     url = '{}'.format(notify_url)
     get_url = "{}/entities/Kitchen1/attrs/temperature/value".format(QL_URL)
     url_new = '{}'.format(get_url)
-    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
+    r = requests.post(url, data=json.dumps(notification),
+                      headers=notify_header(service))
     assert r.status_code == 200
     # Give time for notification to be processed
     time.sleep(SLEEP_TIME)
@@ -614,7 +785,8 @@ def test_no_value_with_type_for_attributes(service, notification):
     url = '{}'.format(notify_url)
     get_url = "{}/entities/Hall1/attrs/temperature/value".format(QL_URL)
     url_new = '{}'.format(get_url)
-    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
+    r = requests.post(url, data=json.dumps(notification),
+                      headers=notify_header(service))
     assert r.status_code == 200
     # Give time for notification to be processed
     time.sleep(SLEEP_TIME)
@@ -627,7 +799,7 @@ def test_no_value_with_type_for_attributes(service, notification):
 @pytest.mark.parametrize("service", services)
 def test_issue_382(service, notification):
     # entity with one Null value and no type
-    notification['data'][0] =     {
+    notification['data'][0] = {
         "id": "urn:ngsi-ld:Test:0002",
         "type": "Test",
         "errorNumber": {
@@ -647,9 +819,11 @@ def test_issue_382(service, notification):
         }
     }
     url = '{}'.format(notify_url)
-    get_url = "{}/entities/urn:ngsi-ld:Test:0002/attrs/errorNumber/value".format(QL_URL)
+    get_url = "{}/entities/urn:ngsi-ld:Test:0002/attrs/errorNumber/value".format(
+        QL_URL)
     url_new = '{}'.format(get_url)
-    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
+    r = requests.post(url, data=json.dumps(notification),
+                      headers=notify_header(service))
     assert r.status_code == 200
     # Give time for notification to be processed
     time.sleep(SLEEP_TIME)
@@ -657,6 +831,7 @@ def test_issue_382(service, notification):
     assert res_get.status_code == 200
     assert res_get.json()['values'][0] == 2
     delete_entity_type(service, notification['data'][0]['type'])
+
 
 @pytest.mark.parametrize("service", services)
 def test_json_ld(service, notification):
@@ -720,9 +895,11 @@ def test_json_ld(service, notification):
         ]
     }
     url = '{}'.format(notify_url)
-    get_url = "{}/entities/urn:ngsi-ld:Streetlight:streetlight:guadalajara:4567/attrs/lanternHeight/value".format(QL_URL)
+    get_url = "{}/entities/urn:ngsi-ld:Streetlight:streetlight:guadalajara:4567/attrs/lanternHeight/value".format(
+        QL_URL)
     url_new = '{}'.format(get_url)
-    r = requests.post(url, data=json.dumps(notification), headers=notify_header(service))
+    r = requests.post(url, data=json.dumps(notification),
+                      headers=notify_header(service))
     assert r.status_code == 200
     # Give time for notification to be processed
     time.sleep(SLEEP_TIME)

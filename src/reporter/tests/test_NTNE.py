@@ -10,6 +10,8 @@ entity_id = 'Room0'
 entity_id_1 = 'Kitchen0'
 n_days = 30
 
+services = ['t1', 't2']
+
 
 def query_url():
     url = "{qlUrl}/entities"
@@ -20,20 +22,23 @@ def query_url():
 
 @pytest.fixture(scope='module')
 def reporter_dataset():
-    service = ''
-    insert_test_data(service, [entity_type], n_entities=1, index_size=30,
+    for service in services:
+        insert_test_data(service, [entity_type], n_entities=1, index_size=30,
                      entity_id=entity_id)
-    insert_test_data(service, [entity_type_1], n_entities=1, index_size=30,
+        insert_test_data(service, [entity_type_1], n_entities=1, index_size=30,
                      entity_id=entity_id_1,
                      index_base=datetime(1980, 1, 1, 0, 0, 0, 0))
     yield
-    delete_test_data(service, [entity_type, entity_type_1])
+    for service in services:
+        delete_test_data(service, [entity_type, entity_type_1])
 
 
 # TODO we removed order comparison given that in
 # CRATE4.0 union all and order by don't work correctly with offset
-def test_NTNE_defaults(reporter_dataset):
-    r = requests.get(query_url())
+@pytest.mark.parametrize("service", services)
+def test_NTNE_defaults(service, reporter_dataset):
+    h = {'Fiware-Service': service}
+    r = requests.get(query_url(), headers=h)
     assert r.status_code == 200, r.text
 
     obtained = r.json()
@@ -54,11 +59,13 @@ def test_NTNE_defaults(reporter_dataset):
     assert obtained == expected
 
 
-def test_not_found():
+@pytest.mark.parametrize("service", services)
+def test_not_found(service):
     query_params = {
         'type': 'NotThere'
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 404, r.text
     assert r.json() == {
         "error": "Not Found",
@@ -66,12 +73,14 @@ def test_not_found():
     }
 
 
-def test_NTNE_type(reporter_dataset):
+@pytest.mark.parametrize("service", services)
+def test_NTNE_type(service, reporter_dataset):
     # Query
     query_params = {
         'type': entity_type
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Assert
@@ -91,13 +100,15 @@ def test_NTNE_type(reporter_dataset):
 
 # TODO we removed order comparison given that in
 # CRATE4.0 union all and order by don't work correctly with offset
-def test_NTNE_fromDate_toDate(reporter_dataset):
+@pytest.mark.parametrize("service", services)
+def test_NTNE_fromDate_toDate(service, reporter_dataset):
     # Query
     query_params = {
         'fromDate': "1970-01-06T00:00:00+00:00",
         'toDate': "1980-01-17T00:00:00+00:00",
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
     
     expected_type = 'Room'
@@ -125,13 +136,15 @@ def test_NTNE_fromDate_toDate(reporter_dataset):
     assert obtained == expected
 
 
-def test_NTNE_fromDate_toDate_with_quotes(reporter_dataset):
+@pytest.mark.parametrize("service", services)
+def test_NTNE_fromDate_toDate_with_quotes(service, reporter_dataset):
     # Query
     query_params = {
         'fromDate': '"1970-01-06T00:00:00+00:00"',
         'toDate': '"1980-01-17T00:00:00+00:00"',
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
     
     expected_type = 'Room'
@@ -161,12 +174,14 @@ def test_NTNE_fromDate_toDate_with_quotes(reporter_dataset):
 
 # TODO we removed order comparison given that in
 # CRATE4.0 union all and order by don't work correctly with offset
-def test_NTNE_limit(reporter_dataset):
+@pytest.mark.parametrize("service", services)
+def test_NTNE_limit(service, reporter_dataset):
     # Query
     query_params = {
         'limit': 1
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     expected_type = 'Kitchen'
@@ -187,12 +202,14 @@ def test_NTNE_limit(reporter_dataset):
 
 # TODO we removed order comparison given that in
 # CRATE4.0 union all and order by don't work correctly with offset
-def test_NTNE_offset(reporter_dataset):
+@pytest.mark.parametrize("service", services)
+def test_NTNE_offset(service, reporter_dataset):
     # Query
     query_params = {
         'offset': 1
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     expected_type = 'Kitchen'
@@ -211,7 +228,8 @@ def test_NTNE_offset(reporter_dataset):
     assert len(obtained) == len(expected)
 
 
-def test_NTNE_combined(reporter_dataset):
+@pytest.mark.parametrize("service", services)
+def test_NTNE_combined(service, reporter_dataset):
     # Query
     query_params = {
         'type': entity_type,
@@ -220,7 +238,8 @@ def test_NTNE_combined(reporter_dataset):
         'toDate': "1980-01-20T00:00:00+00:00",
         'limit': 1,
     }
-    r = requests.get(query_url(), params=query_params)
+    h = {'Fiware-Service': service}
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
     
     expected_type = 'Room'
