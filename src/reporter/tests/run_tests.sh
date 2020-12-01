@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+POSTGRES_PORT='5432'
+
 docker build -t smartsdk/quantumleap ../../../
 
 docker-compose up -d
@@ -11,6 +13,8 @@ pytest src/reporter/ \
        --ignore=src/reporter/tests/test_health.py
 r=$?
 cd -
+
+unset POSTGRES_PORT
 
 docker-compose down -v
 exit $r
