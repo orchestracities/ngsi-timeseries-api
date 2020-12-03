@@ -3,8 +3,7 @@ import pytest
 import requests
 import time
 import urllib
-from .utils import send_notifications
-
+from .utils import send_notifications, delete_entity_type
 
 entity_type = 'TestDevice'
 
@@ -55,7 +54,7 @@ def manage_db_entities():
 
     yield
 
-    do_clean_crate()
+    delete_entity_type(service, entity_type)
 
 
 def query_sql(service, entity_id, query_params, response_code):

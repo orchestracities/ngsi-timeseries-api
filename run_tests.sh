@@ -16,17 +16,8 @@ tot=$?
 cd -
 
 cd src/reporter/tests
-test_suite_header "REPORTER (Crate)"
+test_suite_header "REPORTER"
 sh run_tests.sh
-loc=$?
-if [ "$tot" -eq 0 ]; then
-   tot=$loc
-fi
-cd -
-
-cd src/reporter/tests
-test_suite_header "REPORTER (Timescale)"
-sh run_tests.timescale.sh
 loc=$?
 if [ "$tot" -eq 0 ]; then
    tot=$loc

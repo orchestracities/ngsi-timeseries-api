@@ -79,7 +79,12 @@ def decode_wkb_hexstr(geom: str) -> dict:
     :return: the corresponding GeoJSON.
     """
     geom_bytes = bytes.fromhex(geom)
-    return decode_wkb(geom_bytes)
+    geojson = decode_wkb(geom_bytes)
+    if 'meta' in geojson:
+        geojson.pop('meta')
+    if 'crs' in geojson:
+        geojson.pop('crs')
+    return geojson
 
 
 # TODO. Use shapely?

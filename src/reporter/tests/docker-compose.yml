@@ -32,12 +32,39 @@ services:
     depends_on:
       - orion
       - crate
+      - timescale
+    volumes:
+      - ${PWD}/ql-config.yml:/config/ql-config.yml
     networks:
         - reportertests
     environment:
-      - USE_GEOCODING=True
+      - USE_GEOCODING=False
       - REDIS_HOST=redis
-      - LOGLEVEL=DEBUG
+      - LOGLEVEL=INFO
+      - POSTGRES_HOST=timescale
+      - QL_CONFIG=/config/ql-config.yml
+
+  timescale:
+    image: timescale/timescaledb-postgis:${TIMESCALE_VERSION}
+    ports:
+      - "5432:5432"
+    networks:
+      - reportertests
+    environment:
+      - POSTGRES_PASSWORD=*
+
+  quantumleap-db-setup:
+    build: ../../../timescale-container/
+    image: quantumleap-db-setup
+    depends_on:
+      - timescale
+    networks:
+      - reportertests
+    environment:
+      - QL_DB_PASS=*
+      - QL_DB_INIT_DIR=/ql-db-init
+      - PG_HOST=timescale
+      - PG_PASS=*
 
   crate:
     image: crate:${CRATE_VERSION}

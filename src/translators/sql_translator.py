@@ -127,6 +127,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         if self.cache:
             self.default_ttl = self.cache.default_ttl
         self.start_time = datetime.now()
+        self.dbCacheName = 'sql'
 
     def dispose(self):
         dt = datetime.now() - self.start_time
@@ -437,7 +438,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         self.cursor.executemany(stmt, rows)
 
     def _attr_is_structured(self, a):
-        if a['value'] is not None and isinstance(a['value'], dict):
+        if 'value' in a and a['value'] is not None and isinstance(a['value'], dict):
             self.logger.debug("attribute {} has 'value' attribute of type dict"
                               .format(a))
             return True
@@ -474,9 +475,9 @@ class SQLTranslator(base_translator.BaseTranslator):
             The dict mapping the matedata of each column. See original_attrs.
         """
 
-        if not self._is_query_in_cache("quantumleap", METADATA_TABLE_NAME):
+        if not self._is_query_in_cache(self.dbCacheName, METADATA_TABLE_NAME):
             self._create_metadata_table()
-            self._cache("quantumleap",
+            self._cache(self.dbCacheName,
                         METADATA_TABLE_NAME,
                         None,
                         self.default_ttl)
@@ -487,7 +488,7 @@ class SQLTranslator(base_translator.BaseTranslator):
 
         # By design, one entry per table_name
         try:
-            res = self._execute_query_via_cache("quantumleap",
+            res = self._execute_query_via_cache(self.dbCacheName,
                                                 table_name,
                                                 stmt,
                                                 [table_name],
@@ -508,7 +509,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             update = dict((k, metadata[k]) for k in diff if k in metadata)
             persisted_metadata.update(update)
             self._store_metadata(table_name, persisted_metadata)
-            self._cache("quantumleap",
+            self._cache(self.dbCacheName,
                         table_name,
                         [[persisted_metadata]],
                         self.default_ttl)
@@ -1155,7 +1156,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             key = None
             if fiware_service:
                 key = fiware_service.lower()
-            self._remove_from_cache("quantumleap", table_name)
+            self._remove_from_cache(self.dbCacheName, table_name)
             self._remove_from_cache(key, "tableNames")
             return self.cursor.rowcount
         except Exception as e:
@@ -1176,7 +1177,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         op = "delete from {} where table_name = ?".format(METADATA_TABLE_NAME)
         try:
             self.cursor.execute(op, [table_name])
-            self._remove_from_cache("quantumleap", table_name)
+            self._remove_from_cache(self.dbCacheName, table_name)
             key = None
             if fiware_service:
                 key = fiware_service.lower()

@@ -1,0 +1,6 @@
+tenants:
+  t1:
+    backend: Crate
+  t2:
+    backend: Timescale
+default-backend: Crate

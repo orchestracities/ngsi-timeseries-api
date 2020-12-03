@@ -436,20 +436,25 @@ class DbLoadCmd:
 
 
 def run():
-    sleep(5)  # Give Postgres enough time to start in the container.
-    try:
-        args = Args().get()
-        DbBootstrapCmd(args).run()
-        DbInitCmd(args).run()
-        DbLoadCmd(args).run()
-    except CalledProcessError as cpe:
-        # Rewrite error message to avoid leaking passwords into log files.
-        msg = 'Command `{0}` did not complete successfully. Exit status: {1}' \
-            .format(cpe.cmd[0], cpe.returncode)
-        print(msg, file=sys.stderr)
-        if cpe.output is not None:
-            print(str(cpe.output), file=sys.stderr)
-
+    count = 0
+    retry = True
+    while retry and count < 10:
+        try:
+            args = Args().get()
+            DbBootstrapCmd(args).run()
+            DbInitCmd(args).run()
+            DbLoadCmd(args).run()
+            retry = False
+        except CalledProcessError as cpe:
+            # Rewrite error message to avoid leaking passwords into log files.
+            msg = 'Command `{0}` did not complete successfully. Exit status: {1}' \
+                .format(cpe.cmd[0], cpe.returncode)
+            print(msg, file=sys.stderr)
+            if cpe.output is not None:
+                print(str(cpe.output), file=sys.stderr)
+            count = count + 1
+            sleep(5)
+    if not retry:
         sys.exit(64)
 
 

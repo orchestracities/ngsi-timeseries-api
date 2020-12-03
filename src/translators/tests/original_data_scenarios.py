@@ -11,9 +11,9 @@ from translators.sql_translator import ORIGINAL_ENTITY_COL, ENTITY_ID_COL, \
     TYPE_PREFIX, TENANT_PREFIX
 from utils.jsondict import maybe_value
 
-
 ENTITY_TYPE = 'device'
 TranslatorFactory = Callable[[], Generator[SQLTranslator, Any, None]]
+
 
 #
 # NOTE. Each test scenario gets a (sort of) unique tenant so that we won't
@@ -23,7 +23,7 @@ TranslatorFactory = Callable[[], Generator[SQLTranslator, Any, None]]
 
 
 def gen_tenant_id() -> str:
-    tid = random.randint(1, 2**32)
+    tid = random.randint(1, 2 ** 32)
     return f"tenant{tid}"
 
 
@@ -55,9 +55,9 @@ def assert_saved_original(actual_row, original_entity,
 
 def assert_inserted_entity(actual_row, original_entity):
     assert actual_row['a_number'] == \
-        maybe_value(original_entity, 'a_number', 'value')
+           maybe_value(original_entity, 'a_number', 'value')
     assert actual_row['an_attr'] == \
-        maybe_value(original_entity, 'an_attr', 'value')
+           maybe_value(original_entity, 'an_attr', 'value')
     assert actual_row[ORIGINAL_ENTITY_COL] is None
 
 
@@ -81,6 +81,9 @@ class OriginalDataScenarios:
         self.translator = translator
         self.cursor = cursor
         self.delay_query_by = delay_query_by
+
+    def get_translator(self):
+        return self.translator
 
     def insert_entities(self, tenant: str, entities: List[dict]):
         with self.translator() as t:

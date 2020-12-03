@@ -1,5 +1,5 @@
 """
-The crate translator understands about FIWARE-Service and FIWARE-ServicePath.
+The translator understands about FIWARE-Service and FIWARE-ServicePath.
 
 The FIWARE-Service is used as a crate db schema. By default, no schema is
 specified (Crate uses "doc" schema as default).
@@ -10,10 +10,23 @@ corresponding FIWARE-ServicePath.
 
 The queries using FIWARE-ServicePath will work like...
     select * from entityX where path ~ '/path/here($|/.*)';
+
+
+To test a single translator use the -k parameter followed by either
+timescale or crate.
+See https://docs.pytest.org/en/stable/example/parametrize.html
 """
 from datetime import datetime
 from utils.common import TIME_INDEX_NAME
-from conftest import crate_translator as translator
+from conftest import crate_translator, timescale_translator
+
+import pytest
+
+
+translators = [
+    pytest.lazy_fixture('crate_translator'),
+    pytest.lazy_fixture('timescale_translator')
+]
 
 
 def entity(entity_id):
@@ -28,7 +41,7 @@ def entity(entity_id):
     }
     return e
 
-
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_fiware_tenant(translator):
     # Insert WITH tenant
     e = entity("Room1")
@@ -46,6 +59,7 @@ def test_fiware_tenant(translator):
     translator.clean(fs)
 
 
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_fiware_tenant_services(translator):
     # Insert in tenant A
     e = entity("X")
@@ -68,6 +82,7 @@ def test_fiware_tenant_services(translator):
     translator.clean("B")
 
 
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_fiware_tenant_servicepath(translator):
     def insert_with_tenant(e, path):
         translator.insert([e], fiware_service="EU", fiware_servicepath=path)
@@ -101,6 +116,7 @@ def test_fiware_tenant_servicepath(translator):
     translator.clean("EU")
 
 
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_fiware_empty_tenant_is_no_tenant(translator):
     # Insert with EMPTY tenant
     e = entity("Room1")
@@ -122,6 +138,7 @@ def test_fiware_empty_tenant_is_no_tenant(translator):
     translator.clean()
 
 
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_fiware_tenant_reserved_word(translator):
     e = entity("Room1")
     fs = "default"

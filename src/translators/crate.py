@@ -47,6 +47,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
     def __init__(self, host, port=4200, db_name="ngsi-tsdb"):
         super(CrateTranslator, self).__init__(host, port, db_name)
         self.logger = logging.getLogger(__name__)
+        self.dbCacheName = 'crate'
         self.ccm = None
         self.connection = None
         self.cursor = None
@@ -94,7 +95,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
 
     def get_db_version(self):
         stmt = "select version['number'] from sys.nodes"
-        res = self._execute_query_via_cache("crate",
+        res = self._execute_query_via_cache(self.dbCacheName,
                                             "dbversion",
                                             stmt, None, 6000)
         return res[0][0]

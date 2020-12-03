@@ -122,8 +122,9 @@ def create_random_entities(num_types=1,
                     add_attr(entity, "attr_time", v_iso)
 
                 if use_geo:
-                    long = random.uniform(-180, 180)
-                    lat = random.uniform(-90, 90)
+                    #precision of postgis does not allow more than 16 decimals
+                    long = round(random.uniform(-180, 180), 10)
+                    lat = round(random.uniform(-90, 90), 10)
                     point = {"type": "Point", "coordinates": [long, lat]}
                     add_attr(entity, "attr_geo", point)
 
