@@ -20,7 +20,25 @@ from server.telemetry.observation import ObservationStore, \
     ObservationStoreAction, tabulate
 
 
-OBSERVATION_STORE_HEADER = ['Timepoint', 'Measurement', 'Label', 'PID']
+TIMEPOINT_CSV_FIELD = 'Timepoint'
+"""
+Name of the observation's timepoint field in the CSV header.
+"""
+MEASUREMENT_CSV_FIELD = 'Measurement'
+"""
+Name of the observation's measurement field in the CSV header.
+"""
+LABEL_CSV_FIELD = 'Label'
+"""
+Name of the observation's label field in the CSV header.
+"""
+PID_CSV_FIELD = 'PID'
+"""
+Name of the PID field in the CSV header.
+"""
+
+OBSERVATION_STORE_HEADER = [TIMEPOINT_CSV_FIELD, MEASUREMENT_CSV_FIELD,
+                            LABEL_CSV_FIELD, PID_CSV_FIELD]
 """
 Header of the CSV file where observation store contents get written.
 """
