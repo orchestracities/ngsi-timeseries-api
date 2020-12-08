@@ -59,5 +59,3 @@ volumes:
 
 networks:
     default:
-        driver_opts:
-            com.docker.network.driver.mtu: ${DOCKER_MTU:-1400}

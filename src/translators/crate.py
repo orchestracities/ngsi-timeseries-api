@@ -47,6 +47,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
     def __init__(self, host, port=4200, db_name="ngsi-tsdb"):
         super(CrateTranslator, self).__init__(host, port, db_name)
         self.logger = logging.getLogger(__name__)
+        self.dbCacheName = 'crate'
         self.ccm = None
         self.connection = None
         self.cursor = None
@@ -69,6 +70,8 @@ class CrateTranslator(sql_translator.SQLTranslator):
         # we need to think if we want to cache this information
         # and save few msec for evey API call
         self.db_version = self.get_db_version()
+        self.active_shards = EnvReader(log=logging.getLogger(__name__).debug)\
+            .read(StrVar('CRATE_WAIT_ACTIVE_SHARDS', '1'))
 
         major = int(self.db_version.split('.')[0])
         if major <= 2:
@@ -92,7 +95,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
 
     def get_db_version(self):
         stmt = "select version['number'] from sys.nodes"
-        res = self._execute_query_via_cache("crate",
+        res = self._execute_query_via_cache(self.dbCacheName,
                                             "dbversion",
                                             stmt, None, 6000)
         return res[0][0]
@@ -170,8 +173,10 @@ class CrateTranslator(sql_translator.SQLTranslator):
         columns = ', '.join('"{}" {}'.format(cn.lower(), ct)
                             for cn, ct in table.items())
         stmt = "create table if not exists {} ({}) with " \
-               "(number_of_replicas = '2-all', " \
-               "column_policy = 'strict')".format(table_name, columns)
+               "(\"number_of_replicas\" = '2-all', " \
+               "\"column_policy\" = 'strict', " \
+               "\"write.wait_for_active_shards\" = '{}'" \
+               ")".format(table_name, columns, self.active_shards)
         self.cursor.execute(stmt)
 
     def _update_data_table(self, table_name, new_columns, fiware_service):
@@ -188,7 +193,9 @@ class CrateTranslator(sql_translator.SQLTranslator):
     def _create_metadata_table(self):
         stmt = "create table if not exists {} " \
                "(table_name string primary key, entity_attrs object) " \
-               "with (number_of_replicas = '2-all', column_policy = 'dynamic')"
+               "with (" \
+               "number_of_replicas = '2-all', " \
+               "column_policy = 'dynamic')"
         op = stmt.format(METADATA_TABLE_NAME)
         self.cursor.execute(op)
 

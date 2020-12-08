@@ -1,6 +1,7 @@
 from datetime import datetime
 from conftest import QL_URL
 from utils.common import assert_equal_time_index_arrays
+from reporter.tests.utils import delete_entity_type
 import copy
 import json
 import pytest
@@ -38,6 +39,7 @@ def test_for_valid_headers(notification):
         ]
     }
     assert res_get.json() == exp_values
+    delete_entity_type('test', 'Room')
 
 def test_for_invalid_headers(notification):
     notification['data'][0] = {

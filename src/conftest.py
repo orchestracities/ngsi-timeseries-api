@@ -15,7 +15,7 @@ CRATE_HOST = os.environ.get('CRATE_HOST', 'crate')
 CRATE_PORT = 4200
 
 POSTGRES_HOST = os.environ.get('POSTGRES_HOST', 'timescale')
-POSTGRES_HOST = 5432
+POSTGRES_PORT = 5432
 
 REDIS_HOST = os.environ.get('REDIS_HOST', 'redis')
 REDIS_PORT = 6379
@@ -68,6 +68,12 @@ class OrionClient(object):
         r = requests.post('{}/v2/entities'.format(self.url),
                           data=json.dumps(entity),
                           headers=headers(service, service_path))
+        return r
+
+    def update_attr(self, entity_id, attrs, service=None, service_path=None):
+        r = requests.patch('{}/v2/entities/{}/attrs'.format(self.url, entity_id),
+                           data=json.dumps(attrs),
+                           headers=headers(service, service_path))
         return r
 
     def delete(self, entity_id, service=None, service_path=None):
@@ -181,6 +187,54 @@ def crate_translator(clean_crate):
                     pass
 
     with Translator(host=CRATE_HOST, port=CRATE_PORT) as trans:
+        yield trans
+
+
+@pytest.fixture()
+def timescale_translator():
+    from src.translators.timescale import PostgresTranslator, \
+        PostgresConnectionData
+
+    class Translator(PostgresTranslator):
+
+        def insert(self, entities,
+                   fiware_service=None, fiware_servicepath=None):
+            r = PostgresTranslator.insert(self, entities,
+                                          fiware_service, fiware_servicepath)
+            return r
+
+        def delete_entity(self, entity_id, entity_type=None,
+                          fiware_service=None, **kwargs):
+            r = PostgresTranslator.delete_entity(self, entity_id, entity_type,
+                                                 fiware_service=fiware_service,
+                                                 **kwargs)
+            return r
+
+        def delete_entities(self, entity_type=None, fiware_service=None,
+                            **kwargs):
+            r = PostgresTranslator.delete_entities(self, entity_type,
+                                                   fiware_service=fiware_service,
+                                                   **kwargs)
+            return r
+
+        def entity_types(self, fiware_service=None, **kwargs):
+            r = PostgresTranslator.query_entity_types(self, entity_type=None,
+                                                      fiware_service=fiware_service,
+                                                      **kwargs)
+            return r
+
+        def clean(self, fiware_service=None, **kwargs):
+            types = PostgresTranslator.query_entity_types(self,
+                                                          fiware_service=fiware_service,
+                                                          **kwargs)
+            if types:
+                for t in types:
+                    PostgresTranslator.drop_table(self, t,
+                                                  fiware_service=fiware_service,
+                                                  **kwargs)
+
+    with Translator(PostgresConnectionData(host=POSTGRES_HOST,
+                                           port=POSTGRES_PORT)) as trans:
         yield trans
 
 
@@ -453,4 +507,72 @@ def traffic_flow_observed():
             'value': 52.6,
         }
     }
+    return entity
+
+
+@pytest.fixture
+def ngsi_ld():
+    """
+    :return: dict
+        The NGSI LD model as received within an Orion notification.
+    """
+    entity = {
+        "id": "urn:ngsi-ld:Streetlight:streetlight:guadalajara:4567",
+        "type": "Streetlight",
+        "location": {
+            "type": "GeoProperty",
+            "value": {
+                "type": "Point",
+                "coordinates": [-3.164485591715449, 40.62785133667262]
+            }
+        },
+        "areaServed": {
+            "type": "Property",
+            "value": "Roundabouts city entrance"
+        },
+        "status": {
+            "type": "Property",
+            "value": "ok"
+        },
+        "refStreetlightGroup": {
+            "type": "Relationship",
+            "object": "urn:ngsi-ld:StreetlightGroup:streetlightgroup:G345"
+        },
+        "refStreetlightModel": {
+            "type": "Relationship",
+            "object": "urn:ngsi-ld:StreetlightModel:streetlightmodel:STEEL_Tubular_10m"
+        },
+        "circuit": {
+            "type": "Property",
+            "value": "C-456-A467"
+        },
+        "lanternHeight": {
+            "type": "Property",
+            "value": 10
+        },
+        "locationCategory": {
+            "type": "Property",
+            "value": "centralIsland"
+        },
+        "powerState": {
+            "type": "Property",
+            "value": "off"
+        },
+        "controllingMethod": {
+            "type": "Property",
+            "value": "individual"
+        },
+        "dateLastLampChange": {
+            "type": "Property",
+            "value": {
+                "@type": "DateTime",
+                "@value": "2016-07-08T08:02:21.753Z"
+            }
+        },
+        "@context": [
+            "https://schema.lab.fiware.org/ld/context",
+            "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+        ]
+    }
+
     return entity

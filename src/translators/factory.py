@@ -24,11 +24,21 @@ def lookup_backend(fiware_service: str) -> MaybeString:
     config = cfg_reader.from_env_file(QL_CONFIG_ENV_VAR, defaults={})
     tenant_backend = maybe_string_match(config, 'tenants', fiware_service,
                                         'backend')
-    default_backend = maybe_string_match(config, 'default-backend')
 
-    env_backend = env_reader.read(StrVar(QL_DEFAULT_DB_ENV_VAR, CRATE_BACKEND))
+    return tenant_backend or default_backend()
 
-    return tenant_backend or env_backend or default_backend
+
+def default_backend() -> MaybeString:
+    cfg_reader = YamlReader(log=log().debug)
+    env_reader = EnvReader(log=log().debug)
+
+    config = cfg_reader.from_env_file(QL_CONFIG_ENV_VAR, defaults={})
+
+    config_backend = maybe_string_match(config, 'default-backend')
+
+    env_backend = env_reader.read(StrVar(QL_DEFAULT_DB_ENV_VAR, None))
+
+    return env_backend or config_backend or CRATE_BACKEND
 
 
 def translator_for(fiware_service: str):

@@ -1,12 +1,14 @@
-from conftest import crate_translator as translator
 from reporter.tests.test_1T1E1A import query_url as query_1T1E1A, \
     assert_1T1E1A_response
 from reporter.tests.utils import get_notification, send_notifications, delete_entity_type
 import requests
 import time
+import pytest
+
+services = ['t1', 't2']
 
 
-def check_time_index(input_index, expected_index=None):
+def check_time_index(service, input_index, expected_index=None):
     expected_index = expected_index or input_index
 
     n0 = get_notification('Room', 'Room0', 0, input_index[0])
@@ -32,7 +34,8 @@ def check_time_index(input_index, expected_index=None):
     delete_entity_type('', 'Room')
 
 
-def test_index_iso(translator):
+@pytest.mark.parametrize("service", services)
+def test_index_iso(service):
     # If notifications use time-zone info, QL still responds in UTC
     input_index = [
         '2010-10-10T09:09:00.792',
@@ -44,10 +47,11 @@ def test_index_iso(translator):
         '2010-10-10T07:09:01.792+00:00',
         '2010-10-10T07:09:02.792+00:00',
     ]
-    check_time_index(input_index, expected_index)
+    check_time_index(service, input_index, expected_index)
 
 
-def test_index_iso_with_time_zone(translator):
+@pytest.mark.parametrize("service", services)
+def test_index_iso_with_time_zone(service):
     # If notifications use time-zone info, QL still responds in UTC
     # #97: Make it return time info used in input.
     input_index = [
@@ -60,4 +64,4 @@ def test_index_iso_with_time_zone(translator):
         '2010-10-10T07:09:01.792+00:00',
         '2010-10-10T07:09:02.792+00:00',
     ]
-    check_time_index(input_index, expected_index)
+    check_time_index(service, input_index, expected_index)

@@ -2,20 +2,21 @@ import requests
 import time
 from conftest import QL_URL
 from .utils import send_notifications, delete_entity_type
+import pytest
 
-service = ''
+services = ['t1', 't2']
 
 
-def notify(entity):
+def notify(service, entity):
     notification_data = [{'data': [entity]}]
     send_notifications(service, notification_data)
 
 
-def get_all_stored_attributes(entity_id):
+def get_all_stored_attributes(service, entity_id):
     time.sleep(2)
-
+    h = {'Fiware-Service': service}
     url = "{}/entities/{}".format(QL_URL, entity_id)
-    response = requests.get(url)
+    response = requests.get(url, headers=h)
     attrs = response.json().get('attributes', [])
 
     attr_values_map = {}
@@ -53,7 +54,8 @@ def get_all_stored_attributes(entity_id):
 # }
 
 
-def test_can_add_new_attribute():
+@pytest.mark.parametrize("service", services)
+def test_can_add_new_attribute(service):
     a1_value = 123.0
     a2_value = 'new attribute initial value'
     entity = {
@@ -64,22 +66,23 @@ def test_can_add_new_attribute():
             'value': a1_value
         }
     }
-    notify(entity)
+    notify(service, entity)
 
     entity['a2'] = {
         'type': 'Text',
         'value': a2_value
     }
-    notify(entity)
+    notify(service, entity)
 
-    attr_values_map = get_all_stored_attributes(entity['id'])
+    attr_values_map = get_all_stored_attributes(service, entity['id'])
     assert len(attr_values_map) == 2
     assert attr_values_map['a1'] == [a1_value, a1_value]
     assert attr_values_map['a2'] == [None, a2_value]
     delete_entity_type(service, 't1')
 
 
-def test_can_add_new_attribute_even_without_specifying_old_ones():
+@pytest.mark.parametrize("service", services)
+def test_can_add_new_attribute_even_without_specifying_old_ones(service):
     a1_value = 123.0
     entity_1 = {
         'id': 'u1:1',
@@ -89,7 +92,7 @@ def test_can_add_new_attribute_even_without_specifying_old_ones():
             'value': a1_value
         }
     }
-    notify(entity_1)
+    notify(service, entity_1)
 
     a2_value = 'new attribute initial value'
     entity_2 = {
@@ -100,15 +103,17 @@ def test_can_add_new_attribute_even_without_specifying_old_ones():
             'value': a2_value
         }
     }
-    notify(entity_2)
+    notify(service, entity_2)
 
-    attr_values_map = get_all_stored_attributes(entity_1['id'])
+    attr_values_map = get_all_stored_attributes(service, entity_1['id'])
     assert len(attr_values_map) == 2
     assert attr_values_map['a1'] == [a1_value, None]
     assert attr_values_map['a2'] == [None, a2_value]
     delete_entity_type(service, 'u1')
 
-def test_can_add_2_new_attribute_even_without_specifying_old_ones():
+
+@pytest.mark.parametrize("service", services)
+def test_can_add_2_new_attribute_even_without_specifying_old_ones(service):
     a1_value = 123.0
     entity_1 = {
         'id': 'u1:1',
@@ -118,7 +123,7 @@ def test_can_add_2_new_attribute_even_without_specifying_old_ones():
             'value': a1_value
         }
     }
-    notify(entity_1)
+    notify(service, entity_1)
 
     a2_value = 'new attribute initial value'
     a3_value = True
@@ -134,9 +139,9 @@ def test_can_add_2_new_attribute_even_without_specifying_old_ones():
             'value': a3_value
         }
     }
-    notify(entity_2)
+    notify(service, entity_2)
 
-    attr_values_map = get_all_stored_attributes(entity_1['id'])
+    attr_values_map = get_all_stored_attributes(service, entity_1['id'])
     assert len(attr_values_map) == 3
     assert attr_values_map['a1'] == [a1_value, None]
     assert attr_values_map['a2'] == [None, a2_value]
@@ -144,7 +149,9 @@ def test_can_add_2_new_attribute_even_without_specifying_old_ones():
     delete_entity_type(service, 'u1')
 
 
-def test_store_missing_text_value_as_null():
+
+@pytest.mark.parametrize("service", services)
+def test_store_missing_text_value_as_null(service):
     entity = {
         'id': 't2:1',
         'type': 't2',
@@ -156,15 +163,17 @@ def test_store_missing_text_value_as_null():
             'type': 'Text'
         }
     }
-    notify(entity)
+    notify(service, entity)
 
-    attr_values_map = get_all_stored_attributes(entity['id'])
+    attr_values_map = get_all_stored_attributes(service, entity['id'])
     assert len(attr_values_map) == 2
     assert attr_values_map['x'] == [None]
     delete_entity_type(service, 't2')
 
 
-def test_store_missing_text_value_as_null_then_as_empty():
+
+@pytest.mark.parametrize("service", services)
+def test_store_missing_text_value_as_null_then_as_empty(service):
     entity = {
         'id': 't3:1',
         'type': 't3',
@@ -176,18 +185,20 @@ def test_store_missing_text_value_as_null_then_as_empty():
             'type': 'Text'
         }
     }
-    notify(entity)
+    notify(service, entity)
 
     entity['x']['value'] = ''
-    notify(entity)
+    notify(service, entity)
 
-    attr_values_map = get_all_stored_attributes(entity['id'])
+    attr_values_map = get_all_stored_attributes(service, entity['id'])
     assert len(attr_values_map) == 2
     assert attr_values_map['x'] == [None, '']
     delete_entity_type(service, 't3')
 
 
-def test_store_null_text_value_as_null():
+
+@pytest.mark.parametrize("service", services)
+def test_store_null_text_value_as_null(service):
     entity = {
         'id': 't4:1',
         'type': 't4',
@@ -200,15 +211,17 @@ def test_store_null_text_value_as_null():
             'value': None
         }
     }
-    notify(entity)
+    notify(service, entity)
 
-    attr_values_map = get_all_stored_attributes(entity['id'])
+    attr_values_map = get_all_stored_attributes(service, entity['id'])
     assert len(attr_values_map) == 2
     assert attr_values_map['x'] == [None]
     delete_entity_type(service, 't4')
 
 
-def test_store_null_numeric_value_as_null():
+
+@pytest.mark.parametrize("service", services)
+def test_store_null_numeric_value_as_null(service):
     entity = {
         'id': 't5:1',
         'type': 't5',
@@ -221,15 +234,17 @@ def test_store_null_numeric_value_as_null():
             'value': None
         }
     }
-    notify(entity)
+    notify(service, entity)
 
-    attr_values_map = get_all_stored_attributes(entity['id'])
+    attr_values_map = get_all_stored_attributes(service, entity['id'])
     assert len(attr_values_map) == 2
     assert attr_values_map['x'] == [None]
     delete_entity_type(service, 't5')
 
 
-def test_store_empty_numeric_value_as_null():
+
+@pytest.mark.parametrize("service", services)
+def test_store_empty_numeric_value_as_null(service):
     entity = {
         'id': 't6:1',
         'type': 't6',
@@ -242,9 +257,9 @@ def test_store_empty_numeric_value_as_null():
             'value': ''
         }
     }
-    notify(entity)
+    notify(service, entity)
 
-    attr_values_map = get_all_stored_attributes(entity['id'])
+    attr_values_map = get_all_stored_attributes(service, entity['id'])
     assert len(attr_values_map) == 2
     assert attr_values_map['x'] == [None]
     delete_entity_type(service, 't6')

@@ -1,6 +1,7 @@
-from conftest import QL_BASE_URL 
+from conftest import QL_BASE_URL
 import pytest
 import requests
+
 
 def test_health_pass():
     """

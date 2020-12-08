@@ -39,3 +39,13 @@ def test_os_env():
     os.environ['QL_DEFAULT_DB'] = 'crate'
     with translator_for(None) as t:
         assert isinstance(t, CrateTranslator)
+    os.environ['QL_DEFAULT_DB'] = ''
+
+
+def test_fix_404():
+    with translator_for(None) as t:
+        assert isinstance(t, CrateTranslator)
+    os.environ['QL_CONFIG'] = 'src/translators/tests/ql-config-timescale-default.yml'
+    with translator_for(None) as t:
+        assert isinstance(t, PostgresTranslator)
+

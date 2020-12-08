@@ -1,8 +1,23 @@
-from conftest import crate_translator as translator
+# To test a single translator use the -k parameter followed by either
+# timescale or crate.
+# See https://docs.pytest.org/en/stable/example/parametrize.html
+
+from conftest import crate_translator, timescale_translator
 from utils.common import create_random_entities, TIME_INDEX_NAME, add_attr
 import datetime
 
+from src.utils.common import create_random_entities
 
+import pytest
+
+
+translators = [
+    pytest.lazy_fixture('crate_translator'),
+    pytest.lazy_fixture('timescale_translator')
+]
+
+
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_aggr_per_second(translator):
     entities = create_random_entities(num_ids_per_type=2, num_updates=17)
     assert len(entities) == 34
