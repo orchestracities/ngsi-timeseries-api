@@ -26,7 +26,10 @@ requests = ">=2.20"
 rethinkdb = "==2.3"
 pickle-mixin = "==1.0.2"
 
+# run `pipenv install --dev` to get the packages below in your env
 [dev-packages]
+matplotlib = "~=3.3"
+pandas = "~=1.1"
 
 [requires]
 python_version = "3.8.5"
