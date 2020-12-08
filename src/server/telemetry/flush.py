@@ -13,7 +13,6 @@ writers in this module.
 
 import csv
 import os
-from tempfile import gettempdir
 from uuid import uuid4
 
 from server.telemetry.observation import ObservationStore, \
@@ -65,21 +64,32 @@ def flush_to_csv(target_dir: str, filename_prefix: str) \
 
 def _save_csv(target_dir: str, filename_prefix: str,
               store: ObservationStore):
-    filename = _filename(filename_prefix)
-    temp_path = os.path.join(gettempdir(), filename)
+    temp_name, filename = _file_names(filename_prefix)
+    temp_path = os.path.join(target_dir, temp_name)      # (*)
     target_path = os.path.join(target_dir, filename)
 
     _write_csv(temp_path, store)
-    os.rename(temp_path, target_path)    # (*)
+    os.rename(temp_path, target_path)                    # (*)
 
     # NOTE. Atomic move. Rename is atomic but won't work across file systems,
     # see
     # - https://alexwlchan.net/2019/03/atomic-cross-filesystem-moves-in-python/
+    # If you try moving a file across file systems you get an error similar to:
+    #
+    #     OSError: [Errno 18] Cross-device link:
+    #       '/tmp/file.csv' -> '/dir/on/other/fs/file.csv'
+    #
+    # This is why we write the file directly to the target dir with a temp name
+    # and then do the move. In fact, putting the file in a temp dir and then
+    # moving it to the target dir may fail if the two dirs are on different
+    # file systems.
 
 
-def _filename(filename_prefix: str) -> str:
+def _file_names(filename_prefix: str) -> (str, str):
     fid = uuid4().hex
-    return f"{filename_prefix}.{fid}.csv"
+    temp_name = f"{filename_prefix}.{fid}.tmp"
+    target_name = f"{filename_prefix}.{fid}.csv"
+    return temp_name, target_name
 
 
 def _write_csv(path: str, content: ObservationStore):
