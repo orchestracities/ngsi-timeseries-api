@@ -280,9 +280,10 @@ class ProcSampler:
 class RuntimeBackgroundSampler:
     """
     Convenience class to sample GC and OS metrics at regular intervals in a
-    background daemon thread. The thread goes on forever until the program
-    exits, calling ``GCSampler`` and ``ProcSampler`` every ``sampling_interval``
-    seconds to collect GC and OS-level metrics using a bucket you specify.
+    background daemon thread.
+    The thread goes on forever until the program exits, calling ``GCSampler``
+    and ``ProcSampler`` every ``sampling_interval`` seconds to collect GC and
+    OS-level metrics using a bucket you specify.
     Just before the program exits, you should call the bucket's ``empty``
     method to make sure any left over sampled data still in the memory buffer
     gets processed by the bucket's empty action.

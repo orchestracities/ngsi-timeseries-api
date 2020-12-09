@@ -8,8 +8,8 @@ from typing import Optional
 
 import pandas as pd
 
-from server.telemetry.flush import TIMEPOINT_CSV_FIELD, MEASUREMENT_CSV_FIELD, \
-    LABEL_CSV_FIELD, PID_CSV_FIELD
+from server.telemetry.flush import TIMEPOINT_CSV_FIELD, \
+    MEASUREMENT_CSV_FIELD, LABEL_CSV_FIELD, PID_CSV_FIELD
 from server.telemetry.monitor import DURATION_FILE_PREFIX, RUNTIME_FILE_PREFIX
 from server.telemetry.sampler import GC_COLLECTIONS, GC_COLLECTED, \
     GC_UNCOLLECTABLE, PROC_MAX_RSS, PROC_SYSTEM_TIME, PROC_USER_TIME

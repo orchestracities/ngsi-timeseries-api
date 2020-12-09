@@ -21,12 +21,15 @@ is the actual quantity measured.
 # NOTE. Performance. Using a bare tuple instead of a class to keep memory
 # footprint low. In fact, there could be quite a number of these little
 # guys in memory during a sampling session...
-# TODO. Consider using NumPy
 # Unfortunately integers and floats aren't as light on memory as in other
 # languages---e.g. an int is actually an object taking up at least 28 bytes
 # on a 64-bit box. See:
 # - https://pythonspeed.com/articles/python-integers-memory/
 # - https://stackoverflow.com/questions/10365624
+#
+# NumPy would possibly have a much smaller footprint, but we'd like to keep
+# this package self-contained so not to impose any external lib dependency
+# on users.
 
 OBSERVATION_MIN_SZ = getsizeof((0, 0.0))
 """
@@ -136,8 +139,8 @@ A time series of numeric measurements.
 
 ObservationStore = Dict[str, ObservationSeries]
 """
-A collection of labelled observation time series. Each label uniquely identifies
-a time series.
+A collection of labelled observation time series. Each label uniquely
+identifies a time series.
 """
 # NOTE. Memory footprint. It looks like that using a dict with list values
 # shouldn't be too bad:
@@ -154,9 +157,9 @@ def _extend_series(store: ObservationStore, label: str, obs: [Observation]):
     # pre-allocating a list with an initial capacity. I have my doubts
     # about this though and the effect of append on GC---i.e. what if
     # the list grows in too small chunks? Is there any data structure
-    # we could use?
-    #
-    # TODO figure out to what extent this affects GC and how to optimise.
+    # we could use? Simple benchmarks show that we shouldn't have an
+    # issue here, but I'd still like to figure out to what extent this
+    # affects GC and how to optimise.
 
 
 def observation_store(*ts: LabelledObservation) -> ObservationStore:
@@ -221,11 +224,14 @@ def merge_observation_stores(*ts: ObservationStore) -> ObservationStore:
         [5.0]
     """
     merged = {}
-    for t in ts:  # TODO implement efficient merge algo
+    for t in ts:
         for k in t:
             _extend_series(merged, k, t[k])
 
     return merged
+    # NOTE. Efficient algo. This function is only used for examples and testing
+    # so performance isn't really critical. But it'd be nice to implement an
+    # efficient algorithm.
 
 
 def tabulate(store: ObservationStore) -> \
@@ -265,7 +271,7 @@ class ObservationBuffer:
         >>> tot_bytes = buf.estimate_memory_lower_bound()
         >>> 150 < tot_bytes < 200
         True
-        
+
         >>> store = buf.flush()
         >>> buf.size() == 0
         True
