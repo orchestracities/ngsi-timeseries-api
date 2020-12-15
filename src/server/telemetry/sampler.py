@@ -9,7 +9,6 @@ import gc
 from resource import getrusage, RUSAGE_SELF
 from threading import Thread
 from time import perf_counter, sleep
-from typing import Optional
 from uuid import uuid4
 
 from server.telemetry.observation import ObservationBucket, observe, \

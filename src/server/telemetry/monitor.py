@@ -93,18 +93,27 @@ to
     1607092101580275000, 0.029, "my code block id", 5662
         ...
 
-Since timing functions is a pretty common thing to do, we have a shortcut
-for that
+Timing your code with ``try/finally`` clauses like we did earlier is
+quite verbose, so we have a context decorator you can use to get rid
+of the boilerplate. This code snippet is equivalent to the one we saw
+earlier:
 ::
     from server.telemetry.monitor import time_it
 
+    with time_it(label='my code block id'):
+        # do stuff
+
+``time_it`` wraps the code block following the ``with`` statement to
+run the same timing instructions we wired in manually earlier. And it
+works with functions too:
+::
     @time_it(label='my_func')
     def my_func():
         # do stuff
 
-The ``time_it`` decorator wraps the function you annotate to basically
-run the same timing instructions we wired in manually earlier. With
-runtime metrics collection enabled (see ``start`` method), a background
+Notice when we called the ``start`` method earlier, we turned on
+collection of runtime metrics by passing in: ``with_runtime=True``.
+With runtime metrics collection enabled, a background
 thread gathers GC and OS data (CPU time, memory, etc.) as detailed in
 the documentation of ``GCSampler`` and ``ProcSampler``. Another thing
 you can do is turn on the profiler when calling the ``start`` function.
@@ -159,8 +168,8 @@ To try it out yourself, start Gunicorn with a config file containing
 
 """
 
+from contextlib import ContextDecorator
 from cProfile import Profile
-import functools
 import os
 from threading import Lock
 from typing import Optional
@@ -297,21 +306,25 @@ def stop():
     # to the docs, then there's no issues.
 
 
-def time_it(label: str):
+class time_it(ContextDecorator):
     """
-    Time how long a function takes to run.
+    Context decorator to time how long a function or a code block takes to run.
+    """
 
-    :param label: a name to identify the time series where durations of the
-        timed function should be added.
-    :return: a decorator to time a function.
-    """
-    def time_it_decorator(func):
-        @functools.wraps(func)
-        def time_it_wrapper(*args, **kwargs):
-            sample_id = start_duration_sample()
-            try:
-                return func(*args, **kwargs)
-            finally:
-                stop_duration_sample(label, sample_id)
-        return time_it_wrapper
-    return time_it_decorator
+    def __init__(self, label: str):
+        """
+        Create a new instance.
+
+        :param label: a name to identify the time series where durations
+            of the timed function or code block should be added.
+        """
+        self._label = label
+        self._sample_id: Optional[str] = None
+
+    def __enter__(self):
+        self._sample_id = start_duration_sample()
+        return self
+
+    def __exit__(self, *exc):
+        stop_duration_sample(self._label, self._sample_id)
+        return False
