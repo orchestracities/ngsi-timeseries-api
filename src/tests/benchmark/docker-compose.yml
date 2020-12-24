@@ -6,6 +6,11 @@ services:
     image: crate:${CRATE_VERSION:-4.1.4}
     command: crate -Cauth.host_based.enabled=false
       -Ccluster.name=democluster -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*"
+    sysctls:
+      net.core.somaxconn: 4096
+      # see:
+      # - https://serverfault.com/questions/518862/
+      # - http://veithen.io/2014/01/01/how-tcp-backlog-works-in-linux.html
     ports:
       # Admin UI
       - "4200:4200"
@@ -16,6 +21,11 @@ services:
 
   redis:
     image: redis
+    sysctls:
+      net.core.somaxconn: 4096
+      # see:
+      # - https://serverfault.com/questions/518862/
+      # - http://veithen.io/2014/01/01/how-tcp-backlog-works-in-linux.html
     ports:
       - "6379:6379"
 
@@ -24,6 +34,9 @@ services:
     command: --config server/gconfig_telemetry.py
     sysctls:
       net.core.somaxconn: 4096
+      # see:
+      # - https://serverfault.com/questions/518862/
+      # - http://veithen.io/2014/01/01/how-tcp-backlog-works-in-linux.html
     ports:
       - "8668:8668"
     depends_on:

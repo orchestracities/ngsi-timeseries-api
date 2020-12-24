@@ -29,6 +29,7 @@ pytest-lazy-fixture = "~=0.6.3"
 
 # run `pipenv install --dev` to get the packages below in your env
 [dev-packages]
+aiohttp = "~=3.7"
 matplotlib = "~=3.3"
 pandas = "~=1.1"
 

@@ -29,7 +29,13 @@ docker-compose up -d
 
 sleep 10
 
-seq 1 10000 | xargs -n1 -P10  curl 'http://localhost:8668/version'
+# seq 1 10000 | xargs -n1 -P10  curl 'http://localhost:8668/version'
+# ^ this is the slowest client, probably because of context switches and
+#   lack of connection pooling.
+# python asyncio_driver.py version
+# ^ this is way faster as it does async I/O and pools connections, but
+#   the one below beats them all!
+python threaded_driver.py version
 
 docker-compose down -v
 
