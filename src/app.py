@@ -16,7 +16,7 @@ class RequestFormatter(logging.Formatter):
                 record.subserv = request.headers.get('fiware-servicepath', None)
             else:
                 record.subserv = None
-            if request.json and request.json['data']:
+            if len(request.data) > 0 and request.json and request.json['data']:
                 record.payload = request.json['data']
             else:
                 record.payload = None
