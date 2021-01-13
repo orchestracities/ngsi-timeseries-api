@@ -164,28 +164,64 @@ NGSI エンティティが属性に有効な NGSI 型を使用していること
 必要があります。これらの型は、NGSI API の仕様セクションに記載されています。
 下記の変換表の最初の欄を参照し、大文字を覚えておいてください。
 
-下の表は、どの属性型がどの CrateDB のデータ型に変換されるかを示しています 。
+下の表は、どの属性型がどの
+[CrateDB](https://crate.io/docs/crate/reference/sql/data_types.html)
+および
+[TimescaleDB](https://www.postgresql.org/docs/current/datatype.html)
+のデータ型に変換されるかを示しています 。
 
-**CrateDB 変換テーブル**
+**CrateDB (v4.x) 変換テーブル**
 
 | NGSI 型          | CrateDB 型          | 見解 |
 | ------------------ |:-----------------------:| :-----------|
 |Array               | [array(string)](https://crate.io/docs/crate/reference/sql/data_types.html#array)           | [Issue 36: 他のタイプの配列をサポートする](https://github.com/smartsdk/ngsi-timeseries-api/issues/36) |
 |Boolean             | [boolean](https://crate.io/docs/crate/reference/sql/data_types.html#boolean)                 | - |
-|DateTime            | [timestamp](https://crate.io/docs/crate/reference/sql/data_types.html#timestamp)                 | 'ISO8601'は 'DateTime'に相当するものとして使用できます |
-|Integer             | [long](https://crate.io/docs/crate/reference/sql/data_types.html#numeric-types)                  | - |
+|DateTime            | [timestampz](https://crate.io/docs/crate/reference/en/4.3/general/ddl/data-types.html#timestamp-with-time-zone)                 | 'ISO8601'は 'DateTime'に相当するものとして使用できます |
+|Integer             | [bigint](https://crate.io/docs/crate/reference/sql/data_types.html#numeric-types)                  | - |
 |[geo:point](http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities)            | [geo_point](https://crate.io/docs/crate/reference/sql/data_types.html#geo-point)               | **注意!** NGSI は "lat, long"の順番を使用しますが、Crateは、ポイントを[long, lat] 順に格納します |
 |[geo:json](http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities)            | [geo_shape](https://crate.io/docs/crate/reference/sql/data_types.html#geo-shape)               | - |
-|Number              | [float](https://crate.io/docs/crate/reference/sql/data_types.html#numeric-types)                   |-|
-|Text                | [string](https://crate.io/docs/crate/reference/sql/data_types.html#string)                  | 提供された NGSI 型がサポートされていないか間違っている場合、これはデフォルト型です |
+|Number              | [real](https://crate.io/docs/crate/reference/sql/data_types.html#numeric-types)                   |-|
+|Text                | [text](https://crate.io/docs/crate/reference/sql/data_types.html#data-type-text)                  | 提供された NGSI 型がサポートされていないか間違っている場合、これはデフォルト型です |
 |StructuredValue     | [object](https://crate.io/docs/crate/reference/sql/data_types.html#object)                  |-|
 
-受信した属性のいずれかの型が、上記のテーブルの列 *NGSI 型*に存在しない場合、
-その属性の値は内部的に文字列として扱われます。したがって、属性型 (有効ではない)
-に `Float` を使用すると、属性は `string` として格納されます。
+**TimescaleDB (v12.x) 変換テーブル**
 
+| NGSI 型            | TimescaleDB 型          | 見解        |
+| ------------------ |:-----------------------:| :-----------|
+|Array               | [jsonb](https://www.postgresql.org/docs/current/datatype-json.html)           |  |
+|Boolean             | [boolean](https://www.postgresql.org/docs/current/datatype-boolean.html)                 | - |
+|DateTime            | [timestamp WITH TIME ZONE](https://www.postgresql.org/docs/current/datatype-datetime.html)                 | 'ISO8601' は 'DateTime' と同等のものとして使用できます |
+|Integer             | [bigint](https://www.postgresql.org/docs/current/datatype-numeric.html#DATATYPE-INT)                  | - |
+|[geo:point](http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities)            | [geometry](https://postgis.net/docs/geometry.html)               | **注意!** NGSI は "lat, long" の順序を使用しますが、PostGIS/WGS84 はポイントを [long, lat] の順序で保存します |
+|[geo:json](http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities)            | [geometry](https://postgis.net/docs/geometry.html)               | - |
+|Number              | [float](https://www.postgresql.org/docs/current/datatype-numeric.html#DATATYPE-FLOAT)                   |-|
+|Text                | [text](https://www.postgresql.org/docs/current/datatype-character.html)                  | これは、提供されたNGSI 型がサポートされていないか間違っている場合のデフォルトのタイプです |
+|StructuredValue     | [jsonb](https://www.postgresql.org/docs/current/datatype-json.html)                  |-|
 
-### タイム・インデックス (Time Index)
+受信した属性のいずれかの型が前のテーブルの **NGSI 型**の列に存在しない場合、
+NGSI 型 (したがって SQL 型) は値から派生します。次のロジックを使用します:
+
+```
+       if a_type not in NGSI
+            type = Text
+            if a_value is a list:
+               type = Array
+            elif a_value is not None and a_value is an Object:
+                if a_type is 'Property' and a_value['@type'] is 'DateTime':
+                    type = DateTime
+                else:
+                    type = StructuredValue
+            elif a_value is int:
+                type = Integer
+            elif a_value is float:
+                type = Number
+            elif a_value is bool:
+                type = Boolean
+            elif a_value is an ISO DateTime:
+                type = DateTime
+```
+
+### [タイム・インデックス](#timeindex)
 
 時系列データベースの基本要素は**タイム・インデクス**です。あなたは疑問に
 思うかもしれません...。それはどこに保存されていますか？ QuantumLeap は各通知の
@@ -302,7 +338,8 @@ QuantumLeap から履歴データを取得するには、
 それらのすべてがまだ完全に実装されているわけではありません。
 
 必要に応じて、データベースと直接対話できます。詳細は、ドキュメントの
-[CrateDB](../admin/crate.md) セクションを参照してください。
+[CrateDB](../admin/crate.md) または [Timescale](../admin/timescale.md)
+セクションを参照してください。
 この場合、あなたが知る必要があるのは、QuantumLeap が各エンティティ型ごとに
 1つのテーブルを作成するということです。テーブル名には接頭辞 (et)
 とエンティティ型の小文字のバージョンが含まれます。つまり、エンティティ型が
@@ -347,8 +384,10 @@ QuantumLeap の場合、挿入時のヘッダは実際には
 ときにもデバイスによって使用されるべきです。前述のように、そのようなデータを
 取得するには同じヘッダを使用する必要があります。
 
-データベースと直接対話している場合、QuantumLeap は crate の
-[データベース・スキーマ](https://crate.io/docs/crate/reference/en/latest/general/ddl/create-table.html?highlight=scheme#schemas)
+データベースと直接対話している場合、QuantumLeap は
+[crate](https://crate.io/docs/crate/reference/en/latest/general/ddl/create-table.html?highlight=scheme#schemas)
+または [timescale](https://www.postgresql.org/docs/current/ddl-schemas.html)
+のデータベース・スキーマ
 として特定のプレフィックスを付けて `FIWARE-Service` を使用することを知って
 おく必要があります。こうすれば、`Fiware-Service: magic` ヘッダを使って `Room`
 型のエンティティを挿入した場合、あなたのテーブルは `mtmagic.etroom` として
