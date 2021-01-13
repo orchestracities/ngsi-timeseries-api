@@ -48,6 +48,45 @@ pip install -r requirements.txt
 source setup_dev_env.sh
 ```
 
+Gunicorn で QuantumLeap WSGI アプリを使用する方法の詳細:
+
+```
+cd ngsi-timeseries-api/src
+gunicorn server.wsgi --config server/gconfig.py
+```
+
+セキュリティ設定:
+
+###### limit_request_line
+
+```
+--limit-request-line INT
+4094
+```
+
+バイト単位の HTTP リクエスト・ラインの最大サイズ。このパラメータは、クライアントの HTTP リクエスト・
+ラインの許容サイズを制限するために使用されます。
+
+###### limit_request_fields
+
+```
+--limit-request-fields INT
+100
+```
+
+このパラメータは、DDOS 攻撃を防ぐために、リクエスト内のヘッダの数を制限するために使用されます。
+limit_request_field_size と一緒に使用すると、より安全になります。 デフォルトでは、この値は 100
+であり、32768 を超えることはできません。
+
+###### limit_request_field_size
+```
+--limit-request-field_size INT
+8190
+```
+
+HTTP リクエスト・ヘッダ・フィールドの許容サイズを制限します。
+値は正の数または0です。0に設定すると、ヘッダ・フィールドのサイズを無制限に設定できます。
+
 [pytest](https://docs.pytest.org/en/latest/)
 はテストフレームワークとして使用されますが、QuantumLeap
 の機能のほとんどはコンポーネントの統合であるため、テスト・フォルダの

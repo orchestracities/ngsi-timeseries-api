@@ -118,7 +118,7 @@ QuantumLeap サービスを Kubernetes にデプロイするには、
 
 特に、以下のコンポーネントをデプロイする必要があります:
 * [CrateDB](https://github.com/orchestracities/charts/tree/master/charts/crate)
-* [オプション] Timescale - これについては、[Patroni Helm Chart](https://github.com/helm/charts/tree/master/incubator/patroni) を参照してください
+* [オプション/代替] Timescale - これについては、[Patroni Helm Chart](https://github.com/helm/charts/tree/master/incubator/patroni) を参照してください
 * [QuantumLeap](https://github.com/orchestracities/charts/tree/master/charts/quantumleap)
 
 ## FIWARE Releases の互換性

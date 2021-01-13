@@ -62,6 +62,17 @@
 (grafana の右上隅) が実際にデータがある時間範囲をカバーしていることを確認
 してください。
 
+#### CrateDB をバックエンドとして使用すると、3D 座標が機能しません。
+
+次のようなエラーを見つけた場合：
+
+```
+crate.client.exceptions.ProgrammingError: SQLActionException[ColumnValidationException: Validation failed for location: Cannot cast {"coordinates"=[51.716783624, 8.752131611, 23], "type"='Point'} to type geo_shape]
+```
+
+これは、[管理ドキュメント](../admin/crate.md)に記載されているとおり
+CrateDB が 3D 座標をサポートしていないという事実に関連しています。
+
 ## バグ・レポート
 
 バグは、github リポジトリの
