@@ -55,6 +55,24 @@ crate.client.exceptions.ProgrammingError: SQLActionException[ColumnValidationExc
 This related to the fact that CrateDB does not support 3D coordinates,
 as documented in [admin documentation](../admin/crate.md).
 
+### Sometimes it takes more than 500 msec to read the data sent to Orion in QuantumLeap
+ 
+QuantumLeap is a Timeseries API that stores values forwarded by the Context Broker,
+and due to the nature of its backends as well, there is always some synch
+latency between the data writing and the time the data is available for reading.
+
+1. Orion takes some msec to process a request and trigger a notification.
+
+1. The QL takes some msec to process a single message and store it in the database.
+
+1. Especially in the case of CrateDB, indexing of inserted data may take a bit,
+    so this means that there is additional latency between when the a message
+    is stored in crate, and when it is actually available for querying. In case
+    of multi-node CrateDB deployment this can take even more because QL writes
+    on Crate node A, first the data is indexed in node A, and then replicated
+    on node B. So if you issue a query right after writing a message and QL
+    picks node B, probability to find the data you just pushed is even lower.
+
 ## Bug reporting
 
 Bugs should be reported in the form of

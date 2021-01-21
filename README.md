@@ -20,6 +20,12 @@ It currently also experimentally supports the injection of
 a backward compatible way with NGSI-v2 API. I.e. you can retrieve NGSI-LD stored data via NGSI v2
 API and retrieve data will be describe following NGSI v2 format.
 
+QuantumLeap is not a [real time](https://en.wikipedia.org/wiki/Real-time_computing) API,
+its purpose is to process notifications received from the Context Broker and
+to create temporal records for them. In general, the whole FIWARE stack, being
+based on a micro-service architecture, cannot be regarded as real time
+in case you have requirements on guaranteed delivery in a given amount of time.
+
 Want to know more? Refer to the [docs](https://quantumleap.readthedocs.io/en/latest/)
 or checkout the Extra Resources below.
 
