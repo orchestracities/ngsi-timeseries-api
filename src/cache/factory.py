@@ -25,6 +25,9 @@ class CacheEnvReader:
     def default_ttl(self) -> int:
         return self.env.read(IntVar('DEFAULT_CACHE_TTL', 60))
 
+    def cache_queries(self) -> bool:
+        return self.env.read(BoolVar('CACHE_QUERIES', False))
+
 
 def log():
     return logging.getLogger(__name__)
@@ -51,9 +54,8 @@ def get_cache() -> MaybeCache:
         object otherwise.
     """
     env = CacheEnvReader()
-    if is_cache_available():
-        log().info("Cache env variables set, building a cache.")
-
+    if is_cache_available() and env.cache_queries():
+        log().debug("Cache env variables set, building a cache.")
         return QueryCache(env.redis_host(), env.redis_port(),
                           env.default_ttl())
 
