@@ -159,9 +159,6 @@ to use multiple time series databases. This design choice is justified
 by the fact that a database product may be more suitable than
 another depending on circumstances at hand. Currently QuantumLeap
 can be used with both [CrateDB][crate] and [Timescale][timescale].
-Experimental support is also available for [InfluxDB][influx] and
-[RethinkDB][rethink] but development for these two back ends has
-stalled so they are **not** usable at the moment.
 
 The [Database Selection][ql-man.db-sel] section of this manual
 explains how to configure QuantumLeap to use one of the available
@@ -293,8 +290,6 @@ As of today, the query caching stores:
     "Grafana Home"
 [grafana.pg]: http://docs.grafana.org/features/datasources/postgres/
     "Grafana PostgreSQL Data Source"
-[influx]: https://docs.influxdata.com/influxdb
-    "InfluxDB Documentation"
 [ngsi-spec]: https://fiware.github.io/specifications/ngsiv2/stable/
     "FIWARE-NGSI v2 Specification"
 [ngsi-ld-spec]: https://www.etsi.org/deliver/etsi_gs/CIM/001_099/009/01.01.01_60/gs_CIM009v010101p.pdf
@@ -319,8 +314,6 @@ As of today, the query caching stores:
     "NGSI-TSDB Specification"
 [ql-tut]: https://fiware-tutorials.readthedocs.io/en/latest/time-series-data/
     "FIWARE Tutorials - Time Series Data"
-[rethink]: https://www.rethinkdb.com/
-    "RethinkDB Home"
 [smartsdk.tour]: http://guided-tour-smartsdk.readthedocs.io/en/latest/
     "SmartSDK Guided Tour"
 [timescale]: https://www.timescale.com

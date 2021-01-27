@@ -12,7 +12,6 @@ geocoder = "~=1.33"
 geojson = "~=2.4"
 geomet = "~=0.2"
 gunicorn = "~=20.0.4"
-influxdb = "~=4.0"
 pg8000 = "==1.16.5"
 pymongo = "~=3.4"
 pytest = "~=3.0"
@@ -23,11 +22,10 @@ python-dateutil = ">=2.7"
 pyyaml = ">=4.2"
 redis = "~=2.10"
 requests = ">=2.20"
-rethinkdb = "==2.3"
 pickle-mixin = "==1.0.2"
 pytest-lazy-fixture = "~=0.6.3"
-
 # run `pipenv install --dev` to get the packages below in your env
+
 [dev-packages]
 aiohttp = "~=3.7"
 matplotlib = "~=3.3"

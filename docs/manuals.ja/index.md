@@ -196,8 +196,6 @@ REST API を介したデータのクエリと取得が計画されています�
     "Grafana Home"
 [grafana.pg]: http://docs.grafana.org/features/datasources/postgres/
     "Grafana PostgreSQL Data Source"
-[influx]: https://docs.influxdata.com/influxdb
-    "InfluxDB Documentation"
 [ngsi-spec]: https://fiware.github.io/specifications/ngsiv2/stable/
     "FIWARE-NGSI v2 Specification"
 [orion]: https://fiware-orion.readthedocs.io
