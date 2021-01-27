@@ -23,3 +23,4 @@ nav:
     - 'Grafana': 'admin/grafana.md'
     - 'Data-Migration': 'admin/dataMigration.md'
     - 'Bechmarks': 'admin/benchmarks.md'
+    - 'Telemetry': 'admin/telemetry.md'
