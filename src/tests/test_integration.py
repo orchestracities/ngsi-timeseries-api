@@ -1,4 +1,4 @@
-from src.tests.common import load_data, check_data, unload_data, \
+from tests.common import load_data, check_data, unload_data, \
     check_deleted_data
 
 

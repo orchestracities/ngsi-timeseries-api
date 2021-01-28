@@ -6,9 +6,9 @@ from exceptions.exceptions import AmbiguousNGSIIdError
 from translators.base_translator import BaseTranslator
 from translators.sql_translator import NGSI_TEXT
 from utils.common import *
+from utils.tests.common import *
 from datetime import datetime, timezone
 
-from utils.tests.common import create_random_entities
 from conftest import crate_translator, timescale_translator, entity
 import pytest
 

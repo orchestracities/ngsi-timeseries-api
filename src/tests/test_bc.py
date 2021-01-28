@@ -1,4 +1,4 @@
-from src.tests.common import check_data, unload_data, create_entities, \
+from tests.common import check_data, unload_data, create_entities, \
     check_deleted_data
 
 
