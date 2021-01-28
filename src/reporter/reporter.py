@@ -44,6 +44,7 @@ from geocoding.location import normalize_location, LOCATION_ATTR_NAME
 from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption, \
     NGSIUsageError, InvalidParameterValue, InvalidHeaderValue
 
+
 def log():
     logger = logging.getLogger(__name__)
     return logger
@@ -213,55 +214,6 @@ def add_geodata(entity):
         geocoding.add_location(entity, cache=cache)
 
 
-# TODO check that following methods can be removed
-def query_1TNENA():
-    r = {
-        "error": "Not Implemented",
-        "description": "This API method is not yet implemented."
-    }
-    return r, 501
-
-
-def query_1TNENA_value():
-    r = {
-        "error": "Not Implemented",
-        "description": "This API method is not yet implemented."
-    }
-    return r, 501
-
-
-def query_NTNE1A():
-    r = {
-        "error": "Not Implemented",
-        "description": "This API method is not yet implemented."
-    }
-    return r, 501
-
-
-def query_NTNE1A_value():
-    r = {
-        "error": "Not Implemented",
-        "description": "This API method is not yet implemented."
-    }
-    return r, 501
-
-
-def query_NTNENA():
-    r = {
-        "error": "Not Implemented",
-        "description": "This API method is not yet implemented."
-    }
-    return r, 501
-
-
-def query_NTNENA_value():
-    r = {
-        "error": "Not Implemented",
-        "description": "This API method is not yet implemented."
-    }
-    return r, 501
-
-
 def config():
     r = {
         "error": "Not Implemented",
@@ -281,6 +233,7 @@ def subscribe(orion_url,
               throttling=None,
               time_index_attribute=None):
     # Validate Orion
+    log().warning("This API is deprecated, it will be removed in version 0.9")
     try:
         r = requests.get(orion_url)
     except RequestException:
@@ -316,7 +269,9 @@ def subscribe(orion_url,
     if not r.ok:
         log().debug("subscribing to {} with headers: {} and data: {}")
 
-    return r.text, r.status_code
+    msg = r.text + \
+        " - This API is deprecated, it will be removed in version 0.9"
+    return msg, r.status_code
 
 
 def _validate_query_params(attr_names, aggr_period, aggr_method,
