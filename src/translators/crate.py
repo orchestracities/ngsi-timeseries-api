@@ -204,7 +204,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
             attr_v = attr.get('value', '')
             is_long = attr_v is not None and len(attr_v) > 32765
             if is_long:
-                crate_t += ' STORAGE WITH (columnstore = false)'
+                crate_t += ' INDEX OFF STORAGE WITH (columnstore = false)'
         return crate_t
 
     def _get_geo_clause(self, geo_query: SlfQuery = None) -> Optional[str]:
