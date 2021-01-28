@@ -61,9 +61,9 @@ the following versions:
 - Timescale backend: Postgres version `10.*` or `11.*` +
   Timescale extension `1.3.*` + Postgis extension `2.5.*`.
   
-PR [#373](/pull/373) introduced
+PR [#373](https://github.com/smartsdk/ngsi-timeseries-api/pull/373) introduced
 basic support for NGSI-LD. In short this means that using the current endpoint
-you are able to store NGSI-LD payloads with few caveats (see [#398](/issue/398))
+you are able to store NGSI-LD payloads with few caveats (see [#398](https://github.com/smartsdk/ngsi-timeseries-api/issue/398))
 
 ## Usage
 
