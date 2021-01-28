@@ -61,8 +61,9 @@ the following versions:
 * Timescale backend: Postgres version `10.*` or `11.*` +
   Timescale extension `1.3.*` + Postgis extension `2.5.*`.
   
-PR #373 introduced basic support for NGSI-LD. In short this means that using
-the current endpoint you are able to store NGSI-LD payloads with few caveats (see #398)
+PR [#373](/pull/373) introduced
+basic support for NGSI-LD. In short this means that using the current endpoint
+you are able to store NGSI-LD payloads with few caveats (see [#398](/issue/398))
 
 ## Usage
 
@@ -85,9 +86,7 @@ additional documentation about QuantumLeap. Note that these guides could be
 outdated (so could the official docs!), so we appreciate all efforts to keep
 consistency.
 
-- [SmartSDK Guided-tour](https://guided-tour-smartsdk.readthedocs.io/en/latest/)
 - [FIWARE Step-by-step](https://fiware-tutorials.readthedocs.io/en/latest/time-series-data/index.html)
-- [SmartSDK Recipes](https://smartsdk-recipes.readthedocs.io/en/latest/data-management/quantumleap/readme/)
 - [Orchestra Cities Helm Charts](https://github.com/orchestracities/charts)
 
 ---
