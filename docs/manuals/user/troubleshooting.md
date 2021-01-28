@@ -73,7 +73,6 @@ latency between the data writing and the time the data is available for reading.
     on node B. So if you issue a query right after writing a message and QL
     picks node B, probability to find the data you just pushed is even lower.
 
-
 ### Crate configuration and active shards
 
 The `wait_for_active_shards` value only affects table (or partition) creation
@@ -93,18 +92,19 @@ be shutdown gracefully . By doing so, it is ensured that primary **and**
 replica shards are moved away from the to-shutdown node **before** the
 node will stop.
 
-> Here's the scenario:
->
->    1. A node N1 holds a primary shard S with records r[1] to r[m + n].
->    2. Another node N2 holds S's replica shard, R, with records r[1] to r[m], i.e. n records haven't been replicated yet.
->    3. N1 goes down.
->    4. Crate won't promote N2 as primary since it knows R is stale w/r/t S.
->
-> The only way out of the impasse would be to manually force replica promotion.
+Here's the scenario:
+
+1. A node N1 holds a primary shard S with records r[1] to r[m + n].
+1. Another node N2 holds S's replica shard, R, with records r[1] to r[m],
+    i.e. n records haven't been replicated yet.
+1. N1 goes down.
+1. Crate won't promote N2 as primary since it knows R is stale w/r/t S.
+
+The only way out of the impasse would be to manually force replica promotion.
 
 In case N1 goes down **before**  the operation request was sent on the replica
 shard at N2, the cluster will not promote the (stale) replica as a new primary
-and thus won't process any new writes, resulting in a red table health. 
+and thus won't process any new writes, resulting in a red table health.
 After the primary shard comes back (yellow/green health, writes possible again),
 the missing operations are synced to the replica.
 If the primary cannot be started (e.g. due to disk corruption) the replica
