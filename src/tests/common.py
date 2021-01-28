@@ -61,12 +61,8 @@ def check_orion_url():
     assert res.ok, "{} not accessible. {}".format(ORION_URL, res.text)
 
 
-def check_ql_url(is_old_ql_image=False):
-    if is_old_ql_image:
-        version_url = f"{QL_URL}/v2/version"
-    else:
-        version_url = f"{QL_URL}/version"
-    res = requests.get(version_url)
+def check_ql_url():
+    res = requests.get("{}/version".format(QL_URL))
     assert res.ok, "{} not accessible. {}".format(QL_URL, res.text)
 
 
@@ -97,9 +93,9 @@ def post_orion_subscriptions(entities):
                                      "{}".format(r.text)
 
 
-def load_data(is_old_ql_image=False):
+def load_data():
     check_orion_url()
-    check_ql_url(is_old_ql_image)
+    check_ql_url()
 
     entities = create_entities()
 
@@ -211,4 +207,4 @@ def check_deleted_data(entities):
 
 
 if __name__ == '__main__':
-    load_data(is_old_ql_image=True)
+    load_data()

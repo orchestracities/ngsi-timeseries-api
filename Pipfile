@@ -14,22 +14,22 @@ geomet = "~=0.2"
 gunicorn = "~=20.0.4"
 pg8000 = "==1.16.5"
 pymongo = "~=3.4"
-pytest = "~=3.0"
-pytest-cov = "~=2.7.1"
-coveralls = "~=2.0"
-pytest-flask = "~=0.10"
 python-dateutil = ">=2.7"
 pyyaml = ">=4.2"
 redis = "~=2.10"
 requests = ">=2.20"
 pickle-mixin = "==1.0.2"
-pytest-lazy-fixture = "~=0.6.3"
-# run `pipenv install --dev` to get the packages below in your env
 
+# run `pipenv install --dev` to get the packages below in your env
 [dev-packages]
 aiohttp = "~=3.7"
 matplotlib = "~=3.3"
 pandas = "~=1.1"
+pytest-lazy-fixture = "~=0.6.3"
+pytest-flask = "~=0.10"
+pytest = "~=3.0"
+pytest-cov = "~=2.7.1"
+coveralls = "~=2.0"
 
 [requires]
 python_version = "3.8.5"

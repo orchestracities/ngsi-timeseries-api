@@ -10,7 +10,7 @@ install:
   - pip install pipenv
 
 before_script:
-  - pipenv install
+  - pipenv install --dev
   - sudo service postgresql stop
 
 script:
