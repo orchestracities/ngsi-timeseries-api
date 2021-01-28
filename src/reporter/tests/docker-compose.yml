@@ -40,6 +40,7 @@ services:
     environment:
       - USE_GEOCODING=False
       - REDIS_HOST=redis
+      - CACHE_QUERIES=True
       - LOGLEVEL=INFO
       - POSTGRES_HOST=timescale
       - QL_CONFIG=/config/ql-config.yml

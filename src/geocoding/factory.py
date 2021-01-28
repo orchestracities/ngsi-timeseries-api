@@ -4,7 +4,6 @@ from typing import Union
 from .geocache import GeoCodingCache
 from utils.cfgreader import EnvReader, BoolVar, IntVar, StrVar, MaybeString
 
-
 MaybeGeoCache = Union[GeoCodingCache, None]
 
 
@@ -25,6 +24,9 @@ class GeoCodingEnvReader:
 
     def use_geocoding(self) -> bool:
         return self.env.read(BoolVar('USE_GEOCODING', False))
+
+    def cache_geocoding(self) -> bool:
+        return self.env.read(BoolVar('CACHE_GEOCODING', False))
 
     def redis_host(self) -> MaybeString:
         return self.env.read(StrVar('REDIS_HOST', None))
@@ -48,7 +50,20 @@ def is_geo_coding_available() -> bool:
         use geo-coding.
     """
     env = GeoCodingEnvReader()
-    if env.use_geocoding() and env.redis_host():
+    if env.use_geocoding():
+        return True
+    return False
+
+
+def is_geo_cache_available() -> bool:
+    """
+    Can we use cache? Yes if the Redis host env var is set. No otherwise.
+
+    :return: True or False depending on whether or not we're supposed to
+        use geo-coding.
+    """
+    env = GeoCodingEnvReader()
+    if env.redis_host():
         return True
     return False
 
@@ -62,9 +77,10 @@ def get_geo_cache() -> MaybeGeoCache:
     """
     env = GeoCodingEnvReader()
     if is_geo_coding_available():
-        log().debug("Geo Cache env variables set, building a cache.")
+        log().debug("Geo Cache env variables set, try to build a cache.")
+        if env.cache_geocoding() and is_geo_cache_available():
+            return GeoCodingCache(env.redis_host(), env.redis_port())
+        log().warning("Geo Cache is not enabled, check env variables.")
 
-        return GeoCodingCache(env.redis_host(), env.redis_port())
-
-    log().debug("Geo Cache env variables indicate cache should not be used.")
+    log().debug("Geo Cache is not enabled")
     return None

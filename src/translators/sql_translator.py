@@ -131,8 +131,8 @@ class SQLTranslator(base_translator.BaseTranslator):
 
     def dispose(self):
         dt = datetime.now() - self.start_time
-        time_difference = (
-                                      dt.days * 24 * 60 * 60 + dt.seconds) * 1000 + dt.microseconds / 1000.0
+        time_difference = (dt.days * 24 * 60 * 60 + dt.seconds)\
+            * 1000 + dt.microseconds / 1000.0
         self.logger.debug("Translation completed | time={} msec".format(
             str(time_difference)))
 
@@ -143,8 +143,8 @@ class SQLTranslator(base_translator.BaseTranslator):
         """
         Used for testing purposes only!
         Refreshing ensures a query after an insert retrieves the inserted data.
-        :param entity_types: list(str) list of entity types whose tables will be
-         refreshed
+        :param entity_types: list(str) list of entity types whose tables will
+         be refreshed
         """
         table_names = [self._et2tn(et, fiware_service) for et in entity_types]
         table_names.append(METADATA_TABLE_NAME)
@@ -365,8 +365,8 @@ class SQLTranslator(base_translator.BaseTranslator):
             start_time = datetime.now()
             self.cursor.executemany(stmt, rows)
             dt = datetime.now() - start_time
-            time_difference = (
-                                          dt.days * 24 * 60 * 60 + dt.seconds) * 1000 + dt.microseconds / 1000.0
+            time_difference = (dt.days * 24 * 60 * 60 + dt.seconds)\
+                * 1000 + dt.microseconds / 1000.0
             self.logger.debug("Query completed | time={} msec".format(
                 str(time_difference)))
         except Exception as e:
@@ -426,8 +426,8 @@ class SQLTranslator(base_translator.BaseTranslator):
     def _insert_original_entities_in_failed_batch(
             self, table_name: str, entities: List[dict],
             insert_error: Exception):
-        cols = f"{ENTITY_ID_COL}, {ENTITY_TYPE_COL}, {self.TIME_INDEX_NAME}" + \
-               f", {ORIGINAL_ENTITY_COL}"
+        cols = f"{ENTITY_ID_COL}, {ENTITY_TYPE_COL}, {self.TIME_INDEX_NAME}" \
+               + f", {ORIGINAL_ENTITY_COL}"
         stmt = f"insert into {table_name} ({cols}) values (?, ?, ?, ?)"
         tix = current_timex()
         batch_id = uuid4().hex
@@ -438,7 +438,8 @@ class SQLTranslator(base_translator.BaseTranslator):
         self.cursor.executemany(stmt, rows)
 
     def _attr_is_structured(self, a):
-        if 'value' in a and a['value'] is not None and isinstance(a['value'], dict):
+        if 'value' in a and a['value'] is not None \
+                and isinstance(a['value'], dict):
             self.logger.debug("attribute {} has 'value' attribute of type dict"
                               .format(a))
             return True
@@ -448,8 +449,8 @@ class SQLTranslator(base_translator.BaseTranslator):
     @staticmethod
     def is_text(attr_type):
         # TODO: verify: same logic in two different places!
-        # The above kinda reproduces the tests done by the translator, we should
-        # factor this logic out and keep it in just one place!
+        # The above kinda reproduces the tests done by the translator,
+        # we should factor this logic out and keep it in just one place!
         return attr_type == NGSI_TEXT or attr_type not in NGSI_TO_SQL
 
     def _preprocess_values(self, e, original_attrs, col_names,
@@ -1352,12 +1353,19 @@ class SQLTranslator(base_translator.BaseTranslator):
                     res = pickle.loads(value)
                     return res
             except Exception as e:
-                self.logger.warning(str(e), exc_info=True)
+                self.logger.warning("Caching not available, metadata data may "
+                                    "not be consistent: " + str(e),
+                                    exc_info=True)
 
         self.cursor.execute(stmt, parameters)
         res = self.cursor.fetchall()
-        if res:
-            self._cache(tenant_name, key, res, ex)
+        if res and self.cache:
+            try:
+                self._cache(tenant_name, key, res, ex)
+            except Exception as e:
+                self.logger.warning("Caching not available, metadata data may "
+                                    "not be consistent: " + str(e),
+                                    exc_info=True)
         return res
 
     def _is_query_in_cache(self, tenant_name, key):
@@ -1365,7 +1373,9 @@ class SQLTranslator(base_translator.BaseTranslator):
             try:
                 return self.cache.exists(tenant_name, key)
             except Exception as e:
-                self.logger.warning(str(e), exc_info=True)
+                self.logger.warning("Caching not available, metadata data may "
+                                    "not be consistent: " + str(e),
+                                    exc_info=True)
         return False
 
     def _cache(self, tenant_name, key, value=None, ex=None):
@@ -1375,14 +1385,18 @@ class SQLTranslator(base_translator.BaseTranslator):
                     value = pickle.dumps(value)
                 self.cache.put(tenant_name, key, value, ex)
             except Exception as e:
-                self.logger.warning(str(e), exc_info=True)
+                self.logger.warning("Caching not available, metadata data may "
+                                    "not be consistent: " + str(e),
+                                    exc_info=True)
 
     def _remove_from_cache(self, tenant_name, key):
         if self.cache:
             try:
                 self.cache.delete(tenant_name, key)
             except Exception as e:
-                self.logger.warning(str(e), exc_info=True)
+                self.logger.warning("Caching not available, metadata data may "
+                                    "not be consistent: " + str(e),
+                                    exc_info=True)
 
 
 class QueryCacheManager(Borg):
@@ -1394,7 +1408,8 @@ class QueryCacheManager(Borg):
             try:
                 self.cache = get_cache()
             except Exception as e:
-                self.logger.warning(str(e), exc_info=True)
+                self.logger.warning("Caching not available:" + str(e),
+                                    exc_info=True)
 
     def get_query_cache(self):
         return self.cache

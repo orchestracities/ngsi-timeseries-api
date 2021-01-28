@@ -19,6 +19,8 @@ To configure QuantumLeap you can use the following environment variables:
 | `REDIS_HOST`       | Redis Host              |
 | `REDIS_PORT`       | Redis Port              |
 | `USE_GEOCODING`    | `True` or `False` enable or disable geocoding |
+| `CACHE_GEOCODING`  | `True` or `False` enable or disable caching for geocoding |
+| `CACHE_QUERIES`    | `True` or `False` enable or disable caching for queries |
 | `DEFAULT_CACHE_TTL`| Time to live of metadata cache, default: 60 (seconds) |                              |
 | `QL_CONFIG`        | Pathname for tenant  configuration  |
 | `QL_DEFAULT_DB`    | Default backend: `timescale` or `crate`  |

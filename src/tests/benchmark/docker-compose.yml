@@ -45,6 +45,7 @@ services:
     environment:
       - CRATE_HOST=${CRATE_HOST:-crate}
       - USE_GEOCODING=False
+      - CACHE_QUERIES=True
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - LOGLEVEL=INFO
