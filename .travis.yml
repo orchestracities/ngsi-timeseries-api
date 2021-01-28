@@ -26,4 +26,5 @@ notifications:
 
 env:
   jobs:
-    - CRATE_VERSION=4.1.4 QL_PREV_IMAGE=smartsdk/quantumleap:0.8 PREV_CRATE=4.0.12
+    - CRATE_VERSION=4.0.12 QL_PREV_IMAGE=smartsdk/quantumleap:0.7.5 PREV_CRATE=3.3.5
+    - CRATE_VERSION=4.1.4 QL_PREV_IMAGE=smartsdk/quantumleap:0.7.5 PREV_CRATE=4.0.12
