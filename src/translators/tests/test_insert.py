@@ -8,7 +8,7 @@ from translators.sql_translator import NGSI_TEXT
 from utils.common import *
 from datetime import datetime, timezone
 
-from src.utils.common import create_random_entities
+from utils.tests.common import create_random_entities
 from conftest import crate_translator, timescale_translator, entity
 import pytest
 

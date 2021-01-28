@@ -1,6 +1,6 @@
 from datetime import datetime
 from conftest import QL_URL
-from utils.common import assert_equal_time_index_arrays
+from utils.tests.common import assert_equal_time_index_arrays
 from reporter.tests.utils import delete_entity_type
 import copy
 import json

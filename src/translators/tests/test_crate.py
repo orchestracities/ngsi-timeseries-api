@@ -1,9 +1,8 @@
 from translators.sql_translator import METADATA_TABLE_NAME, TYPE_PREFIX
 from conftest import crate_translator as translator, entity
-from utils.common import *
+from utils.common import TIME_INDEX_NAME
+from utils.tests.common import *
 from datetime import datetime, timezone
-
-from src.utils.common import create_random_entities
 
 
 def test_db_version(translator):

@@ -3,10 +3,11 @@
 # See https://docs.pytest.org/en/stable/example/parametrize.html
 
 from conftest import crate_translator, timescale_translator
-from utils.common import create_random_entities, TIME_INDEX_NAME, add_attr
+from utils.common import TIME_INDEX_NAME
+from utils.tests.common import create_random_entities, add_attr
 import datetime
 
-from src.utils.common import create_random_entities
+from utils.tests.common import create_random_entities
 
 import pytest
 
