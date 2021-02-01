@@ -6,5 +6,5 @@ def test_version():
     r = requests.get('{}'.format(version_url))
     assert r.status_code == 200, r.text
     assert r.json() == {
-        "version": "0.7.6"
+        "version": "0.8.0"
     }

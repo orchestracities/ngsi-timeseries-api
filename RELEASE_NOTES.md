@@ -1,5 +1,61 @@
 # QuantumLeap Release Notes
 
+## 0.8.0
+
+#### New features
+- Experimental NGSI-LD support
+  - Make the notify endpoint accept NGSI-LD payloads, convert them to
+    tabular format and store them in the DB backend (#373)
+  - Retain NGSI-v2 backward compatibility (#373)
+  - Verify basic Orion-LD interoperability (#413)
+- Improved performance
+  - Make CrateDB async writes the default but allow the setting to be
+    overwritten through configuration (#384)
+  - Reduce DB queries on insert through a Redis metadata cache (#373)
+  - Pool DB connections (#373)
+- Expose configuration settings to enable/disable caching of geo-queries
+  and metadata queries on insert (#429)
+- Better logs
+  - Adopt Orion log format and improve log messages (#373)
+  - Log FiWare correlation ID to support tracking of requests from
+    agents (through Orion) to QuantumLeap (#373)
+  - Add process and thread ID to log entries (#367)
+  - Make log messages more descriptive and use debug log level (#355)
+  - Timestamp log entries (#352)
+- Assign NGSI attribute values a DB type according to their JSON type
+  if no NGSI type is present rather than defaulting to text (#373)
+- Make all API endpoints work with Timescale as a backend (#374)
+- Support running QuantumLeap as a WSGI app in Gunicorn (#357)
+- Collect telemetry time-series to analyse performance (#411)
+
+#### Bug fixes
+- Honour default DB backend setting in YAML configuration (#405)
+- Change health status from critical to warning when cache backend
+  is down (#402)
+- Explicitly add new columns to CrateDB tables to cater to corner cases
+  where new columns aren't added if using Crate's dynamic column policy (#373)
+- Log a warning if there's a type mismatch between NGSI and DB date-time
+  rather than making queries crash (#387)
+- Use proper ISO 8601 date-times and FiWare service path match operator
+  in CrateDB queries (#371)
+- Use proper CrateDB types rather than deprecated aliases (#370)
+- Assign entities to their respective service paths when a notification
+  contains multiple service paths (#363, #364, #365)
+- Return HTTP 500 on DB insert failure (#346)
+
+#### Documentation
+- Note delay to be expected between an entity insertion and its subsequent
+  availability for querying (#420)
+- Update Japanese documentation (#414)
+- Substantial updates regarding Redis cache, benchmarks and NGSI-LD
+  support (#373)
+- Gunicorn security settings for QuantumLeap (#380)
+- Mention CrateDB lacks support for 3D coordinates (#340)
+
+#### Technical debt
+- Clean up and refactor translator tests (#403)
+
+
 ## 0.7.6
 
 #### New features
