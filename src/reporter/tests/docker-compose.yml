@@ -8,7 +8,6 @@ services:
     ports:
       - "8668:8668"
     depends_on:
-      - orion
       - crate
       - timescale
     volumes:
