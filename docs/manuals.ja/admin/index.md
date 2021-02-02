@@ -25,7 +25,7 @@ docker-compose --version
 ```
 
 QuantumLeap の Docker イメージは、
-[https://hub.docker.com/r/smartsdk/quantumleap/](https://hub.docker.com/r/smartsdk/quantumleap/)
+[https://hub.docker.com/r/orchestracities/quantumleap/](https://hub.docker.com/r/orchestracities/quantumleap/)
 でホストされています。
 
 今、あなたのシナリオに応じて、さまざまな展開オプションがあります。
@@ -40,7 +40,7 @@ QuantumLeap の実験をできるだけ早く開始するには、以下の手�
 
 **重要:** 本番環境ではこのアプローチを使用しないでください。
 
-[このdocker-compose.yml](https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
+[このdocker-compose.yml](https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
 ファイルのコピーをダウンロードするか、またはローカル作成してください。
 その後、起動してください :
 
@@ -54,7 +54,7 @@ $ docker-compose -f docker-compose-dev.yml up -d
 ```
 $ docker ps
 CONTAINER ID        IMAGE                  COMMAND                  CREATED             STATUS                   PORTS                                                           NAMES
-8cf0b544868d        smartsdk/quantumleap   "/bin/sh -c 'python …"   2 minutes ago       Up 2 minutes             0.0.0.0:8668->8668/tcp                                          docker_quantumleap_1
+8cf0b544868d        orchestracities/quantumleap   "/bin/sh -c 'python …"   2 minutes ago       Up 2 minutes             0.0.0.0:8668->8668/tcp                                          docker_quantumleap_1
 aa09dbcb8500        fiware/orion:1.13.0    "/usr/bin/contextBro…"   2 minutes ago       Up 2 minutes (healthy)   0.0.0.0:1026->1026/tcp                                          docker_orion_1
 32709dbc5701        grafana/grafana        "/run.sh"                2 minutes ago       Up 2 minutes             0.0.0.0:3000->3000/tcp                                          docker_grafana_1
 ed9f8a60b6e8        crate:1.0.5            "/docker-entrypoint.…"   2 minutes ago       Up 2 minutes             0.0.0.0:4200->4200/tcp, 0.0.0.0:4300->4300/tcp, 5432-5532/tcp   docker_crate_1
@@ -129,5 +129,5 @@ QuantumLeap サービスを Kubernetes にデプロイするには、
 をご覧ください。
 Generic Enabler と外部依存関係の QL がどのバージョンで使用され、
 テストされているかを確認するには、展開に使用される
-[docker-compose-dev.yml](https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
+[docker-compose-dev.yml](https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
 ファイルをチェックアウトします。
