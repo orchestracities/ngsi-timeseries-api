@@ -12,7 +12,7 @@ To test a single translator use the -k parameter followed by either
 timescale or crate.
 See https://docs.pytest.org/en/stable/example/parametrize.html
 """
-from utils.common import create_random_entities
+from utils.tests.common import create_random_entities
 from conftest import crate_translator, timescale_translator
 
 import pytest

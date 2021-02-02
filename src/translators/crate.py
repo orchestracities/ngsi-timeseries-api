@@ -22,19 +22,16 @@ CRATE_ARRAY_STR = 'array(string)'
 NGSI_TO_SQL = {
     "Array": CRATE_ARRAY_STR,  # TODO #36: Support numeric arrays
     "Boolean": 'boolean',
-    # TODO since CRATEDB 4.0 timestamp is deprecated,
-    # when moving to release 0.8, we will deprecate support for CRATE 3.x
-    # https://crate.io/docs/crate/reference/en/4.2/appendices/release-notes/4.0.0.html#general
-    NGSI_ISO8601: 'timestamp',
-    NGSI_DATETIME: 'timestamp',
-    "Integer": 'long',
+    NGSI_ISO8601: 'timestamptz',
+    NGSI_DATETIME: 'timestamptz',
+    "Integer": 'bigint',
     NGSI_GEOJSON: 'geo_shape',
     NGSI_LD_GEOMETRY: 'geo_shape',
     NGSI_GEOPOINT: 'geo_point',
-    "Number": 'float',
-    NGSI_TEXT: 'string',
+    "Number": 'real',
+    NGSI_TEXT: 'text',
     NGSI_STRUCTURED_VALUE: 'object',
-    TIME_INDEX: 'timestamp'
+    TIME_INDEX: 'timestamptz'
 }
 
 CRATE_TO_NGSI = dict((v, k) for (k, v) in NGSI_TO_SQL.items())
@@ -74,17 +71,9 @@ class CrateTranslator(sql_translator.SQLTranslator):
             .read(StrVar('CRATE_WAIT_ACTIVE_SHARDS', '1'))
 
         major = int(self.db_version.split('.')[0])
-        if major <= 2:
-            logging.warning("CRATE 2.x support is deprecated")
-        elif major <= 3:
-            logging.warning("CRATE 3.x will be deprecated in release 0.8")
-        elif major >= 4:
-            NGSI_TO_SQL[NGSI_ISO8601] = 'timestamptz'
-            NGSI_TO_SQL[NGSI_DATETIME] = 'timestamptz'
-            NGSI_TO_SQL[TIME_INDEX] = 'timestamptz'
-            NGSI_TO_SQL["Integer"] = 'bigint'
-            NGSI_TO_SQL["Number"] = 'real'
-            NGSI_TO_SQL[NGSI_TEXT] = 'text'
+        if major < 4:
+            logging.error("CRATE 4.x is the minimal version supported")
+            raise Exception("Unsupported CrateDB version")
 
     def dispose(self):
         super(CrateTranslator, self).dispose()
@@ -180,7 +169,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
         self.cursor.execute(stmt)
 
     def _update_data_table(self, table_name, new_columns, fiware_service):
-        #crate allows to add only one column for alter command!
+        # crate allows to add only one column for alter command!
         for cn in new_columns:
             alt_cols = 'add column "{}" {}'.format(cn.lower(), new_columns[cn])
             stmt = "alter table {} {};".format(table_name, alt_cols)
@@ -200,13 +189,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
         self.cursor.execute(op)
 
     def _store_metadata(self, table_name, persisted_metadata):
-        major = int(self.db_version.split('.')[0])
-        if (major <= 3):
-            stmt = "insert into {} (table_name, entity_attrs) values (?,?) " \
-                   "on duplicate key " \
-                   "update entity_attrs = values(entity_attrs)"
-        else:
-            stmt = "insert into {} (table_name, entity_attrs) values (?,?) " \
+        stmt = "insert into {} (table_name, entity_attrs) values (?,?) " \
                    "on conflict(table_name) " \
                    "DO UPDATE SET entity_attrs = excluded.entity_attrs"
         stmt = stmt.format(METADATA_TABLE_NAME)
@@ -221,14 +204,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
             attr_v = attr.get('value', '')
             is_long = attr_v is not None and len(attr_v) > 32765
             if is_long:
-                # Before Crate v2.3
-                crate_t += ' INDEX OFF'
-
-                # After Crate v2.3
-                major = int(self.db_version.split('.')[0])
-                minor = int(self.db_version.split('.')[1])
-                if (major == 2 and minor >= 3) or major > 2:
-                    crate_t += ' STORAGE WITH (columnstore = false)'
+                crate_t += ' INDEX OFF STORAGE WITH (columnstore = false)'
         return crate_t
 
     def _get_geo_clause(self, geo_query: SlfQuery = None) -> Optional[str]:

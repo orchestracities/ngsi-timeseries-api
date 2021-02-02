@@ -10,7 +10,7 @@ install:
   - pip install pipenv
 
 before_script:
-  - pipenv install
+  - pipenv install --dev
   - sudo service postgresql stop
 
 script:
@@ -26,7 +26,5 @@ notifications:
 
 env:
   jobs:
-    - CRATE_VERSION=3.3.2 QL_PREV_IMAGE=smartsdk/quantumleap:0.5.1 PREV_CRATE=3.3.0
-    - CRATE_VERSION=4.0.12 QL_PREV_IMAGE=smartsdk/quantumleap:0.5.1 PREV_CRATE=3.3.5
     - CRATE_VERSION=4.0.12 QL_PREV_IMAGE=smartsdk/quantumleap:0.7.5 PREV_CRATE=3.3.5
     - CRATE_VERSION=4.1.4 QL_PREV_IMAGE=smartsdk/quantumleap:0.7.5 PREV_CRATE=4.0.12

@@ -4,7 +4,8 @@
 
 from datetime import datetime
 from conftest import crate_translator, timescale_translator
-from utils.common import create_random_entities, TIME_INDEX_NAME
+from utils.common import TIME_INDEX_NAME
+from utils.tests.common import create_random_entities
 import pytest
 
 

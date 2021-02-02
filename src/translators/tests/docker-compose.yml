@@ -1,18 +1,6 @@
 version: '3'
 
 services:
-  influx:
-    image: influxdb:${INFLUX_VERSION}
-    ports:
-      # client-server comm over InfluxDB’s HTTP API
-      - "8086:8086"
-      # Admin UI
-      - "8083:8083"
-      # RPC service for backup and restore
-      - "8088:8088"
-    networks:
-        - translatorstests
-
   crate:
     image: crate:${CRATE_VERSION}
     command: crate -Cauth.host_based.enabled=false
@@ -22,18 +10,6 @@ services:
       - "4200:4200"
       # Transport protocol
       - "4300:4300"
-    networks:
-        - translatorstests
-
-  rethink:
-    image: rethinkdb:${RETHINK_VERSION}
-    ports:
-      # process
-      - "28015:28015"
-      # cluster
-      - "29015:29015"
-      # Admin UI
-      - "8080:8080"
     networks:
         - translatorstests
 

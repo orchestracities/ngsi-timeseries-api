@@ -2,35 +2,12 @@ version: '3'
 
 services:
 
-  orion:
-    image: fiware/orion:${ORION_VERSION}
-    ports:
-      - "1026:1026"
-    command: -logLevel DEBUG -noCache -dbhost mongo
-    depends_on:
-      - mongo
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://0.0.0.0:1026/version"]
-      interval: 1m
-      timeout: 10s
-      retries: 3
-    networks:
-        - reportertests
-
-  mongo:
-    image: mongo:${MONGO_VERSION}
-    ports:
-      - "27017:27017"
-    networks:
-        - reportertests
-
   quantumleap:
     build: ../../../
     image: smartsdk/quantumleap
     ports:
       - "8668:8668"
     depends_on:
-      - orion
       - crate
       - timescale
     volumes:

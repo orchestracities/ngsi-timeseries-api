@@ -14,7 +14,7 @@ BM_AGGREGATE_1ANE = "aggregate_1ANE"
 
 
 def benchmark(translator, num_types=10, num_ids_per_type=10, num_updates=10, use_time=False, use_geo=False):
-    from utils.common import create_random_entities, pick_random_entity_id
+    from utils.tests.common import create_random_entities, pick_random_entity_id
 
     results = {}
     entities = create_random_entities(num_types, num_ids_per_type, num_updates, use_time=use_time, use_geo=use_geo)
