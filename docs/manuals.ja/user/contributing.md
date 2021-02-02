@@ -2,7 +2,7 @@
 
 コントリビューションはプルリクエストの形でより歓迎します。
 
-作業する[未解決の問題](https://github.com/smartsdk/ngsi-timeseries-api/issues)
+作業する[未解決の問題](https://github.com/orchestracities/ngsi-timeseries-api/issues)
 の1つを選択するか、自分の必要に応じて拡張機能を提供することができます。
 いずれにしても、事前に連絡を取り、コントリビューションが現在の開発状況と一致する
 ことを確認することをお勧めします。

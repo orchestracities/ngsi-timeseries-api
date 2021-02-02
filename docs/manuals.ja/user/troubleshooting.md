@@ -76,7 +76,7 @@ CrateDB が 3D 座標をサポートしていないという事実に関連し�
 ## バグ・レポート
 
 バグは、github リポジトリの
-[issues](https://github.com/smartsdk/ngsi-timeseries-api/issues)
+[issues](https://github.com/orchestracities/ngsi-timeseries-api/issues)
 の形で報告する必要があります。
 
 重複した issues を報告する前に、既に報告された issues を見てください :)

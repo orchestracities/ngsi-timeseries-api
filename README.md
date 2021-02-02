@@ -1,13 +1,13 @@
 # QuantumLeap
 
 [![FIWARE Core Context Management](https://nexus.lab.fiware.org/static/badges/chapters/core.svg)](https://www.fiware.org/developers/catalogue/)
-[![License: MIT](https://img.shields.io/github/license/smartsdk/ngsi-timeseries-api.svg)](https://opensource.org/licenses/MIT)
-[![Docker Status](https://img.shields.io/docker/pulls/smartsdk/quantumleap.svg)](https://hub.docker.com/r/smartsdk/quantumleap/)
+[![License: MIT](https://img.shields.io/github/license/orchestracities/ngsi-timeseries-api.svg)](https://opensource.org/licenses/MIT)
+[![Docker Status](https://img.shields.io/docker/pulls/orchestracities/quantumleap.svg)](https://hub.docker.com/r/orchestracities/quantumleap/)
 [![Support](https://img.shields.io/badge/support-ask-yellowgreen.svg)](https://ask.fiware.org/questions/)
 <br/>
 [![Documentation badge](https://img.shields.io/readthedocs/quantumleap.svg)](https://quantumleap.readthedocs.io/en/latest/)
-[![Build Status](https://travis-ci.com/smartsdk/ngsi-timeseries-api.svg?branch=master)](https://travis-ci.com/smartsdk/ngsi-timeseries-api)
-[![Coverage Status](https://coveralls.io/repos/github/smartsdk/ngsi-timeseries-api/badge.svg?branch=master)](https://coveralls.io/github/smartsdk/ngsi-timeseries-api?branch=master)
+[![Build Status](https://travis-ci.com/orchestracities/ngsi-timeseries-api.svg?branch=master)](https://travis-ci.com/orchestracities/ngsi-timeseries-api)
+[![Coverage Status](https://coveralls.io/repos/github/orchestracities/ngsi-timeseries-api/badge.svg?branch=master)](https://coveralls.io/github/orchestracities/ngsi-timeseries-api?branch=master)
 ![Status](https://nexus.lab.fiware.org/static/badges/statuses/quantum-leap.svg)
 [![Swagger Validator](https://img.shields.io/swagger/valid/2.0/https/raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v2.0/json/petstore-expanded.json.svg)](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4394/badge)](https://bestpractices.coreinfrastructure.org/projects/4394)
@@ -37,7 +37,7 @@ or checkout the Extra Resources below.
 This project is part of [FIWARE](https://www.fiware.org). You can find more
 FIWARE components in the [FIWARE catalogue](https://catalogue.fiware.org).
 
-|  :books: [Documentation](https://quantumleap.rtfd.io/) | :mortar_board: [Academy](https://fiware-academy.readthedocs.io/en/latest/core/quantum-leap) |  :whale: [Docker Hub](https://hub.docker.com/r/smartsdk/quantumleap/) | :dart: [Roadmap](https://github.com/smartsdk/ngsi-timeseries-api/blob/master/docs/roadmap.md) |
+|  :books: [Documentation](https://quantumleap.rtfd.io/) | :mortar_board: [Academy](https://fiware-academy.readthedocs.io/en/latest/core/quantum-leap) |  :whale: [Docker Hub](https://hub.docker.com/r/orchestracities/quantumleap/) | :dart: [Roadmap](https://github.com/orchestracities/ngsi-timeseries-api/blob/master/docs/roadmap.md) |
 |---|---|---|---|
 
 ## Contents
@@ -61,9 +61,9 @@ the following versions:
 - Timescale backend: Postgres version `10.*` or `11.*` +
   Timescale extension `1.3.*` + Postgis extension `2.5.*`.
   
-PR [#373](https://github.com/smartsdk/ngsi-timeseries-api/pull/373) introduced
+PR [#373](https://github.com/orchestracities/ngsi-timeseries-api/pull/373) introduced
 basic support for NGSI-LD. In short this means that using the current endpoint
-you are able to store NGSI-LD payloads with few caveats (see [#398](https://github.com/smartsdk/ngsi-timeseries-api/issue/398))
+you are able to store NGSI-LD payloads with few caveats (see [#398](https://github.com/orchestracities/ngsi-timeseries-api/issue/398))
 
 ## Usage
 

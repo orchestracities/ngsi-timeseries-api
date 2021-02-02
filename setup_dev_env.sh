@@ -8,7 +8,7 @@ set -e
 
 export PYTHONPATH=${PWD}/src:${PYTHONPATH}
 
-docker build -t smartsdk/quantumleap .
+docker build -t orchestracities/quantumleap .
 
 source deps.env
 

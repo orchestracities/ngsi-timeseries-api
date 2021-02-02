@@ -2,7 +2,7 @@
 
 POSTGRES_PORT='5432'
 
-docker build -t smartsdk/quantumleap ../../../
+docker build -t orchestracities/quantumleap ../../../
 
 docker-compose up -d
 sleep 20

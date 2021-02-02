@@ -254,10 +254,10 @@ keeping in mind this. Ultimately, the correct naming of types and attributes
 should respect the naming guidelines explained
 [here](http://fiware-datamodels.readthedocs.io/en/latest/guidelines/index.html).
 
-- Attributes metadata are still not being persisted. See [Issue 12](https://github.com/smartsdk/ngsi-timeseries-api/issues/12)
+- Attributes metadata are still not being persisted. See [Issue 12](https://github.com/orchestracities/ngsi-timeseries-api/issues/12)
 
 - While support for multiple data in a single notification as been recently introduced
-  (See [PR 191](https://github.com/smartsdk/ngsi-timeseries-api/pull/191)),
+  (See [PR 191](https://github.com/orchestracities/ngsi-timeseries-api/pull/191)),
   The following limitations still apply: a error in a single data entity will invalidate
   the all set. There is not optimisation for large message size.
 
@@ -385,5 +385,5 @@ So, to enable this feature, you need to pass (at initialisation time) to the
 QuantumLeap container the environment variable `USE_GEOCODING` set to `True`
 and the environment variables `REDIS_HOST` and `REDIS_PORT` respectively set to
 the location of your REDIS instance and its access port. See the
-[docker-compose-dev.yml](https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
+[docker-compose-dev.yml](https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
 for example.

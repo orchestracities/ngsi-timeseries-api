@@ -15,7 +15,7 @@
 mkdir -p _monitoring
 rm _monitoring/*
 
-docker build --cache-from smartsdk/quantumleap -t smartsdk/quantumleap ../../../
+docker build --cache-from orchestracities/quantumleap -t orchestracities/quantumleap ../../../
 
 docker-compose up -d
 

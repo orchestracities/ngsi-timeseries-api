@@ -283,11 +283,11 @@ NGSI 型 (したがって SQL 型) は値から派生します。次のロジッ
   で説明する命名ガイドラインを遵守する必要があります
 
 - 属性メタデータは依然として永続化されていません。
-  [Issue 12](https://github.com/smartsdk/ngsi-timeseries-api/issues/12)
+  [Issue 12](https://github.com/orchestracities/ngsi-timeseries-api/issues/12)
   を参照してください
 
 - 最近導入された単一の通知における複数のデータのサポート
-  ([PR 191](https://github.com/smartsdk/ngsi-timeseries-api/pull/191) を参照)
+  ([PR 191](https://github.com/orchestracities/ngsi-timeseries-api/pull/191) を参照)
   が、依然として以下の制限が適用されます。単一のデータ・エンティティにエラーが
   あると、すべてのセットが無効になります。大きなメッセージサイズに対する最適化は
   ありません
@@ -427,5 +427,5 @@ address が都市名、番地、郵便番号を含む完全な住所であれば
 コンテナに環境変数 `USE_GEOCODING` を `True` に設定し、環境変数 `REDIS_HOST` と
 `REDIS_PORT` をそれぞれ REDIS
 インスタンスとそのアクセスポートの場所に設定する必要があります。 たとえば、
-[docker-compose-dev.yml](https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
+[docker-compose-dev.yml](https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
 を参照してください。

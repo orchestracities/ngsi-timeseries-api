@@ -31,18 +31,18 @@ presently QuantumLeap supports both [CrateDB][crate] and
 [Timescale][timescale] as back end databases.
 
 ### NGSI-LD support
-PR [#373](https://github.com/smartsdk/ngsi-timeseries-api/pulls/373) 
+PR [#373](https://github.com/orchestracities/ngsi-timeseries-api/pulls/373) 
 introduced basic support for basic [NGSI-LD][nsgi-ld-spec] relying on v2 API.
 In short this means that using the current endpoint QL can
 store NGSI-LD payloads with few caveats (see 
-[#398](https://github.com/smartsdk/ngsi-timeseries-api/issues/398)):
+[#398](https://github.com/orchestracities/ngsi-timeseries-api/issues/398)):
 * temporal attributes are not currently supported
-  ([#395](https://github.com/smartsdk/ngsi-timeseries-api/issues/395));
+  ([#395](https://github.com/orchestracities/ngsi-timeseries-api/issues/395));
    what is relevant here is that this attributes are
    used to create the time index of the series
 * other attributes may be added as well in future (not a priority probably,
   so may not be tackled any time
-  [#396](https://github.com/smartsdk/ngsi-timeseries-api/issues/396))
+  [#396](https://github.com/orchestracities/ngsi-timeseries-api/issues/396))
 * context is currently not stored.
 * query endpoints returns NGSIv2 data types.
 
@@ -268,9 +268,6 @@ As of today, the query caching stores:
   it to other complementary services.
 * [FIWARE Time Series][ql-tut]: a complete, step-by-step, hands-on tutorial
   to learn how to set up and use QuantumLeap.
-* The [SmartSDK guided tour][smartsdk.tour] has a section about using
-  QuantumLeap in a FiWare cloud.
-
 
 
 
@@ -314,8 +311,6 @@ As of today, the query caching stores:
     "NGSI-TSDB Specification"
 [ql-tut]: https://fiware-tutorials.readthedocs.io/en/latest/time-series-data/
     "FIWARE Tutorials - Time Series Data"
-[smartsdk.tour]: http://guided-tour-smartsdk.readthedocs.io/en/latest/
-    "SmartSDK Guided Tour"
 [timescale]: https://www.timescale.com
     "Timescale Home"
 [tsdb]: https://en.wikipedia.org/wiki/Time_series_database
