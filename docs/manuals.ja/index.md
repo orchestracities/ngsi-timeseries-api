@@ -30,7 +30,7 @@ QuantumLeap が実装する NGSI-TSDB と呼ばれるREST
 
 #### STH Comet との関係
 
-QuantumLeap と FiWare [STH Comet][comet] は同様の目標を共有しますが、
+QuantumLeap と FIWARE [STH Comet][comet] は同様の目標を共有しますが、
 Comet は複数のデータベース・バックエンドをサポートせず (MongoDB
 のみが利用可能)、NGSI v2 もサポートしません。Comet 自体は素晴らしい
 ソフトウェアですが、開発のきっかけとなったニーズと仮定のいくつかはもはや
@@ -181,7 +181,7 @@ REST API を介したデータのクエリと取得が計画されています�
 
 
 [comet]: https://fiware-sth-comet.readthedocs.io/en/latest/
-    "FiWare STH Comet Manual"
+    "FIWARE STH Comet Manual"
 [crate]: http://www.crate.io
     "CrateDB Home"
 [crate-doc.cont]: https://crate.io/docs/crate/guide/en/latest/deployment/containers/
@@ -191,7 +191,7 @@ REST API を介したデータのクエリと取得が計画されています�
 [crate-doc.sql]: https://crate.io/docs/crate/reference/en/latest/sql/index.html
     "CrateDB SQL"
 [fw-catalogue]: https://www.fiware.org/developers/catalogue/
-    "FiWare Catalogue"
+    "FIWARE Catalogue"
 [grafana]: http://www.grafana.com
     "Grafana Home"
 [grafana.pg]: http://docs.grafana.org/features/datasources/postgres/
@@ -217,7 +217,7 @@ REST API を介したデータのクエリと取得が計画されています�
 [ql-spec]: https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb
     "NGSI-TSDB Specification"
 [ql-tut]: https://fiware-tutorials.readthedocs.io/en/latest/time-series-data/
-    "FiWare Tutorials - Time Series Data"
+    "FIWARE Tutorials - Time Series Data"
 [rethink]: https://www.rethinkdb.com/
     "RethinkDB Home"
 [smartsdk.tour]: http://guided-tour-smartsdk.readthedocs.io/en/latest/

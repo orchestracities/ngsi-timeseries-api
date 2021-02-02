@@ -24,7 +24,7 @@ QuantumLeap implements has been defined with the goal of providing
 a database-agnostic REST interface for the storage, querying and
 retrieval of NGSI entity time series that could be as close as possible
 to the NGSI specification itself. Thus NGSI-TSDB provides a uniform
-and familiar (to FiWare developers) mechanism to access time
+and familiar (to FIWARE developers) mechanism to access time
 series data which allows implementing services such as QuantumLeap
 to transparently support multiple database back ends. In fact,
 presently QuantumLeap supports both [CrateDB][crate] and
@@ -86,14 +86,14 @@ MongoDB is available) and doesn't support NGSI v2 either. While
 Comet per se is a fine piece of software, some of the needs and
 assumptions that prompted its developments are no longer current.
 QuantumLeap started out as an exploration of an alternative way
-to make historical data available to the FiWare ecosystem without
+to make historical data available to the FIWARE ecosystem without
 committing to a specific database back end.
 
 
 ## Operation
 
 Typically QuantumLeap acquires IoT data, in the form of NGSI entities,
-from a FiWare IoT Agent layer indirectly through NGSI notifications
+from a FIWARE IoT Agent layer indirectly through NGSI notifications
 set up upfront with the context broker, [Orion][orion]. (We assume
 the reader is familiar with the NGSI publish-subscribe mechanism
 described in the *Notification Messages* and *Subscriptions* sections
@@ -278,7 +278,7 @@ As of today, the query caching stores:
 
 
 [comet]: https://fiware-sth-comet.readthedocs.io/en/latest/
-    "FiWare STH Comet Manual"
+    "FIWARE STH Comet Manual"
 [crate]: http://www.crate.io
     "CrateDB Home"
 [crate-doc.cont]: https://crate.io/docs/crate/guide/en/latest/deployment/containers/
@@ -288,7 +288,7 @@ As of today, the query caching stores:
 [crate-doc.sql]: https://crate.io/docs/crate/reference/en/latest/sql/index.html
     "CrateDB SQL"
 [fw-catalogue]: https://www.fiware.org/developers/catalogue/
-    "FiWare Catalogue"
+    "FIWARE Catalogue"
 [grafana]: http://www.grafana.com
     "Grafana Home"
 [grafana.pg]: http://docs.grafana.org/features/datasources/postgres/
