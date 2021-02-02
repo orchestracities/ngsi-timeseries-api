@@ -29,7 +29,8 @@ To configure QuantumLeap you can use the following environment variables:
 | `LOGLEVEL`         | Define the log level for all services (`DEBUG`, `INFO`, `WARNING` , `ERROR`)      |
 
 **NOTE**
-* `DEFAULT_LIMIT`. This variable specifies the upper limit L of rows a query
+
+- `DEFAULT_LIMIT`. This variable specifies the upper limit L of rows a query
   operation is allowed to fetch from the database and return to client. The
   actual number of rows will be the least of L and the client-specified limit
   or L if the client didn't specify a limit. If not set through this variable,
@@ -37,7 +38,8 @@ To configure QuantumLeap you can use the following environment variables:
   endpoints so it can be set dynamically and it will affect every subsequent
   query operation. The variable string value you set should be convertible to
   an integer, if not, the default value of 10,000 will be used instead.
-* `KEEP_RAW_ENTITY`. If true, then each notified entity will be stored in its
+
+- `KEEP_RAW_ENTITY`. If true, then each notified entity will be stored in its
   entirety as JSON in an additional column of the corresponding entity table.
   (This may result in the table needing up to 10x more storage.) If false, the
   JSON will only be stored (as detailed earlier) in case the conversion from
