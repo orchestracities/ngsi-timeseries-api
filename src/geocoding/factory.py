@@ -1,6 +1,7 @@
 import logging
 from typing import Union
 
+from cache.factory import REDIS_HOST_ENV_VAR, REDIS_PORT_ENV_VAR
 from .geocache import GeoCodingCache
 from utils.cfgreader import EnvReader, BoolVar, IntVar, StrVar, MaybeString
 
@@ -14,6 +15,10 @@ MaybeGeoCache = Union[GeoCodingCache, None]
 # which referred to the below env vars.
 
 
+USE_GEOCODING_ENV_VAR = 'USE_GEOCODING'
+CACHE_GEOCODING_ENV_VAR = 'CACHE_GEOCODING'
+
+
 class GeoCodingEnvReader:
     """
     Helper class to encapsulate the reading of geo-coding env vars.
@@ -23,16 +28,16 @@ class GeoCodingEnvReader:
         self.env = EnvReader(log=logging.getLogger(__name__).debug)
 
     def use_geocoding(self) -> bool:
-        return self.env.read(BoolVar('USE_GEOCODING', False))
+        return self.env.read(BoolVar(USE_GEOCODING_ENV_VAR, False))
 
     def cache_geocoding(self) -> bool:
-        return self.env.read(BoolVar('CACHE_GEOCODING', False))
+        return self.env.read(BoolVar(CACHE_GEOCODING_ENV_VAR, False))
 
     def redis_host(self) -> MaybeString:
-        return self.env.read(StrVar('REDIS_HOST', None))
+        return self.env.read(StrVar(REDIS_HOST_ENV_VAR, None))
 
     def redis_port(self) -> int:
-        return self.env.read(IntVar('REDIS_PORT', 6379))
+        return self.env.read(IntVar(REDIS_PORT_ENV_VAR, 6379))
 
 
 def log():

@@ -8,6 +8,12 @@ from .querycache import QueryCache
 MaybeCache = Union[QueryCache, None]
 
 
+REDIS_HOST_ENV_VAR = 'REDIS_HOST'
+REDIS_PORT_ENV_VAR = 'REDIS_PORT'
+DEFAULT_CACHE_TTL_ENV_VAR = 'DEFAULT_CACHE_TTL'
+CACHE_QUERIES_ENV_VAR = 'CACHE_QUERIES'
+
+
 class CacheEnvReader:
     """
     Helper class to encapsulate the reading of geo-coding env vars.
@@ -17,16 +23,16 @@ class CacheEnvReader:
         self.env = EnvReader(log=logging.getLogger(__name__).debug)
 
     def redis_host(self) -> MaybeString:
-        return self.env.read(StrVar('REDIS_HOST', None))
+        return self.env.read(StrVar(REDIS_HOST_ENV_VAR, None))
 
     def redis_port(self) -> int:
-        return self.env.read(IntVar('REDIS_PORT', 6379))
+        return self.env.read(IntVar(REDIS_PORT_ENV_VAR, 6379))
 
     def default_ttl(self) -> int:
-        return self.env.read(IntVar('DEFAULT_CACHE_TTL', 60))
+        return self.env.read(IntVar(DEFAULT_CACHE_TTL_ENV_VAR, 60))
 
     def cache_queries(self) -> bool:
-        return self.env.read(BoolVar('CACHE_QUERIES', False))
+        return self.env.read(BoolVar(CACHE_QUERIES_ENV_VAR, False))
 
 
 def log():

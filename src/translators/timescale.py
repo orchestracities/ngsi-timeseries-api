@@ -42,6 +42,14 @@ NGSI_TO_SQL = {
 }
 
 
+POSTGRES_HOST_ENV_VAR = 'POSTGRES_HOST'
+POSTGRES_PORT_ENV_VAR = 'POSTGRES_PORT'
+POSTGRES_USE_SSL_ENV_VAR = 'POSTGRES_USE_SSL'
+POSTGRES_DB_NAME_ENV_VAR = 'POSTGRES_DB_NAME'
+POSTGRES_DB_USER_ENV_VAR = 'POSTGRES_DB_USER'
+POSTGRES_DB_PASS_ENV_VAR = 'POSTGRES_DB_PASS'
+
+
 class PostgresConnectionData:
 
     def __init__(self, host='0.0.0.0', port=5432, use_ssl=False,
@@ -56,12 +64,12 @@ class PostgresConnectionData:
 
     def read_env(self, env: dict = os.environ):
         r = EnvReader(env, log=logging.getLogger(__name__).debug)
-        self.host = r.read(StrVar('POSTGRES_HOST', self.host))
-        self.port = r.read(IntVar('POSTGRES_PORT', self.port))
-        self.use_ssl = r.read(BoolVar('POSTGRES_USE_SSL', self.use_ssl))
-        self.db_name = r.read(StrVar('POSTGRES_DB_NAME', self.db_name))
-        self.db_user = r.read(StrVar('POSTGRES_DB_USER', self.db_user))
-        self.db_pass = r.read(StrVar('POSTGRES_DB_PASS', self.db_pass,
+        self.host = r.read(StrVar(POSTGRES_HOST_ENV_VAR, self.host))
+        self.port = r.read(IntVar(POSTGRES_PORT_ENV_VAR, self.port))
+        self.use_ssl = r.read(BoolVar(POSTGRES_USE_SSL_ENV_VAR, self.use_ssl))
+        self.db_name = r.read(StrVar(POSTGRES_DB_NAME_ENV_VAR, self.db_name))
+        self.db_user = r.read(StrVar(POSTGRES_DB_USER_ENV_VAR, self.db_user))
+        self.db_pass = r.read(StrVar(POSTGRES_DB_PASS_ENV_VAR, self.db_pass,
                                      mask_value=True))
 
 
