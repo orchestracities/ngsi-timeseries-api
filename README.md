@@ -109,7 +109,7 @@ if you want to list it here, add your information on this
 [issue](https://github.com/orchestracities/ngsi-timeseries-api/issues/436)
 or create a PR to update the list. 
 
-| <a href="https://github.com/lets-fiware/ngsi-goe"><img src="https://raw.githubusercontent.com/lets-fiware/ngsi-go/gh-pages/img/lets-fiware-logo-non-free.png" height="75" /> <br/> NGSI-GO is a CLI API supporting QL</a> |  |   |  |
+| <a href="https://github.com/lets-fiware/ngsi-go"><img src="https://raw.githubusercontent.com/lets-fiware/ngsi-go/gh-pages/img/NGSI-Go.png" height="75" /> <br/> NGSI Go is a CLI supporting QL</a> |  |   |  |
 |---|---|---|---|
 
 ## Enterprise Support
