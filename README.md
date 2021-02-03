@@ -34,8 +34,11 @@ configure your infrastructure to handle that :)
 Want to know more? Refer to the [docs](https://quantumleap.readthedocs.io/en/latest/)
 or checkout the Extra Resources below.
 
-This project is part of [FIWARE](https://www.fiware.org). You can find more
-FIWARE components in the [FIWARE catalogue](https://catalogue.fiware.org).
+This project is contributed to [FIWARE](https://www.fiware.org) by 
+[Martel Innovate](https://www.martel-innovate.com/) as part of its [Orchestra Cities](https://www.orchestracities.com/)
+platform.
+You can find more FIWARE components in the [FIWARE catalogue](https://catalogue.fiware.org).
+
 
 |  :books: [Documentation](https://quantumleap.rtfd.io/) | :mortar_board: [Academy](https://fiware-academy.readthedocs.io/en/latest/core/quantum-leap) |  :whale: [Docker Hub](https://hub.docker.com/r/orchestracities/quantumleap/) | :dart: [Roadmap](https://github.com/orchestracities/ngsi-timeseries-api/blob/master/docs/roadmap.md) |
 |---|---|---|---|
@@ -47,6 +50,8 @@ FIWARE components in the [FIWARE catalogue](https://catalogue.fiware.org).
 -   [Troubleshooting](#troubleshooting)
 -   [Contributing](#contributing)
 -   [Extra resources](#extra-resources)
+-   [Adopters](#adopters)
+-   [Linked projects](#linked-projects)
 -   [License](#license)
 
 ## Install
@@ -88,6 +93,29 @@ consistency.
 
 - [FIWARE Step-by-step](https://fiware-tutorials.readthedocs.io/en/latest/time-series-data/index.html)
 - [Orchestra Cities Helm Charts](https://github.com/orchestracities/charts)
+
+## Adopters
+[Orchestra Cities](https://www.orchestracities.com/) QuantumLeap is adopted in the FIWARE community,
+if you want to list it here, add your information on this
+[issue](https://github.com/orchestracities/ngsi-timeseries-api/issues/436)
+or create a PR to update the list. 
+
+| <a href="https://www.ekz.ch/"><img src="https://www.ekz.ch/content/ekz-internet/de/_jcr_content/configuration/logo/image.ekzImg.width_ekznative.png/1610370526582.png/logo.png" height="75" /></a> | <a href="https://www.stadtwerke-wolfsburg.de/"><img src="https://www.stadtwerke-wolfsburg.de/fileadmin/templates/Images/logo_stadtwerke.png" height="75" /></a> |   |  |
+|---|---|---|---|
+
+## Linked projects
+The following projects are linked to [Orchestra Cities](https://www.orchestracities.com/) QuantumLeap,
+if you want to list it here, add your information on this
+[issue](https://github.com/orchestracities/ngsi-timeseries-api/issues/436)
+or create a PR to update the list. 
+
+| <a href="https://github.com/lets-fiware/ngsi-goe"><img src="https://raw.githubusercontent.com/lets-fiware/ngsi-go/gh-pages/img/lets-fiware-logo-non-free.png" height="75" /> <br/> NGSI-GO is a CLI API supporting QL</a> |  |   |  |
+|---|---|---|---|
+
+## Enterprise Support
+
+<a href="mailto:info@orchestracities.com?subject=[Orchestra Cities]%20Enterprise%20Support">Contact us</a> if you need Enterprise
+Support for your QuantumLeap installation. 
 
 ---
 
