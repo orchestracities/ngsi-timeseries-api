@@ -114,7 +114,7 @@ or create a PR to update the list.
 
 ## Enterprise Support
 
-[Contact us](mailto:info@orchestracities.com?subject=[Orchestra Cities]%20Enterprise%20Support) if you need Enterprise
+<a href="mailto:info@orchestracities.com?subject=[Orchestra Cities]%20Enterprise%20Support">Contact us</a> if you need Enterprise
 Support for your QuantumLeap installation. 
 
 ---
