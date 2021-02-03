@@ -17,7 +17,7 @@
   and metadata queries on insert (#429)
 - Better logs
   - Adopt Orion log format and improve log messages (#373)
-  - Log FiWare correlation ID to support tracking of requests from
+  - Log FIWARE correlation ID to support tracking of requests from
     agents (through Orion) to QuantumLeap (#373)
   - Add process and thread ID to log entries (#367)
   - Make log messages more descriptive and use debug log level (#355)
@@ -36,7 +36,7 @@
   where new columns aren't added if using Crate's dynamic column policy (#373)
 - Log a warning if there's a type mismatch between NGSI and DB date-time
   rather than making queries crash (#387)
-- Use proper ISO 8601 date-times and FiWare service path match operator
+- Use proper ISO 8601 date-times and FIWARE service path match operator
   in CrateDB queries (#371)
 - Use proper CrateDB types rather than deprecated aliases (#370)
 - Assign entities to their respective service paths when a notification
@@ -75,7 +75,7 @@
   date time SQL injection vulnerability (#315)
 - Ignore attributes with null values (#298)
 - Accept quoted values in API `fromDate` and `toDate` parameters (#285)
-- Use standard header names for FiWare service and service path (#283)
+- Use standard header names for FIWARE service and service path (#283)
 - Update tests for incomplete entities to take into account changes introduced
   by PR #278 (#282)
 - Filter empty entities out of notification payload (#278)

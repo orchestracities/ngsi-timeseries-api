@@ -4,7 +4,7 @@ services:
 
   quantumleap:
     build: ../../../
-    image: smartsdk/quantumleap
+    image: orchestracities/quantumleap
     ports:
       - "8668:8668"
     depends_on:

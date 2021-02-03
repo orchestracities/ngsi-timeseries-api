@@ -22,6 +22,6 @@
 |TCP                | 6379          |  Redisキャッシュ (ジオ・コーディングで使用) |
 
 このリポジトリの
-[docker-compose-dev.yml](https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
+[docker-compose-dev.yml](https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
 ファイル (実際にはデプロイに使用したものはもちろんのこと) で公開されている
 ポートをいつでも調べることができます。

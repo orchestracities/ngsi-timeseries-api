@@ -62,7 +62,7 @@ the conversation.
     "FIWARE Individual Contributor License Agreement"
 [conduct]: ./CODE_OF_CONDUCT.md
     "Contributor Covenant Code of Conduct"
-[gi]: https://github.com/smartsdk/ngsi-timeseries-api/issues
+[gi]: https://github.com/orchestracities/ngsi-timeseries-api/issues
     "GitHub Issues"
-[pr]: https://github.com/smartsdk/ngsi-timeseries-api/pulls
+[pr]: https://github.com/orchestracities/ngsi-timeseries-api/pulls
     "GitHub Pull Requests"

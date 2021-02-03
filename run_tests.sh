@@ -6,8 +6,8 @@ test_suite_header () {
   echo "======================================================================="
 }
 
-docker pull smartsdk/quantumleap
-docker build --cache-from smartsdk/quantumleap -t smartsdk/quantumleap .
+docker pull orchestracities/quantumleap
+docker build --cache-from orchestracities/quantumleap -t orchestracities/quantumleap .
 
 cd src/translators/tests
 test_suite_header "TRANSLATOR"

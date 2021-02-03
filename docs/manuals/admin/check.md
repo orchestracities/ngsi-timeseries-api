@@ -132,7 +132,7 @@ integration tests that checks exactly this connection among core components.
 with valuable data. If things go wrong in the test, it may leave garbage data
 or can lead to data loses. As always, use automation with caution.
 
-You can see the test script [here](https://github.com/smartsdk/ngsi-timeseries-api/blob/master/src/tests/test_integration.py).
+You can see the test script [here](https://github.com/orchestracities/ngsi-timeseries-api/blob/master/src/tests/test_integration.py).
 Pay attention to the input variables that, depending on your deployment, you
 may need to configure. These indicate the URLs where to find the core services.
 By default, it assumes all services run in a local docker-based deployment.

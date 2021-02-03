@@ -33,7 +33,7 @@ The development is mostly in *python3* for now, and really in the early stages
 so things will change for sure. For now, you can get started with:
 
 ```
-git clone https://github.com/smartsdk/ngsi-timeseries-api.git
+git clone https://github.com/orchestracities/ngsi-timeseries-api.git
 cd ngsi-timeseries-api
 pipenv install
 
@@ -102,7 +102,7 @@ In the current project tree structure you can find:
 
 
 
-[contrib]: https://github.com/smartsdk/ngsi-timeseries-api/blob/master/CONTRIBUTING.md
+[contrib]: https://github.com/orchestracities/ngsi-timeseries-api/blob/master/CONTRIBUTING.md
     "Contributing to QuantumLeap"
 [fiware-contrib]: https://github.com/FIWARE/contribution-requirements/
     "FIWARE Platform Contribution Requirements"

@@ -33,8 +33,10 @@ docker run -i --rm loadimpact/k6 run --vus 30 --duration 60s - < notify-load-tes
 ```
 
 Tests shows that:
-* caching metadata improves throughput of inserts , but usage of redis, has not the same impact as in memory
-* the number of queries linked to metadata is not the only element affecting insert performance,
+
+- caching metadata improves throughput of inserts , but usage of redis, has not the same impact as in memory
+
+- the number of queries linked to metadata is not the only element affecting insert performance,
   due to the nature of http request, up to QL v0.7.6, we created a db connection for each insert,
   opening the connection takes time. From v0.8 we reuse existing connections. This proved to increase throughput of 100%
   compared just to just redis caching.
@@ -42,12 +44,16 @@ Tests shows that:
 System used for testing:
 Mac2016 with 3.1 GhZ i7 (i.e. 4 cores) and 16GB Ram
 
-* Baseline (v0.7.6): 44 req/s - 600 ms avg response time -
+- Baseline (v0.7.6): 44 req/s - 600 ms avg response time -
   (crate queries peak: select 111 q/sec, insert 54 q/sec)
-* Redis caching: 60 req/s -  (no data collected on response time)
-* In memory caching:  95 req/s - (no data collected on response time)
-* Redis caching + connection re-usage: 100 req/s - 200 ms avg response time
+
+- Redis caching: 60 req/s -  (no data collected on response time)
+
+- In memory caching:  95 req/s - (no data collected on response time)
+
+- Redis caching + connection re-usage: 100 req/s - 200 ms avg response time
   (crate queries peak: select 7 q/sec, insert 142 q/sec)
-* Connection re-usage (without any cache): 55 req/s  - 400 ms avg response time
+
+- Connection re-usage (without any cache): 55 req/s  - 400 ms avg response time
   (crate queries peak: select 177 q/sec, insert 86 q/sec)
   

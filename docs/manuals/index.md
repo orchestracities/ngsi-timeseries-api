@@ -7,8 +7,8 @@
 ## Overview
 
 QuantumLeap is a REST service for storing, querying and retrieving
-[NGSI v2][ngsi-spec] and [NGSI-LD][nsgi-ld-spec] (*experimental support*)
-spatial-temporal data. QuantumLeap converts
+[NGSI v2][ngsi-spec] and [NGSI-LD][ngsi-ld-spec] 
+(*experimental support*) spatial-temporal data. QuantumLeap converts
 NGSI semi-structured data into tabular format and stores it in a
 [time-series database][tsdb], associating each database record with
 a time index and, if present in the NGSI data, a location on Earth.
@@ -24,27 +24,31 @@ QuantumLeap implements has been defined with the goal of providing
 a database-agnostic REST interface for the storage, querying and
 retrieval of NGSI entity time series that could be as close as possible
 to the NGSI specification itself. Thus NGSI-TSDB provides a uniform
-and familiar (to FiWare developers) mechanism to access time
+and familiar (to FIWARE developers) mechanism to access time
 series data which allows implementing services such as QuantumLeap
 to transparently support multiple database back ends. In fact,
 presently QuantumLeap supports both [CrateDB][crate] and
 [Timescale][timescale] as back end databases.
 
 ### NGSI-LD support
-PR [#373](https://github.com/smartsdk/ngsi-timeseries-api/pulls/373) 
-introduced basic support for basic [NGSI-LD][nsgi-ld-spec] relying on v2 API.
+PR [#373](https://github.com/orchestracities/ngsi-timeseries-api/pulls/373) 
+introduced basic support for basic [NGSI-LD][ngsi-ld-spec] relying on v2 API.
 In short this means that using the current endpoint QL can
 store NGSI-LD payloads with few caveats (see 
-[#398](https://github.com/smartsdk/ngsi-timeseries-api/issues/398)):
-* temporal attributes are not currently supported
-  ([#395](https://github.com/smartsdk/ngsi-timeseries-api/issues/395));
+[#398](https://github.com/orchestracities/ngsi-timeseries-api/issues/398)):
+
+- temporal attributes are not currently supported
+  ([#395](https://github.com/orchestracities/ngsi-timeseries-api/issues/395));
    what is relevant here is that this attributes are
    used to create the time index of the series
-* other attributes may be added as well in future (not a priority probably,
+
+- other attributes may be added as well in future (not a priority probably,
   so may not be tackled any time
-  [#396](https://github.com/smartsdk/ngsi-timeseries-api/issues/396))
-* context is currently not stored.
-* query endpoints returns NGSIv2 data types.
+  [#396](https://github.com/orchestracities/ngsi-timeseries-api/issues/396))
+
+- context is currently not stored.
+
+- query endpoints returns NGSIv2 data types.
 
 NGSI-LD temporal queries seem to have a semantic that implies that
 only numeric values are tracked in time series. This was never the case
@@ -82,14 +86,14 @@ MongoDB is available) and doesn't support NGSI v2 either. While
 Comet per se is a fine piece of software, some of the needs and
 assumptions that prompted its developments are no longer current.
 QuantumLeap started out as an exploration of an alternative way
-to make historical data available to the FiWare ecosystem without
+to make historical data available to the FIWARE ecosystem without
 committing to a specific database back end.
 
 
 ## Operation
 
 Typically QuantumLeap acquires IoT data, in the form of NGSI entities,
-from a FiWare IoT Agent layer indirectly through NGSI notifications
+from a FIWARE IoT Agent layer indirectly through NGSI notifications
 set up upfront with the context broker, [Orion][orion]. (We assume
 the reader is familiar with the NGSI publish-subscribe mechanism
 described in the *Notification Messages* and *Subscriptions* sections
@@ -126,7 +130,7 @@ in [OpenStreetMap][osm] (OSM). Finally, the **Reporter** passes on
 the validated and harmonised NGSI entities to a **Translator** component.
 **Translators** convert NGSI entities to tabular format and persist
 them as time series records in the database. There is a **Translator**
-component in correspondence of each supported database back end---see
+component in correspondence of each supported database back end - see
 section below. Depending on [configuration][ql-man.db-sel], the
 **Reporter** chooses which **Translator** to use.
 
@@ -140,7 +144,7 @@ QuantumLeap supports filtering by time range, geographical queries
 as defined by the [NGSI specification][ngsi-spec] and simple
 aggregate functions such as averages. Other than that, QuantumLeap
 also supports deleting historical records but note that presently
-it does **not** implement in full the NGSI-TSDB specification---please
+it does **not** implement in full the NGSI-TSDB specification - please
 refer to the REST API [specification][ql-spec] for the details.
 
 Finally, the diagram shows Grafana querying the database directly
@@ -206,10 +210,11 @@ robust support for time series data. The mechanics of converting
 an NGSI entity to tabular format stay pretty much the same as in
 the Crate back end except for a few improvements:
 
-* NGSI arrays are stored as (indexable & queryable) JSON as opposed
+- NGSI arrays are stored as (indexable & queryable) JSON as opposed
   to the flat array of strings in the Crate back end.
-* GeoJSON and NGSI Simple Location Format attributes are stored as
-  spatial data that can be indexed and queried---full support for
+  
+- GeoJSON and NGSI Simple Location Format attributes are stored as
+  spatial data that can be indexed and queried - full support for
   spatial attributes is still patchy in the Crate back end.
 
 The `test_timescale_insert.py` file in the QuantumLeap source base
@@ -240,7 +245,7 @@ Caching support for queries to databases is *experimental*.
                                   ---------------                                        
 
 As of today, the query caching stores:
-* Version of CrateDB. Different version of CrateDB supports different SQL
+- Version of CrateDB. Different version of CrateDB supports different SQL
   dialects, so at each request we check which version of CrateDB
   we are using. By caching this information, each thread will ask
   this information only once. Of course this could be passed as variable,
@@ -249,7 +254,8 @@ As of today, the query caching stores:
   the one caused by Crate not being in ready state), you would need
   only to clear the key `crate` from redis cache. TTL in this case is
   1 hour, i.e. after one hour version will be checked again against CrateDB.
-* Metadata table. The metadata table is used to store information about the
+  
+- Metadata table. The metadata table is used to store information about the
   mapping between original NGSI attributes (including type) to db column names.
   Basically this information is required to perform "consistent" data injection
   and to correctly NGSI type retrieved attributes by queries. Given concurrency due
@@ -262,20 +268,17 @@ As of today, the query caching stores:
 
 ## Further Readings
 
-* The [Admin Guide][ql-man.admin] explains how to install and run
+- The [Admin Guide][ql-man.admin] explains how to install and run
   QuantumLeap.
-* The [User Manual][ql-man.user] delves into how to use it and connect
+- The [User Manual][ql-man.user] delves into how to use it and connect
   it to other complementary services.
-* [FIWARE Time Series][ql-tut]: a complete, step-by-step, hands-on tutorial
+- [FIWARE Time Series][ql-tut]: a complete, step-by-step, hands-on tutorial
   to learn how to set up and use QuantumLeap.
-* The [SmartSDK guided tour][smartsdk.tour] has a section about using
-  QuantumLeap in a FiWare cloud.
-
 
 
 
 [comet]: https://fiware-sth-comet.readthedocs.io/en/latest/
-    "FiWare STH Comet Manual"
+    "FIWARE STH Comet Manual"
 [crate]: http://www.crate.io
     "CrateDB Home"
 [crate-doc.cont]: https://crate.io/docs/crate/guide/en/latest/deployment/containers/
@@ -285,7 +288,7 @@ As of today, the query caching stores:
 [crate-doc.sql]: https://crate.io/docs/crate/reference/en/latest/sql/index.html
     "CrateDB SQL"
 [fw-catalogue]: https://www.fiware.org/developers/catalogue/
-    "FiWare Catalogue"
+    "FIWARE Catalogue"
 [grafana]: http://www.grafana.com
     "Grafana Home"
 [grafana.pg]: http://docs.grafana.org/features/datasources/postgres/
@@ -314,8 +317,6 @@ As of today, the query caching stores:
     "NGSI-TSDB Specification"
 [ql-tut]: https://fiware-tutorials.readthedocs.io/en/latest/time-series-data/
     "FIWARE Tutorials - Time Series Data"
-[smartsdk.tour]: http://guided-tour-smartsdk.readthedocs.io/en/latest/
-    "SmartSDK Guided Tour"
 [timescale]: https://www.timescale.com
     "Timescale Home"
 [tsdb]: https://en.wikipedia.org/wiki/Time_series_database

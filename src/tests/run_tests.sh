@@ -2,7 +2,7 @@
 
 # Prepare Docker Images
 docker pull ${QL_PREV_IMAGE}
-docker build -t smartsdk/quantumleap ../../
+docker build -t orchestracities/quantumleap ../../
 CRATE_VERSION=${PREV_CRATE} docker-compose pull --ignore-pull-failures
 
 tot=0
@@ -25,11 +25,11 @@ docker run -ti --rm --network tests_default \
            -e QL_URL="http://$QL_BC_HOST:8668" \
            --entrypoint "" \
            -e USE_FLASK=TRUE \
-           smartsdk/quantumleap python tests/common.py
+           smartsdk/quantumleap:0.8.0 python tests/common.py
 
 # Restart QL on development version and CRATE on current version
 docker-compose stop quantumleap
-CRATE_VERSION=${CRATE_VERSION} QL_IMAGE=smartsdk/quantumleap docker-compose up -d
+CRATE_VERSION=${CRATE_VERSION} QL_IMAGE=orchestracities/quantumleap docker-compose up -d
 sleep 40
 
 # Backwards Compatibility Test

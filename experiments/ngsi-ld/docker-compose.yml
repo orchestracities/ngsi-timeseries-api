@@ -18,7 +18,7 @@ services:
       test: curl --fail -s http://orion:1026/version || exit 1
 
   quantumleap:
-    image: ${QL_IMAGE:-smartsdk/quantumleap}
+    image: ${QL_IMAGE:-orchestracities/quantumleap}
     ports:
       - "8668:8668"
     depends_on:

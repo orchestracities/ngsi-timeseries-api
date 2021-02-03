@@ -37,5 +37,5 @@ ENTRYPOINT ["python", "app.py"]
 #     $ docker run -it --rm \
 #                  -p 8668:8668 \
 #                  -v $(pwd)/gunicorn.conf.py:/gunicorn.conf.py
-#                  smartsdk/quantumleap --config /gunicorn.conf.py
+#                  orchestracities/quantumleap --config /gunicorn.conf.py
 #

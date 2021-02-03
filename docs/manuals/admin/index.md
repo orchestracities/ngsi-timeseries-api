@@ -19,7 +19,7 @@ To check it works, you should be able to successfully run...
 docker-compose --version
 ```
 
-The QuantumLeap Docker Image is hosted at [https://hub.docker.com/r/smartsdk/quantumleap/](https://hub.docker.com/r/smartsdk/quantumleap/).
+The QuantumLeap Docker Image is hosted at [https://hub.docker.com/r/orchestracities/quantumleap/](https://hub.docker.com/r/orchestracities/quantumleap/).
 
 Now, depending on your scenario, you have different deployment options. See
 from the sections below which fits yours. After installation, you can check
@@ -33,7 +33,7 @@ QuantumLeap ASAP.
 
 **Important:** Do not use this approach for production environments.
 
-Download (or create locally) a copy of [this docker-compose.yml](https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
+Download (or create locally) a copy of [this docker-compose.yml](https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
 file. Then start it up:
 
 ```
@@ -46,7 +46,7 @@ After a while, check that all containers are up and running:
 ```
 $ docker ps
 CONTAINER ID        IMAGE                  COMMAND                  CREATED             STATUS                   PORTS                                                           NAMES
-8cf0b544868d        smartsdk/quantumleap   "/bin/sh -c 'python …"   2 minutes ago       Up 2 minutes             0.0.0.0:8668->8668/tcp                                          docker_quantumleap_1
+8cf0b544868d        orchestracities/quantumleap   "/bin/sh -c 'python …"   2 minutes ago       Up 2 minutes             0.0.0.0:8668->8668/tcp                                          docker_quantumleap_1
 aa09dbcb8500        fiware/orion:1.13.0    "/usr/bin/contextBro…"   2 minutes ago       Up 2 minutes (healthy)   0.0.0.0:1026->1026/tcp                                          docker_orion_1
 32709dbc5701        grafana/grafana        "/run.sh"                2 minutes ago       Up 2 minutes             0.0.0.0:3000->3000/tcp                                          docker_grafana_1
 ed9f8a60b6e8        crate:1.0.5            "/docker-entrypoint.…"   2 minutes ago       Up 2 minutes             0.0.0.0:4200->4200/tcp, 0.0.0.0:4300->4300/tcp, 5432-5532/tcp   docker_crate_1
@@ -115,5 +115,5 @@ greater than `6.3.1`. More info of FIWARE releases can be seen [here](https://fo
 
 To check which versions of the Generic Enablers and external dependencies QL is
 used and tested, checkout the
-[docker-compose-dev.yml](https://raw.githubusercontent.com/smartsdk/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
+[docker-compose-dev.yml](https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
 file used for the deployment.

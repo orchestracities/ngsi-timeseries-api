@@ -121,7 +121,7 @@ and [resiliency](https://crate.io/docs/crate/reference/en/4.3/appendices/resilie
 ## Bug reporting
 
 Bugs should be reported in the form of
-[issues](https://github.com/smartsdk/ngsi-timeseries-api/issues) in the github
+[issues](https://github.com/orchestracities/ngsi-timeseries-api/issues) in the github
 repository.
 
 Please, look through the open issues before opening a duplicated one :)
