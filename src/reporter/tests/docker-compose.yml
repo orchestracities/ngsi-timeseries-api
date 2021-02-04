@@ -2,26 +2,6 @@ version: '3'
 
 services:
 
-  quantumleap:
-    build: ../../../
-    image: orchestracities/quantumleap
-    ports:
-      - "8668:8668"
-    depends_on:
-      - crate
-      - timescale
-    volumes:
-      - ${PWD}/ql-config.yml:/config/ql-config.yml
-    networks:
-        - reportertests
-    environment:
-      - USE_GEOCODING=False
-      - REDIS_HOST=redis
-      - CACHE_QUERIES=True
-      - LOGLEVEL=INFO
-      - POSTGRES_HOST=timescale
-      - QL_CONFIG=/config/ql-config.yml
-
   timescale:
     image: timescale/timescaledb-postgis:${TIMESCALE_VERSION}
     ports:
