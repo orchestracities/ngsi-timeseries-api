@@ -13,7 +13,8 @@ class RequestFormatter(logging.Formatter):
             record.remote_addr = request.remote_addr
             record.srv = request.headers.get('fiware-service', None)
             if record.srv:
-                record.subserv = request.headers.get('fiware-servicepath', None)
+                record.subserv = request.headers.get(
+                    'fiware-servicepath', None)
             else:
                 record.subserv = None
             if len(request.data) > 0 and request.json and request.json['data']:

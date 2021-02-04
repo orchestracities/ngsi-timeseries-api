@@ -12,6 +12,7 @@ from .original_data_scenarios import *
 # timescale or crate.
 # See https://docs.pytest.org/en/stable/example/parametrize.html
 
+
 @pytest.fixture(scope='module')
 def with_timescale():
     pg8000.paramstyle = "qmark"
@@ -44,6 +45,7 @@ def with_crate():
 
     cursor.close()
     conn.close()
+
 
 translators = [
     pytest.lazy_fixture('with_timescale'),

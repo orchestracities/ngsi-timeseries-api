@@ -427,7 +427,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             self, table_name: str, entities: List[dict],
             insert_error: Exception):
         cols = f"{ENTITY_ID_COL}, {ENTITY_TYPE_COL}, {self.TIME_INDEX_NAME}" \
-               + f", {ORIGINAL_ENTITY_COL}"
+            + f", {ORIGINAL_ENTITY_COL}"
         stmt = f"insert into {table_name} ({cols}) values (?, ?, ?, ?)"
         tix = current_timex()
         batch_id = uuid4().hex
@@ -881,13 +881,13 @@ class SQLTranslator(base_translator.BaseTranslator):
                  "{where_clause} " \
                  "{order_group_clause} " \
                  "limit {limit} offset {offset}".format(
-                select_clause=select_clause,
-                tn=tn,
-                where_clause=where_clause,
-                order_group_clause=order_group_clause,
-                limit=limit,
-                offset=offset,
-            )
+                     select_clause=select_clause,
+                     tn=tn,
+                     where_clause=where_clause,
+                     order_group_clause=order_group_clause,
+                     limit=limit,
+                     offset=offset,
+                 )
             try:
                 self.cursor.execute(op)
             except Exception as e:
@@ -962,9 +962,9 @@ class SQLTranslator(base_translator.BaseTranslator):
                             "from {tn} {where_clause} " \
                             "group by entity_id, entity_type " \
                             "union all ".format(
-                        tn=tn,
-                        where_clause=where_clause
-                    )
+                                tn=tn,
+                                where_clause=where_clause
+                            )
                 else:
                     stmt += "select " \
                             "entity_id, " \
@@ -972,9 +972,9 @@ class SQLTranslator(base_translator.BaseTranslator):
                             "max(time_index) as time_index " \
                             "from {tn} {where_clause} " \
                             "group by entity_id, entity_type ".format(
-                        tn=tn,
-                        where_clause=where_clause
-                    )
+                                tn=tn,
+                                where_clause=where_clause
+                            )
 
             # TODO ORDER BY time_index asc is removed for the time being
             #  till we have a solution for

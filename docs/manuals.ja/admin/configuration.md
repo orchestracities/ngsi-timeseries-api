@@ -26,7 +26,8 @@ QuantumLeap を構成するには、次の環境変数を使用できます:
 | `QL_CONFIG`        | テナント構成のパス名                                                                                  |
 | `LOGLEVEL`         | すべてのサービスのログ・レベルを定義 (`DEBUG`, `INFO`, `WARNING` , `ERROR`)                           |
 
-**注意**
+### 注意
+
 * `DEFAULT_LIMIT`. この変数は、クエリ操作がデータベースからフェッチして
   クライアントに返すことができる行の上限 L を指定します。 実際の行数は、Lと
   クライアント指定の制限の最小値、またはクライアントが制限を指定しなかった
@@ -68,23 +69,22 @@ YAML 設定ファイルは、どのテナントにどのバックエンドを使
 ファイルで明示的に言及されていない他のテナントに使用するデフォルトの
 バックエンドを指定します。YAML 設定の例を次に示します :
 
-    tenants:
-        t1:
-            backend: Timescale
-        t2:
-            backend: Crate
-        t3:
-            backend: Timescale
+```yaml
+tenants:
+    t1:
+        backend: Timescale
+    t2:
+        backend: Crate
+    t3:
+        backend: Timescale
 
-    default-backend: Crate
+default-backend: Crate
+```
 
 この構成では、テナント `t1` または `t3` に着信するすべての NGSI
 エンティティは Timescale に格納されますが、テナント `t2` は Crate
-を使用します。 `t1`, ` t2` または `t3` 以外のテナントは、デフォルトの
+を使用します。 `t1`, `t2` または `t3` 以外のテナントは、デフォルトの
 Crate バックエンドになります。
-
-
-
 
 [crate]: ./crate.md
     "QuantumLeap Crate"

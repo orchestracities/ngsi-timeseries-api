@@ -4,7 +4,7 @@
 
 To configure QuantumLeap you can use the following environment variables:
 
-| Variable           | Description             | 
+| Variable           | Description             |
 | -------------------|-------------------------|
 | `CRATE_HOST`       | CrateDB Host            |
 | `CRATE_PORT`       | CrateDB Port            |
@@ -28,7 +28,7 @@ To configure QuantumLeap you can use the following environment variables:
 | `USE_FLASK`        | `True` or `False` to use flask server (only for Dev) or gunicorn. Default to `False`  |
 | `LOGLEVEL`         | Define the log level for all services (`DEBUG`, `INFO`, `WARNING` , `ERROR`)      |
 
-**NOTE**
+### Notes
 
 - `DEFAULT_LIMIT`. This variable specifies the upper limit L of rows a query
   operation is allowed to fetch from the database and return to client. The
@@ -64,7 +64,7 @@ However, different back ends can be configured for specific tenants
 through a YAML configuration file. To use this feature, you have
 to set the environment variable below:
 
-* `QL_CONFIG`: absolute pathname of the QuantumLeap YAML configuration
+- `QL_CONFIG`: absolute pathname of the QuantumLeap YAML configuration
   file. If not set, the default configuration will be used where only
   the Crate back end is available.
 
@@ -73,23 +73,22 @@ tenant as well as the default back end to use for any other tenant
 not explicitly mentioned in the file. Here's an example YAML
 configuration:
 
-    tenants:
-        t1:
-            backend: Timescale
-        t2:
-            backend: Crate
-        t3:
-            backend: Timescale
+```yaml
+tenants:
+    t1:
+        backend: Timescale
+    t2:
+        backend: Crate
+    t3:
+        backend: Timescale
 
-    default-backend: Crate
+default-backend: Crate
+```
 
 With this configuration, any NGSI entity coming in for tenant `t1`
 or `t3` will be stored in Timescale whereas tenant `t2` will use
 Crate. Any tenant other than `t1`, `t2`, or `t3` gets the default
 Crate back end.
-
-
-
 
 [crate]: ./crate.md
     "QuantumLeap Crate"

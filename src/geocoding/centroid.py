@@ -43,10 +43,10 @@ def centroid2d(points):
 
 def is_point(coords_list):
     return coords_list and \
-           isinstance(coords_list, Sequence) and \
-           len(coords_list) > 1 and \
-           isinstance(coords_list[0], Real) and \
-           isinstance(coords_list[1], Real)
+        isinstance(coords_list, Sequence) and \
+        len(coords_list) > 1 and \
+        isinstance(coords_list[0], Real) and \
+        isinstance(coords_list[1], Real)
 
 
 def best_effort_centroid2d(points):

@@ -18,22 +18,22 @@ def subscribe(entity_type):
         "description": "Test subscription",
         "subject": {
             "entities": [
-              {
-                "idPattern": ".*",
-                "type": entity_type
-              }
+                {
+                    "idPattern": ".*",
+                    "type": entity_type
+                }
             ],
             "condition": {
-              "attrs": [
-                "temperature",
-                "pressure",
-                "humidity",
-              ]
+                "attrs": [
+                    "temperature",
+                    "pressure",
+                    "humidity",
+                ]
             }
-          },
+        },
         "notification": {
             "http": {
-              "url": NOTIFY_URL
+                "url": NOTIFY_URL
             },
             "attrs": [
                 "temperature",

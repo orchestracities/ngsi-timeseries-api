@@ -15,91 +15,107 @@ If you don't use Postman, you can use the equivalent curl commands bellow.
 
 1. Check you can get *Orion version*
 
-        curl -X GET http://0.0.0.0:1026/version -H 'Accept: application/json'
+    ```bash
+    curl -X GET http://0.0.0.0:1026/version -H 'Accept: application/json'
+    ```
 
     You should get a return status `200 OK`.
 
 1. Check you can get *QuantumLeap version*
 
-        curl -X GET http://0.0.0.0:8668/version -H 'Accept: application/json'
+    ```bash
+    $ curl -X GET http://0.0.0.0:8668/version -H 'Accept: application/json'
+    ```
 
     You should get a return status `200 OK`.
 
 1. Create an Orion Subscription via "QuantumLeap Subscribe"
 
-        curl -X POST \
-        'http://0.0.0.0:8668/v2/subscribe?orionUrl=http://orion:1026/v2&quantumleapUrl=http://quantumleap:8668/v2&entityType=AirQualityObserved' \
-        -H 'Accept: application/json'
+    ```bash
+    $ curl -X POST \
+    'http://0.0.0.0:8668/v2/subscribe?orionUrl=http://orion:1026/v2&quantumleapUrl=http://quantumleap:8668/v2&entityType=AirQualityObserved' \
+    -H 'Accept: application/json'
+    ```
 
     Note we've just created a subscription for any change in any attribute of
-    entities of type [AirQualityObserved](https://github.com/FIWARE/data-models/tree/master/specs/Environment/AirQualityObserved). You should get a return status `201 Created`.
+    entities of type [AirQualityObserved](https://github.com/FIWARE/data-models/tree/master/specs/Environment/AirQualityObserved).
+    You should get a return status `201 Created`.
 
 1. Check you cat get such subscription from Orion
 
-        curl -X GET http://0.0.0.0:1026/v2/subscriptions \
-        -H 'Accept: application/json'
+    ```bash
+    $ curl -X GET http://0.0.0.0:1026/v2/subscriptions \
+    -H 'Accept: application/json'
+    ```
 
     You should get a return status `200 OK`.
 
 1. Insert an entity of AirQualityObserved into Orion
 
-        curl -X POST \
-        'http://0.0.0.0:1026/v2/entities?options=keyValues' \
-        -H 'Accept: application/json' \
-        -H 'Content-Type: application/json' \
-        -d '{
-        "id": "air_quality_observer_be_001",
-        "type": "AirQualityObserved",
-        "address": {
-        "streetAddress": "IJzerlaan",
-        "postOfficeBoxNumber": "18",
-        "addressLocality": "Antwerpen",
-        "addressCountry": "BE"
-        },
-        "dateObserved": "2017-11-03T12:37:23.734827",
-        "source": "http://testing.data.from.smartsdk",
-        "precipitation": 0,
-        "relativeHumidity": 0.54,
-        "temperature": 12.2,
-        "windDirection": 186,
-        "windSpeed": 0.64,
-        "airQualityLevel": "moderate",
-        "airQualityIndex": 65,
-        "reliability": 0.7,
-        "CO": 500,
-        "NO": 45,
-        "NO2": 69,
-        "NOx": 139,
-        "SO2": 11,
-        "CO_Level": "moderate",
-        "refPointOfInterest": "null"
-        }'
+    ```bash
+    $ curl -X POST \
+    'http://0.0.0.0:1026/v2/entities?options=keyValues' \
+    -H 'Accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{
+    "id": "air_quality_observer_be_001",
+    "type": "AirQualityObserved",
+    "address": {
+    "streetAddress": "IJzerlaan",
+    "postOfficeBoxNumber": "18",
+    "addressLocality": "Antwerpen",
+    "addressCountry": "BE"
+    },
+    "dateObserved": "2017-11-03T12:37:23.734827",
+    "source": "http://testing.data.from.smartsdk",
+    "precipitation": 0,
+    "relativeHumidity": 0.54,
+    "temperature": 12.2,
+    "windDirection": 186,
+    "windSpeed": 0.64,
+    "airQualityLevel": "moderate",
+    "airQualityIndex": 65,
+    "reliability": 0.7,
+    "CO": 500,
+    "NO": 45,
+    "NO2": 69,
+    "NOx": 139,
+    "SO2": 11,
+    "CO_Level": "moderate",
+    "refPointOfInterest": "null"
+    }'
+    ```
 
     You should get a return status `201 Created`.
 
     Note we used `options=keyValues` for simplification just because this is a
-    sanity check. If you use such option in practice, you may loose translation capabilities as explained in the [user guide](../user/index.md#orion-subscription).
+    sanity check. If you use such option in practice, you may loose translation
+    capabilities as explained in the [user guide](../user/index.md#orion-subscription).
 
 1. Update the precipitation value of the same entity in Orion.
 
-        curl -X PATCH \
-        http://0.0.0.0:1026/v2/entities/air_quality_observer_be_001/attrs \
-        -H 'Accept: application/json' \
-        -H 'Content-Type: application/json' \
-        -d '{
-        "precipitation": {
-        "value": 100,
-        "type": "Number"
-        }
-        }'
+    ```bash
+    $ curl -X PATCH \
+    http://0.0.0.0:1026/v2/entities/air_quality_observer_be_001/attrs \
+    -H 'Accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{
+    "precipitation": {
+    "value": 100,
+    "type": "Number"
+    }
+    }'
+    ```
 
     You should get a return status `204 No Content`.
 
 1. Query again historical records of precipitation for the same entity (1T1E1A).
 
-        curl -X GET \
-        'http://0.0.0.0:8668/v2/entities/air_quality_observer_be_001/attrs/precipitation?type=AirQualityObserved' \
-        -H 'Accept: application/json'
+    ```bash
+    $ curl -X GET \
+    'http://0.0.0.0:8668/v2/entities/air_quality_observer_be_001/attrs/precipitation?type=AirQualityObserved' \
+    -H 'Accept: application/json'
+    ```
 
     You should get a return status `200 OK`, plus the historical records in the
     response body.
@@ -108,19 +124,25 @@ If you don't use Postman, you can use the equivalent curl commands bellow.
 
     Delete records from QL
 
-        curl -X DELETE http://0.0.0.0:8668/v2/types/AirQualityObserved
+    ```bash
+    $ curl -X DELETE http://0.0.0.0:8668/v2/types/AirQualityObserved
+    ```
 
     Delete entity from Orion
 
-        curl -X DELETE \
-        http://0.0.0.0:1026/v2/entities/air_quality_observer_be_001 \
-        -H 'Accept: application/json'
+    ```bash
+    $ curl -X DELETE \
+    http://0.0.0.0:1026/v2/entities/air_quality_observer_be_001 \
+    -H 'Accept: application/json'
+    ```
 
     Delete subscription from Orion (replace the `id` with yours)
 
-        curl -X DELETE \
-        http://0.0.0.0:1026/v2/subscriptions/5b3df2ae940fcc446763ef90 \
-        -H 'Accept: application/json'
+    ```bash
+    $ curl -X DELETE \
+    http://0.0.0.0:1026/v2/subscriptions/5b3df2ae940fcc446763ef90 \
+    -H 'Accept: application/json'
+    ```
 
 ## Automated Sanity Check
 
@@ -143,14 +165,14 @@ the following example, ORION and QL are reachable by the test container at
 `192.0.0.1` and then, by default, ORION and QL find each other at `orion` and
 `quantumleap` endpoints because both were deployed in the same docker network.
 
-```
-docker run -ti --rm -e ORION_URL="http://192.0.0.1:1026" -e QL_URL="http://192.0.0.1:8668" quantumleap pytest tests/test_integration.py
+```bash
+$ docker run -ti --rm -e ORION_URL="http://192.0.0.1:1026" -e QL_URL="http://192.0.0.1:8668" quantumleap pytest tests/test_integration.py
 ```
 
 Or, assuming all services are in the same docker deployment and you have access
 to it, you can run the test container in the same network so as to use the
 service names in the urls.
 
-```
-docker run -ti --rm --network docker_default -e ORION_URL="http://orion:1026" -e QL_URL="http://quantumleap:8668" quantumleap pytest tests/test_integration.py
+```bash
+$ docker run -ti --rm --network docker_default -e ORION_URL="http://orion:1026" -e QL_URL="http://quantumleap:8668" quantumleap pytest tests/test_integration.py
 ```

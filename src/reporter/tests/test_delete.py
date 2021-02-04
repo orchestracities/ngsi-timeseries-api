@@ -278,6 +278,7 @@ def test_delete_347():
     r = requests.get(url, params=params, headers=h)
     assert r.status_code == 404, r.text
 
+
 def test_delete_different_servicepaths():
     """
     Selective delete by service Path.
@@ -315,7 +316,7 @@ def test_delete_different_servicepaths():
                       headers=hn)
     assert r.status_code == 200, r.text
 
-    #insert the same entity in a different service path
+    # insert the same entity in a different service path
     service_path = '/b'
     hn = {
         'Content-Type': 'application/json',

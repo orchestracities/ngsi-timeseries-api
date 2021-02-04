@@ -24,10 +24,10 @@ def query_url():
 def reporter_dataset():
     for service in services:
         insert_test_data(service, [entity_type], n_entities=1, index_size=30,
-                     entity_id=entity_id)
+                         entity_id=entity_id)
         insert_test_data(service, [entity_type_1], n_entities=1, index_size=30,
-                     entity_id=entity_id_1,
-                     index_base=datetime(1980, 1, 1, 0, 0, 0, 0))
+                         entity_id=entity_id_1,
+                         index_base=datetime(1980, 1, 1, 0, 0, 0, 0))
     yield
     for service in services:
         delete_test_data(service, [entity_type, entity_type_1])
@@ -110,7 +110,7 @@ def test_NTNE_fromDate_toDate(service, reporter_dataset):
     h = {'Fiware-Service': service}
     r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
-    
+
     expected_type = 'Room'
     expected_id = 'Room0'
     expected_index = [
@@ -146,7 +146,7 @@ def test_NTNE_fromDate_toDate_with_quotes(service, reporter_dataset):
     h = {'Fiware-Service': service}
     r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
-    
+
     expected_type = 'Room'
     expected_id = 'Room0'
     expected_index = [
@@ -241,7 +241,7 @@ def test_NTNE_combined(service, reporter_dataset):
     h = {'Fiware-Service': service}
     r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
-    
+
     expected_type = 'Room'
     expected_id = 'Room0'
     expected_index = [

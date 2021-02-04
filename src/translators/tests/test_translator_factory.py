@@ -48,4 +48,3 @@ def test_fix_404():
     os.environ['QL_CONFIG'] = 'src/translators/tests/ql-config-timescale-default.yml'
     with translator_for(None) as t:
         assert isinstance(t, PostgresTranslator)
-

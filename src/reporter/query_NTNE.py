@@ -5,12 +5,11 @@ from translators.factory import translator_for
 import logging
 
 
-
 def query_NTNE(limit=10000,
-                 type_=None,  # In Query
-                 from_date=None,
-                 to_date=None,
-                 offset=0):
+               type_=None,  # In Query
+               from_date=None,
+               to_date=None,
+               offset=0):
     """
     See /entities in API Specification
     quantumleap.yml
@@ -22,12 +21,12 @@ def query_NTNE(limit=10000,
     try:
         with translator_for(fiware_s) as trans:
             entities = trans.query_ids(limit=limit,
-                                   entity_type=type_,
-                                   from_date=from_date,
-                                   to_date=to_date,
-                                   offset=offset,
-                                   fiware_service=fiware_s,
-                                   fiware_servicepath=fiware_sp)
+                                       entity_type=type_,
+                                       from_date=from_date,
+                                       to_date=to_date,
+                                       offset=offset,
+                                       fiware_service=fiware_s,
+                                       fiware_servicepath=fiware_sp)
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)
         logging.getLogger(__name__).error(msg, exc_info=True)
@@ -59,4 +58,3 @@ def query_NTNE(limit=10000,
     }
     logging.getLogger(__name__).info("No value found for query")
     return r, 404
-

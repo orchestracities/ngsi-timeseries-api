@@ -41,38 +41,40 @@ NOTIFY_HEADERS = {
 def register():
     # Register Service
     data = {
-         "services": [
+        "services": [
            {
-             "apikey":      API_KEY,
-             "cbroker":     ORION_URL,
-             "entity_type": "thing",
-             "resource":    "/iot/d"
+               "apikey":      API_KEY,
+               "cbroker":     ORION_URL,
+               "entity_type": "thing",
+               "resource":    "/iot/d"
            }
-         ]
+        ]
     }
-    r = requests.post('{}/iot/services'.format(AGENT_CONFIG_URL, API_KEY, DEVICE_ID), data=json.dumps(data), headers=CONFIG_HEADERS)
+    r = requests.post('{}/iot/services'.format(AGENT_CONFIG_URL, API_KEY,
+                                               DEVICE_ID), data=json.dumps(data), headers=CONFIG_HEADERS)
     assert r.ok, r.text
 
     # Register Sensor
     data = {
-         "devices": [
+        "devices": [
            {
-             "device_id":   DEVICE_ID,
-             "x": "my_entity_01",
-             "entity_type": "thing",
-             "protocol":    "PDI-IoTA-UltraLight",
-             "timezone":    "Europe/Madrid",
-             "attributes": [
-               {
-                 "object_id": "t",
-                 "name":      "temperature",
-                 "type":      "float"
-               }
-             ]
+               "device_id":   DEVICE_ID,
+               "x": "my_entity_01",
+               "entity_type": "thing",
+               "protocol":    "PDI-IoTA-UltraLight",
+               "timezone":    "Europe/Madrid",
+               "attributes": [
+                   {
+                       "object_id": "t",
+                       "name":      "temperature",
+                       "type":      "float"
+                   }
+               ]
            }
-         ]
+        ]
     }
-    r = requests.post('{}/iot/devices'.format(AGENT_CONFIG_URL, API_KEY, DEVICE_ID), data=json.dumps(data), headers=CONFIG_HEADERS)
+    r = requests.post('{}/iot/devices'.format(AGENT_CONFIG_URL, API_KEY,
+                                              DEVICE_ID), data=json.dumps(data), headers=CONFIG_HEADERS)
     assert r.ok, r.text
 
 
@@ -80,7 +82,8 @@ def send():
     temperature = random.random() * 40
     data = 't|{}'.format(temperature)
     print("sending {}".format(data))
-    r = requests.post('{}/iot/d?k={}&i={}'.format(AGENT_NOTIFY_URL, API_KEY, DEVICE_ID), data=data, headers=NOTIFY_HEADERS)
+    r = requests.post('{}/iot/d?k={}&i={}'.format(AGENT_NOTIFY_URL,
+                                                  API_KEY, DEVICE_ID), data=data, headers=NOTIFY_HEADERS)
     return r
 
 

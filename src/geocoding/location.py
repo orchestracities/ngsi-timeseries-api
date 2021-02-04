@@ -26,7 +26,7 @@ class LocationAttribute:
 
     def is_geojson(self):
         return self.geometry_type() == _GEOJSON_TYPE or \
-               self.geometry_type() == _GEOJSON_LD_TYPE
+            self.geometry_type() == _GEOJSON_LD_TYPE
 
     def _compute_geojson_centroid(self):
         lon_lat = geojson_centroid(self.geometry_value())

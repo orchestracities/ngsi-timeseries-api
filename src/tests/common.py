@@ -46,10 +46,10 @@ class IntegrationTestEntity:
     def update(self):
         self.attrs['int_attr'] += random.choice((1, -1))
         return {
-          "int_attr": {
-            "value": self.attrs['int_attr'],
-            "type": "Number"
-          }
+            "int_attr": {
+                "value": self.attrs['int_attr'],
+                "type": "Number"
+            }
         }
 
     def __repr__(self):

@@ -55,9 +55,9 @@ def assert_saved_original(actual_row, original_entity,
 
 def assert_inserted_entity(actual_row, original_entity):
     assert actual_row['a_number'] == \
-           maybe_value(original_entity, 'a_number', 'value')
+        maybe_value(original_entity, 'a_number', 'value')
     assert actual_row['an_attr'] == \
-           maybe_value(original_entity, 'an_attr', 'value')
+        maybe_value(original_entity, 'an_attr', 'value')
     assert actual_row[ORIGINAL_ENTITY_COL] is None
 
 
@@ -193,8 +193,8 @@ class OriginalDataScenarios:
                              fetch_batch_id_clause: str) -> List[dict]:
         table = full_table_name(tenant)
         stmt = f"select {fetch_batch_id_clause} as batch, count(*) as count" + \
-               f" from {table} where {fetch_batch_id_clause} is not null" + \
-               f" group by {fetch_batch_id_clause}"
+            f" from {table} where {fetch_batch_id_clause} is not null" + \
+            f" group by {fetch_batch_id_clause}"
         return self.query(stmt)
 
     def run_query_failed_entities_scenario(self, fetch_batch_id_clause: str):

@@ -1,13 +1,12 @@
 # QuantumLeap
 
 [![FIWARE Core Context Management](https://img.shields.io/badge/FIWARE-Core-233c68.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABsAAAAVCAYAAAC33pUlAAAABHNCSVQICAgIfAhkiAAAA8NJREFUSEuVlUtIFlEUx+eO+j3Uz8wSLLJ3pBiBUljRu1WLCAKXbXpQEUFERSQF0aKVFAUVrSJalNXGgmphFEhQiZEIPQwKLbEUK7VvZrRvbr8zzjfNl4/swplz7rn/8z/33HtmRhn/MWzbXmloHVeG0a+VSmAXorXS+oehVD9+0zDN9mgk8n0sWtYnHo5tT9daH4BsM+THQC8naK02jCZ83/HlKaVSzBey1sm8BP9nnUpdjOfl/Qyzj5ust6cnO5FItJLoJqB6yJ4QuNcjVOohegpihshS4F6S7DTVVlNtFFxzNBa7kcaEwUGcbVnH8xOJD67WG9n1NILuKtOsQG9FngOc+lciic1iQ8uQGhJ1kVAKKXUs60RoQ5km93IfaREvuoFj7PZsy9rGXE9G/NhBsDOJ63Acp1J82eFU7OIVO1OxWGwpSU5hb0GqfMydMHYSdiMVnncNY5Vy3VbwRUEydvEaRxmAOSSqJMlJISTxS9YWTYLcg3B253xsPkc5lXk3XLlwrPLuDPKDqDIutzYaj3eweMkPeCCahO3+fEIF8SfLtg/5oI3Mh0ylKM4YRBaYzuBgPuRnBYD3mmhA1X5Aka8NKl4nNz7BaKTzSgsLCzWbvyo4eK9r15WwLKRAmmCXXDoA1kaG2F4jWFbgkxUnlcrB/xj5iHxFPiBN4JekY4nZ6ccOiQ87hgwhe+TOdogT1nfpgEDTvYAucIwHxBfNyhpGrR+F8x00WD33VCNTOr/Wd+9C51Ben7S0ZJUq3qZJ2OkZz+cL87ZfWuePlwRcHZjeUMxFwTrJZAJfSvyWZc1VgORTY8rBcubetdiOk+CO+jPOcCRTF+oZ0okUIyuQeSNL/lPrulg8flhmJHmE2gBpE9xrJNkwpN4rQIIyujGoELCQz8ggG38iGzjKkXufJ2Klun1iu65bnJub2yut3xbEK3UvsDEInCmvA6YjMeE1bCn8F9JBe1eAnS2JksmkIlEDfi8R46kkEkMWdqOv+AvS9rcp2bvk8OAESvgox7h4aWNMLd32jSMLvuwDAwORSE7Oe3ZRKrFwvYGrPOBJ2nZ20Op/mqKNzgraOTPt6Bnx5citUINIczX/jUw3xGL2+ia8KAvsvp0ePoL5hXkXO5YvQYSFAiqcJX8E/gyX8QUvv8eh9XUq3h7mE9tLJoNKqnhHXmCO+dtJ4ybSkH1jc9XRaHTMz1tATBe2UEkeAdKu/zWIkUbZxD+veLxEQhhUFmbnvOezsJrk+zmqMo6vIL2OXzPvQ8v7dgtpoQnkF/LP8Ruu9zXdJHg4igAAAABJRU5ErkJgggA=)](https://www.fiware.org/developers/catalogue/)
-[![](https://img.shields.io/badge/tag-fiware-orange.svg?logo=stackoverflow)](https://stackoverflow.com/questions/tagged/fiware)
-
+[![stackoverflow](https://img.shields.io/badge/tag-fiware-orange.svg?logo=stackoverflow)](https://stackoverflow.com/questions/tagged/fiware)
 
 ## Overview
 
 QuantumLeap is a REST service for storing, querying and retrieving
-[NGSI v2][ngsi-spec] and [NGSI-LD][ngsi-ld-spec] 
+[NGSI v2][ngsi-spec] and [NGSI-LD][ngsi-ld-spec]
 (*experimental support*) spatial-temporal data. QuantumLeap converts
 NGSI semi-structured data into tabular format and stores it in a
 [time-series database][tsdb], associating each database record with
@@ -31,16 +30,17 @@ presently QuantumLeap supports both [CrateDB][crate] and
 [Timescale][timescale] as back end databases.
 
 ### NGSI-LD support
-PR [#373](https://github.com/orchestracities/ngsi-timeseries-api/pulls/373) 
+
+PR [#373](https://github.com/orchestracities/ngsi-timeseries-api/pulls/373)
 introduced basic support for basic [NGSI-LD][ngsi-ld-spec] relying on v2 API.
 In short this means that using the current endpoint QL can
-store NGSI-LD payloads with few caveats (see 
+store NGSI-LD payloads with few caveats (see
 [#398](https://github.com/orchestracities/ngsi-timeseries-api/issues/398)):
 
 - temporal attributes are not currently supported
   ([#395](https://github.com/orchestracities/ngsi-timeseries-api/issues/395));
-   what is relevant here is that this attributes are
-   used to create the time index of the series
+  what is relevant here is that this attributes are
+  used to create the time index of the series
 
 - other attributes may be added as well in future (not a priority probably,
   so may not be tackled any time
@@ -66,8 +66,8 @@ all modern timeseries DB (to achieve performance).
 This imply that we have a policy to compute such time index (either custom
 and referring to an attribute of the entity, or using the "latest" time
 metadata linked to the entity or to an attribute).
-The issue is that if the notification payload sent to QL includes all attributes,
-also not update ones, QL will "timestamp" all values (also old ones)
+The issue is that if the notification payload sent to QL includes all
+attributes, also not update ones, QL will "timestamp" all values (also old ones)
 with that timestamp.
 
 This means that the ability to track a specific value
@@ -80,6 +80,7 @@ implementing NGSI-LD temporal api, may not be 100% compliant with
 the specs.
 
 ### Relation to STH Comet
+
 Although QuantumLeap and FIWARE [STH Comet][comet] share similar
 goals, Comet doesn't support multiple database back ends (only
 MongoDB is available) and doesn't support NGSI v2 either. While
@@ -88,7 +89,6 @@ assumptions that prompted its developments are no longer current.
 QuantumLeap started out as an exploration of an alternative way
 to make historical data available to the FIWARE ecosystem without
 committing to a specific database back end.
-
 
 ## Operation
 
@@ -119,8 +119,8 @@ to Orion. (You can read more about setting up subscriptions in the
 From this point on, when [Agents in the IoT layer][fw-catalogue] push
 data to the context broker **(2)**, if the data pertains to entities
 pinpointed by the client subscription, Orion forwards the data to
-QuantumLeap by POSTing NGSI entities to QuantumLeap's [notify end point][ql-spec]
-**(3)**.
+QuantumLeap by POSTing NGSI entities to QuantumLeap's
+[notify end point][ql-spec] **(3)**.
 
 QuantumLeap's **Reporter** component parses and validates POSTed data.
 Additionally, if geo-coding is configured, the **Reporter** invokes
@@ -155,7 +155,6 @@ would shield visualisation tools from QuantumLeap internals. In
 fact, there are plans to develop such a plugin in the (not-so-distant!)
 future.
 
-
 ## Database Back Ends
 
 One guiding principle in QuantumLeap design has been the ability
@@ -169,13 +168,14 @@ explains how to configure QuantumLeap to use one of the available
 database back ends.
 
 ### CrateDB back end
+
 [CrateDB][crate] is the default back end. It is easy to scale thanks
 to its shared-nothing architecture which lends itself well to
 [containerisation][crate-doc.cont] so it is relatively easy to
 manage a containerised CrateDB database cluster, e.g. using Kubernetes.
 Moreover, CrateDB uses [SQL][crate-doc.sql] to query data, with
 built-in extensions for temporal and [geographical queries][crate-doc.geo].
-CrateDB offers as well a Postgres API, making simpler its integration. 
+CrateDB offers as well a Postgres API, making simpler its integration.
 For example, you can leverage Grafana [PostgreSQL plugin][grafana.pg]
 to visualise time series stored in CrateDB.
 
@@ -186,6 +186,7 @@ QuantumLeap stores NGSI entities in CrateDB using the `notify` endpoint.
     -------------------------          ---------------
 
 ### Timescale back end
+
 [Timescale][timescale] is another time series databases that can be
 used with QuantumLeap as a back end to store NGSI entity time series.
 Indeed, QuantumLeap provides full support for storing NGSI entities in
@@ -193,7 +194,7 @@ Timescale, including geographical features (encoded as GeoJSON or NGSI
 Simple Location Format), structured types and arrays.
 
 QuantumLeap stores NGSI entities in Timescale using the
-`notify` endpoint (as for CrateDB). 
+`notify` endpoint (as for CrateDB).
 The Timescale back end is made up of [PostgreSQL][postgres]
 with both Timescale and [PostGIS][postgis] extensions enabled:
 
@@ -221,9 +222,10 @@ The `test_timescale_insert.py` file in the QuantumLeap source base
 contains quite a number of examples of how NGSI data are stored in
 Timescale.
 
-#### Note: querying & retrieving data
+#### Note: querying & retrieving database
+
 At the moment, QuantumLeap implement experimental querying
-of data through the QuantumLeap REST API. 
+of data through the QuantumLeap REST API.
 This means that while REST API on top of CrateDB
 have been tested in production, this is not the case for
 Timescale.
@@ -245,6 +247,7 @@ Caching support for queries to databases is *experimental*.
                                   ---------------                                        
 
 As of today, the query caching stores:
+
 - Version of CrateDB. Different version of CrateDB supports different SQL
   dialects, so at each request we check which version of CrateDB
   we are using. By caching this information, each thread will ask
@@ -258,13 +261,13 @@ As of today, the query caching stores:
 - Metadata table. The metadata table is used to store information about the
   mapping between original NGSI attributes (including type) to db column names.
   Basically this information is required to perform "consistent" data injection
-  and to correctly NGSI type retrieved attributes by queries. Given concurrency due
-  to the support of multithread and ha deployment, cache in this case has by default
-  a shorter TTL (60 sec). Cache is anyhow re-set every time a change to Metadata
-  table occurs (e.g. in case the incoming payload include a new entityType or
-  a new attribute for an existing entityType). **Metadata** for a specific
-  entityType are removed only if a entityType is dropped, not in case
-  all its values are removed.
+  and to correctly NGSI type retrieved attributes by queries. Given concurrency
+  due to the support of multithread and ha deployment, cache in this case has by
+  default a shorter TTL (60 sec). Cache is anyhow re-set every time a change to
+  Metadata table occurs (e.g. in case the incoming payload include a new
+  entityType or a new attribute for an existing entityType). **Metadata**
+  for a specific entityType are removed only if a entityType is dropped, not
+  in case all its values are removed.
 
 ## Further Readings
 
@@ -274,8 +277,6 @@ As of today, the query caching stores:
   it to other complementary services.
 - [FIWARE Time Series][ql-tut]: a complete, step-by-step, hands-on tutorial
   to learn how to set up and use QuantumLeap.
-
-
 
 [comet]: https://fiware-sth-comet.readthedocs.io/en/latest/
     "FIWARE STH Comet Manual"
