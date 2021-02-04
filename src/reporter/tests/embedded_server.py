@@ -1,8 +1,11 @@
+import backoff
 from pathlib import Path
 import os
+import requests
 from threading import Thread
 from typing import Any
 
+from conftest import QL_BASE_URL
 from cache.factory import CACHE_QUERIES_ENV_VAR, REDIS_HOST_ENV_VAR
 from geocoding.factory import USE_GEOCODING_ENV_VAR
 import server.wsgi as flask
@@ -58,14 +61,40 @@ class ServerConfig:
         self.set_postgres_host_env_var()
 
 
+@backoff.on_exception(
+    backoff.fibo,
+    (requests.ConnectionError,  # server is down
+     requests.Timeout,          # either a connection or response read timeout
+     requests.HTTPError),       # server didn't respond w/ a 200
+    max_time=60                 # give up after 60 secs
+)
+def _wait_for_flask():
+    version_url = f"{QL_BASE_URL}/version"
+    r = requests.get(version_url)
+    r.raise_for_status()
+
+
 def start_embedded_flask():
     ServerConfig().set_env()
 
     t = Thread(target=flask.run, args=())
-    t.daemon = True                        # (*)
+    t.daemon = True                        # (1)
     t.start()
 
-# NOTE. Daemon thread. This makes sure the program won't wait on this
+    _wait_for_flask()                      # (2)
+
+# NOTE.
+# 1. Daemon thread. This makes sure the program won't wait on this
 # thread to complete before exiting, which is what we want b/c of the
 # infinite loop in the run method. The downside is that when the Python
 # interpreter quits, this thread will be interrupted abruptly.
+# 2. Thread sync. Flask could have a slow start, so it can happen that
+# test functions start hammering Flask while it's still busy prepping
+# the WSGI app. Hence the call to the version endpoint to make sure the
+# server is up and running before we start testing. Yea, that's not how
+# you do multi-threading programming. I hear you, but I looked into an
+# easy way to send a message from the Flask main thread to the Pytest
+# thread that spawns it and had no luck. My Google foo failed me. I don't
+# think Flask raises any signals either. The best I could find is:
+# - https://stackoverflow.com/questions/27465533
+# That's more work I'm prepared to put in. So HTTP call it is for now.
