@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+bitmath = "~=1.3"
 certifi = "==2018.10.15"
 "connexion[swagger-ui]" = "~=2.2"
 crate = "~=0.22"
