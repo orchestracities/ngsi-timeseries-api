@@ -33,17 +33,24 @@ def delete_entity(entity_id, type_=None, from_date=None, to_date=None):
 
 def delete_entities(entity_type, from_date=None, to_date=None,
                     drop_table=False):
-    with translator_for(fiware_s()) as trans:
-        if drop_table:
-            trans.drop_table(etype=entity_type, fiware_service=fiware_s())
-            logging.getLogger(__name__).info("dropped entity_type {}".format(entity_type))
-            return 'entity table dropped', 204
+        with translator_for(fiware_s()) as trans:
+            if fiware_s() is not None:
+                e = None
+                e = fiware_s().split(",")
+                for i in e:
+                    count = len(e)
+                    if count > 1:
+                        return "entity table has more than one servicepath", 422
+            elif drop_table:
+                trans.drop_table(etype=entity_type, fiware_service=fiware_s())
+                logging.getLogger(__name__).info("dropped entity_type {}".format(entity_type))
+                return 'entity table dropped', 204
 
-        deleted = trans.delete_entities(etype=entity_type,
-                                        from_date=from_date,
-                                        to_date=to_date,
-                                        fiware_service=fiware_s(),
-                                        fiware_servicepath=fiware_sp(),)
+            deleted = trans.delete_entities(etype=entity_type,
+                                            from_date=from_date,
+                                            to_date=to_date,
+                                            fiware_service=fiware_s(),
+                                            fiware_servicepath=fiware_sp(),)
 
         logging.getLogger(__name__).info("deleted {} entities of type {}".format(deleted, entity_type))
         if deleted == 0:
