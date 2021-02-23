@@ -477,10 +477,6 @@ class SQLTranslator(base_translator.BaseTranslator):
                         mapped_value = self._ngsi_geojson_to_db(e[attr])
                     elif self._is_ngsi_ld_datetime_property(e[attr]):
                         mapped_value = self._ngsi_ld_datetime_to_db(e[attr])
-                    elif self._is_ngsi_array(e[attr], attr_t):
-                        mapped_value = self._ngsi_array_to_db(e[attr])
-                    elif self._is_ngsi_object(e[attr], attr_t):
-                        mapped_value = self._ngsi_structured_to_db(e[attr])
                     elif attr_t == NGSI_TEXT:
                         mapped_value = self._ngsi_text_to_db(e[attr])
                     elif attr_t == NGSI_DATETIME or attr_t == NGSI_ISO8601:
@@ -494,6 +490,10 @@ class SQLTranslator(base_translator.BaseTranslator):
                     elif attr_t == 'Relationship':
                         mapped_value = self._ngsi_ld_relationship_to_db(
                             e[attr])
+                    elif self._is_ngsi_array(e[attr], attr_t):
+                        mapped_value = self._ngsi_array_to_db(e[attr])
+                    elif self._is_ngsi_object(e[attr], attr_t):
+                        mapped_value = self._ngsi_structured_to_db(e[attr])
                     else:
                         mapped_value = self._ngsi_default_to_db(e[attr])
 
