@@ -204,6 +204,63 @@ if a_type not in NGSI
         type = DateTime
 ```
 
+### Data Casting
+
+QuantumLeap uses DB schemas to store data in a flat way. This decision design decision,
+while not being space efficient given that often many values do not change between
+sequential inserts and enforcing attribute to have a consistent type overtime,
+increase the speed of retrieval of full entities removing need for joins that
+would be otherwise requested.
+
+This means that if an entity attribute was in origin received as a `Number`, following
+insert changing the same attribute to `Text` would fail. To mitigate this failures,
+QL attempts data casting, if casting is not possible, values are replace with `None`,
+to ensure that the insert in the data base its not failing totally for the received
+entity.
+
+The following table shows how the casting works through examples:
+
+| Type          | Original value          | Stored value |
+| ------------- |:-----------------------:| :------------|
+| Number | 1.0 | 1.0 |
+| Number | 1 | 1.0 |
+| Number | True | None |
+| Number | "1.0" | 1.0 |
+| Number | "2017-06-19T11:46:45.00Z" | None |
+| Integer | 1.0 | 1 |
+| Integer | 1 | 1 |
+| Integer | True | None |
+| Integer | "1.0" | 1 |
+| Integer | "2017-06-19T11:46:45.00Z" | None |
+| DateTime | 1.0 | None |
+| DateTime | 1 | None |
+| DateTime | True | None |
+| DateTime | "error" | None |
+| DateTime | "2017-06-19T11:46:45.00Z" | "2017-06-19T11:46:45.000+00:00" |
+| Text | 1.0 | "1.0" |
+| Text | 1 | "1" |
+| Text | True | "True" |
+| Text | "1.0" | "1.0" |
+| Text | "2017-06-19T11:46:45.00Z" | "2017-06-19T11:46:45.00Z" |
+| Text | ["a", "b"] | "['a', 'b']" |
+| Text | {"test": "test"} | "{'test': 'test'}" |
+| StructuredValue | 1.0 | None |
+| StructuredValue | 1 | None |
+| StructuredValue | True | None |
+| StructuredValue | "1.0" | None |
+| StructuredValue | "2017-06-19T11:46:45.00Z" | None |
+| StructuredValue | {"test": "test"} | {"test": "test"} |
+| StructuredValue" | ["a", "b"] | ["a", "b"] |
+| Property | 1.0 | 1.0 |
+| Property | 1 | 1 |
+| Property | True | True |
+| Property | "1.0" | "1.0" |
+| Property | "2017-06-19T11:46:45.00Z" | "2017-06-19T11:46:45.000+00:00" |
+| Property | {"test": "test"} | {"test": "test"} |
+| Property | ["a", "b"] | ["a", "b"] |
+
+**N.B.:** Casting logic may change in the future!
+
 ### [Time Index](#timeindex)
 
 A fundamental element in the time-series database is the **time index**.
