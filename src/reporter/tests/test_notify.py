@@ -16,10 +16,12 @@ SLEEP_TIME = 1
 
 
 def query_url(entity_type='Room', eid='Room1', attr_name='temperature',
-              values=False):
+              values=False, last=False):
     url = "{qlUrl}/entities/{entityId}/attrs/{attrName}"
     if values:
         url += '/value'
+    if last:
+        url += '?lastN=1'
     return url.format(
         qlUrl=QL_URL,
         entityId=eid,
@@ -140,6 +142,65 @@ def test_valid_no_modified(notification, service):
     time.sleep(SLEEP_TIME)
     r = requests.get(query_url(), params=None, headers=query_header(service))
     assert r.status_code == 200, r.text
+    delete_entity_type(service, 'Room')
+
+
+@pytest.mark.parametrize("e_type, e_value, exp_value", [
+    ("Number", 1.0, 1.0),
+    ("Number", 1, 1.0),
+    ("Number", True, None),
+    ("Number", "1.0", 1.0),
+    ("Number", "2017-06-19T11:46:45.00Z", None),
+    ("Integer", 1.0, 1),
+    ("Integer", 1, 1),
+    ("Integer", True, None),
+    ("Integer", "1.0", 1),
+    ("Integer", "2017-06-19T11:46:45.00Z", None),
+    ("DateTime", 1.0, None),
+    ("DateTime", 1, None),
+    ("DateTime", True, None),
+    ("DateTime", "error", None),
+    ("DateTime", "2017-06-19T11:46:45.00Z", "2017-06-19T11:46:45.000+00:00"),
+    ("Text", 1.0, "1.0"),
+    ("Text", 1, "1"),
+    ("Text", True, "True"),
+    ("Text", "1.0", "1.0"),
+    ("Text", "2017-06-19T11:46:45.00Z", "2017-06-19T11:46:45.00Z"),
+    ("Text", ["a", "b"], "['a', 'b']"),
+    ("Text", {"test": "test"}, "{'test': 'test'}"),
+    ("StructuredValue", 1.0, None),
+    ("StructuredValue", 1, None),
+    ("StructuredValue", True, None),
+    ("StructuredValue", "1.0", None),
+    ("StructuredValue", "2017-06-19T11:46:45.00Z", None),
+    ("StructuredValue", {"test": "test"}, {"test": "test"}),
+    ("StructuredValue", ["a", "b"], ["a", "b"]),
+    ("Property", 1.0, 1.0),
+    ("Property", 1, 1),
+    ("Property", True, True),
+    ("Property", "1.0", "1.0"),
+    ("Property", "2017-06-19T11:46:45.00Z", "2017-06-19T11:46:45.000+00:00"),
+    ("Property", {"test": "test"}, {"test": "test"}),
+    ("Property", ["a", "b"], ["a", "b"]),
+])
+@pytest.mark.parametrize("service", services)
+def test_valid_data_for_type(notification, service, e_type, e_value, exp_value):
+    del notification['data'][0]['temperature']
+
+    notification['data'][0][e_type.lower()] = {
+        'type': e_type,
+        'value': e_value
+    }
+    r = requests.post('{}'.format(notify_url),
+                      data=json.dumps(notification),
+                      headers=notify_header(service))
+    assert r.status_code == 200
+    time.sleep(SLEEP_TIME)
+    r = requests.get(query_url(attr_name=e_type.lower(), last=True), params=None,
+                     headers=query_header(service))
+    assert r.status_code == 200
+    assert r.json()['values'][0] == exp_value
+
     delete_entity_type(service, 'Room')
 
 

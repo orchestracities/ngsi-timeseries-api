@@ -1,6 +1,7 @@
 import os
 import pytest
 import random
+import json
 from time import sleep
 from typing import Any, Callable, Generator, List
 
@@ -46,7 +47,10 @@ def gen_entity(entity_id: int, attr_type: str, attr_value) -> dict:
 def assert_saved_original(actual_row, original_entity,
                           should_have_batch_id=False):
     saved_entity = actual_row[ORIGINAL_ENTITY_COL]
-    assert original_entity == saved_entity['data']
+    data = saved_entity['data']
+    if not isinstance(saved_entity['data'], dict):
+        data = json.loads(data)
+    assert original_entity == data
     if should_have_batch_id:
         assert saved_entity['failedBatchID']
     else:
@@ -68,6 +72,14 @@ def assert_failed_entity(actual_row, original_entity):
 
     assert_saved_original(actual_row, original_entity,
                           should_have_batch_id=True)
+
+
+def assert_partial_entity(actual_row, original_entity):
+    assert actual_row['a_number'] == \
+           maybe_value(original_entity, 'a_number', 'value')
+    assert actual_row['an_attr'] != \
+           maybe_value(original_entity, 'an_attr', 'value')
+    assert actual_row[ORIGINAL_ENTITY_COL] is None
 
 
 def full_table_name(tenant: str) -> str:
@@ -134,8 +146,8 @@ class OriginalDataScenarios:
         rs = self.fetch_rows(tenant)
 
         assert len(rs) == 2
-        assert_failed_entity(rs[0], good_entity)
-        assert_failed_entity(rs[1], bad_entity)
+        assert_partial_entity(rs[0], good_entity)
+        assert_partial_entity(rs[1], bad_entity)
 
     def run_data_loss_scenario(self):
         tenant = gen_tenant_id()

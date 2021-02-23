@@ -1,3 +1,4 @@
+import json
 from contextlib import contextmanager
 from crate import client
 from crate.client import exceptions
@@ -67,7 +68,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
         # we need to think if we want to cache this information
         # and save few msec for evey API call
         self.db_version = self.get_db_version()
-        self.active_shards = EnvReader(log=logging.getLogger(__name__).debug)\
+        self.active_shards = EnvReader(log=logging.getLogger(__name__).debug) \
             .read(StrVar('CRATE_WAIT_ACTIVE_SHARDS', '1'))
 
         major = int(self.db_version.split('.')[0])
@@ -122,41 +123,35 @@ class CrateTranslator(sql_translator.SQLTranslator):
 
         return health
 
-    def _preprocess_values(self, e, original_attrs, col_names, fiware_servicepath):
-        values = []
-        for cn in col_names:
-            if cn == 'entity_type':
-                values.append(e['type'])
-            elif cn == 'entity_id':
-                values.append(e['id'])
-            elif cn == self.TIME_INDEX_NAME:
-                values.append(e[self.TIME_INDEX_NAME])
-            elif cn == FIWARE_SERVICEPATH:
-                values.append(fiware_servicepath or '')
-            else:
-                # Normal attributes
-                try:
-                    attr = original_attrs[cn][0]
-                    value = e[attr].get('value', None)
-                    if 'type' in e[attr] and e[attr]['type'] == 'geo:point':
-                        lat, lon = e[attr]['value'].split(',')
-                        value = [float(lon), float(lat)]
-                    elif 'type' in e[attr] and e[attr]['type'] == 'Property' \
-                         and 'value' in e[attr] \
-                         and isinstance(e[attr]['value'], dict) \
-                         and '@type' in e[attr]['value'] \
-                         and e[attr]['value']['@type'] == 'DateTime':
-                        value = e[attr]['value']['@value']
-                    elif 'type' in e[attr] and e[attr]['type'] == 'Relationship':
-                        value = e[attr].get('value', None) or \
-                            e[attr].get('object', None)
+    @staticmethod
+    def _ngsi_geojson_to_db(attr):
+        return attr['value']
 
-                    values.append(value)
-                except KeyError:
-                    # this entity update does not have a value for the column
-                    # so use None which will be inserted as NULL to the db.
-                    values.append(None)
-        return values
+    @staticmethod
+    def _ngsi_slf_to_db(attr):
+        if attr['type'] == 'geo:point':
+            lat, lon = attr['value'].split(',')
+            return [float(lon), float(lat)]
+
+    @staticmethod
+    def _ngsi_structured_to_db(attr):
+        attr_v = attr.get('value', None)
+        if isinstance(attr_v, dict):
+            return attr_v
+        logging.warning('{} cannot be cast to {} replaced with None'.format(attr['value'], attr['type']))
+        return None
+
+    @staticmethod
+    def _ngsi_array_to_db(attr):
+        attr_v = attr.get('value', None)
+        if isinstance(attr_v, list):
+            return attr_v
+        logging.warning('{} cannot be cast to {} replaced with None'.format(attr['value'], attr['type']))
+        return None
+
+    @staticmethod
+    def _ngsi_default_to_db(attr):
+        return attr.get('value', None)
 
     def _create_data_table(self, table_name, table, fiware_service):
         columns = ', '.join('"{}" {}'.format(cn.lower(), ct)
@@ -178,6 +173,19 @@ class CrateTranslator(sql_translator.SQLTranslator):
     def _should_insert_original_entities(self,
                                          insert_error: Exception) -> bool:
         return isinstance(insert_error, exceptions.ProgrammingError)
+
+    def _build_original_data_value(self, entity: dict,
+                                   insert_error: Exception = None,
+                                   failed_batch_id: str = None) -> Any:
+        value = {
+            'data': json.dumps(entity)
+        }
+        if failed_batch_id:
+            value['failedBatchID'] = failed_batch_id
+        if insert_error:
+            value['error'] = repr(insert_error)
+
+        return self._to_db_ngsi_structured_value(value)
 
     def _create_metadata_table(self):
         stmt = "create table if not exists {} " \
@@ -202,7 +210,8 @@ class CrateTranslator(sql_translator.SQLTranslator):
         crate_t = self.NGSI_TO_SQL[attr_t]
         if attr_t == NGSI_TEXT:
             attr_v = attr.get('value', '')
-            is_long = attr_v is not None and len(attr_v) > 32765
+            is_long = attr_v is not None and isinstance(attr_v, str) \
+                and len(attr_v) > 32765
             if is_long:
                 crate_t += ' INDEX OFF STORAGE WITH (columnstore = false)'
         return crate_t
