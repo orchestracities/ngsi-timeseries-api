@@ -250,7 +250,7 @@ The following table shows how the casting works through examples:
 | StructuredValue | "1.0" | None |
 | StructuredValue | "2017-06-19T11:46:45.00Z" | None |
 | StructuredValue | {"test": "test"} | {"test": "test"} |
-| StructuredValue" | ["a", "b"] | ["a", "b"] |
+| StructuredValue | ["a", "b"] | ["a", "b"] |
 | Property | 1.0 | 1.0 |
 | Property | 1 | 1 |
 | Property | True | True |
