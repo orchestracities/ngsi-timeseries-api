@@ -9,7 +9,7 @@ jobs:
       - run: cd timescale-container && docker build -t orchestracities/quantumleap-db-setup:$CIRCLE_BRANCH .
   test_translators:
     docker:
-      - image: circleci/python:3.8.3
+      - image: circleci/python:3.8.5
         environment:
           PIPENV_VENV_IN_PROJECT: true
           QL_CONFIG: src/translators/tests/ql-config.yml
