@@ -30,8 +30,8 @@ jobs:
             - "/usr/local/lib/python3.8/site-packages"
       - run:
           command: |
-            cd src/translators/tests
-            pipenv run  src/translators/ --cov-report= --cov-config=.coveragerc --cov=src/
+            ls
+          # pipenv run  src/translators/ --cov-report= --cov-config=.coveragerc --cov=src/
 
 
 workflows:
