@@ -12,6 +12,7 @@ jobs:
       - image: circleci/python:3.8.3
         environment:
           PIPENV_VENV_IN_PROJECT: true
+          QL_CONFIG: src/translators/tests/ql-config.yml
     steps:
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8/site-packages
@@ -27,6 +28,12 @@ jobs:
             - ".venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.8/site-packages"
+      - run:
+          command: |
+            pipenv shell
+            cd src/translators/tests
+            pytest src/translators/ --cov-report= --cov-config=.coveragerc --cov=src/
+
 
 workflows:
   main:
