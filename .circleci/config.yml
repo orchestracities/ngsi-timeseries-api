@@ -6,6 +6,7 @@ jobs:
     steps:
       - checkout
       - run: docker build -t orchestracities/quantumleap:$CIRCLE_BRANCH .
+      - run: cd timescale-container && docker build -t orchestracities/quantumleap-db-setup:$CIRCLE_BRANCH .
 
 
 workflows:
