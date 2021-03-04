@@ -1,0 +1,16 @@
+version: 2.1
+
+jobs: 
+  build:
+    machine: true
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run: docker build -t orchestracities/quantumleap:$CIRCLE_BRANCH .
+
+
+workflows:
+  main:
+    jobs:
+      - build
