@@ -1,8 +1,5 @@
 version: 2.1
 
-orbs:
-    python: circleci/python@1.0.0
-
 jobs: 
   build:
     machine: true
@@ -11,15 +8,25 @@ jobs:
       - run: docker build -t orchestracities/quantumleap:$CIRCLE_BRANCH .
       - run: cd timescale-container && docker build -t orchestracities/quantumleap-db-setup:$CIRCLE_BRANCH .
   test_translators:
-    executor: python/default
+    docker:
+      - image: circleci/python:3.8.3
+        environment:
+          PIPENV_VENV_IN_PROJECT: true
     steps:
-        - checkout
-        - python/install-packages:
-            args: pytest
-            pkg-manager: pipenv
-        - run:
-            command: |
-                pipenv run pytest --version
+      - run: sudo chown -R circleci:circleci /usr/local/bin
+      - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8/site-packages
+      - restore_cache:  # ensure this step occurs *before* installing dependencies
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+      - run:
+          command: |
+            sudo pip install pipenv
+            pipenv install
+      - save_cache:
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          paths:
+            - ".venv"
+            - "/usr/local/bin"
+            - "/usr/local/lib/python3.8/site-packages"
 
 workflows:
   main:
