@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+    python: circleci/python@1.0.0
+
 jobs: 
   build:
     machine: true
@@ -8,12 +11,15 @@ jobs:
       - run: docker build -t orchestracities/quantumleap:$CIRCLE_BRANCH .
       - run: cd timescale-container && docker build -t orchestracities/quantumleap-db-setup:$CIRCLE_BRANCH .
   test_translators:
-    docker:
-      - image: cimg/python:3.8.3
+    executor: python/default
     steps:
-      - checkout
-      - run:
-          command: pipenv shell
+        - checkout
+        - python/install-packages:
+            args: pytest
+            pkg-manager: pipenv
+        - run:
+            command: |
+                pipenv run pytest --version
 
 workflows:
   main:
