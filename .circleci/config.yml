@@ -35,7 +35,7 @@ jobs:
           command: |
             set -x
             ls
-            cd src/translators/
+            cd src/translators/tests
             ls
             docker-compose build quantumleap-db-setup
             docker-compose up -d
