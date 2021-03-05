@@ -36,6 +36,7 @@ jobs:
       - run:
           command: |
               source setup_dev_env.sh
+              echo $LH
               sh run_tests.sh
 
 workflows:
