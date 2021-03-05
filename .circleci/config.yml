@@ -13,6 +13,22 @@ jobs:
         environment:
           PIPENV_VENV_IN_PROJECT: true
           QL_CONFIG: src/translators/tests/ql-config.yml
+      - image: crate:${CRATE_VERSION}
+        command: crate -Cauth.host_based.enabled=false -Ccluster.name=democluster -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*"
+      - image: timescale/timescaledb-postgis:${TIMESCALE_VERSION}
+        environment:
+          POSTGRES_PASSWORD: *
+      - image: orchestracities/quantumleap-db-setup:$CIRCLE_BRANCH
+        environment:
+          QL_DB_PASS: *
+          QL_DB_INIT_DIR: /ql-db-init
+          PG_HOST: timescale
+          PG_PASS: *
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
@@ -31,8 +47,7 @@ jobs:
             - "/usr/local/lib/python3.8/site-packages"
       - run:
           command: |
-            ls
-          # pipenv run  src/translators/ --cov-report= --cov-config=.coveragerc --cov=src/
+            pipenv run  pytest src/translators/ --cov-report= --cov-config=.coveragerc --cov=src/
 
 
 workflows:
