@@ -23,14 +23,25 @@ jobs:
           command: |
             sudo pip install pipenv
             pipenv install
+      - save_cache:
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          paths:
+            - ".venv"
+            - "/usr/local/bin"
+            - "/usr/local/lib/python3.8/site-packages"
+      #- setup_remote_docker
+      - run:
+          name: set up variables
+          command: |
+            set -e
             source deps.env
-            LH=`( /sbin/ifconfig ens4 | grep 'inet' | cut -d: -f2 | awk '{ print $1}' ) 2> /dev/null`
-            if [ -z "$LH" ]
-            then
+            #LH=`( /sbin/ifconfig ens4 | grep 'inet' | cut -d: -f2 | awk '{ print $1}' ) 2> /dev/null`
+            #if [ -z "$LH" ]
+            #then
                 # Aliasing so that notifications from orion container reach dev localhost
                 LH=192.0.0.1
-                sudo ifconfig lo0 alias $LH
-            fi
+            #    sudo ifconfig lo0 alias $LH
+            #fi
 
             export ORION_HOST=$LH
             export MONGO_HOST=$LH
@@ -40,13 +51,6 @@ jobs:
             export POSTGRES_HOST=$LH
 
             export REDIS_HOST=$LH
-      - save_cache:
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
-          paths:
-            - ".venv"
-            - "/usr/local/bin"
-            - "/usr/local/lib/python3.8/site-packages"
-      #- setup_remote_docker
       - run:
           name: Start container and verify it's working
           command: |
