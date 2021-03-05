@@ -30,10 +30,15 @@ jobs:
             - "/usr/local/bin"
             - "/usr/local/lib/python3.8/site-packages"
       #- setup_remote_docker
+      #- run:
+      #    name: set up variables
+      #    command: |
+      #      set -e
+      #      
       - run:
-          name: set up variables
+          name: Start container and verify it's working
           command: |
-            set -e
+            set -x
             source deps.env
             #LH=`( /sbin/ifconfig ens4 | grep 'inet' | cut -d: -f2 | awk '{ print $1}' ) 2> /dev/null`
             #if [ -z "$LH" ]
@@ -51,10 +56,6 @@ jobs:
             export POSTGRES_HOST=$LH
 
             export REDIS_HOST=$LH
-      - run:
-          name: Start container and verify it's working
-          command: |
-            set -x
             echo $ORION_HOST
             echo $CRATE_VERSION
             ls
