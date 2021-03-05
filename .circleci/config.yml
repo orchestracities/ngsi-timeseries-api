@@ -29,12 +29,14 @@ jobs:
             - ".venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.8/site-packages"
-      - setup_remote_docker
+      #- setup_remote_docker
       - run:
           name: Start container and verify it's working
           command: |
             set -x
+            ls
             cd src/translators/
+            ls
             docker-compose build quantumleap-db-setup
             docker-compose up -d
       - run:
