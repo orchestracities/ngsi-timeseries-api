@@ -7,13 +7,14 @@ jobs:
       - checkout
       - run: docker build -t orchestracities/quantumleap:$CIRCLE_BRANCH .
   test_translators:
-    docker:
-      - image: circleci/python:3.8.5
-        environment:
-          PIPENV_VENV_IN_PROJECT: true
-          QL_CONFIG: src/translators/tests/ql-config.yml
+    machine: true
     steps:
       - checkout
+      - run:
+          name: "Switch to Python v3.8.5"
+          command: |
+            pyenv versions
+            pyenv global 3.8.5
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8/site-packages
       - restore_cache:  # ensure this step occurs *before* installing dependencies
@@ -28,40 +29,6 @@ jobs:
             - ".venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.8/site-packages"
-      #- setup_remote_docker
-      #- run:
-      #    name: set up variables
-      #    command: |
-      #      set -e
-      # 
-      - run: cd timescale-container && docker build -t quantumleap-db-setup . && cd ..
-      - run:
-          name: Start container and verify it's working
-          command: |
-            set -x
-            source deps.env
-            #LH=`( /sbin/ifconfig ens4 | grep 'inet' | cut -d: -f2 | awk '{ print $1}' ) 2> /dev/null`
-            #if [ -z "$LH" ]
-            #then
-                # Aliasing so that notifications from orion container reach dev localhost
-                LH=192.0.0.1
-            #    sudo ifconfig lo0 alias $LH
-            #fi
-
-            export ORION_HOST=$LH
-            export MONGO_HOST=$LH
-
-            export QL_HOST=$LH
-            export CRATE_HOST=$LH
-            export POSTGRES_HOST=$LH
-
-            export REDIS_HOST=$LH
-            echo $ORION_HOST
-            echo $CRATE_VERSION
-            ls
-            cd src/translators/tests
-            ls
-            docker-compose up -d
       - run:
           command: |
             docker-compose ps
