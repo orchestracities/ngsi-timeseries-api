@@ -25,7 +25,7 @@ jobs:
             sudo add-apt-repository universe
             sudo apt install python3-pip
             sudo pip install pipenv
-            pipenv install
+            pipenv install --dev
             ls /usr/local/lib/python3.8
       - save_cache:
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
@@ -35,9 +35,8 @@ jobs:
             - "/usr/local/lib/python3.8"
       - run:
           command: |
-            docker-compose ps
-          # pipenv run  src/translators/ --cov-report= --cov-config=.coveragerc --cov=src/
-
+              source setup_dev_env.sh
+              sh run_tests.sh
 
 workflows:
   main:
