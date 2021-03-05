@@ -7,7 +7,8 @@ jobs:
       - checkout
       - run: docker build -t orchestracities/quantumleap:$CIRCLE_BRANCH .
   test_translators:
-    machine: true
+    machine:
+      image: ubuntu-2004:202101-01
     steps:
       - checkout
       - run:
