@@ -6,7 +6,6 @@ jobs:
     steps:
       - checkout
       - run: docker build -t orchestracities/quantumleap:$CIRCLE_BRANCH .
-      - run: cd timescale-container && docker build -t orchestracities/quantumleap-db-setup:$CIRCLE_BRANCH .
   test_translators:
     docker:
       - image: circleci/python:3.8.5
@@ -34,7 +33,8 @@ jobs:
       #    name: set up variables
       #    command: |
       #      set -e
-      #      
+      # 
+      - run: cd timescale-container && docker build -t quantumleap-db-setup . && cd ..
       - run:
           name: Start container and verify it's working
           command: |
@@ -61,7 +61,6 @@ jobs:
             ls
             cd src/translators/tests
             ls
-            docker-compose build quantumleap-db-setup
             docker-compose up -d
       - run:
           command: |
