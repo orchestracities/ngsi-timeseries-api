@@ -16,20 +16,22 @@ jobs:
           command: |
             pyenv versions
             pyenv global 3.8.5
+            ls /usr/local/lib/
+            ls /usr/local/lib/python3.8
       - run: sudo chown -R circleci:circleci /usr/local/bin
-      - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8/site-packages
-      - restore_cache:  # ensure this step occurs *before* installing dependencies
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+    #- run: sudo chown -R circleci:circleci /usr/local/lib/python3.8/site-packages
+    #  - restore_cache:  # ensure this step occurs *before* installing dependencies
+    #      key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
           command: |
             sudo pip install pipenv
             pipenv install
-      - save_cache:
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
-          paths:
-            - ".venv"
-            - "/usr/local/bin"
-            - "/usr/local/lib/python3.8/site-packages"
+    #  - save_cache:
+    #      key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+    #      paths:
+    #        - ".venv"
+    #        - "/usr/local/bin"
+    #        - "/usr/local/lib/python3.8/site-packages"
       - run:
           command: |
             docker-compose ps
@@ -39,5 +41,5 @@ jobs:
 workflows:
   main:
     jobs:
-      - build
+    #  - build
       - test_translators
