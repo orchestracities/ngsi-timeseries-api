@@ -18,15 +18,23 @@ source deps.env
 
 echo "source"
 
-LH=`( /sbin/ifconfig ens4 | grep 'inet' | cut -d: -f2 | awk '{ print $1}' ) 2> /dev/null`
-echo "lh"
-echo $LH
-if [ -z "$LH" ]
+if ! command -v /sbin/ifconfig &> /dev/null
 then
-    # Aliasing so that notifications from orion container reach dev localhost
     LH=192.0.0.1
-    sudo ifconfig lo0 alias $LH
+    echo "not ifconfig"
+else
+  echo "yes ifconfig"
+  LH=`( /sbin/ifconfig ens4 | grep 'inet' | cut -d: -f2 | awk '{ print $1}' ) 2> /dev/null`
+  echo "lh"
+  echo $LH
+  if [ -z "$LH" ]
+  then
+      # Aliasing so that notifications from orion container reach dev localhost
+      LH=192.0.0.1
+      sudo ifconfig lo0 alias $LH
+  fi
 fi
+
 echo "export"
 echo $LH
 
