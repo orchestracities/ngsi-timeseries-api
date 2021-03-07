@@ -12,7 +12,8 @@ source deps.env
 
 if ! command -v /sbin/ifconfig &> /dev/null
 then
-    LH=`( ip address show docker0 | grep 'inet' | cut -d: -f2 | awk '{ print $1}' ) 2> /dev/null`
+    ip addr | grep docker0 | grep inet | awk '{print $2}' | cut -d"/" -f1
+    LH=`ip addr | grep docker0 | grep inet | awk '{print $2}' | cut -d"/" -f1`
     echo $LH
 else
   LH=`( /sbin/ifconfig ens4 | grep 'inet' | cut -d: -f2 | awk '{ print $1}' ) 2> /dev/null`
