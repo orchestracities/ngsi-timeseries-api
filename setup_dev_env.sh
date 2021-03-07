@@ -12,7 +12,8 @@ source deps.env
 
 if ! command -v /sbin/ifconfig &> /dev/null
 then
-    LH=192.0.0.1
+    ip address show
+    LH=127.0.0.1
 else
   LH=`( /sbin/ifconfig ens4 | grep 'inet' | cut -d: -f2 | awk '{ print $1}' ) 2> /dev/null`
   if [ -z "$LH" ]
