@@ -542,20 +542,20 @@ class SQLTranslator(base_translator.BaseTranslator):
                 return float(attr['value'])
         except ValueError:
             logging.warning('{} cannot be cast to {} replaced with None'.format(
-                attr['value'], attr['type']))
+                attr.get('value', None), attr.get('type', None)))
             return None
         else:
             logging.warning('{} cannot be cast to {} replaced with None'.format(
-                attr['value'], attr['type']))
+                attr.get('value', None), attr.get('type', None)))
             return None
 
     @staticmethod
     def _ngsi_datetime_to_db(attr):
-        if SQLTranslator._is_iso_date(attr['value']):
+        if 'value' in attr and SQLTranslator._is_iso_date(attr['value']):
             return attr['value']
         else:
             logging.warning('{} cannot be cast to {} replaced with None'.format(
-                attr['value'], attr['type']))
+                attr.get('value', None), attr.get('type', None)))
             return None
 
     @staticmethod
@@ -569,11 +569,11 @@ class SQLTranslator(base_translator.BaseTranslator):
                 return int(float(attr['value']))
         except ValueError:
             logging.warning('{} cannot be cast to {} replaced with None'.format(
-                attr['value'], attr['type']))
+                attr.get('value', None), attr.get('type', None)))
             return None
         else:
             logging.warning('{} cannot be cast to {} replaced with None'.format(
-                attr['value'], attr['type']))
+                attr.get('value', None), attr.get('type', None)))
             return None
 
     @staticmethod
@@ -591,7 +591,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             return attr['value']
         else:
             logging.warning('{} cannot be cast to {} replaced with None'.format(
-                attr['value'], attr['type']))
+                attr.get('value', None), attr.get('type', None)))
             return None
 
     @staticmethod
@@ -611,7 +611,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         if 'value' in attr and attr['value'] is not None:
             return str(attr['value'])
         logging.warning('{} cannot be cast to {} replaced with None'.format(
-            attr['value'], attr['type']))
+            attr.get('value', None), attr.get('type', None)))
         return None
 
     @staticmethod
@@ -620,11 +620,14 @@ class SQLTranslator(base_translator.BaseTranslator):
 
     @staticmethod
     def _ngsi_ld_datetime_to_db(attr):
-        if SQLTranslator._is_iso_date(attr['value']['@value']):
+        if SQLTranslator._is_ngsi_ld_datetime_property(attr) and SQLTranslator._is_iso_date(attr['value']['@value']):
             return attr['value']['@value']
         else:
-            logging.warning('{} cannot be cast to {} replaced with None'.format(
-                attr['value']['@value'], attr['value']['@type']))
+            if 'value' in attr:
+                logging.warning('{} cannot be cast to {} replaced with None'.format(
+                    attr['value'].get('@value', None), attr['value'].get('@type', None)))
+            else:
+                logging.warning('attribute "value" is missing, cannot perform cast')
             return None
 
     @staticmethod

@@ -139,7 +139,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
         if isinstance(attr_v, dict):
             return attr_v
         logging.warning('{} cannot be cast to {} replaced with None'.format(
-            attr['value'], attr['type']))
+            attr.get('value', None), attr.get('type', None)))
         return None
 
     @staticmethod
@@ -148,7 +148,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
         if isinstance(attr_v, list):
             return attr_v
         logging.warning('{} cannot be cast to {} replaced with None'.format(
-            attr['value'], attr['type']))
+            attr.get('value', None), attr.get('type', None)))
         return None
 
     @staticmethod

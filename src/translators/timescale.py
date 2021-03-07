@@ -194,7 +194,7 @@ class PostgresTranslator(sql_translator.SQLTranslator):
         if isinstance(attr_v, dict):
             return pg8000.PGJsonb(attr_v)
         logging.warning('{} cannot be cast to {} replaced with None'.format(
-            attr['value'], attr['type']))
+            attr.get('value', None), attr.get('type', None)))
         return None
 
     @staticmethod
@@ -203,7 +203,7 @@ class PostgresTranslator(sql_translator.SQLTranslator):
         if isinstance(attr_v, list):
             return pg8000.PGJsonb(attr_v)
         logging.warning('{} cannot be cast to {} replaced with None'.format(
-            attr['value'], attr['type']))
+            attr.get('value', None), attr.get('type', None)))
         return None
 
     def _db_value_to_ngsi(self, db_value: Any, ngsi_type: str) -> Any:
