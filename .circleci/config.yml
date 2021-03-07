@@ -9,7 +9,6 @@ jobs:
   test_translators:
     machine:
       image: ubuntu-2004:202008-01
-      resource_class: large
     steps:
       - checkout
       - run:
@@ -38,7 +37,6 @@ jobs:
               export SHELL=no
               source setup_dev_env.sh
               pipenv run sh run_tests.sh
-          no_output_timeout: 20m
 
 workflows:
   main:
