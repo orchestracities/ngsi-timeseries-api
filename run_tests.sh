@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "creating test directory..."
+mkdir -p test-results
+
 test_suite_header () {
   echo "======================================================================="
   echo "        $1 TESTS"

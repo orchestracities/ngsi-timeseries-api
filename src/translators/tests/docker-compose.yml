@@ -39,7 +39,7 @@ services:
       - PG_PASS=*
 
   redis:
-    image: redis
+    image: redis:${REDIS_VERSION}
     ports:
       - "6379:6379"
 

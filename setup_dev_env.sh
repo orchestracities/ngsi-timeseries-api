@@ -34,4 +34,4 @@ export REDIS_HOST=$LH
 
 echo "used ip: $LH"
 
-[[ "$SHELL" == "no" ]] || pipenv shell
+[[ "$SHELL" == "no" ]] || echo "preparing shell..." && pipenv shell
