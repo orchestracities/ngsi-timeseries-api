@@ -6,7 +6,7 @@ jobs:
     steps:
       - checkout
       - run: docker build -t orchestracities/quantumleap:$CIRCLE_BRANCH .
-  test_translators:
+  test:
     machine:
       image: ubuntu-2004:202008-01
     steps:
@@ -49,4 +49,6 @@ workflows:
   main:
     jobs:
       - build
-      - test_translators
+      - test_translators:
+          requires:
+            - build
