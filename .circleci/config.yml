@@ -44,9 +44,7 @@ jobs:
           command: |
               export SHELL=no
               source setup_dev_env.sh
-              echo "CrateDB"
-              echo $CRATE_VERSION
-              #sh run_tests.sh
+              pipenv run sh run_tests.sh
 
 workflows:
   main:
