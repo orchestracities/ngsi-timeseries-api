@@ -11,11 +11,11 @@ jobs:
       image: ubuntu-2004:202008-01
     steps:
       - checkout
-      - run:
-          name: "Switch to Python v3.8.5"
-          command: |
-            pyenv versions
-            pyenv global 3.8.5
+    #  - run:
+    #      name: "Switch to Python v3.8.5"
+    #      command: |
+    #        pyenv versions
+    #        pyenv global 3.8.5
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
       - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib/python3.8/
@@ -25,7 +25,7 @@ jobs:
           command: |
             # sudo add-apt-repository universe
             # sudo apt install python3-pip
-            pip install pipenv
+            sudo pip install pipenv
             pipenv install --dev
       - save_cache:
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
