@@ -6,7 +6,7 @@
 [![Support](https://img.shields.io/badge/support-ask-yellowgreen.svg)](https://ask.fiware.org/questions/)
 <br/>
 [![Documentation badge](https://img.shields.io/readthedocs/quantumleap.svg)](https://quantumleap.readthedocs.io/en/latest/)
-[![CircleCI](https://circleci.com/gh/orchestracities/ngsi-timeseries-api.svg?style=svg)](https://circleci.com/gh/orchestracities/ngsi-timeseries-api)
+[![CircleCI](https://circleci.com/gh/orchestracities/ngsi-timeseries-api.svg?style=shield)](https://circleci.com/gh/orchestracities/ngsi-timeseries-api)
 [![Coverage Status](https://coveralls.io/repos/github/orchestracities/ngsi-timeseries-api/badge.svg?branch=master)](https://coveralls.io/github/orchestracities/ngsi-timeseries-api?branch=master)
 ![Status](https://nexus.lab.fiware.org/static/badges/statuses/quantum-leap.svg)
 [![Swagger Validator](https://img.shields.io/swagger/valid/2.0/https/raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v2.0/json/petstore-expanded.json.svg)](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
