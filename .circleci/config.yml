@@ -20,7 +20,7 @@ jobs:
           command: |
             # sudo add-apt-repository universe
             # sudo apt install python3-pip
-            export WORKON_HOME=~/.venvs
+            export WORKON_HOME=~/.venv
             pip install pipenv
             pipenv install --dev
       - save_cache:
@@ -33,7 +33,7 @@ jobs:
       - run:
           command: |
               export SHELL=no
-              export WORKON_HOME=~/.venvs
+              export WORKON_HOME=~/.venv
               sudo sysctl -w vm.max_map_count=262144
               source setup_dev_env.sh
               pipenv run sh run_tests.sh
