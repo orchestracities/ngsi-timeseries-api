@@ -49,6 +49,6 @@ workflows:
   main:
     jobs:
       - build
-      - test_translators:
+      - test:
           requires:
             - build
