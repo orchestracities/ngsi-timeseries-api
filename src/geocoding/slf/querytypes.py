@@ -19,6 +19,7 @@ class NearQuery(SlfQuery):
     """
     Represents the near query, i.e. a query having ``georel=near``.
     """
+
     def __init__(self,
                  geometry: SlfGeometry,
                  min_distance: Optional[float],
@@ -54,6 +55,7 @@ class ShapeQuery(SlfQuery):
     Factors out functionality shared by all queries that involve determining
     in which relationship two shapes stand.
     """
+
     def __init__(self, geometry: SlfGeometry):
         self._reference_shape = geometry
 

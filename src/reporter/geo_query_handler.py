@@ -2,14 +2,14 @@ from geocoding.slf import from_geo_params, EqualsQuery
 
 
 invalid_params = {
-                     'error': 'ValueError',
-                     'description': 'Invalid geographical query parameters'
-                 }, 400, None
+    'error': 'ValueError',
+    'description': 'Invalid geographical query parameters'
+}, 400, None
 
 query_not_supported = {
-                     'error': 'NotSupportedQuery',
-                     'description': 'This geographical query is not supported'
-                 }, 422, None
+    'error': 'NotSupportedQuery',
+    'description': 'This geographical query is not supported'
+}, 422, None
 
 
 def handle_geo_query(georel=None, geometry=None, coords=None):

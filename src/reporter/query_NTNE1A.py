@@ -88,37 +88,40 @@ def query_NTNE1A(attr_name,  # In Path
         for e in entities:
             matched_attr = lookup_string_match(e, attr_name)
             try:
-                f_date = dateutil.parser.isoparse(from_date).replace(tzinfo=timezone.utc).isoformat()
+                f_date = dateutil.parser.isoparse(from_date).replace(
+                    tzinfo=timezone.utc).isoformat()
             except Exception as ex:
                 f_date = ''
             try:
-                t_date = dateutil.parser.isoparse(to_date).replace(tzinfo=timezone.utc).isoformat()
+                t_date = dateutil.parser.isoparse(to_date).replace(
+                    tzinfo=timezone.utc).isoformat()
             except Exception as ex:
                 t_date = ''
-            index = [f_date, t_date] if aggr_method and not aggr_period else e['index']
+            index = [
+                f_date, t_date] if aggr_method and not aggr_period else e['index']
             entity = {
-                     'entityId': e['id'],
-                     'index': index,
-                     'values': matched_attr['values'] if matched_attr else []
-                     }
+                'entityId': e['id'],
+                'index': index,
+                'values': matched_attr['values'] if matched_attr else []
+            }
 
             if e['type'] not in entity_types:
                 entity_value = []
                 entity_value.append(entity)
 
                 entity_ty = {
-                            'entityType': e['type'],
-                            'entities': entity_value
-                            }
+                    'entityType': e['type'],
+                    'entities': entity_value
+                }
                 entity_type.append(entity_ty)
                 entity_types.append(e['type'])
             else:
                 entity_value.append(entity)
                 entity_type.pop()
                 entity_ty = {
-                            'entities': entity_value,
-                            'entityType': e['type']
-                            }
+                    'entities': entity_value,
+                    'entityType': e['type']
+                }
                 entity_type.append(entity_ty)
 
         res = {

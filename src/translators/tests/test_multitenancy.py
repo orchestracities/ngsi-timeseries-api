@@ -41,6 +41,7 @@ def entity(entity_id):
     }
     return e
 
+
 @pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_fiware_tenant(translator):
     # Insert WITH tenant

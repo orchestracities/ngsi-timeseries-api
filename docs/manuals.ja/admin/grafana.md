@@ -39,13 +39,12 @@ Crate の推奨事項に従うことをお勧めします。
   [マルチ・テナンシーのセクション](../user/index.md#multi-tenancy)
   を確認してください。
 - **User** : `crate` ユーザを使います
-- **SSL モード** : `無効にします
+- **SSL モード** : `無効にします`
 
 次の図は、データソース設定がどのようになっているかの例を示しています。
 ![alt text](../rsrc/postgres_datasource.png "Configuring the DataSource")
 
 *Save & Test* をクリックすると、OK メッセージが表示されます。
-
 
 ## PostgreSQL のデータソースの設定
 
@@ -53,7 +52,6 @@ Crate の推奨事項に従うことをお勧めします。
 [PosgreSQL　のデータソース・マニュアル](https://grafana.com/docs/features/datasources/postgres/)
 に詳しく記載されています。 *TimescaleDB* データソースオプションを有効に
 する必要があることに注意してください。
-
 
 ## グラフ内のデータソースの使用
 

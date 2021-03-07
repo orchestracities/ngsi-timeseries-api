@@ -149,7 +149,6 @@ def test_can_add_2_new_attribute_even_without_specifying_old_ones(service):
     delete_entity_type(service, 'u1')
 
 
-
 @pytest.mark.parametrize("service", services)
 def test_store_missing_text_value_as_null(service):
     entity = {
@@ -171,7 +170,6 @@ def test_store_missing_text_value_as_null(service):
     delete_entity_type(service, 't2')
 
 
-
 @pytest.mark.parametrize("service", services)
 def test_store_missing_text_value_as_null_then_as_empty(service):
     entity = {
@@ -180,7 +178,7 @@ def test_store_missing_text_value_as_null_then_as_empty(service):
         'y': {
             'type': 'Number',
             'value': '23'
-         },
+        },
         'x': {
             'type': 'Text'
         }
@@ -196,15 +194,14 @@ def test_store_missing_text_value_as_null_then_as_empty(service):
     delete_entity_type(service, 't3')
 
 
-
 @pytest.mark.parametrize("service", services)
 def test_store_null_text_value_as_null(service):
     entity = {
         'id': 't4:1',
         'type': 't4',
         'y': {
-             'type': 'Number',
-             'value': '23'
+            'type': 'Number',
+            'value': '23'
         },
         'x': {
             'type': 'Text',
@@ -219,15 +216,14 @@ def test_store_null_text_value_as_null(service):
     delete_entity_type(service, 't4')
 
 
-
 @pytest.mark.parametrize("service", services)
 def test_store_null_numeric_value_as_null(service):
     entity = {
         'id': 't5:1',
         'type': 't5',
         'y': {
-             'type': 'Number',
-             'value': '23'
+            'type': 'Number',
+            'value': '23'
         },
         'x': {
             'type': 'Number',
@@ -242,15 +238,14 @@ def test_store_null_numeric_value_as_null(service):
     delete_entity_type(service, 't5')
 
 
-
 @pytest.mark.parametrize("service", services)
 def test_store_empty_numeric_value_as_null(service):
     entity = {
         'id': 't6:1',
         'type': 't6',
         'y': {
-             'type': 'Number',
-             'value': '23'
+            'type': 'Number',
+            'value': '23'
         },
         'x': {
             'type': 'Number',

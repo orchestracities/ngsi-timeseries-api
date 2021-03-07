@@ -83,16 +83,19 @@ def create_random_entities(num_types=1,
     for u in range(num_updates):
         for nt in range(num_types):
             for ni in range(num_ids_per_type):
-                t = datetime.now(timezone.utc).isoformat(timespec='milliseconds')
+                t = datetime.now(timezone.utc).isoformat(
+                    timespec='milliseconds')
                 entity = {
                     "type": "{}".format(nt),
                     "id": "{}-{}".format(nt, ni),
                     TIME_INDEX_NAME: t,
                 }
                 # Guarantee significant differences for TIME_INDEX_NAME.
-                import time; time.sleep(0.001)
+                import time
+                time.sleep(0.001)
 
-                a = random.choices(string.ascii_uppercase + string.digits, k=10)
+                a = random.choices(
+                    string.ascii_uppercase + string.digits, k=10)
                 add_attr(entity, "attr_str", ''.join(a))
                 a = float(format(random.uniform(0, 1), '.6f'))
                 add_attr(entity, "attr_float", a)
@@ -107,7 +110,7 @@ def create_random_entities(num_types=1,
                     add_attr(entity, "attr_time", v_iso)
 
                 if use_geo:
-                    #precision of postgis does not allow more than 16 decimals
+                    # precision of postgis does not allow more than 16 decimals
                     long = round(random.uniform(-180, 180), 10)
                     lat = round(random.uniform(-90, 90), 10)
                     point = {"type": "Point", "coordinates": [long, lat]}
@@ -122,21 +125,21 @@ def create_simple_subscription(notify_url):
         "description": "Test subscription",
         "subject": {
             "entities": [
-              {
-                "id": "Room1",
-                "type": "Room"
-              }
+                {
+                    "id": "Room1",
+                    "type": "Room"
+                }
             ],
             "condition": {
-              "attrs": [
-                "pressure",
-                "temperature"
-              ]
+                "attrs": [
+                    "pressure",
+                    "temperature"
+                ]
             }
-          },
+        },
         "notification": {
             "http": {
-              "url": notify_url
+                "url": notify_url
             },
             "attrs": [
                 "pressure",

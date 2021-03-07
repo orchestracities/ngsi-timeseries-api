@@ -44,21 +44,21 @@ def test_insert_entity(translator, entity):
 
 
 @pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
-def test_insert_same_entity_with_different_attrs( translator, sameEntityWithDifferentAttrs ):
+def test_insert_same_entity_with_different_attrs(translator, sameEntityWithDifferentAttrs):
     """
     Test that the CrateTranslator can insert entity updates  that are of the same type but have different attributes.
     """
     # Add time index to the updates. Use the dateModified meta data attribute of temperature.
     for entity in sameEntityWithDifferentAttrs:
         entity[BaseTranslator.TIME_INDEX_NAME] = entity['temperature']['metadata']['dateModified']['value']
-        
-    result = translator.insert( sameEntityWithDifferentAttrs )
+
+    result = translator.insert(sameEntityWithDifferentAttrs)
     assert result.rowcount != 0
-    
+
     loaded_entities = translator.query()
     assert len(loaded_entities) == 1
 
-    check_notifications_record( sameEntityWithDifferentAttrs, loaded_entities)
+    check_notifications_record(sameEntityWithDifferentAttrs, loaded_entities)
     translator.clean()
 
 
@@ -208,7 +208,8 @@ def test_attrs_by_id_ambiguity(translator):
     translator.insert(entities)
 
     # OK if specifying type
-    loaded_entities = translator.query(entity_type='0', entity_id='repeated_id')
+    loaded_entities = translator.query(
+        entity_type='0', entity_id='repeated_id')
     assert len(loaded_entities[0]['index']) == 3
     assert len(loaded_entities) == 1
 
@@ -217,9 +218,10 @@ def test_attrs_by_id_ambiguity(translator):
         translator.query(entity_id='repeated_id')
     translator.clean()
 
+
 # TODO: This query is only for CRATE not for TIMESCALE
 WITHIN_EAST_HEMISPHERE = "within(attr_geo, " \
-                        "'POLYGON ((0 -90, 180 -90, 180 90, 0 90, 0 -90))')"
+    "'POLYGON ((0 -90, 180 -90, 180 90, 0 90, 0 -90))')"
 
 
 def within_east_hemisphere(e):
@@ -237,7 +239,7 @@ def beyond_mid_epoch(e):
     ("attr_str", "> 'M'", lambda e: e["attr_str"]["values"][0] > "M"),
     ("attr_float", "< 0.5", lambda e: e["attr_float"]["values"][0] < 0.5),
     ("attr_time", "> '1970-06-28T00:00'", beyond_mid_epoch)
-##    (WITHIN_EAST_HEMISPHERE, "", within_east_hemisphere)
+    ##    (WITHIN_EAST_HEMISPHERE, "", within_east_hemisphere)
 ])
 def test_query_per_attribute(translator, attr_name, clause, tester):
     num_types = 1
@@ -378,7 +380,8 @@ def test_capitals(translator):
     e2 = e1.copy()
     e2['id'] = 'SOmEwEiRdId2'
     e2['NewAttr'] = {"type": "Text", "value": "NewAttrValue!"}
-    e2[TIME_INDEX_NAME] = datetime.now(timezone.utc).isoformat(timespec='milliseconds')
+    e2[TIME_INDEX_NAME] = datetime.now(
+        timezone.utc).isoformat(timespec='milliseconds')
 
     translator.insert([e2])
     entities = translator.query()

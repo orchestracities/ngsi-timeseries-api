@@ -10,7 +10,7 @@ Docker をインストールする必要がある場合は、
 を参照してください。
 動作することを確認するには、次のコマンドが正常に実行できる必要があります...
 
-```
+```bash
 docker --version
 ```
 
@@ -20,7 +20,7 @@ docker --version
 を確認してください。動作することを確認するには、
 次のコマンドが正常に実行できる必要があります...
 
-```
+```bash
 docker-compose --version
 ```
 
@@ -44,14 +44,14 @@ QuantumLeap の実験をできるだけ早く開始するには、以下の手�
 ファイルのコピーをダウンロードするか、またはローカル作成してください。
 その後、起動してください :
 
-```
+```bash
 # same path were you have placed the docker-compose-dev.yml
 $ docker-compose -f docker-compose-dev.yml up -d
 ```
 
 しばらくして、すべてのコンテナが起動していることを確認します :
 
-```
+```bash
 $ docker ps
 CONTAINER ID        IMAGE                  COMMAND                  CREATED             STATUS                   PORTS                                                           NAMES
 8cf0b544868d        orchestracities/quantumleap   "/bin/sh -c 'python …"   2 minutes ago       Up 2 minutes             0.0.0.0:8668->8668/tcp                                          docker_quantumleap_1
@@ -67,8 +67,7 @@ QuantumLeap を使用する準備が整いました。
 
 あなたが実験を終えたら、解体することを忘れないでください。
 
-
-```
+```bash
 # same path were you have placed the docker-compose-dev.yml
 $ docker-compose -f docker-compose-dev.yml down -v
 ```
@@ -98,7 +97,7 @@ Docker Swarm Cluster 上のサービスとして HA　に QuantumLeap
 またセットアップを完了するために、QuantumLeap を実行する必要が場合は、
 単に以下を実行するだけです :
 
-```
+```bash
 docker run -d -p 8668:8668 -e "CRATE_HOST=http://your_crate_location" smartsdk/quantumleap
 ```
 
@@ -117,8 +116,10 @@ QuantumLeap サービスを Kubernetes にデプロイするには、
 の Helm チャートを活用できます。
 
 特に、以下のコンポーネントをデプロイする必要があります:
+
 * [CrateDB](https://github.com/orchestracities/charts/tree/master/charts/crate)
-* [オプション/代替] Timescale - これについては、[Patroni Helm Chart](https://github.com/helm/charts/tree/master/incubator/patroni) を参照してください
+* [オプション/代替] Timescale - これについては、[Patroni Helm Chart](https://github.com/helm/charts/tree/master/incubator/patroni)
+  を参照してください
 * [QuantumLeap](https://github.com/orchestracities/charts/tree/master/charts/quantumleap)
 
 ## FIWARE Releases の互換性

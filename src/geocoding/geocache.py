@@ -14,4 +14,3 @@ def temp_geo_cache(host, port):
         yield gc
     finally:
         gc.redis.flushall()
-

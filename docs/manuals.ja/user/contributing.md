@@ -1,4 +1,4 @@
-## コントリビューション
+# コントリビューション
 
 コントリビューションはプルリクエストの形でより歓迎します。
 
@@ -37,8 +37,8 @@
 実際には初期段階にありますので、事態は確実に変わります。
 今のところ、あなたは以下から始めることができます :
 
-```
-git clone https://github.com/smartsdk/ngsi-timeseries-api.git
+```bash
+$ git clone https://github.com/smartsdk/ngsi-timeseries-api.git
 cd ngsi-timeseries-api
 python3 -m venv env
 source env/bin/activate
@@ -50,16 +50,16 @@ source setup_dev_env.sh
 
 Gunicorn で QuantumLeap WSGI アプリを使用する方法の詳細:
 
-```
-cd ngsi-timeseries-api/src
+```bash
+$ cd ngsi-timeseries-api/src
 gunicorn server.wsgi --config server/gconfig.py
 ```
 
 セキュリティ設定:
 
-###### limit_request_line
+### limit_request_line
 
-```
+```bash
 --limit-request-line INT
 4094
 ```
@@ -67,9 +67,9 @@ gunicorn server.wsgi --config server/gconfig.py
 バイト単位の HTTP リクエスト・ラインの最大サイズ。このパラメータは、クライアントの HTTP リクエスト・
 ラインの許容サイズを制限するために使用されます。
 
-###### limit_request_fields
+### limit_request_fields
 
-```
+```bash
 --limit-request-fields INT
 100
 ```
@@ -78,8 +78,9 @@ gunicorn server.wsgi --config server/gconfig.py
 limit_request_field_size と一緒に使用すると、より安全になります。 デフォルトでは、この値は 100
 であり、32768 を超えることはできません。
 
-###### limit_request_field_size
-```
+### limit_request_field_size
+
+```bash
 --limit-request-field_size INT
 8190
 ```
@@ -102,16 +103,16 @@ HTTP リクエスト・ヘッダ・フィールドの許容サイズを制限し
 現在のプロジェクト・ツリー構造では、次のとおりです：
 
 - `ngsi-timeseries-api`
-    - `docs`: ドキュメント・ファイルを保持します
-    - `docker`: プロジェクトのスコープのために Docker 関連のファイルを保持します
-    - `experiments`: サンドボックスを使用して迅速な手動テストを行い、
-      新しいテストケースを導き出します
-    - `specification`: QL が実装する OpenAPI 定義を含みます
-    - `src`: ソース・コード・フォルダー
-        - `geocoding`: OSMと対話し、ジオ関連の処理を行うためのコードを保持します
-        - `reporter`: 通知および API リクエストのレシーバーとして機能する
-        モジュール。トランスレータにタスクをハンドリングする前に、それらを
-        "解析/検証" します
-        - `translators`: 各時系列データベースの特定のトランスレータ。
-        下位レベルのデータベースの詳細とのやり取りを行います
-        - `utils`: 住みやすい場所を探している共通の共有物
+  - `docs`: ドキュメント・ファイルを保持します
+  - `docker`: プロジェクトのスコープのために Docker 関連のファイルを保持します
+  - `experiments`: サンドボックスを使用して迅速な手動テストを行い、
+    新しいテストケースを導き出します
+  - `specification`: QL が実装する OpenAPI 定義を含みます
+  - `src`: ソース・コード・フォルダー
+    - `geocoding`: OSMと対話し、ジオ関連の処理を行うためのコードを保持します
+    - `reporter`: 通知および API リクエストのレシーバーとして機能する
+    モジュール。トランスレータにタスクをハンドリングする前に、それらを
+    "解析/検証" します
+    - `translators`: 各時系列データベースの特定のトランスレータ。
+    下位レベルのデータベースの詳細とのやり取りを行います
+    - `utils`: 住みやすい場所を探している共通の共有物

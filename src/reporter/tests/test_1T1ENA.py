@@ -281,7 +281,9 @@ def test_1T1ENA_fromDate(service, reporter_dataset):
     obtained = r.json()
     assert_1T1ENA_response(obtained, expected)
 
-#see #353
+# see #353
+
+
 @pytest.mark.parametrize("service", services)
 @pytest.mark.parametrize("last", [1, 3, 10, 10000])
 def test_1T1ENA_fromDate_and_last(service, last, reporter_dataset):
@@ -324,6 +326,7 @@ def test_1T1ENA_fromDate_and_last(service, last, reporter_dataset):
     }
     obtained = r.json()
     assert_1T1ENA_response(obtained, expected)
+
 
 @pytest.mark.parametrize("service", services)
 def test_1T1ENA_fromDate_toDate_with_quotes(service, reporter_dataset):

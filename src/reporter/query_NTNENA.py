@@ -103,50 +103,53 @@ def query_NTNENA(id_=None,  # In Query
                 matched_attr = lookup_string_match(e, at)
                 if matched_attr is not None:
                     try:
-                        f_date = dateutil.parser.isoparse(from_date).replace(tzinfo=timezone.utc).isoformat()
+                        f_date = dateutil.parser.isoparse(from_date).replace(
+                            tzinfo=timezone.utc).isoformat()
                     except Exception as ex:
                         f_date = ''
                     try:
-                        t_date = dateutil.parser.isoparse(to_date).replace(tzinfo=timezone.utc).isoformat()
+                        t_date = dateutil.parser.isoparse(to_date).replace(
+                            tzinfo=timezone.utc).isoformat()
                     except Exception as ex:
                         t_date = ''
-                    index = [f_date, t_date] if aggr_method and not aggr_period else e['index']
+                    index = [
+                        f_date, t_date] if aggr_method and not aggr_period else e['index']
                     entity = {
-                             'entityId': e['id'],
-                             'index': index,
-                             'values': matched_attr['values'] if matched_attr else [],
-                              }
+                        'entityId': e['id'],
+                        'index': index,
+                        'values': matched_attr['values'] if matched_attr else [],
+                    }
                     if e['type'] not in entity_types:
                         entity_value = []
                         entity_value.append(entity)
                         entity_ty = {
-                                    'entityType': e['type'],
-                                    'entities': entity_value
-                                     }
+                            'entityType': e['type'],
+                            'entities': entity_value
+                        }
                         entity_type.append(entity_ty)
                         entity_types.append(e['type'])
                     else:
                         entity_value.append(entity)
                         entity_type.pop()
                         entity_ty = {
-                                   'entityType': e['type'],
-                                   'entities': entity_value
-                                    }
+                            'entityType': e['type'],
+                            'entities': entity_value
+                        }
                         entity_type.append(entity_ty)
             attrs_value = {
-                          'attrName': at,
-                          'types': entity_type
-                          }
+                'attrName': at,
+                'types': entity_type
+            }
             attrs_values.append(attrs_value)
         res = {
-             'attrs': attrs_values
-              }
+            'attrs': attrs_values
+        }
         logging.getLogger(__name__).info("Query processed successfully")
         return res
     r = {
         "error": "Not Found",
         "description": "No records were found for such query."
-        }
+    }
     logging.getLogger(__name__).info("No value found for query")
     return r, 404
 

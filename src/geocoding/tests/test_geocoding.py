@@ -55,6 +55,8 @@ def test_entity_add_point(air_quality_observed):
     assert_lon_lat(r, expected_lon=51.23, expected_lat=4.42)
 
 # TODO Inspect why this test fails
+
+
 @pytest.mark.skip(reason="no way of currently testing this")
 def test_entity_add_point_negative_coord(air_quality_observed):
     air_quality_observed.pop('location')

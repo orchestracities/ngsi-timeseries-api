@@ -17,6 +17,7 @@ index = result_gen.time_index()
 
 services = ['t1', 't2']
 
+
 def ix_intervals():
     bs = list(range(0, result_gen.time_index_size)) + [None]
     prod = [(i, j) for i in bs for j in bs]
@@ -39,9 +40,9 @@ def reporter_dataset():
     sz = result_gen.time_index_size
     for service in services:
         insert_test_data(service, [entity_type], n_entities=1,
-                     index_size=sz, entity_id=entity_id_1)
+                         index_size=sz, entity_id=entity_id_1)
         insert_test_data(service, [entity_type], n_entities=1,
-                     index_size=sz, entity_id=entity_id_2)
+                         index_size=sz, entity_id=entity_id_2)
     yield
     for service in services:
         delete_test_data(service, [entity_type])
@@ -115,7 +116,8 @@ def test_NTNE1A_values_defaults(service, reporter_dataset):
         'id': entity_ids
     }
     h = {'Fiware-Service': service}
-    response = requests.get(query_url(values=True), params=query_params, headers=h)
+    response = requests.get(query_url(values=True),
+                            params=query_params, headers=h)
     assert_entities(response, [entity_id_1, entity_id_2], values_only=True)
 
 
@@ -154,7 +156,7 @@ def test_NTNE1A_fromDate_toDate(service, reporter_dataset, ix_lo, ix_hi):
 @pytest.mark.parametrize("service", services)
 def test_NTNE1A_fromDate_toDate_with_quotes(service, reporter_dataset):
     query_params = {
-        'types': 'entity_type',   
+        'types': 'entity_type',
         'fromDate': '"{}"'.format(index[0]),
         'toDate': '"{}"'.format(index[-1])
     }
@@ -248,7 +250,7 @@ def test_NTNE1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
             'index': exp_index,
             'values': [expected_temperatures, expected_temperatures,
                        expected_temperatures]
-        } 
+        }
     ]
     expected_types = [
         {
@@ -292,12 +294,12 @@ def test_NTNE1A_aggrScope(service, reporter_dataset):
 
 @pytest.mark.parametrize("service", services)
 @pytest.mark.parametrize('aggr_method, aggregator, ix_lo, ix_hi',
-    [('count', len, lo, hi) for (lo, hi) in ix_intervals()] +
-    [('sum', sum, lo, hi) for (lo, hi) in ix_intervals()] +
-    [('avg', mean, lo, hi) for (lo, hi) in ix_intervals()] +
-    [('min', min, lo, hi) for (lo, hi) in ix_intervals()] +
-    [('max', max, lo, hi) for (lo, hi) in ix_intervals()]
-)
+                         [('count', len, lo, hi) for (lo, hi) in ix_intervals()] +
+                         [('sum', sum, lo, hi) for (lo, hi) in ix_intervals()] +
+                         [('avg', mean, lo, hi) for (lo, hi) in ix_intervals()] +
+                         [('min', min, lo, hi) for (lo, hi) in ix_intervals()] +
+                         [('max', max, lo, hi) for (lo, hi) in ix_intervals()]
+                         )
 def test_aggregating_entities_of_same_type(service, reporter_dataset,
                                            aggr_method, aggregator,
                                            ix_lo, ix_hi):
@@ -318,12 +320,12 @@ def test_aggregating_entities_of_same_type(service, reporter_dataset,
 
 @pytest.mark.parametrize("service", services)
 @pytest.mark.parametrize('aggr_method, aggregator, ix_lo, ix_hi',
-    [('count', len, lo, hi) for (lo, hi) in ix_intervals()] +
-    [('sum', sum, lo, hi) for (lo, hi) in ix_intervals()] +
-    [('avg', mean, lo, hi) for (lo, hi) in ix_intervals()] +
-    [('min', min, lo, hi) for (lo, hi) in ix_intervals()] +
-    [('max', max, lo, hi) for (lo, hi) in ix_intervals()]
-)
+                         [('count', len, lo, hi) for (lo, hi) in ix_intervals()] +
+                         [('sum', sum, lo, hi) for (lo, hi) in ix_intervals()] +
+                         [('avg', mean, lo, hi) for (lo, hi) in ix_intervals()] +
+                         [('min', min, lo, hi) for (lo, hi) in ix_intervals()] +
+                         [('max', max, lo, hi) for (lo, hi) in ix_intervals()]
+                         )
 def test_aggregating_single_entity(service, reporter_dataset,
                                    aggr_method, aggregator,
                                    ix_lo, ix_hi):

@@ -120,18 +120,20 @@ def _prepare_response(entities, attrs, entity_type, entity_ids,
                 'values': e[at]['values']
             })
         try:
-            f_date = dateutil.parser.isoparse(from_date).replace(tzinfo=timezone.utc).isoformat()
+            f_date = dateutil.parser.isoparse(from_date).replace(
+                tzinfo=timezone.utc).isoformat()
         except Exception as ex:
             f_date = ''
         try:
-            t_date = dateutil.parser.isoparse(to_date).replace(tzinfo=timezone.utc).isoformat()
+            t_date = dateutil.parser.isoparse(to_date).replace(
+                tzinfo=timezone.utc).isoformat()
         except Exception as ex:
             t_date = ''
         index = [f_date, t_date] if aggr_method and not aggr_period else e['index']
         entity = {
-                 'entityId': e['id'],
-                 'index': index,
-                 'attributes': attributes
+            'entityId': e['id'],
+            'index': index,
+            'attributes': attributes
         }
         entries.append(entity)
     res = {
@@ -140,6 +142,7 @@ def _prepare_response(entities, attrs, entity_type, entity_ids,
     }
     return res
 
+
 def query_1TNENA_value(*args, **kwargs):
     res = query_1TNENA(*args, **kwargs)
     if isinstance(res, dict):
@@ -147,4 +150,3 @@ def query_1TNENA_value(*args, **kwargs):
         res['values'] = res['entities']
         res.pop('entities', None)
     return res
-

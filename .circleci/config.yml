@@ -11,20 +11,16 @@ jobs:
       image: ubuntu-2004:202008-01
     steps:
       - checkout
-      - run:
-          name: "Switch to Python v3.8.5"
-          command: |
-            pyenv versions
-            pyenv global 3.8.5
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
-      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib/python3.8/
+      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib 
       - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
           command: |
-            sudo add-apt-repository universe
-            sudo apt install python3-pip
+            # sudo add-apt-repository universe
+            # sudo apt install python3-pip
+            export WORKON_HOME=~/.venv
             pip install pipenv
             pipenv install --dev
       - save_cache:
@@ -33,10 +29,11 @@ jobs:
             - ".venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.8"
-            - "/opt/circleci/.pyenv/versions/3.8.5/lib/python3.8/"
+            - "/opt/circleci/.pyenv/versions/3.8.5/lib"
       - run:
           command: |
               export SHELL=no
+              export WORKON_HOME=~/.venv
               sudo sysctl -w vm.max_map_count=262144
               source setup_dev_env.sh
               pipenv run sh run_tests.sh

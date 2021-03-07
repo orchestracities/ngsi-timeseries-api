@@ -36,7 +36,8 @@ def delete_entities(entity_type, from_date=None, to_date=None,
     with translator_for(fiware_s()) as trans:
         if drop_table:
             trans.drop_table(etype=entity_type, fiware_service=fiware_s())
-            logging.getLogger(__name__).info("dropped entity_type {}".format(entity_type))
+            logging.getLogger(__name__).info(
+                "dropped entity_type {}".format(entity_type))
             return 'entity table dropped', 204
 
         deleted = trans.delete_entities(etype=entity_type,
@@ -45,7 +46,8 @@ def delete_entities(entity_type, from_date=None, to_date=None,
                                         fiware_service=fiware_s(),
                                         fiware_servicepath=fiware_sp(),)
 
-        logging.getLogger(__name__).info("deleted {} entities of type {}".format(deleted, entity_type))
+        logging.getLogger(__name__).info(
+            "deleted {} entities of type {}".format(deleted, entity_type))
         if deleted == 0:
             r = {
                 "error": "Not Found",

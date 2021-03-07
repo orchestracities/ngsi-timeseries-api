@@ -1,19 +1,22 @@
 # Basic benchmarks
 
-QuantumLeap heavily relies on crate (or timescale) to query and store data model configuration,
-this implies during insert an high number of queries on the backend, despite the change
-of models between an insert and another of the same entity type should not be that frequent.
+QuantumLeap heavily relies on crate (or timescale) to query and store data model
+configuration, this implies during insert an high number of queries on the
+backend, despite the change of models between an insert and another of the same
+entity type should not be that frequent.
 
 As tested, caching reduce such number of queries, and thus increase throughput.
-Previous test used in-memory cache, but that's not ideal in a concurrent environment,
-thus we developed experimental support for REDIS based caching.
+Previous test used in-memory cache, but that's not ideal in a concurrent
+environment, thus we developed experimental support for REDIS based caching.
 
-To measure basic insertion performances we developed a simple load script based on [k6](https://k6.io/)
-that you can find [here](https://github.com/smartsdk/ngsi-timeseries-api/blob/master/src/tests/run_load_tests.sh)
+To measure basic insertion performances we developed a simple load script based
+on [k6](https://k6.io/) that you can find
+[here](https://github.com/smartsdk/ngsi-timeseries-api/blob/master/src/tests/run_load_tests.sh)
 
 Example:
-```
-docker run -i --rm loadimpact/k6 run --vus 30 --duration 60s - < notify-load-test.js
+
+```bash
+$ docker run -i --rm loadimpact/k6 run --vus 30 --duration 60s - < notify-load-test.js
 
     checks.....................: 100.00% ✓ 6000 ✗ 0   
     data_received..............: 1.6 MB  27 kB/s
@@ -34,12 +37,14 @@ docker run -i --rm loadimpact/k6 run --vus 30 --duration 60s - < notify-load-tes
 
 Tests shows that:
 
-- caching metadata improves throughput of inserts , but usage of redis, has not the same impact as in memory
+- caching metadata improves throughput of inserts , but usage of redis, has not
+  the same impact as in memory
 
-- the number of queries linked to metadata is not the only element affecting insert performance,
-  due to the nature of http request, up to QL v0.7.6, we created a db connection for each insert,
-  opening the connection takes time. From v0.8 we reuse existing connections. This proved to increase throughput of 100%
-  compared just to just redis caching.
+- the number of queries linked to metadata is not the only element affecting
+  insert performance, due to the nature of http request, up to QL v0.7.6, we
+  created a db connection for each insert, opening the connection takes time.
+  From v0.8 we reuse existing connections. This proved to increase throughput
+  of 100% compared just to just redis caching.
 
 System used for testing:
 Mac2016 with 3.1 GhZ i7 (i.e. 4 cores) and 16GB Ram

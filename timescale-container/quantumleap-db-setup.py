@@ -106,7 +106,8 @@ class Args:
         return x
 
     def _build_parser(self) -> ArgumentParser:
-        p = ArgumentParser(description='QuantumLeap database bootstrap script.')
+        p = ArgumentParser(
+            description='QuantumLeap database bootstrap script.')
         ne = self._non_empty_string
 
         p.add_argument('--ql-db-name', type=ne, required=False,
