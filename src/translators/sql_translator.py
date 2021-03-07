@@ -627,7 +627,8 @@ class SQLTranslator(base_translator.BaseTranslator):
                 logging.warning('{} cannot be cast to {} replaced with None'.format(
                     attr['value'].get('@value', None), attr['value'].get('@type', None)))
             else:
-                logging.warning('attribute "value" is missing, cannot perform cast')
+                logging.warning(
+                    'attribute "value" is missing, cannot perform cast')
             return None
 
     @staticmethod
