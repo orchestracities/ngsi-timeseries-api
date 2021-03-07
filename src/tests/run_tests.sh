@@ -36,13 +36,15 @@ sleep 40
 echo "\n"
 echo "Backwards Compatibility Test"
 cd ../../
-pytest src/tests/test_bc.py --cov-report= --cov-config=.coveragerc --cov-append --cov=src/
+pytest src/tests/test_bc.py --cov-report= --cov-config=.coveragerc --cov-append --cov=src/ \
+    --junitxml=test-results/junit-bc.xml
 tot=$?
 
 # Integration Test
 echo "\n"
 echo "Integration Test"
-pytest src/tests/test_integration.py --cov-report= --cov-config=.coveragerc --cov-append --cov=src/
+pytest src/tests/test_integration.py --cov-report= --cov-config=.coveragerc --cov-append --cov=src/ \
+    --junitxml=test-results/junit-it.xml
 loc=$?
 if [ "$tot" -eq 0 ]; then
   tot=$loc

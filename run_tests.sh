@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "creating test directory..."
+mkdir -p test-results
+
 test_suite_header () {
   echo "======================================================================="
   echo "        $1 TESTS"
@@ -7,7 +10,7 @@ test_suite_header () {
 }
 
 docker pull orchestracities/quantumleap
-docker build --cache-from orchestracities/quantumleap -t orchestracities/quantumleap .
+docker build -t orchestracities/quantumleap .
 
 cd src/translators/tests
 test_suite_header "TRANSLATOR"
@@ -59,7 +62,5 @@ if [ "$tot" -eq 0 ]; then
    tot=$loc
 fi
 cd -
-
-docker rmi quantumleap
 
 exit $tot
