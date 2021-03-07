@@ -8,8 +8,6 @@ set -e
 
 export PYTHONPATH=${PWD}/src:${PYTHONPATH}
 
-docker build -t orchestracities/quantumleap .
-
 source deps.env
 
 if ! command -v /sbin/ifconfig &> /dev/null

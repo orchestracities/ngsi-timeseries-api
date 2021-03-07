@@ -4,9 +4,9 @@ docker-compose up -d
 sleep 20
 
 cd ../../../
-pytest src/reporter/ \
+pytest src/reporter/ -m trace --trace \
        --cov-report= --cov-config=.coveragerc --cov-append --cov=src/ \
-       --ignore=src/reporter/tests/test_health.py
+       --ignore=src/reporter/tests/test_health.py 
 r=$?
 cd -
 
