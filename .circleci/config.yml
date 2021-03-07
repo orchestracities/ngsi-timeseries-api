@@ -31,6 +31,8 @@ jobs:
           command: |
               export SHELL=no
               source setup_dev_env.sh
+              echo $CRATE_VERSION
+              pipenv install --dev
               sh run_tests.sh
 
 workflows:
