@@ -8,16 +8,19 @@ set -e
 
 export PYTHONPATH=${PWD}/src:${PYTHONPATH}
 
-docker build -t orchestracities/quantumleap .
-
 source deps.env
 
-LH=`( /sbin/ifconfig ens4 | grep 'inet' | cut -d: -f2 | awk '{ print $1}' ) 2> /dev/null`
-if [ -z "$LH" ]
+if ! command -v /sbin/ifconfig &> /dev/null
 then
-    # Aliasing so that notifications from orion container reach dev localhost
-    LH=192.0.0.1
-    sudo ifconfig lo0 alias $LH
+    LH=`ip addr | grep docker0 | grep inet | awk '{print $2}' | cut -d"/" -f1`
+else
+  LH=`( /sbin/ifconfig ens4 | grep 'inet' | cut -d: -f2 | awk '{ print $1}' ) 2> /dev/null`
+  if [ -z "$LH" ]
+  then
+      # Aliasing so that notifications from orion container reach dev localhost
+      LH=192.0.0.1
+      sudo ifconfig lo0 alias $LH
+  fi
 fi
 
 export ORION_HOST=$LH
@@ -29,4 +32,6 @@ export POSTGRES_HOST=$LH
 
 export REDIS_HOST=$LH
 
-[[ "$LH" != "192.0.0.1" ]] || pipenv shell
+echo "used ip: $LH"
+
+[[ "$SHELL" == "no" ]] || pipenv shell

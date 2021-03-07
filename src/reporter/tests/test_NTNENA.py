@@ -918,7 +918,8 @@ def test_NTNENA_types_two_attribute(service, reporter_dataset):
     expected_temperatures = list(range(4))
     expected_temperatures_kitchen = list(range(3))
     expected_pressures = [t * 10 for t in expected_temperatures]
-    expected_pressures_kitchen = [t * 10 for t in expected_temperatures_kitchen]
+    expected_pressures_kitchen = [
+        t * 10 for t in expected_temperatures_kitchen]
     expected_index = [
         '1970-01-{:02}T00:00:00.000+00:00'.format(i + 1) for i in expected_temperatures
     ]
@@ -1012,7 +1013,8 @@ def test_1TNENA_types_one_attribute(service, reporter_dataset):
     expected_temperatures = list(range(4))
     expected_temperatures_kitchen = list(range(3))
     expected_pressures = [t * 10 for t in expected_temperatures]
-    expected_pressures_kitchen = [t * 10 for t in expected_temperatures_kitchen]
+    expected_pressures_kitchen = [
+        t * 10 for t in expected_temperatures_kitchen]
     expected_index = [
         '1970-01-{:02}T00:00:00.000+00:00'.format(i + 1) for i in expected_temperatures
     ]

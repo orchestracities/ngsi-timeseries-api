@@ -13,9 +13,14 @@ QuantumLeap's API. However, you will still need to understand the basics of
 how subscriptions and notifications work, so take your time to read
 [the docs](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#ubscriptions).
 
-Historical data for each entity type will be added in the QuantumLeap's database as long as the subscription is active, correctly configured and the entity in the notification is NGSI compliant.
+Historical data for each entity type will be added in the QuantumLeap's database
+as long as the subscription is active, correctly configured and the entity in
+the notification is NGSI compliant.
 
-In case the subscription is removed or its status is changed, no data will be added after that. Although the previous data stored in QuantumLeap's database will persist until it is removed externally using APIs to delete data stored in QuantumLeap.
+In case the subscription is removed or its status is changed, no data will be
+added after that. Although the previous data stored in QuantumLeap's database
+will persist until it is removed externally using APIs to delete data stored
+in QuantumLeap.
 
 So, summing up, the usage flow is therefore the following...
 
@@ -39,7 +44,7 @@ Alternatively, you can directly talk to Orion and create the subscription as you
 prefer. Here's an example of the payload of the subscription you need to create
 in Orion to establish the link Orion-QuantumLeap.
 
-```
+```json
     {
         "description": "Test subscription",
         "subject": {
@@ -107,7 +112,7 @@ Here's an example of an insert payload to Orion that will generate a
 notification to QuantumLeap based on the "Test subscription" example shown
 before.
 
-```
+```json
 {
     "id": "Room1",
     "type": "Room",
@@ -138,14 +143,16 @@ considered a common workflow.
 ### Attributes DataType Translation
 
 You need to make sure your NGSI entities are using the valid NGSI types for the
-attributes, which are documented in the *Specification* section of the [NGSI API](http://telefonicaid.github.io/fiware-orion/api/v2/latest/). See the first
-column of the translation table below, and mind its capitalisation.
+attributes, which are documented in the *Specification* section of the
+[NGSI API](http://telefonicaid.github.io/fiware-orion/api/v2/latest/).
+See the first column of the translation table below, and mind its
+capitalisation.
 
 The tables below show which attribute types will be translated to which
 [CrateDB](https://crate.io/docs/crate/reference/sql/data_types.html)
 or [TimescaleDB](https://www.postgresql.org/docs/current/datatype.html) data types.
 
-**CrateDB (v4.x) Translation Table**
+#### CrateDB (v4.x) Translation Table
 
 | NGSI Type          | CrateDB Type          | Observation |
 | ------------------ |:-----------------------:| :-----------|
@@ -159,7 +166,7 @@ or [TimescaleDB](https://www.postgresql.org/docs/current/datatype.html) data typ
 |Text                | [text](https://crate.io/docs/crate/reference/sql/data_types.html#data-type-text)                  | This is the default type if the provided NGSI Type is unsupported or wrong. |
 |StructuredValue     | [object](https://crate.io/docs/crate/reference/sql/data_types.html#object)                  |-|
 
-**TimescaleDB (v12.x) Translation Table**
+#### TimescaleDB (v12.x) Translation Table
 
 | NGSI Type          | TimescaleDB Type          | Observation |
 | ------------------ |:-----------------------:| :-----------|
@@ -173,30 +180,28 @@ or [TimescaleDB](https://www.postgresql.org/docs/current/datatype.html) data typ
 |Text                | [text](https://www.postgresql.org/docs/current/datatype-character.html)                  | This is the default type if the provided NGSI Type is unsupported or wrong. |
 |StructuredValue     | [jsonb](https://www.postgresql.org/docs/current/datatype-json.html)                  |-|
 
-
-
 If the type of any of the received attributes is not present in the column
 *NGSI Type* of the previous table, the *NGSI Type* (and hence the SQL type)
 will be derived from the value. Using the following logic:
 
-```
-       if a_type not in NGSI
-            type = Text
-            if a_value is a list:
-               type = Array
-            elif a_value is not None and a_value is an Object:
-                if a_type is 'Property' and a_value['@type'] is 'DateTime':
-                    type = DateTime
-                else:
-                    type = StructuredValue
-            elif a_value is int:
-                type = Integer
-            elif a_value is float:
-                type = Number
-            elif a_value is bool:
-                type = Boolean
-            elif a_value is an ISO DateTime:
-                type = DateTime
+```python
+if a_type not in NGSI
+    type = Text
+    if a_value is a list:
+       type = Array
+    elif a_value is not None and a_value is an Object:
+        if a_type is 'Property' and a_value['@type'] is 'DateTime':
+            type = DateTime
+        else:
+            type = StructuredValue
+    elif a_value is int:
+        type = Integer
+    elif a_value is float:
+        type = Number
+    elif a_value is bool:
+        type = Boolean
+    elif a_value is an ISO DateTime:
+        type = DateTime
 ```
 
 ### [Time Index](#timeindex)
@@ -216,7 +221,8 @@ subscription has to be created with an `httpCustom` block, as detailed in the
 This is the way you can instruct QL to use custom attributes of the
 notification payload to be taken as *time index* indicators.
 
-1. Custom **time index** metadata. The most recent custom time index (the value of the `Fiware-TimeIndex-Attribute`)
+1. Custom **time index** metadata. The most recent custom time index
+(the value of the `Fiware-TimeIndex-Attribute`)
 attribute value found in any of the attribute metadata sections in the notification.
 See the previous option about the details regarding subscriptions.
 
@@ -229,8 +235,9 @@ found in any of the attribute metadata sections in the notification.
 
 1. **timestamp** attribute.
 
-1. **timestamp** metadata. The most recent `timestamp` attribute value found in any of the attribute metadata sections
-in the notification. As specified in the
+1. **timestamp** metadata. The most recent `timestamp` attribute value found
+in any of the attribute metadata section in the notification.
+As specified in the
 [FIWARE data models documentation](https://fiware-datamodels.readthedocs.io/en/latest/guidelines/index.html#dynamic-attributes).
 
 1. **dateModified** attribute. If you payed attention in the
@@ -269,11 +276,13 @@ should respect the naming guidelines explained
   
 ### Inserting data into QuantumLeap directly
 
-To insert the data directly into quantum leap, we can use http://localhost:8668/v2/notify API, i.e. To notify QuantumLeap about the arrival of a new NGSI notification.
+To insert the data directly into quantum leap, we can use
+`http://localhost:8668/v2/notify` API, i.e.
+To notify QuantumLeap about the arrival of a new NGSI notification.
 
 Consider the below example:
 
-```
+```bash
 curl http://localhost:8668/v2/notify -s -S -H 'Content-Type: application/json' -d @- <<EOF
 { 
     "subscriptionId": "5ce3dbb331dfg9h71aad5deeaa", 
@@ -324,7 +333,8 @@ You can remove historical data from QuantumLeap in two different ways.
 
 - To remove all records of a given entity, use [this /entities delete API endpoint](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
 
-- To remove all records of all entities of a given type, use [this /types delete API endpoint](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
+- To remove all records of all entities of a given type, use
+[this /types delete API endpoint](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
 
 Use the filters to delete only records in certain intervals of time.
 

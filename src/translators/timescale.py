@@ -169,7 +169,7 @@ class PostgresTranslator(sql_translator.SQLTranslator):
 
         ix_name = '"ix_{}_eid_and_tx"'.format(table_name.replace('"', ''))
         stmt = f"create index if not exists {ix_name} " + \
-               f"on {table_name} (entity_id, {self.TIME_INDEX_NAME} desc)"
+            f"on {table_name} (entity_id, {self.TIME_INDEX_NAME} desc)"
         self.cursor.execute(stmt)
 
     def _update_data_table(self, table_name, new_columns, fiware_service):
@@ -221,7 +221,7 @@ class PostgresTranslator(sql_translator.SQLTranslator):
                     elif 'type' in e[attr] and e[attr][
                             'type'] == 'Relationship':
                         mapped_value = e[attr].get('value', None) or \
-                                       e[attr].get('object', None)
+                            e[attr].get('object', None)
                     else:
                         mapped_value = e[attr]['value']
 

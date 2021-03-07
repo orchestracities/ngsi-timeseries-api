@@ -56,7 +56,7 @@ def do_integration(entity, subscription, orion_client, service=None,
                    service_path=None):
     subscription_id = orion_client.subscribe(subscription, service,
                                              service_path). \
-                          headers['Location'][18:]
+        headers['Location'][18:]
     time.sleep(SLEEP_TIME)
 
     orion_client.insert(entity, service, service_path)
@@ -179,7 +179,7 @@ def test_integration_multiple_entities(service, diffEntityWithDifferentAttrs,
     }
     subscription_id = orion_client.subscribe(subscription, service,
                                              "/Root/#"). \
-                          headers['Location'][18:]
+        headers['Location'][18:]
 
     for idx, e in enumerate(diffEntityWithDifferentAttrs):
         orion_client.insert(e, service, "/Root/{}".format(idx))
@@ -229,7 +229,7 @@ def test_integration_multiple_values(service, entity, orion_client,
         "throttling": 1,
     }
     subscription_id = orion_client.subscribe(subscription, service, '/'). \
-                          headers['Location'][18:]
+        headers['Location'][18:]
     time.sleep(SLEEP_TIME)
 
     orion_client.insert(entity, service, '/')

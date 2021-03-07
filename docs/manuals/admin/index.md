@@ -7,7 +7,7 @@ provided for such installation at the moment.
 If you need to install Docker, refer to the [Docker Installation](https://docs.docker.com/engine/installation/).
 To check it works, you should be able to successfully run...
 
-```
+```bash
 docker --version
 ```
 
@@ -15,7 +15,7 @@ You might also need [docker-compose](https://docs.docker.com/compose/) for
 some cases. Checkout the [install docs](https://docs.docker.com/compose/install/).
 To check it works, you should be able to successfully run...
 
-```
+```bash
 docker-compose --version
 ```
 
@@ -36,14 +36,14 @@ QuantumLeap ASAP.
 Download (or create locally) a copy of [this docker-compose.yml](https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
 file. Then start it up:
 
-```
+```bash
 # same path were you have placed the docker-compose-dev.yml
 $ docker-compose -f docker-compose-dev.yml up -d
 ```
 
 After a while, check that all containers are up and running:
 
-```
+```bash
 $ docker ps
 CONTAINER ID        IMAGE                  COMMAND                  CREATED             STATUS                   PORTS                                                           NAMES
 8cf0b544868d        orchestracities/quantumleap   "/bin/sh -c 'python …"   2 minutes ago       Up 2 minutes             0.0.0.0:8668->8668/tcp                                          docker_quantumleap_1
@@ -58,7 +58,7 @@ Now you're ready to use QuantumLeap as instructed in the [User Manual](../user/i
 
 When you are done experimenting, remember to teardown things.
 
-```
+```bash
 # same path were you have placed the docker-compose-dev.yml
 $ docker-compose -f docker-compose-dev.yml down -v
 ```
@@ -88,7 +88,7 @@ time-series database (`crate` in the common case).
 Alternatively, if you only need to run QuantumLeap to complete your setup, you
 can simply run
 
-```
+```bash
 docker run -d -p 8668:8668 -e "CRATE_HOST=http://your_crate_location" smartsdk/quantumleap
 ```
 
@@ -104,6 +104,7 @@ To deploy QuantumLeap services in Kubernetes,
 you can leverage the Helm Charts in [this repository](https://smartsdk-recipes.readthedocs.io/en/latest/data-management/quantumleap/readme/).
 
 In particular you will need to deploy:
+
 * [CrateDB](https://github.com/orchestracities/charts/tree/master/charts/crate)
 * [Optional/Alternative] Timescale - for which you can refer to [Patroni Helm Chart](https://github.com/helm/charts/tree/master/incubator/patroni).
 * [QuantumLeap](https://github.com/orchestracities/charts/tree/master/charts/quantumleap)

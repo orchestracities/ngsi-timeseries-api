@@ -2,7 +2,8 @@
 
 ## 0.8.0
 
-#### New features
+### New features
+
 - Experimental NGSI-LD support
   - Make the notify endpoint accept NGSI-LD payloads, convert them to
     tabular format and store them in the DB backend (#373)
@@ -28,7 +29,8 @@
 - Support running QuantumLeap as a WSGI app in Gunicorn (#357)
 - Collect telemetry time-series to analyse performance (#411)
 
-#### Bug fixes
+### Bug fixes
+
 - Honour default DB backend setting in YAML configuration (#405)
 - Change health status from critical to warning when cache backend
   is down (#402)
@@ -43,7 +45,8 @@
   contains multiple service paths (#363, #364, #365)
 - Return HTTP 500 on DB insert failure (#346)
 
-#### Documentation
+### Documentation
+
 - Note delay to be expected between an entity insertion and its subsequent
   availability for querying (#420)
 - Update Japanese documentation (#414)
@@ -52,13 +55,14 @@
 - Gunicorn security settings for QuantumLeap (#380)
 - Mention CrateDB lacks support for 3D coordinates (#340)
 
-#### Technical debt
-- Clean up and refactor translator tests (#403)
+### Technical debt
 
+- Clean up and refactor translator tests (#403)
 
 ## 0.7.6
 
-#### New features
+### New features
+
 - Save original data on translation error (#335)
 - Make maximum number of rows a query can retrieve configurable (#330)
 - Support CrateDB `4.x` series (#300)
@@ -68,7 +72,8 @@
 - Make `entities` endpoint list IDs of all existing entities (#264)
 - Move `version`, `config` and `health` endpoint to API root path (#261)
 
-#### Bug fixes
+### Bug fixes
+
 - Log values of environment variables when reading them in (#326)
 - Reduce code duplication between CrateDB and Timescale translators;
   use UTC time consistently across the board for time indexing; fix
@@ -84,7 +89,8 @@
 - Update network interface in Travis build (#260)
 - Update FIWARE CSS to avoid redirect URL (#252)
 
-#### Documentation
+### Documentation
+
 - Update Japanese documentation to cater for CrateDB `4.x` and environment
   variables (#333)
 - Update contributors list (#307)
@@ -98,7 +104,8 @@
 - Update GitHub issue template (#259)
 - State DB versions in README
 
-#### Important: Backward compatibility
+### Important: Backward compatibility
+
 This release breaks API backward compatibility. Existing `0.7.5` clients may
 **not** be able to work with this new Quantum Leap version without code
 changes.
@@ -147,7 +154,8 @@ Note that the semantics of the endpoints remains the same as version
 - Flatten JSON in query results (#213)
 - Data migration from STH-Comet to QuantumLeap (#184)
 
-#### Important: Backward compatibility
+### Important: Backward compatibility
+
 This release breaks API backward compatibility. Existing 0.6.3 clients will
 **not** be able to work with Quantum Leap 0.7.0 without code changes.
 In detail: version 0.7.0 changes the structure of query results. Up to

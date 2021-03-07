@@ -67,11 +67,11 @@ def test_1TNENA_defaults(service, reporter_dataset):
     expected_attributes = [
         {
             'attrName': attr_name_2,
-            'values' : expected_pressures
+            'values': expected_pressures
         },
         {
             'attrName': attr_name_1,
-            'values' : expected_temperatures
+            'values': expected_temperatures
         }
     ]
     expected_entities = [
@@ -123,11 +123,11 @@ def test_1TNENA_one_entity(service, reporter_dataset):
     expected_attributes = [
         {
             'attrName': attr_name_2,
-            'values' : expected_pressures
+            'values': expected_pressures
         },
         {
             'attrName': attr_name_1,
-            'values' : expected_temperatures
+            'values': expected_temperatures
         }
     ]
 
@@ -167,11 +167,11 @@ def test_1TNENA_some_entities(service, reporter_dataset):
     expected_attributes = [
         {
             'attrName': attr_name_2,
-            'values' : expected_pressures
+            'values': expected_pressures
         },
         {
             'attrName': attr_name_1,
-            'values' : expected_temperatures
+            'values': expected_temperatures
         }
     ]
 
@@ -217,11 +217,11 @@ def test_1TNENA_values_defaults(service, reporter_dataset):
     expected_attributes = [
         {
             'attrName': attr_name_2,
-            'values' : expected_pressures
+            'values': expected_pressures
         },
         {
             'attrName': attr_name_1,
-            'values' : expected_temperatures
+            'values': expected_temperatures
         }
     ]
 
@@ -284,11 +284,11 @@ def test_weird_ids(service, reporter_dataset):
     expected_attributes = [
         {
             'attrName': attr_name_2,
-            'values' : expected_pressures
+            'values': expected_pressures
         },
         {
             'attrName': attr_name_1,
-            'values' : expected_temperatures
+            'values': expected_temperatures
         }
     ]
 
@@ -334,7 +334,7 @@ def test_aggregation_is_per_instance(service, reporter_dataset):
     expected_attributes = [
         {
             'attrName': attr_name_1,
-            'values' : [sum(range(6))]
+            'values': [sum(range(6))]
         }
     ]
 
@@ -375,7 +375,7 @@ def test_aggregation_is_per_instance(service, reporter_dataset):
     expected_attributes = [
         {
             'attrName': attr_name_1,
-            'values' : [5]
+            'values': [5]
         }
     ]
 
@@ -454,7 +454,7 @@ def test_1TNENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
     expected_attributes = [
         {
             'attrName': attr_name_1,
-            'values' : [exp_sum, exp_sum, exp_sum]
+            'values': [exp_sum, exp_sum, exp_sum]
         }
     ]
 

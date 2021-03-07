@@ -18,8 +18,10 @@ NGSI entities corresponding to the rows stored in the Crate table.
 
 Here's an example usage
 
-    $ python crate-exporter.py --schema mtyoutenant --table etdevice \
-        > mtyoutenant.etdevice-import.sql
+```bash
+$ python crate-exporter.py --schema mtyoutenant --table etdevice \
+    > mtyoutenant.etdevice-import.sql
+```
 
 where we export all the rows in the Crate table `mtyoutenant.etdevice`.
 The generated file contains all the SQL statements to recreate the
@@ -32,9 +34,10 @@ By default the script exports all the rows in the Crate table, but
 you can also use the `--query` argument to specify a query to select
 only a subset of interest as shown below:
 
-    $ python crate-exporter.py --schema mtyoutenant --table etdevice --query \
-        "SELECT * FROM mtyoutenant.etdevice where time_index > '2019-04-15';"
-
+```bash
+$ python crate-exporter.py --schema mtyoutenant --table etdevice --query \
+    "SELECT * FROM mtyoutenant.etdevice where time_index > '2019-04-15';"
+```
 
 [ts-admin]: ./timescale.md
     "QuantumLeap Timescale"

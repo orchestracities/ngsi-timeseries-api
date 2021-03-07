@@ -9,7 +9,6 @@ being persisted. Moreover, QuantumLeap ships with tools to automate the
 Timescale back end setup and generate Crate-to-Timescale migration
 scripts---details in the [Data Migration section][admin.dm].
 
-
 ## QuantumLeap Timescale DB setup
 
 In order to start using the Timescale back end, a working PostgreSQL
@@ -58,7 +57,6 @@ and another container that will run the script using
 providing a working Timescale DB, complete with some tables
 and test data.
 
-
 ## Using the Timescale back end
 
 Once you have a Postgres+Timescale+PostGIS server with a freshly
@@ -68,8 +66,8 @@ be set and a YAML file edited. The environment variables to use
 are:
 
 * `POSTGRES_HOST`: the hostname or IP address of your Timescale server.
-  Defaults to `timescale` if not specified. 
-* `POSTGRES_PORT`: the server port to connect to, defaults to `5432`. 
+  Defaults to `timescale` if not specified.
+* `POSTGRES_PORT`: the server port to connect to, defaults to `5432`.
 * `POSTGRES_DB_NAME`: the name of the QuantumLeap DB, defaults to
   `quantumleap`.
 * `POSTGRES_DB_USER`: the DB user QuantumLeap should use to connect,
@@ -84,9 +82,6 @@ are:
   the Crate back end is available. For details about how to select a
   back end and YAML configuration, refer to the [Database Selection
   section][admin.db].
-
-
-
 
 [admin.db]: ./db-selection.md
     "QuantumLeap Database Selection"

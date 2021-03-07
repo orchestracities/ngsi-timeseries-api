@@ -103,7 +103,7 @@ class EnvReader:
     @staticmethod
     def get_parse_error_log_msg(var: EVar, cause: Exception) -> str:
         return f"Error reading env variable {var.name}: {cause}; " + \
-               f"using default value of {var.default_value}."
+            f"using default value of {var.default_value}."
 
     def __init__(self, var_store: dict = os.environ, log=None):
         self.var_store = var_store

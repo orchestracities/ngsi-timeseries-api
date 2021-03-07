@@ -149,7 +149,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
                         value = e[attr]['value']['@value']
                     elif 'type' in e[attr] and e[attr]['type'] == 'Relationship':
                         value = e[attr].get('value', None) or \
-                                e[attr].get('object', None)
+                            e[attr].get('object', None)
 
                     values.append(value)
                 except KeyError:
@@ -190,8 +190,8 @@ class CrateTranslator(sql_translator.SQLTranslator):
 
     def _store_metadata(self, table_name, persisted_metadata):
         stmt = "insert into {} (table_name, entity_attrs) values (?,?) " \
-                   "on conflict(table_name) " \
-                   "DO UPDATE SET entity_attrs = excluded.entity_attrs"
+            "on conflict(table_name) " \
+            "DO UPDATE SET entity_attrs = excluded.entity_attrs"
         stmt = stmt.format(METADATA_TABLE_NAME)
         self.cursor.execute(stmt, (table_name, persisted_metadata))
 
