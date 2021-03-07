@@ -76,9 +76,9 @@ def assert_failed_entity(actual_row, original_entity):
 
 def assert_partial_entity(actual_row, original_entity):
     assert actual_row['a_number'] == \
-           maybe_value(original_entity, 'a_number', 'value')
+        maybe_value(original_entity, 'a_number', 'value')
     assert actual_row['an_attr'] != \
-           maybe_value(original_entity, 'an_attr', 'value')
+        maybe_value(original_entity, 'an_attr', 'value')
     assert actual_row[ORIGINAL_ENTITY_COL] is None
 
 
