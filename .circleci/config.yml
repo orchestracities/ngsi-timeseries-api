@@ -16,6 +16,8 @@ jobs:
           command: |
             pyenv versions
             pyenv global 3.9.1
+            ls /usr/local/bin
+            ls /usr/local/lib/
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.9
       - restore_cache:  # ensure this step occurs *before* installing dependencies
