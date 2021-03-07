@@ -24,7 +24,7 @@ jobs:
           command: |
             sudo add-apt-repository universe
             sudo apt install python3-pip
-            sudo pip install pipenv
+            pip install pipenv
             pipenv install --dev
       - save_cache:
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
