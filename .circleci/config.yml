@@ -38,6 +38,10 @@ jobs:
               sudo sysctl -w vm.max_map_count=262144
               source setup_dev_env.sh
               pipenv run sh run_tests.sh
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results 
 
 workflows:
   main:

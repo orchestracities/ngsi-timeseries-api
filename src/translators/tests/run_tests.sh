@@ -5,6 +5,7 @@ docker build -t orchestracities/quantumleap ../../../
 docker-compose build quantumleap-db-setup
 docker-compose pull crate
 docker-compose pull timescale
+docker-compose pull redis
 # NOTE. The below command:
 #   docker-compose pull --include-deps crate timescale
 # fails on Travis for some obscure reasons which is why we're pulling
