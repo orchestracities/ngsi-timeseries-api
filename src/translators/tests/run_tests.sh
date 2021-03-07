@@ -12,6 +12,7 @@ docker-compose pull timescale
 
 docker-compose up -d
 sleep 20
+docker-compose ps
 
 
 

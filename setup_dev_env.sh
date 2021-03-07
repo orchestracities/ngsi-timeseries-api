@@ -12,9 +12,7 @@ source deps.env
 
 if ! command -v /sbin/ifconfig &> /dev/null
 then
-    ip addr | grep docker0 | grep inet | awk '{print $2}' | cut -d"/" -f1
     LH=`ip addr | grep docker0 | grep inet | awk '{print $2}' | cut -d"/" -f1`
-    echo $LH
 else
   LH=`( /sbin/ifconfig ens4 | grep 'inet' | cut -d: -f2 | awk '{ print $1}' ) 2> /dev/null`
   if [ -z "$LH" ]
@@ -33,5 +31,7 @@ export CRATE_HOST=$LH
 export POSTGRES_HOST=$LH
 
 export REDIS_HOST=$LH
+
+echo "used ip: $LH"
 
 [[ "$SHELL" == "no" ]] || pipenv shell
