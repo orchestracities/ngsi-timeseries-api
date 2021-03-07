@@ -13,21 +13,20 @@ docker-compose pull timescale
 docker-compose up -d
 sleep 20
 docker-compose ps
-
+docker logs tests_crate_1
 
 
 cd ../../../
 
 # Set test QL config file
-export QL_CONFIG='src/translators/tests/ql-config.yml'
-
-#pytest src/translators/ --cov-report= --cov-config=.coveragerc --cov=src/
-pytest --verbose src/translators/ 
-r=$?
-
-unset QL_CONFIG
-
-cd -
-
-docker-compose down -v
-exit $r
+# export QL_CONFIG='src/translators/tests/ql-config.yml'
+# 
+# pytest src/translators/ --cov-report= --cov-config=.coveragerc --cov=src/
+# r=$?
+# 
+# unset QL_CONFIG
+# 
+# cd -
+# 
+# docker-compose down -v
+# exit $r
