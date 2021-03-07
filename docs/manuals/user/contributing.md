@@ -74,26 +74,26 @@ gunicorn server.wsgi --config server/gconfig.py
 ### Security Settings
 
 #### limit_request_line
-```
+
+```bash
 --limit-request-line INT
 4094
 ```
 
 #### limit_request_fields
 
-### limit_request_fields
-
 ```bash
 --limit-request-fields INT
 100
 ```
 
-This parameter is used to limit the number of headers in a request to prevent DDOS attack. 
-Used with the limit_request_field_size it allows more safety. By default this value is 100 and can’t be larger than 32768.
+This parameter is used to limit the number of headers in a request to prevent
+DDOS attack.  Used with the `limit_request_field_size` it allows more safety.
+By default this value is 100 and can’t be larger than 32768.
 
 #### limit_request_field_size
 
-```
+```bash
 --limit-request-field_size INT
 8190
 ```
