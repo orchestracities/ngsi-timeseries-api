@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+docker-compose build quantumleap-db-setup
+docker-compose pull crate
+docker-compose pull timescale
+docker-compose pull redis
 
 docker-compose up -d
 sleep 20
