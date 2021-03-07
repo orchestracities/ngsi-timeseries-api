@@ -5,16 +5,11 @@ jobs:
     machine: true
     steps:
       - checkout
-      - restore_cache:  # ensure this step occurs *before* installing dependencies
-          key: deps9-{{ .Branch }}-{{ checksum "Dockerfile" }}
       - run: docker build -t orchestracities/quantumleap:$CIRCLE_BRANCH .
-      - save_cache:
-          key: deps9-{{ .Branch }}-{{ checksum "Dockerfile" }}
-          paths:
-            - " /var/lib/docker/"
   test_translators:
     machine:
       image: ubuntu-2004:202008-01
+      resource_class: large
     steps:
       - checkout
       - run:
@@ -38,13 +33,12 @@ jobs:
             - ".venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.8"
-      - restore_cache:  # ensure this step occurs *before* installing dependencies
-          key: deps9-{{ .Branch }}-{{ checksum "Dockerfile" }}
       - run:
           command: |
               export SHELL=no
               source setup_dev_env.sh
               pipenv run sh run_tests.sh
+          no_output_timeout: 20m
 
 workflows:
   main:
