@@ -19,8 +19,9 @@ jobs:
           command: |
             #sudo add-apt-repository universe
             #sudo apt install python3-pip
-            pip install pipenv
-            pipenv install --dev
+            sudo pip install pipenv
+            sudo pipenv install --dev
+            ls /usr/local/lib/
       - save_cache:
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
           paths:
@@ -31,6 +32,7 @@ jobs:
           command: |
               export SHELL=no
               source setup_dev_env.sh
+              echo "CrateDB"
               echo $CRATE_VERSION
               pipenv install --dev
               sh run_tests.sh
