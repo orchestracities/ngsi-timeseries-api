@@ -1,4 +1,4 @@
-FROM python:3.8.3-alpine3.12
+FROM python:3.9-alpine3.13
 
 RUN apk --no-cache --update-cache add postgresql-client openssl
 
