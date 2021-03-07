@@ -12,7 +12,7 @@ docker build -t orchestracities/quantumleap .
 # cd src/translators/tests
 # test_suite_header "TRANSLATOR"
 # sh run_tests.sh
-# tot=$?
+tot=$?
 # cd -
 
 cd src/reporter/tests
