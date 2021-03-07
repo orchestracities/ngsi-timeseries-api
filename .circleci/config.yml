@@ -5,10 +5,10 @@ jobs:
     machine: true
     steps:
       - checkout
-      - restore_docker_cache:  # ensure this step occurs *before* installing dependencies
+      - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Dockerfile" }}
       - run: docker build -t orchestracities/quantumleap:$CIRCLE_BRANCH .
-      - save_python_cache:
+      - save_cache:
           key: deps9-{{ .Branch }}-{{ checksum "Dockerfile" }}
           paths:
             - " /var/lib/docker/"
@@ -24,7 +24,7 @@ jobs:
             pyenv global 3.8.5
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
-      - restore_python_cache:  # ensure this step occurs *before* installing dependencies
+      - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
           command: |
@@ -32,13 +32,13 @@ jobs:
             sudo apt install python3-pip
             pip install pipenv
             pipenv install --dev
-      - save_python_cache:
+      - save_cache:
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
           paths:
             - ".venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.8"
-      - restore_docker_cache:  # ensure this step occurs *before* installing dependencies
+      - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Dockerfile" }}
       - run:
           command: |
