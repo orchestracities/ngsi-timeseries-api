@@ -11,24 +11,24 @@ jobs:
       image: ubuntu-2004:202101-01
     steps:
       - checkout
-      - run:
-          name: "Switch to Python v3.9.1"
-          command: |
-            pyenv versions
-            pyenv global 3.9.1
-            ls /usr/local/bin
-            ls /usr/local/lib
+      #- run:
+      #    name: "Switch to Python v3.9.1"
+      #    command: |
+      #      pyenv versions
+      #      pyenv global 3.9.1
+      #      ls /usr/local/bin
+      #      ls /usr/local/lib
+      - run: sudo python --version
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
       - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
           command: |
-            sudo add-apt-repository universe
-            sudo apt install python3-pip
-            sudo pip install pipenv
+            #sudo add-apt-repository universe
+            #sudo apt install python3-pip
+            pip install pipenv
             pipenv install --dev
-            ls /usr/local/lib/python3.8
             ls /usr/local/lib/
       - save_cache:
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
