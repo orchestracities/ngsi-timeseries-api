@@ -31,7 +31,7 @@ pytest-flask = "~=0.10"
 pytest = "~=3.0"
 pytest-cov = "~=2.7.1"
 coveralls = "~=2.0"
-lovely-pytest-docker = "*"
+lovely-pytest-docker = "~=0.2.0"
 
 [requires]
 python_version = "3.8"
