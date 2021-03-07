@@ -60,6 +60,4 @@ cd -
 # fi
 # cd -
 
-docker rmi quantumleap
-
 exit $tot
