@@ -31,10 +31,10 @@ contributions"
 
 ## Requirements
 
-* [Python 3.8](https://docs.python-guide.org/starting/installation/)
-* [Docker](https://docs.docker.com/get-docker/)
-* [Docker compose](https://docs.docker.com/compose/install/)
-* [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+- [Python 3.8](https://docs.python-guide.org/starting/installation/)
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker compose](https://docs.docker.com/compose/install/)
+- [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 
 [pytest](https://docs.pytest.org/en/latest/) is used as the testing framework,
 but since most of QL's functionality is integration of components, you'll find
@@ -58,7 +58,7 @@ source setup_dev_env.sh
 
 To run tests (assuming you run `source setup_dev_env.sh`):
 
-```
+```bash
 sh run_tests.sh
 ```
 
@@ -70,6 +70,7 @@ Details on how to use Quantum Leap WSGI app in Gunicorn:
 cd ngsi-timeseries-api/src
 gunicorn server.wsgi --config server/gconfig.py
 ```
+
 ### Security Settings
 
 #### limit_request_line
