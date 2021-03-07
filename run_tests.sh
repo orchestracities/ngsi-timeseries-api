@@ -9,11 +9,11 @@ test_suite_header () {
 docker pull orchestracities/quantumleap
 docker build -t orchestracities/quantumleap .
 
-# cd src/translators/tests
-# test_suite_header "TRANSLATOR"
-# sh run_tests.sh
+cd src/translators/tests
+test_suite_header "TRANSLATOR"
+sh run_tests.sh
 tot=$?
-# cd -
+cd -
 
 cd src/reporter/tests
 test_suite_header "REPORTER"
