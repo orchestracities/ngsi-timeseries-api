@@ -1,4 +1,4 @@
-FROM python:3.9.1-alpine3.13 as base
+FROM python:3.8.5-alpine3.12 as base
 FROM base as builder
 RUN apk --no-cache --update-cache add gcc python3 python3-dev py-pip build-base wget
 RUN ln -s /usr/include/locale.h /usr/include/xlocale.h

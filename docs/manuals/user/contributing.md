@@ -28,7 +28,7 @@ contributions"
 
 ## Requirements
 
-* [Python 3.9](https://docs.python-guide.org/starting/installation/)
+* [Python 3.8](https://docs.python-guide.org/starting/installation/)
 * [Docker](https://docs.docker.com/get-docker/)
 * [Docker compose](https://docs.docker.com/compose/install/)
 * [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
