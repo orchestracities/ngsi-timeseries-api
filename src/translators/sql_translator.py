@@ -131,7 +131,7 @@ class SQLTranslator(base_translator.BaseTranslator):
 
     def dispose(self):
         dt = datetime.now() - self.start_time
-        time_difference = (dt.days * 24 * 60 * 60 + dt.seconds)\
+        time_difference = (dt.days * 24 * 60 * 60 + dt.seconds) \
             * 1000 + dt.microseconds / 1000.0
         self.logger.debug("Translation completed | time={} msec".format(
             str(time_difference)))
@@ -310,15 +310,15 @@ class SQLTranslator(base_translator.BaseTranslator):
                 elif isinstance(e[attr], dict) and 'value' in e[attr]:
                     value = e[attr]['value']
                     if isinstance(value, list):
-                        attr_t = NGSI_STRUCTURED_VALUE
+                        attr_t = "Array"
                     elif value is not None and isinstance(value, dict):
                         attr_t = NGSI_STRUCTURED_VALUE
+                    elif isinstance(value, bool):
+                        attr_t = 'Boolean'
                     elif isinstance(value, int):
                         attr_t = 'Integer'
                     elif isinstance(value, float):
                         attr_t = 'Number'
-                    elif isinstance(value, bool):
-                        attr_t = 'Boolean'
                     elif self._is_iso_date(value):
                         attr_t = NGSI_DATETIME
                     else:
@@ -365,7 +365,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             start_time = datetime.now()
             self.cursor.executemany(stmt, rows)
             dt = datetime.now() - start_time
-            time_difference = (dt.days * 24 * 60 * 60 + dt.seconds)\
+            time_difference = (dt.days * 24 * 60 * 60 + dt.seconds) \
                 * 1000 + dt.microseconds / 1000.0
             self.logger.debug("Query completed | time={} msec".format(
                 str(time_difference)))
@@ -455,7 +455,185 @@ class SQLTranslator(base_translator.BaseTranslator):
 
     def _preprocess_values(self, e, original_attrs, col_names,
                            fiware_servicepath):
+        values = []
+        for cn in col_names:
+            if cn == 'entity_type':
+                values.append(e['type'])
+            elif cn == 'entity_id':
+                values.append(e['id'])
+            elif cn == self.TIME_INDEX_NAME:
+                values.append(e[self.TIME_INDEX_NAME])
+            elif cn == FIWARE_SERVICEPATH:
+                values.append(fiware_servicepath or '')
+            else:
+                # Normal attributes
+                try:
+                    attr = original_attrs[cn][0]
+                    attr_t = original_attrs[cn][1]
+
+                    if SlfGeometry.is_ngsi_slf_attr(e[attr]):
+                        mapped_value = self._ngsi_slf_to_db(e[attr])
+                    elif attr_t == NGSI_GEOJSON or attr_t == NGSI_LD_GEOMETRY:
+                        mapped_value = self._ngsi_geojson_to_db(e[attr])
+                    elif self._is_ngsi_ld_datetime_property(e[attr]):
+                        mapped_value = self._ngsi_ld_datetime_to_db(e[attr])
+                    elif attr_t == NGSI_TEXT:
+                        mapped_value = self._ngsi_text_to_db(e[attr])
+                    elif attr_t == NGSI_DATETIME or attr_t == NGSI_ISO8601:
+                        mapped_value = self._ngsi_datetime_to_db(e[attr])
+                    elif attr_t == "Boolean":
+                        mapped_value = self._ngsi_boolean_to_db(e[attr])
+                    elif attr_t == "Number":
+                        mapped_value = self._ngsi_number_to_db(e[attr])
+                    elif attr_t == "Integer":
+                        mapped_value = self._ngsi_integer_to_db(e[attr])
+                    elif attr_t == 'Relationship':
+                        mapped_value = self._ngsi_ld_relationship_to_db(
+                            e[attr])
+                    elif self._is_ngsi_array(e[attr], attr_t):
+                        mapped_value = self._ngsi_array_to_db(e[attr])
+                    elif self._is_ngsi_object(e[attr], attr_t):
+                        mapped_value = self._ngsi_structured_to_db(e[attr])
+                    else:
+                        mapped_value = self._ngsi_default_to_db(e[attr])
+
+                    values.append(mapped_value)
+                except KeyError:
+                    # this entity update does not have a value for the column
+                    # so use None which will be inserted as NULL to the db.
+                    values.append(None)
+                except ValueError:
+                    # this value cannot be cast to column type
+                    # so use None which will be inserted as NULL to the db.
+                    values.append(None)
+        return values
+
+    @staticmethod
+    def _is_ngsi_array(attr, attr_t):
+        return (attr_t == NGSI_STRUCTURED_VALUE
+                and 'value' in attr and isinstance(attr['value'], list)) or attr_t == "Array"
+
+    @staticmethod
+    def _is_ngsi_object(attr, attr_t):
+        return attr_t == NGSI_STRUCTURED_VALUE or ('value' in attr and isinstance(attr['value'], dict))
+
+    @staticmethod
+    def _is_ngsi_ld_datetime_property(attr):
+        if 'type' in attr and attr[
+                'type'] == 'Property' and 'value' in attr and isinstance(
+                    attr['value'], dict) \
+            and '@type' in attr['value'] and attr['value'][
+                '@type'] == 'DateTime':
+            return True
+        return False
+
+    @staticmethod
+    def _ngsi_geojson_to_db(attr):
         raise NotImplementedError
+
+    @staticmethod
+    def _ngsi_number_to_db(attr):
+        try:
+            if isinstance(attr['value'], bool):
+                return None
+            elif isinstance(attr['value'], float):
+                return attr['value']
+            elif attr['value'] is not None:
+                return float(attr['value'])
+        except ValueError:
+            logging.warning('{} cannot be cast to {} replaced with None'.format(
+                attr.get('value', None), attr.get('type', None)))
+            return None
+        else:
+            logging.warning('{} cannot be cast to {} replaced with None'.format(
+                attr.get('value', None), attr.get('type', None)))
+            return None
+
+    @staticmethod
+    def _ngsi_datetime_to_db(attr):
+        if 'value' in attr and SQLTranslator._is_iso_date(attr['value']):
+            return attr['value']
+        else:
+            logging.warning('{} cannot be cast to {} replaced with None'.format(
+                attr.get('value', None), attr.get('type', None)))
+            return None
+
+    @staticmethod
+    def _ngsi_integer_to_db(attr):
+        try:
+            if isinstance(attr['value'], bool):
+                return None
+            elif isinstance(attr['value'], int):
+                return attr['value']
+            elif attr['value'] is not None:
+                return int(float(attr['value']))
+        except ValueError:
+            logging.warning('{} cannot be cast to {} replaced with None'.format(
+                attr.get('value', None), attr.get('type', None)))
+            return None
+        else:
+            logging.warning('{} cannot be cast to {} replaced with None'.format(
+                attr.get('value', None), attr.get('type', None)))
+            return None
+
+    @staticmethod
+    def _ngsi_boolean_to_db(attr):
+        if isinstance(attr['value'], str) and attr['value'].lower() == 'true':
+            return True
+        elif isinstance(attr['value'], str) \
+                and attr['value'].lower() == 'false':
+            return False
+        elif isinstance(attr['value'], int) and attr['value'] == 1:
+            return True
+        elif isinstance(attr['value'], int) and attr['value'] == 0:
+            return False
+        elif isinstance(attr['value'], bool):
+            return attr['value']
+        else:
+            logging.warning('{} cannot be cast to {} replaced with None'.format(
+                attr.get('value', None), attr.get('type', None)))
+            return None
+
+    @staticmethod
+    def _ngsi_slf_to_db(attr):
+        raise NotImplementedError
+
+    @staticmethod
+    def _ngsi_structured_to_db(attr):
+        raise NotImplementedError
+
+    @staticmethod
+    def _ngsi_array_to_db(attr):
+        raise NotImplementedError
+
+    @staticmethod
+    def _ngsi_text_to_db(attr):
+        if 'value' in attr and attr['value'] is not None:
+            return str(attr['value'])
+        logging.warning('{} cannot be cast to {} replaced with None'.format(
+            attr.get('value', None), attr.get('type', None)))
+        return None
+
+    @staticmethod
+    def _ngsi_default_to_db(attr):
+        return attr.get('value', None)
+
+    @staticmethod
+    def _ngsi_ld_datetime_to_db(attr):
+        if SQLTranslator._is_ngsi_ld_datetime_property(attr) and SQLTranslator._is_iso_date(attr['value']['@value']):
+            return attr['value']['@value']
+        else:
+            if 'value' in attr:
+                logging.warning('{} cannot be cast to {} replaced with None'.format(
+                    attr['value'].get('@value', None), attr['value'].get('@type', None)))
+            else:
+                logging.warning(
+                    'attribute "value" is missing, cannot perform cast')
+            return None
+
+    @staticmethod
+    def _ngsi_ld_relationship_to_db(attr):
+        return attr.get('value', None) or attr.get('object', None)
 
     def _update_metadata_table(self, table_name, metadata):
         """
@@ -625,25 +803,29 @@ class SQLTranslator(base_translator.BaseTranslator):
             where_clause = "where" + " and ".join(clauses)
         return where_clause
 
-    def _parse_date(self, date):
+    @staticmethod
+    def _parse_date(date):
         try:
             return dateutil.parser.isoparse(date.strip('\"')).isoformat()
         except Exception as e:
             raise InvalidParameterValue(date, "**fromDate** or **toDate**")
 
-    def _is_iso_date(self, date):
+    @staticmethod
+    def _is_iso_date(date):
         try:
             dateutil.parser.isoparse(date.strip('\"')).isoformat()
             return True
         except Exception as e:
             return False
 
-    def _parse_limit(sefl, limit):
+    @staticmethod
+    def _parse_limit(limit):
         if (not (limit is None or isinstance(limit, int))):
             raise InvalidParameterValue(limit, "limit")
         return limit
 
-    def _parse_last_n(sefl, last_n):
+    @staticmethod
+    def _parse_last_n(last_n):
         if (not (last_n is None or isinstance(last_n, int))):
             raise InvalidParameterValue(last_n, "last_n")
         return last_n
