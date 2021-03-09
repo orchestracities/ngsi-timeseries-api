@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-docker build -t orchestracities/quantumleap ../../../
+docker-compose pull redis
 
 docker-compose up -d
 sleep 8

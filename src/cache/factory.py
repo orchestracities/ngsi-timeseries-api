@@ -47,7 +47,7 @@ def is_cache_available() -> bool:
         use geo-coding.
     """
     env = CacheEnvReader()
-    if env.redis_host():
+    if env.redis_host() and env.cache_queries():
         return True
     return False
 
@@ -60,7 +60,7 @@ def get_cache() -> MaybeCache:
         object otherwise.
     """
     env = CacheEnvReader()
-    if is_cache_available() and env.cache_queries():
+    if is_cache_available():
         log().debug("Cache env variables set, building a cache.")
         return QueryCache(env.redis_host(), env.redis_port(),
                           env.default_ttl())

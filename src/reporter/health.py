@@ -1,20 +1,25 @@
-import os
-
 from geocoding import geocoding
 from geocoding.factory import get_geo_cache, is_geo_coding_available
 from cache.factory import get_cache, is_cache_available
+from translators.factory import CRATE_BACKEND, TIMESCALE_BACKEND, \
+    default_backend
 
 
-# TODO having now multiple backends, health check needs update
-def check_crate():
+def check_db(db=CRATE_BACKEND):
     """
     crateDB is the default backend of QuantumLeap, so it is required by
     default.
     """
-    from translators.crate import CrateTranslatorInstance
-    with CrateTranslatorInstance() as trans:
-        crate_health = trans.get_health()
-        return crate_health
+    if db == CRATE_BACKEND:
+        from translators.crate import CrateTranslatorInstance
+        with CrateTranslatorInstance() as trans:
+            health = trans.get_health()
+            return health
+    if db == TIMESCALE_BACKEND:
+        from translators.timescale import PostgresTranslator
+        with PostgresTranslator() as trans:
+            health = trans.get_health()
+            return health
 
 
 def check_cache():
@@ -75,12 +80,15 @@ def get_health(with_geocoder=False):
         'status': 'pass'
     }
 
-    # Check crateDB (critical)
+    # Check defaultDB (critical)
+    db = default_backend().lower()
     try:
-        res = _check_critical(check_crate(), res, 'crateDB')
+        res = _check_critical(check_db(db), res, db)
     except Exception:
         res['status'] = 'fail'
-        res.setdefault('details', {})['crateDB'] = 'cannot reach crate'
+        res.setdefault('details', {})[db] = 'cannot reach ' + db
+
+    # TODO add not critical check if a secondary db is configured
 
     # Check cache (not critical)
     res = _check_not_critical(check_cache(), res, 'redis')

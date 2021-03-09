@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 # Make sure **all** images are available before starting to test!
-docker build -t orchestracities/quantumleap ../../../
 docker-compose build quantumleap-db-setup
 docker-compose pull crate
 docker-compose pull timescale
