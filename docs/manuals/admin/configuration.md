@@ -66,7 +66,6 @@ To configure QuantumLeap you can use the following environment variables:
   `0.9 GiB`. If this variable is not set (or the set value isn't valid),
   SQL inserts are processed normally without splitting data into batches.
 
-
 ## Database selection per different tenant
 
 QuantumLeap can use different time series databases to persist and
