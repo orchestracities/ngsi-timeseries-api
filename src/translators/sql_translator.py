@@ -13,9 +13,9 @@ import dateutil.parser
 from typing import Any, List, Optional, Sequence
 from uuid import uuid4
 import pickle
-import types
 
 from cache.factory import get_cache, is_cache_available
+from translators.insert_splitter import to_insert_batches
 from utils.connection_manager import Borg
 
 # NGSI TYPES
@@ -363,7 +363,10 @@ class SQLTranslator(base_translator.BaseTranslator):
         stmt = f"insert into {table_name} ({col_list}) values ({placeholders})"
         try:
             start_time = datetime.now()
-            self.cursor.executemany(stmt, rows)
+
+            for batch in to_insert_batches(rows):
+                self.cursor.executemany(stmt, batch)
+
             dt = datetime.now() - start_time
             time_difference = (dt.days * 24 * 60 * 60 + dt.seconds) \
                 * 1000 + dt.microseconds / 1000.0
