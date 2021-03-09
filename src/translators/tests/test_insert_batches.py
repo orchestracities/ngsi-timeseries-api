@@ -32,7 +32,7 @@ class DataGen:
     @staticmethod
     def _compute_insert_vector_size_lower_bound(entity: dict) -> int:
         vs = entity['id'], entity['type'], entity[TIME_INDEX_NAME], \
-             entity['a_number']['value'], entity['an_attr']['value']
+            entity['a_number']['value'], entity['an_attr']['value']
         sz = [sys.getsizeof(v) for v in vs]
         return sum(sz)
     # NOTE. lower bound since it doesn't include e.g. fiware service.

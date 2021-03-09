@@ -29,7 +29,7 @@ def test_str_var_default(value):
 
 
 @pytest.mark.parametrize('value, expected', [
-   ('1 B', 1), ('1B', 1), ('1 KiB', 1024)
+    ('1 B', 1), ('1B', 1), ('1 KiB', 1024)
 ])
 def test_bit_size_var(value, expected):
     var = BitSizeVar('V', None)
