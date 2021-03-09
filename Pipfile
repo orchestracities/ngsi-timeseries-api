@@ -19,8 +19,8 @@ pyyaml = ">=4.2"
 redis = "~=2.10"
 requests = ">=2.20"
 pickle-mixin = "==1.0.2"
-
 # run `pipenv install --dev` to get the packages below in your env
+
 [dev-packages]
 aiohttp = "~=3.7"
 backoff = "~=1.1"
@@ -31,6 +31,7 @@ pytest-flask = "~=0.10"
 pytest = "~=3.0"
 pytest-cov = "~=2.7.1"
 coveralls = "~=2.0"
+lovely-pytest-docker = "~=0.2.0"
 
 [requires]
 python_version = "3.8"
