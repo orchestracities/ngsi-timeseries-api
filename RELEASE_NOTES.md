@@ -1,5 +1,17 @@
 # QuantumLeap Release Notes
 
+## 0.8.1
+
+### New features
+
+- Optimise Gunicorn config for Docker image (#410)
+- Batch inserts (#445)
+- Increase resiliency to badly formatted data and support data casting (#444)
+
+### Bug fixes
+
+- Fix broken health check if no cache is used (#446)
+
 ## 0.8.0
 
 ### New features
