@@ -28,6 +28,8 @@ To configure QuantumLeap you can use the following environment variables:
 | `CRATE_WAIT_ACTIVE_SHARDS` | Specifies the number of shard copies that need to be active for write operations to proceed. Default `1`. See related [crate documentation](https://crate.io/docs/crate/reference/en/4.3/sql/statements/create-table.html#write-wait-for-active-shards). |
 | `USE_FLASK`        | `True` or `False` to use flask server (only for Dev) or gunicorn. Default to `False`  |
 | `LOGLEVEL`         | Define the log level for all services (`DEBUG`, `INFO`, `WARNING` , `ERROR`)      |
+| `WORKERS`          | Define the number of gunicorn worker processes for handling requests. Default to `2` |
+| `THREADS`          | Define the number of gunicorn threads per worker.  Default to `1` **see notes**.  |
 
 ### Notes
 
@@ -51,6 +53,9 @@ To configure QuantumLeap you can use the following environment variables:
   subsequent insert operation. Any of the following (case insensitive) values
   will be interpreted as true: 'true', 'yes', '1', 't', 'y'. Anything else
   counts for false, which is also the default value if the variable is not set.
+  
+- `THREADS`. Current implementation of ConnectionManager is not thread safe,
+  so keep this value to 1.
 
 - `INSERT_MAX_SIZE`. If set, this variable limits the amount of data that
   can be packed in a single SQL bulk insert to the specified value `M`. If
