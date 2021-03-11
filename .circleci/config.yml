@@ -1,11 +1,20 @@
 version: 2.1
 
-jobs: 
+orbs:
+  docker-cache: nulib/docker-cache@0.3.0
+
+jobs:
   build:
     machine: true
     steps:
       - checkout
-      - run: docker build -t orchestracities/quantumleap .
+      - docker-cache/restore-cache:
+          key: build-{{ .Environment.CIRCLE_SHA1 }}
+      - docker-cache/build:
+          image: orchestracities/quantumleap
+          tag: $CIRCLE_BRANCH
+      - docker-cache/save-cache:
+          key: build-{{ .Environment.CIRCLE_SHA1 }}
   test_translator:
     machine:
       image: ubuntu-2004:202008-01
@@ -96,33 +105,35 @@ jobs:
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
           command: |
+            ls -la /opt/circleci/.pyenv/versions/3.8.5/lib
             export WORKON_HOME=~/.venv
             pip install pipenv
             pipenv install --dev
-      - save_cache:
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
-          paths:
-            - ".venv"
-            - "/usr/local/bin"
-            - "/usr/local/lib/python3.8"
-            - "/opt/circleci/.pyenv/versions/3.8.5/lib"
+            ls -la /opt/circleci/.pyenv/versions/3.8.5/lib
+#      - save_cache:
+#          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+#          paths:
+#            - ".venv"
+#            - "/usr/local/bin"
+#            - "/usr/local/lib/python3.8"
+#            - "/opt/circleci/.pyenv/versions/3.8.5/lib"
       - run:
           command: |
-              export SHELL=no
-              export WORKON_HOME=~/.venv
-              sudo sysctl -w vm.max_map_count=262144
-              source setup_dev_env.sh
-              export tests=others
-              pipenv run sh run_tests.sh
-      - store_test_results:
-          path: test-results
-      - store_artifacts:
-          path: test-results
-      - run:
-          name: Upload coverage data to coveralls.io
-          command: |
-              pip3 install --upgrade coveralls
-              coveralls
+#              export SHELL=no
+#              export WORKON_HOME=~/.venv
+#              sudo sysctl -w vm.max_map_count=262144
+#              source setup_dev_env.sh
+#              export tests=others
+#              pipenv run sh run_tests.sh
+#      - store_test_results:
+#          path: test-results
+#      - store_artifacts:
+#          path: test-results
+#      - run:
+#          name: Upload coverage data to coveralls.io
+#          command: |
+#              pip3 install --upgrade coveralls
+#              coveralls
   coveralls:
     machine:
       image: ubuntu-2004:202008-01
@@ -136,17 +147,17 @@ workflows:
   main:
     jobs:
       - build
-      - test_translator:
-          requires:
-            - build
-      - test_reporter:
-          requires:
-            - build
+#      - test_translator:
+#          requires:
+#            - build
+#      - test_reporter:
+#          requires:
+#            - build
       - test_others:
           requires:
             - build
-      - coveralls:
-          requires:
-            - test_translator
-            - test_reporter
-            - test_others
+#      - coveralls:
+#          requires:
+#            - test_translator
+#            - test_reporter
+#            - test_others
