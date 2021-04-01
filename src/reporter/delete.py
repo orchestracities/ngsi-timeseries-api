@@ -34,9 +34,9 @@ def delete_entity(entity_id, type_=None, from_date=None, to_date=None):
 def delete_entities(entity_type, from_date=None, to_date=None,
                     drop_table=False):
         with translator_for(fiware_s()) as trans:
-            if fiware_sp() is not None:
+            if fiware_s() is not None:
                 e = None
-                e = fiware_sp().split(",")
+                e = fiware_s().split(",")
                 for i in e:
                     count = len(e)
                     if count > 1:
