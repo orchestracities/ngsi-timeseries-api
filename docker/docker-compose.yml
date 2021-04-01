@@ -57,7 +57,7 @@ services:
       - crate
 
   redis:
-    image: redis
+    image: redis:${REDIS_VERSION:-4}
     ports:
       - "6379:6379"
     volumes:

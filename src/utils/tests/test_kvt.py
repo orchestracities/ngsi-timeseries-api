@@ -37,11 +37,11 @@ def test_forest_of_trees():
     target = forest(
         node('t1', 1),
         node('t2', forest(
-           node('t2.1', forest(
-               node('t2.1.1', 2),
-               node('t2.1.2', 3),
+            node('t2.1', forest(
+                node('t2.1.1', 2),
+                node('t2.1.2', 3),
             )),
-           node('t2.2', 4)
+            node('t2.2', 4)
         )),
         node('t3', 5)
     )

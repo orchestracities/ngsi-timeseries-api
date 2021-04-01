@@ -4,8 +4,7 @@ Thanks for checking out the QuantumLeap Project. We're excited to hear
 and learn from you. We've put together the following guidelines to help
 you figure out where you can best be helpful.
 
-
-### Ground rules & expectations
+## Ground rules & expectations
 
 Before we get started, here are a few things we expect from you (and
 that you should expect from others):
@@ -27,8 +26,7 @@ that you should expect from others):
   don't add references or links to things you or your employer have
   created as others will do so if they appreciate it.
 
-
-### How to contribute
+## How to contribute
 
 If you'd like to contribute, start by searching through the [issues][gi]
 and [pull requests][pr] to see whether someone else has raised a similar
@@ -43,8 +41,7 @@ of this guide, do one of the following:
   opening an issue first. That way, other people can weigh in on the
   discussion before you do any work.
 
-
-### Community
+## Community
 
 Discussions about the Open Source Guides take place on this repository's
 [Issues][gi] and [Pull Requests][pr] sections. Anybody is welcome to join
@@ -54,9 +51,6 @@ Wherever possible, do not take these conversations to private channels,
 including contacting the maintainers directly.
 Keeping communication public means everybody can benefit and learn from
 the conversation.
-
-
-
 
 [cla]: https://fiware.github.io/contribution-requirements/individual-cla.pdf
     "FIWARE Individual Contributor License Agreement"

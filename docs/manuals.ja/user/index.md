@@ -32,8 +32,7 @@ Orion の専門家ではないのですか？問題はありません。QuantumL
 
 各ステップの詳細を見てみましょう。
 
-<a name="orion-subscription"></a>
-## Orion サブスクリプション
+## Orion サブスクリプション <a name="orion-subscription"></a>
 
 前述のように、Orion と QuantumLeap のリンクは、
 作成する必要があるサブスクリプションによって確立されます。 したがって、NGSIv2
@@ -51,8 +50,7 @@ Orion の専門家ではないのですか？問題はありません。QuantumL
 Orion-QuantumLeap リンクを確立するために Orion
 で作成する必要があるサブスクリプションのペイロードの例を次に示します。
 
-
-```
+```json
     {
         "description": "Test subscription",
         "subject": {
@@ -83,7 +81,7 @@ Orion-QuantumLeap リンクを確立するために Orion
 
 サブスクリプションから注目すべき重要なことは :
 
--  通知は完全な
+- 通知は完全な
 
 [NGSI JSON エンティティ](http://docs.orioncontextbroker.apiary.io/#introduction/specification/json-attribute-representation)
 の表現形式で行われなければなりません。
@@ -101,7 +99,7 @@ Orion-QuantumLeap リンクを確立するために Orion
 `/etc/hosts`、QuantumLeap が実行されているエンドポイントへの DNS
 によい変換されないものや  *localhost* などを使用しないでください
 
--  必須ではありません が、サブスクリプションの `notification` 部分に、
+- 必須ではありません が、サブスクリプションの `notification` 部分に、
 
 `"metadata": ["dateCreated", "dateModified"]`
 の部分を含めることを強くお勧めします。これは Orion に 属性の変更時刻を
@@ -109,7 +107,7 @@ Orion-QuantumLeap リンクを確立するために Orion
 データベースの **タイム・インデックス** として使用されます。
 詳細については、*タイム・インデックス* のセクションを参照してください。
 
--  以前のルールに従っているエンティティに対して、有効な NGSI
+- 以前のルールに従っているエンティティに対して、有効な NGSI
 
 サブスクリプションを作成できます
 
@@ -128,8 +126,7 @@ Orion に挿入すると、Orion は QuantumLeap に通知します。Orion
 Orion への挿入ペイロードの例は、前に示した "Test subscription"
 の例に基づいて QuantumLeap への通知を生成します。
 
-
-```
+```json
 {
     "id": "Room1",
     "type": "Room",
@@ -170,7 +167,7 @@ NGSI エンティティが属性に有効な NGSI 型を使用していること
 [TimescaleDB](https://www.postgresql.org/docs/current/datatype.html)
 のデータ型に変換されるかを示しています 。
 
-**CrateDB (v4.x) 変換テーブル**
+#### CrateDB (v4.x) 変換テーブル
 
 | NGSI 型          | CrateDB 型          | 見解 |
 | ------------------ |:-----------------------:| :-----------|
@@ -184,7 +181,7 @@ NGSI エンティティが属性に有効な NGSI 型を使用していること
 |Text                | [text](https://crate.io/docs/crate/reference/sql/data_types.html#data-type-text)                  | 提供された NGSI 型がサポートされていないか間違っている場合、これはデフォルト型です |
 |StructuredValue     | [object](https://crate.io/docs/crate/reference/sql/data_types.html#object)                  |-|
 
-**TimescaleDB (v12.x) 変換テーブル**
+#### TimescaleDB (v12.x) 変換テーブル
 
 | NGSI 型            | TimescaleDB 型          | 見解        |
 | ------------------ |:-----------------------:| :-----------|
@@ -201,7 +198,7 @@ NGSI エンティティが属性に有効な NGSI 型を使用していること
 受信した属性のいずれかの型が前のテーブルの **NGSI 型**の列に存在しない場合、
 NGSI 型 (したがって SQL 型) は値から派生します。次のロジックを使用します:
 
-```
+```python
        if a_type not in NGSI
             type = Text
             if a_value is a list:
@@ -300,13 +297,13 @@ NGSI 型 (したがって SQL 型) は値から派生します。次のロジッ
 
 ### QuantumLeap にデータを直接挿入
 
-データを QuantumLeap に直接挿入するには、http://localhost:8668/v2/notify API
+データを QuantumLeap に直接挿入するには、`http://localhost:8668/v2/notify` API
 を使用します。つまり、新しい NGSI 通知の到着について QuantumLeap に通知します。
 
 以下の例を検討してください :
 
-```
-curl http://localhost:8668/v2/notify -s -S -H 'Content-Type: application/json' -d @- <<EOF
+```bash
+$ curl http://localhost:8668/v2/notify -s -S -H 'Content-Type: application/json' -d @- <<EOF
 { 
     "subscriptionId": "5ce3dbb331dfg9h71aad5deeaa", 
     "data": [ 
@@ -365,8 +362,7 @@ QuantumLeap から履歴データを削除する方法は2通りあります。
 
 フィルターを使用して、特定の時間間隔でレコードのみを削除します。
 
-<a name="multi-tenancy"></a>
-## マルチ・テナンシー
+## マルチ・テナンシー<a name="multi-tenancy"></a>
 
 QuantumLeap は、Orion が
 [ここ](https://fiware-orion.readthedocs.io/en/master/user/multitenancy/index.html)

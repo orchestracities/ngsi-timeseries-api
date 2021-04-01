@@ -14,6 +14,7 @@
 import multiprocessing
 
 import server
+import os
 
 
 #
@@ -30,8 +31,8 @@ bind = f"{server.DEFAULT_HOST}:{server.DEFAULT_PORT}"
 
 
 # Number of worker processes for handling requests.
-# We set it to the max Gunicorn recommends.
-workers = multiprocessing.cpu_count() * 4 + 1
+# See https://pythonspeed.com/articles/gunicorn-in-docker/
+workers = os.getenv('WORKERS', 2)
 
 # QuantumLeap does alot of network IO, so we configure worker processes
 # to use multi-threading (`gthread`) to improve performance. With this
@@ -61,7 +62,8 @@ worker_class = 'gthread'
 # way the various Gunicorn worker types actually work. (Pun intended.)
 # IMPORTANT: current implementation of ConnectionManager is not thread safe,
 # keep this value to 1.
-threads = 1
+# See https://pythonspeed.com/articles/gunicorn-in-docker/
+threads = os.getenv('THREADS', 1)
 
 
 #
@@ -70,6 +72,8 @@ threads = 1
 
 loglevel = 'error'
 
+worker_tmp_dir = '/dev/shm'
+# see https://pythonspeed.com/articles/gunicorn-in-docker/
 
 # TODO: other settings.
 # Review gunicorn default settings with an eye on security and performance.

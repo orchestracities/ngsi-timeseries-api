@@ -1,0 +1,26 @@
+# This action works with pull requests and pushes
+name: Code Linter
+
+on:
+  pull_request:
+  push:
+    branches:
+    - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        # Make sure the actual branch is checked out when running on pull requests
+        ref: ${{ github.head_ref }}
+    - uses: creyD/action_autopep8@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Lint
+      uses: docker://avtodev/markdown-lint:v1 # fastest way
+      with:
+        config: '.github/lint/config.json'
+        args: '**/*.md'

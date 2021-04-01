@@ -39,7 +39,8 @@ def test_delete_entity_defaults(translator):
     remaining = translator.query()
     assert len(remaining) == (len(total) - 1)
 
-    survivors = translator.query(entity_type=deleted_type, entity_id=deleted_id)
+    survivors = translator.query(
+        entity_type=deleted_type, entity_id=deleted_id)
     assert len(survivors) == 0
     translator.clean()
 
@@ -143,7 +144,8 @@ def test_delete_entities_customs(translator):
 
     type_to_delete = entities[-1]['type']
     res = translator.delete_entities(type_to_delete,
-                                     from_date=datetime(2018, 1, 4).isoformat(),
+                                     from_date=datetime(
+                                         2018, 1, 4).isoformat(),
                                      to_date=datetime(2018, 1, 12).isoformat())
     assert res == 3
 

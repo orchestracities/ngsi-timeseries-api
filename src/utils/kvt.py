@@ -17,6 +17,7 @@ class ToDict:
     """
     Conversion to dictionaries.
     """
+
     def to_dict(self):
         """
         :return: this object's data as a dictionary.

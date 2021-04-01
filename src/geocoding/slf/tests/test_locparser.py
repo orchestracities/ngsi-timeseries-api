@@ -147,8 +147,8 @@ def test_parse_geojson_location():
     actual = from_location_attribute(
         'geo:json',
         {
-         'type': 'Point',
-         'coordinates': [2.186447514, 41.3763726]
+            'type': 'Point',
+            'coordinates': [2.186447514, 41.3763726]
         })
 
     assert actual is None

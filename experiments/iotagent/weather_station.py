@@ -58,7 +58,8 @@ if __name__ == '__main__':
     entity_id = entity['id']
 
     # Insert
-    r = requests.post('{}/v2/entities?options=keyValues'.format(ORION_URL), data=json.dumps(entity), headers=HEADERS_PUT)
+    r = requests.post('{}/v2/entities?options=keyValues'.format(ORION_URL),
+                      data=json.dumps(entity), headers=HEADERS_PUT)
     if not r.ok:
         raise RuntimeError(r.text)
     print("Inserted: {}".format(entity))
@@ -77,4 +78,5 @@ if __name__ == '__main__':
 
     finally:
         # Delete
-        r = requests.delete('{}/v2/entities/{}'.format(ORION_URL, entity_id), headers=HEADERS)
+        r = requests.delete(
+            '{}/v2/entities/{}'.format(ORION_URL, entity_id), headers=HEADERS)

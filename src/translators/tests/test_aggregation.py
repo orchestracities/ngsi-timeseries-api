@@ -24,7 +24,8 @@ def test_aggr_per_second(translator):
     assert len(entities) == 34
 
     # One update every 100 millis -> 10 updates per second.
-    base_index = datetime.datetime(2010, 1, 1, 8, 0, 0, 0, datetime.timezone.utc)
+    base_index = datetime.datetime(
+        2010, 1, 1, 8, 0, 0, 0, datetime.timezone.utc)
     delta = datetime.timedelta(milliseconds=100)
     for i, e in enumerate(entities):
         t = base_index + i * delta

@@ -1,3 +1,4 @@
+from bitmath import MiB
 import pytest
 
 from utils.cfgreader import *
@@ -24,6 +25,22 @@ def test_str_var(value, expected):
 def test_str_var_default(value):
     def_val = 'some default value'
     var = StrVar('V', def_val)
+    assert var.read(value) == def_val
+
+
+@pytest.mark.parametrize('value, expected', [
+    ('1 B', 1), ('1B', 1), ('1 KiB', 1024)
+])
+def test_bit_size_var(value, expected):
+    var = BitSizeVar('V', None)
+    parsed = var.read(value)
+    assert int(parsed.to_Byte()) == expected
+
+
+@pytest.mark.parametrize('value', unset_env_values)
+def test_bit_size_var_default(value):
+    def_val = MiB(2)
+    var = BitSizeVar('V', def_val)
     assert var.read(value) == def_val
 
 

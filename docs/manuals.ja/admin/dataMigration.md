@@ -36,6 +36,5 @@ QuantumLeap DB をブートストラップするときにデータが自動的�
     $ python crate-exporter.py --schema mtyoutenant --table etdevice --query \
         "SELECT * FROM mtyoutenant.etdevice where time_index > '2019-04-15';"
 
-
 [ts-admin]: ./timescale.md
     "QuantumLeap Timescale"

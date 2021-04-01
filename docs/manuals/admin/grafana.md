@@ -17,7 +17,6 @@ If you're using the CrateDB back end, we suggest you read
 and follow Crate's recommendations on how to configure the Grafana
 datasource which we have summarised in the below section.
 
-
 ## Configuring the DataSource for CrateDB
 
 Explore your deployed Grafana instance (e.g [http://0.0.0.0:3000](http://0.0.0.0:3000)).
@@ -44,13 +43,11 @@ look like
 
 Click *Save & Test* and you should get an OK message.
 
-
 ## Configuring the DataSource for PostgreSQL
 
 The process is pretty much the same as outlined above and is well documented
 in the Grafana [PosgreSQL data source manual](https://grafana.com/docs/features/datasources/postgres/).
 Note that you should enable the *TimescaleDB* data source option.
-
 
 ## Using the DataSource in your Graph
 

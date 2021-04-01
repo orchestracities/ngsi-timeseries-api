@@ -3,6 +3,8 @@ This module provides utilities to read configuration values from environment
 variables, YAML files, etc.
 """
 
+import bitmath
+from bitmath import Bitmath
 import logging
 import os
 from typing import Union
@@ -79,6 +81,18 @@ class BoolVar(EVar):
         return rep.strip().lower() in ('true', 'yes', '1', 't', 'y')
 
 
+class BitSizeVar(EVar):
+    """
+    An env value parsed as a digital information size, e.g. file size in
+    giga bytes, memory size in mega bytes, word size in bits, etc. This
+    class is just a wrapper around the ``bitmath`` lib, see there for
+    usage and examples.
+    """
+
+    def _do_read(self, rep: str) -> Bitmath:
+        return bitmath.parse_string(rep)
+
+
 class EnvReader:
     """
     Reads environment variables.
@@ -103,7 +117,7 @@ class EnvReader:
     @staticmethod
     def get_parse_error_log_msg(var: EVar, cause: Exception) -> str:
         return f"Error reading env variable {var.name}: {cause}; " + \
-               f"using default value of {var.default_value}."
+            f"using default value of {var.default_value}."
 
     def __init__(self, var_store: dict = os.environ, log=None):
         self.var_store = var_store

@@ -195,8 +195,8 @@ def notify():
         with translator_for(fiware_s) as trans:
             trans.insert(payload, fiware_s, fiware_sp)
     except Exception as e:
-        msg = "Notification not processed or not updated: {}"
-        log().error(msg.format(e), exc_info=True)
+        msg = "Notification not processed or not updated: {}".format(e)
+        log().error(msg, exc_info=True)
         error_code = 500
         if e.__class__ == InvalidHeaderValue or \
                 e.__class__ == InvalidParameterValue or \

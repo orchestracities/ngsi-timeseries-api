@@ -4,12 +4,13 @@
 
 To configure QuantumLeap you can use the following environment variables:
 
-| Variable           | Description             | 
+| Variable           | Description             |
 | -------------------|-------------------------|
 | `CRATE_HOST`       | CrateDB Host            |
 | `CRATE_PORT`       | CrateDB Port            |
 | `DEFAULT_LIMIT`    | Max number of rows a query can retrieve |
 | `KEEP_RAW_ENTITY`  | Whether to store original entity data |
+| `INSERT_MAX_SIZE`  | Maximum amount of data a SQL (bulk) insert should take |
 | `POSTGRES_HOST`    | PostgreSQL Host         |
 | `POSTGRES_PORT`    | PostgreSQL Port         |
 | `POSTGRES_DB_NAME` | PostgreSQL default db   |
@@ -27,8 +28,10 @@ To configure QuantumLeap you can use the following environment variables:
 | `CRATE_WAIT_ACTIVE_SHARDS` | Specifies the number of shard copies that need to be active for write operations to proceed. Default `1`. See related [crate documentation](https://crate.io/docs/crate/reference/en/4.3/sql/statements/create-table.html#write-wait-for-active-shards). |
 | `USE_FLASK`        | `True` or `False` to use flask server (only for Dev) or gunicorn. Default to `False`  |
 | `LOGLEVEL`         | Define the log level for all services (`DEBUG`, `INFO`, `WARNING` , `ERROR`)      |
+| `WORKERS`          | Define the number of gunicorn worker processes for handling requests. Default to `2` |
+| `THREADS`          | Define the number of gunicorn threads per worker.  Default to `1` **see notes**.  |
 
-**NOTE**
+### Notes
 
 - `DEFAULT_LIMIT`. This variable specifies the upper limit L of rows a query
   operation is allowed to fetch from the database and return to client. The
@@ -50,6 +53,23 @@ To configure QuantumLeap you can use the following environment variables:
   subsequent insert operation. Any of the following (case insensitive) values
   will be interpreted as true: 'true', 'yes', '1', 't', 'y'. Anything else
   counts for false, which is also the default value if the variable is not set.
+  
+- `THREADS`. Current implementation of ConnectionManager is not thread safe,
+  so keep this value to 1.
+
+- `INSERT_MAX_SIZE`. If set, this variable limits the amount of data that
+  can be packed in a single SQL bulk insert to the specified value `M`. If
+  the size of the data to be inserted exceeds `M`, the data is split into
+  smaller batches, each having a size no greater than `M`, and each batch
+  is inserted separately, i.e. a separate SQL bulk insert statement is issued
+  for each batch. Limiting the amount of data that can be inserted at once
+  is useful with some backends like Crate that abort insert operations when
+  the data size exceeds an internal threshold. This variable is read in on
+  each API call to the notify endpoint so it can be set dynamically and it
+  will affect every subsequent insert operation. Accepted values are sizes
+  in bytes (B) or `2^10` multiples (KiB, MiB, GiB), e.g. `10 B`, `1.2 KiB`,
+  `0.9 GiB`. If this variable is not set (or the set value isn't valid),
+  SQL inserts are processed normally without splitting data into batches.
 
 ## Database selection per different tenant
 
@@ -64,7 +84,7 @@ However, different back ends can be configured for specific tenants
 through a YAML configuration file. To use this feature, you have
 to set the environment variable below:
 
-* `QL_CONFIG`: absolute pathname of the QuantumLeap YAML configuration
+- `QL_CONFIG`: absolute pathname of the QuantumLeap YAML configuration
   file. If not set, the default configuration will be used where only
   the Crate back end is available.
 
@@ -73,23 +93,22 @@ tenant as well as the default back end to use for any other tenant
 not explicitly mentioned in the file. Here's an example YAML
 configuration:
 
-    tenants:
-        t1:
-            backend: Timescale
-        t2:
-            backend: Crate
-        t3:
-            backend: Timescale
+```yaml
+tenants:
+    t1:
+        backend: Timescale
+    t2:
+        backend: Crate
+    t3:
+        backend: Timescale
 
-    default-backend: Crate
+default-backend: Crate
+```
 
 With this configuration, any NGSI entity coming in for tenant `t1`
 or `t3` will be stored in Timescale whereas tenant `t2` will use
 Crate. Any tenant other than `t1`, `t2`, or `t3` gets the default
 Crate back end.
-
-
-
 
 [crate]: ./crate.md
     "QuantumLeap Crate"

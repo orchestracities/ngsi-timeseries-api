@@ -79,19 +79,21 @@ def random_entries(batch):
 
 def create_table(cursor, table_name, clustered_by, partitioned_by):
     stmt = "create table {} (" \
-               "    entity_type string, " \
-               "    entity_id string, " \
-               "    temperature double, " \
-               "    pressure double, " \
-               "    time_index timestamp, " \
-               "    month timestamp GENERATED ALWAYS AS date_trunc('month', time_index)) " \
-               "clustered by ({})" \
-               "partitioned by ({})".format(table_name, clustered_by, partitioned_by)
+        "    entity_type string, " \
+        "    entity_id string, " \
+        "    temperature double, " \
+        "    pressure double, " \
+        "    time_index timestamp, " \
+        "    month timestamp GENERATED ALWAYS AS date_trunc('month', time_index)) " \
+        "clustered by ({})" \
+        "partitioned by ({})".format(
+            table_name, clustered_by, partitioned_by)
     cursor.execute(stmt)
 
 
 def insert_records(cursor, table_name):
-    col_names = ['entity_type', 'entity_id', 'temperature', 'pressure', 'time_index']
+    col_names = ['entity_type', 'entity_id',
+                 'temperature', 'pressure', 'time_index']
     stmt = "insert into {} ({}) values ({})".format(
         table_name,
         ', '.join(col_names),
@@ -147,7 +149,8 @@ def check_scenario(create_table):
             res[VC] = query(cursor, table_name)
 
             # Common
-            res[C] = query(cursor, table_name, extra_clause="AND entity_id = 'room 0'")
+            res[C] = query(cursor, table_name,
+                           extra_clause="AND entity_id = 'room 0'")
 
         finally:
             cleanup(cursor, table_name)
@@ -165,9 +168,11 @@ def dump_test_results(f=sys.stdout):
     print("*" * 50, file=f)
 
     # Gather data
-    res_sc1 = check_scenario(functools.partial(create_table, clustered_by='entity_id', partitioned_by='month'))
+    res_sc1 = check_scenario(functools.partial(
+        create_table, clustered_by='entity_id', partitioned_by='month'))
     time.sleep(SLEEP)
-    res_sc2 = check_scenario(functools.partial(create_table, clustered_by='month', partitioned_by='entity_id'))
+    res_sc2 = check_scenario(functools.partial(
+        create_table, clustered_by='month', partitioned_by='entity_id'))
 
     # Print Results
     def print_results(T):

@@ -22,19 +22,19 @@ def create_subscription(entity_type, notify_url):
         "description": "Subscription for {}".format(entity_type),
         "subject": {
             "entities": [
-              {
-                "idPattern": ".*",
-                "type": entity_type
-              }
+                {
+                    "idPattern": ".*",
+                    "type": entity_type
+                }
             ],
             "condition": {
-              "attrs": [
-              ]
+                "attrs": [
+                ]
             }
-          },
+        },
         "notification": {
             "http": {
-              "url": notify_url
+                "url": notify_url
             },
             "attrs": [
             ],

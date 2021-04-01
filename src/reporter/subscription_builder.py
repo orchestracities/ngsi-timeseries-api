@@ -39,11 +39,11 @@ def build_notification_target(quantumleap_url, time_index_attribute):
     notification_endpoint = '{}/notify'.format(quantumleap_url)
     if time_index_attribute:
         return custom(
-                   notification_endpoint,
-                   headers(
-                       time_index_header(time_index_attribute)
-                   )
-                )
+            notification_endpoint,
+            headers(
+                time_index_header(time_index_attribute)
+            )
+        )
     return url(notification_endpoint)
 
 

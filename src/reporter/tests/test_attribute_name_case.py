@@ -62,7 +62,8 @@ def manage_db_entities():
 
 def query_1t1e1a(service, entity_id, attr_name):
     escaped_attr_name = urllib.parse.quote(attr_name)
-    url = "{}/entities/{}/attrs/{}".format(QL_URL, entity_id, escaped_attr_name)
+    url = "{}/entities/{}/attrs/{}".format(QL_URL,
+                                           entity_id, escaped_attr_name)
     h = {'Fiware-Service': service}
     response = requests.get(url, headers=h)
     assert response.status_code == 200
