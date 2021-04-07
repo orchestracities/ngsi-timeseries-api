@@ -115,7 +115,7 @@ If you would like to add your company to this list, please mention it in
 this [issue](https://github.com/orchestracities/ngsi-timeseries-api/issues/436)
 or create a PR to update the list.
 
-| <a href="https://www.ekz.ch/"><img src="https://www.ekz.ch/.resources/ekzweb/webresources/resources/ekz_logo.svg" height="75" /></a> | <a href="https://www.stadtwerke-wolfsburg.de/"><img src="https://www.stadtwerke-wolfsburg.de/fileadmin/templates/Images/logo_stadtwerke.png" height="75" /></a> | <a href="https://profirator.fi/"><img alt="Profirator" src="" height="75" /></a>  |  |
+| <a href="https://www.ekz.ch/"><img src="https://www.ekz.ch/.resources/ekzweb/webresources/resources/ekz_logo.svg" height="75" /></a> | <a href="https://www.stadtwerke-wolfsburg.de/"><img src="https://www.stadtwerke-wolfsburg.de/fileadmin/templates/Images/logo_stadtwerke.png" height="75" /></a> | <a href="https://profirator.fi/"><img alt="Profirator" src="https://user-images.githubusercontent.com/7221736/113831287-1e0a2c00-9790-11eb-9167-2c336276d716.png" height="75" /></a>  |  |
 |---|---|---|---|
 
 ## Linked projects
