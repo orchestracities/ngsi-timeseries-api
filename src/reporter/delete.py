@@ -64,7 +64,7 @@ def delete_entities(entity_type, from_date=None, to_date=None,
                                         to_date=to_date,
                                         fiware_service=fiware_s(),
                                         fiware_servicepath=fiware_sp(),)
->>>>>>> upstream/master
+
 
         logging.getLogger(__name__).info(
             "deleted {} entities of type {}".format(deleted, entity_type))
