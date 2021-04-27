@@ -48,29 +48,32 @@ by ``to_b64_list``.
 def to_b64_list(xs: [str]) -> str:
     """
     Convert each list element to Base64 and join the converted elements
-    with a colon. Convert the empty list and the singleton list containing
-    the empty string to an empty string.
+    with a colon. Convert the empty list to an empty string. Take the
+    Base64-encoded value of an empty input list element to be ``'""'``.
+    Error out if any list element is ``None``.
 
     :param xs: the input list, must not be ``None``.
-    :return: a colon-separated string ``"x0:x1:..."`` where ``xN`` is the
-        Base64-encoded value of ``xs[N]`` or the empty string if the ``xs``
-        is empty or ``xs == ['']``.
+    :return: a colon-separated string ``x0:x1:...`` where ``xN`` is the
+        Base64-encoded value of ``xs[N]`` or the empty string if ``xs``
+        is empty.
     """
-    encoded_xs = [to_b64(x) for x in xs]
+    def encode(x: str):
+        return '""' if x == '' else to_b64(x)
+    encoded_xs = [encode(x) for x in xs]
     return B64_LIST_SEPARATOR.join(encoded_xs)
 
 
 def from_b64_list(x: str) -> [str]:
     """
-    Reverse the ``to_b64_list`` transformation. Notice you'll only get back
-    the original list passed into ``to_b64_list`` if that list wasn't empty.
-    Return ``['']`` if the input is the empty string.
+    Reverse the ``to_b64_list`` transformation.
 
     :param x: the output of ``to_b64_list``, never pass in ``None``.
-    :return: the input originally passed in to ``to_b64_list``, if possible.
+    :return: the input originally passed in to ``to_b64_list``.
     """
-    if x == '':
-        return ['']
+    def decode(v: str):
+        return '' if v == '""' else from_b64(v)
 
+    if x == '':
+        return []
     encoded_xs = x.split(B64_LIST_SEPARATOR)
-    return [from_b64(v) for v in encoded_xs]
+    return [decode(v) for v in encoded_xs]

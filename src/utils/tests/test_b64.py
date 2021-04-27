@@ -24,24 +24,15 @@ def test_to_from_is_identity(plain_text):
 
 
 @pytest.mark.parametrize('xs', [
-    [''], ['/x/y'], ['/x/y', '123'], ['/x/y', '123', 'abc'],
+    [], [''], ['/x/y'], ['/x/y', '123'], ['/x/y', '123', 'abc'],
     ['', ''], ['x', ''], ['', 'x'],
     ['', '', ''], ['x', '', ''], ['', 'x', ''], ['', '', 'x']
 ])
-def test_to_from_list_is_identity_if_len_gt_0(xs):
+def test_to_from_list_is_identity(xs):
     encoded = to_b64_list(xs)
     decoded = from_b64_list(encoded)
 
     assert xs == decoded
-
-
-@pytest.mark.parametrize('xs', [[], ['']])
-def test_to_b64_list_return_empty(xs):
-    assert to_b64_list(xs) == ''
-
-
-def test_from_b64_list_return_singleton():
-    assert from_b64_list('') == ['']
 
 
 def test_to_b64_list_error_on_none():
