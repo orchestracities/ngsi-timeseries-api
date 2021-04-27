@@ -38,6 +38,13 @@ def from_b64(value: B64Str) -> str:
     return b64_bytes.decode(UTF8)
 
 
+B64_LIST_SEPARATOR = ':'
+"""
+The character used to separate list elements in the Base64 lists produced
+by ``to_b64_list``.
+"""
+
+
 def to_b64_list(xs: [str]) -> str:
     """
     Convert each list element to Base64 and join the converted elements
@@ -50,7 +57,7 @@ def to_b64_list(xs: [str]) -> str:
         is empty or ``xs == ['']``.
     """
     encoded_xs = [to_b64(x) for x in xs]
-    return ':'.join(encoded_xs)
+    return B64_LIST_SEPARATOR.join(encoded_xs)
 
 
 def from_b64_list(x: str) -> [str]:
@@ -65,5 +72,5 @@ def from_b64_list(x: str) -> [str]:
     if x == '':
         return ['']
 
-    encoded_xs = x.split(':')
+    encoded_xs = x.split(B64_LIST_SEPARATOR)
     return [from_b64(v) for v in encoded_xs]
