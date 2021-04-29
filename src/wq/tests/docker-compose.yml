@@ -1,0 +1,61 @@
+version: '3'
+
+services:
+
+  crate:
+    image: crate:${CRATE_VERSION}
+    command: crate -Cauth.host_based.enabled=false
+      -Ccluster.name=democluster -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*"
+    ports:
+      # Admin UI
+      - "4200:4200"
+      # Transport protocol
+      - "4300:4300"
+    networks:
+      - wqtests
+
+  redis:
+    image: redis:${REDIS_VERSION}
+    ports:
+      - "6379:6379"
+    networks:
+      - wqtests
+
+  dashboard:
+    image: pranavgupta1234/rqmonitor
+    ports:
+      - "8899:8899"
+    networks:
+      - wqtests
+    environment:
+      - RQ_MONITOR_REDIS_URL=redis://redis:6379
+
+  quantumleap:
+    image: quantumleap
+    depends_on:
+      - crate
+    networks:
+      - wqtests
+    ports:
+      - "8668:8668"
+    environment:
+      - CRATE_HOST=${CRATE_HOST:-crate}
+      - USE_GEOCODING=False
+      - CACHE_QUERIES=False
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - LOGLEVEL=DEBUG
+
+  quantumleap-wq:
+    image: quantumleap
+    entrypoint: python wq/runner.py
+    networks:
+      - wqtests
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - LOGLEVEL=DEBUG
+
+networks:
+    wqtests:
+        driver: bridge
