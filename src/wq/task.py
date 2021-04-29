@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from uuid import uuid4
 
 from rq import Queue
+from rq.job import Job
 
 from utils.b64 import to_b64_list, from_b64_list
 from wq.cfg import redis_connection, default_queue_name, \
@@ -14,9 +15,10 @@ class TaskId(ABC):
     Abstract representation of a task ID.
     """
 
-    RQ_KEY_PREFIX = 'rq:job:'
+    RQ_JOB_KEY_PREFIX = Job.redis_job_namespace_prefix
     """
-    The prefix RQ puts in front of job ID keys.
+    The prefix RQ puts in front of a job ID to build the corresponding
+    Redis key for storing the job data in a hash.
     """
 
     @staticmethod
@@ -25,12 +27,12 @@ class TaskId(ABC):
         Extract the string representation of a ``TaskId`` from its RQ job
         key.
 
-        :param k: a value returned by the ``to_rq_key`` method. Must
+        :param k: a value returned by the ``to_rq_job_key`` method. Must
             not be ``None``.
         :return: the ``TaskId``'s string representation.
         """
-        if k.startswith(TaskId.RQ_KEY_PREFIX):
-            return k[len(TaskId.RQ_KEY_PREFIX):]
+        if k.startswith(TaskId.RQ_JOB_KEY_PREFIX):
+            return k[len(TaskId.RQ_JOB_KEY_PREFIX):]
         return ''
 
     @abstractmethod
@@ -43,12 +45,14 @@ class TaskId(ABC):
         """
         pass
 
-    def to_rq_key(self):
+    def to_rq_job_key(self) -> str:
         """
         :return: the Redis key RQ uses to identify the job having an ID of
             ``id_repr``.
         """
-        return f"{self.RQ_KEY_PREFIX}{self.id_repr()}"
+        return f"{self.RQ_JOB_KEY_PREFIX}{self.id_repr()}"
+# NOTE.
+# Not using RQ's own ``Job.key_for`` since it returns bytes instead of str.
 
     def __str__(self):
         return self.id_repr()
@@ -77,10 +81,10 @@ class CompositeTaskId(TaskId):
     Since the colon character isn't in any ``b(x)``, given the RQ job
     key we can reconstruct the original sequence of strings that make
     up the ``CompositeTaskId``: ``t1, t2, ..., tN, u``. (Have a look
-    at the ``to_rq_key`` and ``from_rq_key`` methods.) By the same
+    at the ``to_rq_job_key`` and ``from_rq_job_key`` methods.) By the same
     token, we can safely build Redis key patterns to match a set of
     RQ job keys since the Redis wildcard characters aren't in the
-    Base64 alphabet. For example, the ``rq_key_matcher`` method uses
+    Base64 alphabet. For example, the ``rq_key_job_matcher`` method uses
     a ``'*'`` glob pattern to match RQ job keys that contain the first
     ``j`` elements of a given ``CompositeTaskId`` sequence, e.g. for
     ``j = 2``
@@ -89,14 +93,27 @@ class CompositeTaskId(TaskId):
     """
 
     @staticmethod
-    def from_rq_key(k: str) -> [str]:
+    def from_id_repr(r: str) -> [str]:
+        """
+        Parse a ``CompositeTaskId`` string representation into the sequence
+        that makes up the ``CompositeTaskId``. You'll only ever get meaningful
+        results if the input was a value returned by the ``id_repr`` method.
+
+        :param r: a value returned by the ``id_repr`` method. Must not be
+            ``None``.
+        :return: the ID sequence.
+        """
+        return from_b64_list(r)
+
+    @staticmethod
+    def from_rq_job_key(k: str) -> [str]:
         """
         Parse a RQ job key obtained from a ``CompositeTaskId`` into the
         sequence that makes up the ``CompositeTaskId``. You'll only ever
         get meaningful results if the input was a value returned by the
-        ``to_rq_key`` method.
+        ``to_rq_job_key`` method.
 
-        :param k: a value returned by the ``to_rq_key`` method. Must
+        :param k: a value returned by the ``to_rq_job_key`` method. Must
             not be ``None``.
         :return: the ID sequence.
         """
@@ -120,7 +137,26 @@ class CompositeTaskId(TaskId):
         """
         return to_b64_list(self._id_seq)
 
-    def rq_key_matcher(self, n_elements: int) -> str:
+    def id_repr_initial_segment(self, size: int) -> str:
+        """
+        Build the substring of ``id_repr`` that contains the first ``size``
+        elements of the ID sequence.
+
+        :param size: how many elements to take, starting from the left of
+            the sequence.
+        :return: the ID representation substring.
+        """
+        m = max(1, size)                           # (1)
+        initial_segment = self._id_seq[0:m]        # (2)
+        return to_b64_list(initial_segment)
+# NOTE.
+# 1. Never match all RQ job keys. Our IDs have at least one element,
+# the UUID part, so it makes sense to have m >= 1 in all cases. This
+# way, we'll never wind up matching every job known to man.
+# 2. size too big? Not a problem. If the input number is >= len(_id_seq)
+# then [0:m] will take the whole list.
+
+    def rq_key_job_matcher(self, n_elements: int) -> str:
         """
         Build a Redis key expression to match any RQ job key having a
         prefix the same as the one obtained by considering the first
@@ -131,17 +167,22 @@ class CompositeTaskId(TaskId):
             sequence elements to match, starting from the left of the list.
         :return: the key matching expression.
         """
-        m = max(1, n_elements)                     # (1)
-        matched = self._id_seq[0:m]                # (2)
-        own_key_prefix = to_b64_list(matched)
+        own_key_prefix = self.id_repr_initial_segment(n_elements)
+        return f"{self.RQ_JOB_KEY_PREFIX}{own_key_prefix}*"
 
-        return f"{self.RQ_KEY_PREFIX}{own_key_prefix}*"
-# NOTE.
-# 1. Never match all RQ job keys. Our IDs have at least one element,
-# the UUID part, so it makes sense to have m >= 1 in all cases. This
-# way, we'll never wind up matching every job known to man.
-# 2. n_elements too big? Not a problem. If the input number
-# is >= len(_id_vector) then [0:m] will take the whole list.
+    def rq_job_id_matcher(self, n_elements: int) -> str:
+        """
+        Build a Redis glob pattern to match any RQ job ID having a
+        prefix the same as the one obtained by considering the first
+        ``n`` elements of the ID sequence and ignoring the ones at
+        positions ``n+1, n+2, ...``.
+
+        :param n_elements: number of elements to match, i.e. how many ID
+            sequence elements to match, starting from the left of the list.
+        :return: the matching expression.
+        """
+        own_key_prefix = self.id_repr_initial_segment(n_elements)
+        return f"{own_key_prefix}*"
 
 
 class Tasklet(ABC):
