@@ -1773,3 +1773,25 @@ paths:
                     }
                   ]
               }
+
+################################################################################
+# PATHS: WORK QUEUE
+################################################################################
+
+  /wq/messages:
+    get:
+      operationId: wq.mgmt.list_messages
+      summary: "TODO"
+      tags:
+        - wq
+      responses:
+        200:
+          description: "TODO"
+    delete:
+      operationId: wq.mgmt.delete_messages
+      summary: "TODO"
+      tags:
+        - wq
+      responses:
+        204:
+          description: "TODO"
