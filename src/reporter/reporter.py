@@ -43,6 +43,8 @@ from reporter.timex import select_time_index_value_as_iso, \
 from geocoding.location import normalize_location, LOCATION_ATTR_NAME
 from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption, \
     NGSIUsageError, InvalidParameterValue, InvalidHeaderValue
+from wq.ngsi import InsertAction
+from reporter.httputil import fiware_correlator
 
 
 def log():
@@ -192,8 +194,8 @@ def notify():
     entity_id = [i["id"] for i in payload]
     # Send valid entities to translator
     try:
-        with translator_for(fiware_s) as trans:
-            trans.insert(payload, fiware_s, fiware_sp)
+        InsertAction(fiware_s, fiware_sp, fiware_correlator(), payload) \
+            .enqueue()
     except Exception as e:
         msg = "Notification not processed or not updated: {}".format(e)
         log().error(msg, exc_info=True)
