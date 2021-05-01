@@ -16,11 +16,11 @@ class FiwareTaskId(CompositeTaskId):
             fiware_correlator or ''
         )
 
-    def fiware_tags_matcher(self) -> str:
-        return self.rq_key_job_matcher(3)
+    def fiware_tags_repr(self) -> str:
+        return self.id_repr_initial_segment(3)
 
-    def fiware_svc_and_svc_path_matcher(self) -> str:
-        return self.rq_key_job_matcher(2)
+    def fiware_svc_and_svc_path_repr(self) -> str:
+        return self.id_repr_initial_segment(2)
 
 
 class InsertAction(Tasklet):
