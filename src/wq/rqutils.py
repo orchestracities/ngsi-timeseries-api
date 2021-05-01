@@ -80,6 +80,24 @@ def job_key_matcher(jid_pattern: str) -> str:
     return job_id_to_job_key(jid_pattern)
 
 
+def starts_with_matcher(prefix: str) -> str:
+    """
+    Build a Redis expression to match any string beginning with the given
+    ``prefix``.
+
+    :param prefix: the string initial segment to match. Must not be ``None``.
+    :return: a Redis pattern.
+
+    Examples:
+
+        >>> starts_with_matcher('my:')
+        'my:*'
+    """
+    if prefix is None:
+        raise ValueError
+    return f"{prefix}*"
+
+
 def find_job_keys(job_id_matcher: str) -> Iterable[RqJobKey]:
     """
     Iterate the RQ job keys having a job ID part matching the given Redis
@@ -108,17 +126,6 @@ def find_job_ids(job_id_matcher: str) -> Iterable[RqJobId]:
     """
     for k in find_job_keys(job_id_matcher):
         yield job_id_from_job_key(k)
-
-
-def find_job_ids_starting_with(jid_initial_segment: str) -> Iterable[RqJobId]:
-    """
-    Iterate the RQ job IDs starting with ``jid_initial_segment``.
-
-    :param jid_initial_segment: the initial part of the RQ job ID to match.
-    :return: an generator object to iterate the matching job IDs.
-    """
-    jid_matcher = f"{jid_initial_segment}*"
-    return find_job_ids(jid_matcher)
 
 
 def find_job_ids_in_registry(rq_reg_key: str, job_id_matcher: str) \

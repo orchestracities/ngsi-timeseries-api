@@ -5,7 +5,7 @@ from rq.job import Job
 
 from wq.rqutils import RqJobKey, RqJobId, \
     job_id_to_job_key, find_job_keys, find_job_ids, \
-    find_job_ids_starting_with, find_job_ids_in_registry, \
+    starts_with_matcher, find_job_ids_in_registry, \
     find_pending_job_ids, find_successful_job_ids, find_failed_job_ids, \
     load_jobs
 
@@ -64,8 +64,14 @@ def test_find_job_ids_starting_with(monkeypatch, job_ids):
     keys = to_keys(job_ids)
     setup_fake_redis(keys, monkeypatch)
 
-    found = [x for x in find_job_ids_starting_with('wot-eva*')]
+    matcher = starts_with_matcher('wot-eva')
+    found = [x for x in find_job_ids(matcher)]
     assert found == job_ids
+
+
+def test_starts_with_matcher_error_on_none():
+    with pytest.raises(ValueError):
+        starts_with_matcher(None)
 
 
 @pytest.mark.parametrize('job_ids', job_id_supply)

@@ -1,18 +1,19 @@
 from reporter.httputil import *
 from wq.ngsi import FiwareTaskId
-from wq.rqutils import find_job_ids_starting_with, load_jobs, delete_jobs
+from wq.rqutils import find_job_ids, load_jobs, delete_jobs, \
+    starts_with_matcher
 
 
 def build_task_id_init_segment():
     fid = FiwareTaskId(fiware_s(), fiware_sp(), fiware_correlator())
     if fiware_correlator():
-        return fid.fiware_tags_repr()
-    return fid.fiware_svc_and_svc_path_repr()
+        return starts_with_matcher(fid.fiware_tags_repr())
+    return starts_with_matcher(fid.fiware_svc_and_svc_path_repr())
 
 
 def list_messages():
     matcher = build_task_id_init_segment()
-    job_ids = find_job_ids_starting_with(matcher)
+    job_ids = find_job_ids(matcher)
     js = load_jobs(job_ids)
     tasks = [j.args[0] for j in js]
     response_payload = [
@@ -29,5 +30,5 @@ def list_messages():
 
 def delete_messages():
     matcher = build_task_id_init_segment()
-    job_ids = find_job_ids_starting_with(matcher)
+    job_ids = find_job_ids(matcher)
     delete_jobs(job_ids)
