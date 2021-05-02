@@ -140,7 +140,7 @@ def find_job_ids_in_registry(rq_reg_key: str, job_id_matcher: str) \
     """
     redis = redis_connection()
     for jid in redis.zscan_iter(name=rq_reg_key, match=job_id_matcher):
-        yield jid.decode('utf-8')
+        yield jid[0].decode('utf-8')
 
 
 def find_pending_job_ids(q: Queue, job_id_matcher: str) -> Iterable[RqJobId]:
