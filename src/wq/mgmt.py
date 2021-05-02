@@ -89,6 +89,9 @@ class QMan:
         job_ids = find_job_ids(matcher)
         delete_jobs(job_ids)
 
+    def count_all_tasks(self, task_id_prefix: str) -> int:
+        return self._count_tasks(find_job_ids, task_id_prefix)
+
     def count_pending_tasks(self, task_id_prefix: str) -> int:
         return self._count_tasks(self._pending_jid_finder, task_id_prefix)
 

@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from reporter.httputil import *
 from translators.factory import translator_for
 from wq.flaskutils import build_json_array_response_stream
-from wq.mgmt import TaskInfo, QMan
+from wq.mgmt import TaskInfo, TaskStatus, QMan
 from wq.task import CompositeTaskId, Tasklet, WorkQ
 
 
@@ -86,11 +86,11 @@ def build_task_id_init_segment():
 def insert_task_finder(task_status: Optional[str] = None) \
         -> Callable[[str], Iterable[TaskInfo]]:
     qman = QMan(InsertAction.insert_queue())
-    if task_status == 'pending':
+    if task_status == TaskStatus.PENDING.value:
         return qman.load_pending_tasks
-    if task_status == 'succeeded':
+    if task_status == TaskStatus.SUCCEEDED.value:
         return qman.load_successful_tasks
-    if task_status == 'failed':
+    if task_status == TaskStatus.FAILED.value:
         return qman.load_failed_tasks
     return qman.load_tasks
 
@@ -111,3 +111,21 @@ def delete_insert_tasks():
     qman.delete_tasks(task_id_prefix)
 # TODO error handling
 # TODO logging
+
+
+def insert_task_count_calculator(task_status: Optional[str] = None) \
+        -> Callable[[str], int]:
+    qman = QMan(InsertAction.insert_queue())
+    if task_status == TaskStatus.PENDING.value:
+        return qman.count_pending_tasks
+    if task_status == TaskStatus.SUCCEEDED.value:
+        return qman.count_successful_tasks
+    if task_status == TaskStatus.FAILED.value:
+        return qman.count_failed_tasks
+    return qman.count_all_tasks
+
+
+def count_insert_tasks(task_status: Optional[str] = None):
+    task_id_prefix = build_task_id_init_segment()
+    calculate = insert_task_count_calculator(task_status)
+    return calculate(task_id_prefix)
