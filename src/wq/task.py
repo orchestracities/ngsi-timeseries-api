@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from uuid import uuid4
 
+from pydantic import BaseModel
 from rq import Queue
+from rq.job import Job
 
 from utils.b64 import to_b64_list, from_b64_list
 from wq.cfg import redis_connection, default_queue_name, \
@@ -111,6 +113,9 @@ class CompositeTaskId(TaskId):
 # then [0:m] will take the whole list.
 
 
+WorkQ = Queue
+
+
 class Tasklet(ABC):
     """
     TODO
@@ -129,6 +134,23 @@ class Tasklet(ABC):
         """
         pass
 
+    @abstractmethod
+    def task_input(self) -> BaseModel:
+        """
+        Build a Pydantic model object with the data and metadata the task
+        needs to execute the action.
+
+        :return: the task's input.
+        """
+        pass
+# NOTE. RQ arguments.
+# We always invoke RQ jobs with one argument, namely the Tasklet itself.
+# One reason for doing this is that RQ args is just an array, so there's
+# no label associated to each argument. So we collect call arguments in
+# a Tasklet object to be able to name them. This way we can always tell
+# what the arguments of the method we want to call are, even if they get
+# reordered in the method signature.
+
     def queue_name(self) -> str:
         """
         Choose a work queue where to put this task. Subclasses can override
@@ -138,6 +160,12 @@ class Tasklet(ABC):
         :return: the name of the queue where to put this task.
         """
         return default_queue_name()
+
+    def work_queue(self) -> WorkQ:
+        """
+        :return: the work queue where to put this task.
+        """
+        return Queue(self.queue_name(), connection=redis_connection())
 
     def success_ttl(self) -> int:
         """
@@ -167,7 +195,7 @@ class Tasklet(ABC):
 # this class in isolation easily, e.g. using mocks or stubs.
 
     def _do_enqueue(self):
-        q = Queue(self.queue_name(), connection=redis_connection())
+        q = self.work_queue()
         tid = self.task_id().id_repr()                     # (1)
         job = None
         try:
@@ -189,6 +217,20 @@ class Tasklet(ABC):
 # 2. Paranoia. But if the RQ API changes and job ID != tid, then all the
 # monitoring queries become inconsistent and it could be a while before
 # we actually realise that since there won't be any obvious clues about it.
+
+
+def _tasklet_from_rq_job(j: Job) -> Tasklet:
+    """
+    Extract the ``Tasklet`` object from the RQ job hosting it.
+
+    :param j: an RQ job started to run a ``Tasklet``.
+        Must not be ``None``.
+    :return: the ``Tasklet`` object.
+    """
+    return j.args[0]    # (*)
+# NOTE.
+# When we enqueue the Tasklet object gets set to be the only argument
+# of run_action which is why the above works.
 
 
 def run_action(target: Tasklet):

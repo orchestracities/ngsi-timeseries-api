@@ -135,6 +135,14 @@ parameters:
     type: string
     description: "The corresponding 'fiware-servicepath' header.
     See http://fiware-orion.readthedocs.io/en/latest/user/multitenancy/index.html#multi-tenancy"
+  fiware-correlator:
+    in: header
+    name: Fiware-Correlator
+    required: false
+    type: string
+    description: "The request correlation ID Context Broker forwards in
+    notification messages.
+    See https://fiware-orion.readthedocs.io/en/latest/admin/logs/index.html"
 
 ################################################################################
 # PARAMETERS: IN PATH
@@ -326,6 +334,13 @@ parameters:
     to the table are decommissioned and no further writes are possible. In fact,
     race conditions are possible if entities of that type are POSTed to the
     notify endpoint while the underlying clean-up procedure is in progress."
+  taskStatus:
+    in: query
+    name: taskStatus
+    type: string
+    enum: [pending, succeeded, failed]
+    description: "Optional parameter to filter tasks by status in the work
+    queue management endpoints."
 
 ################################################################################
 # PATHS: META
@@ -1778,17 +1793,24 @@ paths:
 # PATHS: WORK QUEUE
 ################################################################################
 
-  /wq/messages:
+  /wq/notifications:
     get:
-      operationId: wq.mgmt.list_messages
+      operationId: wq.ngsi.list_insert_tasks
       summary: "TODO"
       tags:
         - wq
+      parameters:
+        # URL query string:
+        - $ref: '#/parameters/taskStatus'
+        # HTTP Headers:
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
+        - $ref: '#/parameters/fiware-correlator'
       responses:
         200:
           description: "TODO"
     delete:
-      operationId: wq.mgmt.delete_messages
+      operationId: wq.ngsi.delete_insert_tasks
       summary: "TODO"
       tags:
         - wq
