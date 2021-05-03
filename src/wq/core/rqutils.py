@@ -5,7 +5,7 @@ from rq import Queue
 from rq.job import Job
 
 from utils.itersplit import IterCostSplitter
-from wq.cfg import redis_connection
+from wq.core.cfg import redis_connection
 
 
 RQ_JOB_KEY_PREFIX = Job.redis_job_namespace_prefix

@@ -3,7 +3,7 @@ from redis import Redis
 from rq import Queue
 from rq.job import Job
 
-from wq.rqutils import RqJobKey, RqJobId, \
+from wq.core.rqutils import RqJobKey, RqJobId, \
     job_id_to_job_key, find_job_keys, find_job_ids, \
     starts_with_matcher, find_job_ids_in_registry, \
     find_pending_job_ids, find_successful_job_ids, find_failed_job_ids, \
@@ -30,7 +30,9 @@ class FakeRedis(Redis):
         return self.iter_keys()
 
     def zscan_iter(self, *args, **kwargs):
-        return self.iter_keys()
+        for k in self.iter_keys():
+            score = 0
+            yield k, score
 
     def close(self):
         pass
@@ -38,7 +40,7 @@ class FakeRedis(Redis):
 
 def setup_fake_redis(keys: [RqJobKey], monkeypatch):
     r = FakeRedis(keys)
-    monkeypatch.setattr('wq.rqutils.redis_connection', lambda: r)
+    monkeypatch.setattr('wq.core.rqutils.redis_connection', lambda: r)
 
 
 @pytest.mark.parametrize('job_ids', job_id_supply)
@@ -130,7 +132,7 @@ def fake_fetch_many(job_ids, connection, serializer=None):
     # batch size = 100 & cost = 1, so 110 should get split into 2 batches
 ])
 def test_load_jobs(monkeypatch, job_ids):
-    monkeypatch.setattr('wq.rqutils.Job.fetch_many', fake_fetch_many)
+    monkeypatch.setattr('wq.core.rqutils.Job.fetch_many', fake_fetch_many)
     js = load_jobs(job_ids)
 
     actual_job_ids = [j.id for j in js]

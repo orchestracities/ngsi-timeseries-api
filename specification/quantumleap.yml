@@ -1795,7 +1795,7 @@ paths:
 
   /wq/notifications:
     get:
-      operationId: wq.ngsi.list_insert_tasks
+      operationId: wq.ql.notify.list_insert_tasks
       summary: "TODO"
       tags:
         - wq
@@ -1810,7 +1810,7 @@ paths:
         200:
           description: "TODO"
     delete:
-      operationId: wq.ngsi.delete_insert_tasks
+      operationId: wq.ql.notify.delete_insert_tasks
       summary: "TODO"
       tags:
         - wq
@@ -1820,7 +1820,7 @@ paths:
 
   /wq/notifications/count:
     get:
-      operationId: wq.ngsi.count_insert_tasks
+      operationId: wq.ql.notify.count_insert_tasks
       summary: "TODO"
       tags:
         - wq

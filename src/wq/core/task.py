@@ -6,7 +6,7 @@ from rq import Queue
 from rq.job import Job
 
 from utils.b64 import to_b64_list, from_b64_list
-from wq.cfg import redis_connection, default_queue_name, \
+from wq.core.cfg import redis_connection, default_queue_name, \
     offload_to_work_queue, failed_task_retention_period, \
     successful_task_retention_period
 

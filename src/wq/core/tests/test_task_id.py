@@ -1,6 +1,6 @@
 import pytest
 
-from wq.task import CompositeTaskId
+from wq.core.task import CompositeTaskId
 
 tags_supply = [[], [''], ['a', 'b'], ['a', 'b', 'c']]
 

@@ -4,9 +4,8 @@ from pydantic import BaseModel
 
 from reporter.httputil import *
 from translators.factory import translator_for
-from wq.flaskutils import build_json_array_response_stream
-from wq.mgmt import TaskInfo, TaskStatus, QMan
-from wq.task import CompositeTaskId, Tasklet, WorkQ
+from wq.core import TaskInfo, TaskStatus, QMan, CompositeTaskId, Tasklet, WorkQ
+from wq.ql.flaskutils import build_json_array_response_stream
 
 
 class FiwareTaskId(CompositeTaskId):

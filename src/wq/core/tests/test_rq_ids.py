@@ -1,6 +1,6 @@
 import pytest
 
-from wq.rqutils import RQ_JOB_KEY_PREFIX, \
+from wq.core.rqutils import RQ_JOB_KEY_PREFIX, \
     job_id_to_job_key, job_id_from_job_key, job_key_matcher
 
 

@@ -48,7 +48,7 @@ services:
 
   quantumleap-wq:
     image: quantumleap
-    entrypoint: python wq/runner.py
+    entrypoint: python wq/core/runner.py
     networks:
       - wqtests
     environment:

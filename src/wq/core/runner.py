@@ -1,7 +1,7 @@
 from multiprocessing import Pool
 from rq import Connection, Worker
 
-from wq.cfg import queue_names, redis_connection
+from wq.core.cfg import queue_names, redis_connection
 
 
 def run_tasks(_):  # proc pool map needs fn w/ one arg

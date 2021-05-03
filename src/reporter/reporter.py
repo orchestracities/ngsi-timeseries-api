@@ -27,12 +27,11 @@ interest and make QL actually perform the corresponding subscription to orion.
 I.e, QL must be told where orion is.
 """
 
-from flask import has_request_context, request
+from flask import request
 from geocoding import geocoding
 from geocoding.factory import get_geo_cache, is_geo_coding_available
 from requests import RequestException
 from translators.sql_translator import SQLTranslator
-from translators.factory import translator_for
 from utils.common import iter_entity_attrs, TIME_INDEX_NAME
 import json
 import logging
@@ -41,9 +40,8 @@ from reporter.subscription_builder import build_subscription
 from reporter.timex import select_time_index_value_as_iso, \
     TIME_INDEX_HEADER_NAME
 from geocoding.location import normalize_location, LOCATION_ATTR_NAME
-from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption, \
-    NGSIUsageError, InvalidParameterValue, InvalidHeaderValue
-from wq.ngsi import InsertAction
+from exceptions.exceptions import NGSIUsageError, InvalidParameterValue, InvalidHeaderValue
+from wq.ql.notify import InsertAction
 from reporter.httputil import fiware_correlator
 
 

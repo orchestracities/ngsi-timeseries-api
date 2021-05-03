@@ -4,8 +4,8 @@ from typing import Callable, Iterable, Optional
 from pydantic import BaseModel
 from rq.job import Job, JobStatus
 
-from wq.task import WorkQ, _tasklet_from_rq_job
-from wq.rqutils import RqJobId, find_job_ids, find_failed_job_ids, \
+from wq.core.task import WorkQ, _tasklet_from_rq_job
+from wq.core.rqutils import RqJobId, find_job_ids, find_failed_job_ids, \
     find_successful_job_ids, find_pending_job_ids, load_jobs, delete_jobs, \
     starts_with_matcher
 
