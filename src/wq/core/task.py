@@ -7,8 +7,8 @@ from rq.job import Job
 
 from utils.b64 import to_b64_list, from_b64_list
 from wq.core.cfg import redis_connection, default_queue_name, \
-    offload_to_work_queue, failed_task_retention_period, \
-    successful_task_retention_period
+    offload_to_work_queue, recover_from_enqueueing_failure, \
+    failed_task_retention_period, successful_task_retention_period
 
 
 class TaskId(ABC):
@@ -204,11 +204,13 @@ class Tasklet(ABC):
                             result_ttl=self.success_ttl(),
                             failure_ttl=self.failure_ttl())
         except Exception as e:
-            # TODO log error and say you'll run this task on the spot
-            # TODO make last ditch attempt configurable: if no redis
-            # just return a 500 w/o trying DB insert.
-            print(e)
-            run_action(self)
+            print(e)    # TODO log error
+            if recover_from_enqueueing_failure():
+                # TODO log msg to say you'll run this task on the spot
+                # last ditch attempt, but only if configured to do so.
+                run_action(self)
+            else:
+                raise e
 
         assert (job is None or job.get_id() == tid)        # (2)
 # NOTE.

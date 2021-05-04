@@ -29,6 +29,27 @@ def offload_to_work_queue() -> bool:
     # TODO read from env
 
 
+def recover_from_enqueueing_failure() -> bool:
+    """
+    Attempt to run tasks synchronously if the queue is temporarily not
+    available? When offloading task execution to the work queue, it could
+    happen that the queueing of a task fails, e.g. the queue backend is
+    down and the task can't be added to the work queue. In that case, if
+    this function returns ``True``, then QL tries to recover from the
+    error by executing the task synchronously in the calling thread.
+    On the other hand, if this function returns ``False``, then QL will
+    just raise an error.
+
+    Only take this setting into account if ``offload_to_work_queue`` is
+    ``True``. (If ``False``, then tasks already get run synchronously.)
+
+    :return: ``True`` for try synchronous task execution on enqueueing
+        failure, ``False`` for raise an error instead.
+    """
+    return False
+    # TODO read from env
+
+
 def default_queue_name() -> str:
     """
     :return: the name of the default RQ queue to use for executing tasks.
