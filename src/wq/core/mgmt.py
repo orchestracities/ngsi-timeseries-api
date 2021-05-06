@@ -1,3 +1,8 @@
+"""
+Data structures and operations to manage work queues.
+Notice these data structures and operations abstract away the underlying
+RQ implementation so clients don't have to depend on the RQ API.
+"""
 from enum import Enum
 from typing import Callable, Iterable, Optional
 
@@ -11,10 +16,31 @@ from wq.core.rqutils import RqJobId, find_job_ids, find_failed_job_ids, \
 
 
 class TaskStatus(Enum):
+    """
+    Enumerate the states a task can be in.
+    """
+
     PENDING = 'pending'
+    """
+    A task is in the pending state from the time it gets enqueued to the
+    time it gets executed for the last time, i.e. until it gets retried
+    for the last time if previous runs failed.
+    """
     SUCCEEDED = 'succeeded'
+    """
+    A task is in the succeeded state if it ran to completion successfully.
+    """
     FAILED = 'failed'
+    """
+    A task is in the failed state if it failed permanently, i.e. there
+    was an error on every configured retry.
+    """
     UNKNOWN = 'unknown'
+    """
+    A task is in the unknown state if its actual state (pending, succeeded,
+    or failed) couldn't be determined. This can happen momentarily as the
+    task is moved from state to state because transitions aren't atomic.
+    """
 
 
 def _task_status_from_job_status(s: JobStatus) -> TaskStatus:
@@ -29,6 +55,9 @@ def _task_status_from_job_status(s: JobStatus) -> TaskStatus:
 
 
 class TaskRuntimeInfo(BaseModel):
+    """
+    Runtime info about the task such as its work queue ID and status.
+    """
     task_id: str
     task_type: str
     status: TaskStatus
@@ -36,6 +65,10 @@ class TaskRuntimeInfo(BaseModel):
 
 
 class TaskInfo(BaseModel):
+    """
+    Aggregate of task runtime info and input, i.e. the data the task got
+    as input for processing.
+    """
     runtime: TaskRuntimeInfo
     input: BaseModel
 
@@ -55,6 +88,9 @@ def _task_info_from_rq_job(j: Job) -> TaskInfo:
 
 
 class QMan:
+    """
+    Operations to manage a given work queue.
+    """
 
     def __init__(self, q: WorkQ):
         self._q = q
@@ -81,31 +117,108 @@ class QMan:
 
     @staticmethod
     def load_tasks(task_id_prefix: str) -> Iterable[TaskInfo]:
+        """
+        Load all the tasks with an ID having the same prefix as the input.
+        Stream data, i.e. don't load all tasks in memory but fetch them on
+        demand as the consumer iterates the result set.
+
+        :param task_id_prefix: the task ID prefix to match.
+        :return: a generator to iterate the matching tasks.
+        """
         return QMan._load(find_job_ids, task_id_prefix)
 
     @staticmethod
+    def load_tasks_runtime_info(task_id_prefix: str) \
+            -> Iterable[TaskRuntimeInfo]:
+        """
+        Same as ``load_tasks`` but only return task runtime info without
+        inputs.
+        """
+        for t in QMan.load_tasks(task_id_prefix):
+            yield t.runtime
+
+    @staticmethod
     def delete_tasks(task_id_prefix: str):
+        """
+        Delete all the tasks with an ID having the same prefix as the input.
+
+        :param task_id_prefix: the task ID prefix to match.
+        """
         matcher = starts_with_matcher(task_id_prefix)
         job_ids = find_job_ids(matcher)
         delete_jobs(job_ids)
 
     def count_all_tasks(self, task_id_prefix: str) -> int:
+        """
+        Count all the tasks with an ID having the same prefix as the input.
+
+        :param task_id_prefix: the task ID prefix to match.
+        :return: the number of matching tasks.
+        """
         return self._count_tasks(find_job_ids, task_id_prefix)
 
     def count_pending_tasks(self, task_id_prefix: str) -> int:
+        """
+        Count all the pending tasks with an ID having the same prefix as
+        the input.
+
+        :param task_id_prefix: the task ID prefix to match.
+        :return: the number of matching tasks.
+        """
         return self._count_tasks(self._pending_jid_finder, task_id_prefix)
 
     def count_successful_tasks(self, task_id_prefix: str) -> int:
+        """
+        Count all the tasks with an ID having the same prefix as the input
+        that executed successfully, i.e. tasks in the succeeded state.
+
+        :param task_id_prefix: the task ID prefix to match.
+        :return: the number of matching tasks.
+        """
         return self._count_tasks(self._successful_jid_finder, task_id_prefix)
 
     def count_failed_tasks(self, task_id_prefix: str) -> int:
+        """
+        Count all the failed tasks with an ID having the same prefix as
+        the input.
+
+        :param task_id_prefix: the task ID prefix to match.
+        :return: the number of matching tasks.
+        """
         return self._count_tasks(self._failed_jid_finder, task_id_prefix)
 
     def load_pending_tasks(self, task_id_prefix: str) -> Iterable[TaskInfo]:
+        """
+        Load all the pending tasks with an ID having the same prefix as
+        the input.
+        Stream data, i.e. don't load all tasks in memory but fetch them on
+        demand as the consumer iterates the result set.
+
+        :param task_id_prefix: the task ID prefix to match.
+        :return: a generator to iterate the matching tasks.
+        """
         return self._load(self._pending_jid_finder, task_id_prefix)
 
     def load_successful_tasks(self, task_id_prefix: str) -> Iterable[TaskInfo]:
+        """
+        Load all the tasks with an ID having the same prefix as the input
+        that executed successfully, i.e. tasks in the succeeded state.
+        Stream data, i.e. don't load all tasks in memory but fetch them on
+        demand as the consumer iterates the result set.
+
+        :param task_id_prefix: the task ID prefix to match.
+        :return: a generator to iterate the matching tasks.
+        """
         return self._load(self._successful_jid_finder, task_id_prefix)
 
     def load_failed_tasks(self, task_id_prefix: str) -> Iterable[TaskInfo]:
+        """
+        Load all the failed tasks with an ID having the same prefix as
+        the input.
+        Stream data, i.e. don't load all tasks in memory but fetch them on
+        demand as the consumer iterates the result set.
+
+        :param task_id_prefix: the task ID prefix to match.
+        :return: a generator to iterate the matching tasks.
+        """
         return self._load(self._failed_jid_finder, task_id_prefix)

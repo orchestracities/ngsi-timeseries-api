@@ -1818,6 +1818,23 @@ paths:
         204:
           description: "TODO"
 
+  /wq/notifications/summary:
+    get:
+      operationId: wq.ql.notify.list_insert_tasks_runtime_info
+      summary: "TODO"
+      tags:
+        - wq
+      parameters:
+        # URL query string:
+        - $ref: '#/parameters/taskStatus'
+        # HTTP Headers:
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
+        - $ref: '#/parameters/fiware-correlator'
+      responses:
+        200:
+          description: "TODO"
+
   /wq/notifications/count:
     get:
       operationId: wq.ql.notify.count_insert_tasks
