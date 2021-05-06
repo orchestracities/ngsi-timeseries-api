@@ -13,6 +13,9 @@ js = [q.fetch_job(i) for i in ids]
 # curl -v localhost:8668/wq/notifications \
 #      -H 'fiware-service: x' -H 'fiware-servicepath: /'
 
+# curl -v localhost:8668/wq/notifications/summary \
+#      -H 'fiware-service: x' -H 'fiware-servicepath: /'
+
 # curl -v localhost:8668/wq/notifications?taskStatus=succeeded \
 #      -H 'fiware-service: x' -H 'fiware-servicepath: /'
 
