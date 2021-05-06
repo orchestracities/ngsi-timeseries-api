@@ -1825,8 +1825,6 @@ paths:
       tags:
         - wq
       parameters:
-        # URL query string:
-        - $ref: '#/parameters/taskStatus'
         # HTTP Headers:
         - $ref: '#/parameters/fiware-Service'
         - $ref: '#/parameters/fiware-ServicePath'

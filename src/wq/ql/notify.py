@@ -95,14 +95,6 @@ def insert_task_finder(task_status: Optional[str] = None) \
     return qman.load_tasks
 
 
-def insert_task_runtime_info_stream(
-        task_id_prefix: str, task_status: Optional[str] = None) \
-        -> Iterable[TaskRuntimeInfo]:
-    find_tasks = insert_task_finder(task_status)
-    for t in find_tasks(task_id_prefix):
-        yield t.runtime
-
-
 def list_insert_tasks(task_status: Optional[str] = None):
     task_id_prefix = build_task_id_init_segment()
     find_tasks = insert_task_finder(task_status)
@@ -113,10 +105,9 @@ def list_insert_tasks(task_status: Optional[str] = None):
 # TODO logging
 
 
-def list_insert_tasks_runtime_info(task_status: Optional[str] = None):
+def list_insert_tasks_runtime_info():
     task_id_prefix = build_task_id_init_segment()
-    response_payload = insert_task_runtime_info_stream(
-        task_id_prefix, task_status)
+    response_payload = QMan.load_tasks_runtime_info(task_id_prefix)
 
     return build_json_array_response_stream(response_payload)
 # TODO error handling
