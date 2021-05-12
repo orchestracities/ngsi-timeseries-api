@@ -82,8 +82,7 @@ services:
     build: ../../../
     # image: orchestracities/quantumleap:work-q
     image: quantumleap
-    # entrypoint: python wq/core/runner.py
-    entrypoint: rq worker --url "redis://redis:6379"
+    entrypoint: python wq up
     depends_on:
       - redis
 #      - crate

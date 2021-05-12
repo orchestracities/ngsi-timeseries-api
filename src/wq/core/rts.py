@@ -153,7 +153,8 @@ def start(pool_size: Optional[int] = None,
         wp.start()                                             # (2)
 # NOTE
 # 1. RQ compat mode. For all intents and purposes, this is equivalent to
-# starting QuantumLeap WQ with the ``rq worker`` command.
+# starting QuantumLeap WQ with the ``rq worker --with-scheduler`` command
+# and possibly passing in burst mode and/or max jobs.
 # 2. Parallelism. Still experimental, only use for testing. In fact, funnily
 # enough, if you start two worker processes and then kill the main process:
 #
