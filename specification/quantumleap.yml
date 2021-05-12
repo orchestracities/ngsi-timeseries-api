@@ -1814,6 +1814,11 @@ paths:
       summary: "TODO"
       tags:
         - wq
+      parameters:
+        # HTTP Headers:
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
+        - $ref: '#/parameters/fiware-correlator'
       responses:
         204:
           description: "TODO"
