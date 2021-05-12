@@ -77,7 +77,8 @@ def _start_worker(burst_mode: bool = False,
            max_jobs=max_tasks,           # (3)
            logging_level=log_level())    # (4)
 # NOTE
-# 1. Scheduler. Required since we use retries.
+# 1. Scheduler. Required since we use retries. (Failed tasks get scheduled
+# for execution at a later time.)
 # 2. Burst mode. If true, the worker will drain the queue and exit.
 # 3. Max tasks. If given, the worker exits after processing that many jobs.
 # 4. Log level. We use one of the IDs known to the ``logging`` lib to avoid
