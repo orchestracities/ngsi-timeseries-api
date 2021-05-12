@@ -98,6 +98,7 @@ services:
       - POSTGRES_DB_USER=quantumleap
       - POSTGRES_DB_PASS=*
       - POSTGRES_USE_SSL=False
+#      - CRATE_HOST=${CRATE_HOST:-crate}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - LOGLEVEL=DEBUG
