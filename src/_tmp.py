@@ -60,3 +60,8 @@ r.zscan('rq:finished:default', cursor=0, match='eA==:Lw==*')
 # (0, [(b'eA==:Lw==:"":NWU0MDhjZDNkZDllNDQ1ZDhhYTZkNTVkODg2MTcyYWM=', 1619795739.0), (b'eA==:Lw==:"":ZDNhODBhOWE5NGM5NDZmZWJhMmE0MmM4YjBkNDFkYjc=', 1619795739.0), (b'eA==:Lw==:"":YzI3MGEzZjVhOGRiNDI0OWI5ZjAwZGUwMTNmYWUwMWQ=', 1619795740.0), (b'eA==:Lw==:"":MWNjMWYwM2I1ZmIwNGVhYzhhOThkYmY0ODdiN2VlMDg=', 1619795741.0)])
 r.zscan('rq:finished:default', cursor=0, match='eA==:Lw==1*')
 # (0, [])
+
+
+# psql postgresql://quantumleap:*@localhost
+# pstree -s python
+# htop -F python -t
