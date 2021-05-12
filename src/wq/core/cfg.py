@@ -3,9 +3,12 @@ Interface to the configuration store and factory to build simple values
 out of configuration items.
 """
 
+import logging
+
 from redis import Redis
 
 from cache.factory import CacheEnvReader
+from utils.cfgreader import EnvReader, StrVar
 
 
 def redis_connection() -> Redis:
@@ -121,3 +124,21 @@ def successful_task_retention_period() -> int:
 # NOTE. Retention periods.
 # In the future we could have more fine-grained configuration so e.g. each
 # task type gets different retention periods.
+
+
+def log_level() -> int:
+    """
+    Read the log level to use from the ``LOGLEVEL`` environment variable.
+    If the variable isn't set, return the info level ID. If set but its
+    value isn't one of the strings recognised by the ``logging`` lib
+    (case-insensitive comparison), then return the info level ID again.
+    Otherwise return the corresponding log level ID.
+
+    :return: one of the log level IDs known to the ``logging`` lib.
+    """
+    r = EnvReader()
+    level_name = r.read(StrVar('LOGLEVEL', 'INFO')).upper()
+    try:
+        return logging._nameToLevel[level_name]
+    except KeyError:
+        return logging.INFO
