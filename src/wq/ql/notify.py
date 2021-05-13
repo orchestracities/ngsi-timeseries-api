@@ -4,8 +4,9 @@ from pydantic import BaseModel
 
 from reporter.httputil import *
 from translators.factory import translator_for
-from wq.core import TaskInfo, TaskStatus, TaskRuntimeInfo, QMan, \
-    CompositeTaskId, Tasklet, WorkQ
+from wq.core import TaskInfo, TaskStatus, QMan, \
+    CompositeTaskId, Tasklet, WorkQ, StopTask
+import wq.core.cfg as cfg
 from wq.ql.flaskutils import build_json_array_response_stream
 
 
@@ -68,12 +69,19 @@ class InsertAction(Tasklet):
 # what the arguments of the method we want to call are, even if they get
 # reordered in the method signature.
 
+    def retry_intervals(self) -> [int]:
+        return cfg.retry_intervals()
+
     def run(self):
         data = self.task_input()
         with translator_for(data.fiware_service) as trans:
-            trans.insert(data.payload, data.fiware_service,
-                         data.fiware_service_path)
-        # TODO error handling & scheduled retries w/ back-off strategy
+            try:
+                trans.insert(data.payload, data.fiware_service,
+                             data.fiware_service_path)
+            except Exception as e:
+                if trans.can_retry_insert(e):
+                    raise e
+                raise StopTask() from e
 
 
 def build_task_id_init_segment():

@@ -205,6 +205,20 @@ class SQLTranslator(base_translator.BaseTranslator):
         # Implement when that becomes a real problem.
         return "{}".format(entity_attr.lower())
 
+    def can_retry_insert(self, error: Exception) -> bool:
+        """
+        Take an error raised by the ``insert`` method and decide if you
+        can retry the insert. Typically the answer is yes if the input
+        is a transient error, e.g. a connection failure. This method has
+        a default implementation that always returns ``False``, subclasses
+        should override it if needed.
+
+        :param error: the error raised by the ``insert`` method.
+        :return: ``True`` for yes, you can retry the insert; ``False``
+            for no.
+        """
+        return False
+
     def insert(self, entities, fiware_service=None, fiware_servicepath=None):
         if not isinstance(entities, list):
             msg = "Entities expected to be of type list, but got {}"

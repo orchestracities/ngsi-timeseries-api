@@ -116,6 +116,9 @@ class PostgresTranslator(sql_translator.SQLTranslator):
             self.ccm.reset_connection('timescale')
             self.setup()
 
+    def can_retry_insert(self, error: Exception) -> bool:
+        return isinstance(error, pg8000.InterfaceError)
+
     def get_health(self):
         health = {}
 
