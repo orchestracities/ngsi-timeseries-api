@@ -4,12 +4,12 @@ Notice these data structures and operations abstract away the underlying
 RQ implementation so clients don't have to depend on the RQ API.
 """
 from enum import Enum
-from typing import Callable, Iterable, Optional
+from typing import Callable, Iterable, List, Optional
 
 from pydantic import BaseModel
 from rq.job import Job, JobStatus
 
-from wq.core.task import WorkQ, _tasklet_from_rq_job
+from wq.core.task import WorkQ, _tasklet_from_rq_job, RqExcMan
 from wq.core.rqutils import RqJobId, find_job_ids, find_failed_job_ids, \
     find_successful_job_ids, find_pending_job_ids, load_jobs, delete_jobs, \
     starts_with_matcher
@@ -62,6 +62,7 @@ class TaskRuntimeInfo(BaseModel):
     task_type: str
     status: TaskStatus
     retries_left: Optional[int]
+    errors: List[str] = []
 
 
 class TaskInfo(BaseModel):
@@ -76,12 +77,14 @@ class TaskInfo(BaseModel):
 def _task_info_from_rq_job(j: Job) -> TaskInfo:
     tasklet = _tasklet_from_rq_job(j)
     status = _task_status_from_job_status(j.get_status())
+    errors = [repr(e) for e in RqExcMan.list_exceptions(j)]
     return TaskInfo(
         runtime=TaskRuntimeInfo(
             task_id=tasklet.task_id().id_repr(),
             task_type=str(type(tasklet)),
             status=status,
-            retries_left=j.retries_left
+            retries_left=j.retries_left,
+            errors=errors
         ),
         input=tasklet.task_input()
     )
