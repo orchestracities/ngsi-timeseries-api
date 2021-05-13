@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
+from types import TracebackType
+from typing import Optional, Type
 from uuid import uuid4
 
 from pydantic import BaseModel
-from rq import Queue
+from rq import Queue, Retry
 from rq.job import Job
 
 from utils.b64 import to_b64_list, from_b64_list
@@ -114,16 +116,66 @@ class CompositeTaskId(TaskId):
 
 
 WorkQ = Queue
+"""
+The type of the object to use for adding tasks to the work queue.
+This alias shields clients from knowing exactly what's the underlying lib
+we use to get the job done.
+"""
+
+
+class StopTask(Exception):
+    """
+    A ``Tasklet`` can raise this exception to stop execution immediately
+    and transition the task to the failed state where no more processing
+    is possible. This exception is typically useful for ``Tasklet``s with
+    retries so the implementation can raise this exception to break out of
+    a retry cycle, i.e. even if there are some retries left, they won't be
+    attempted.
+    """
+    pass
 
 
 class Tasklet(ABC):
     """
-    TODO
+    An action to run at a possibly later time using a work queue.
+    You subclass ``Tasklet`` to implement your own action. You capture the
+    action's input in the object state when you instantiate your ``Tasklet``.
+    Then you add the ``Tasklet`` instance to a work queue. Finally, a work
+    queue process picks up the task and runs it. Optionally, you can configure
+    retries so a failed task can be run again after some time up to a given
+    number of times.
     """
 
     @abstractmethod
     def run(self):
+        """
+        Subclasses must implement this method to do the actual work.
+        This method gets called by a work queue process on fetching the task
+        from the queue.
+        """
         pass
+
+    def retry_intervals(self) -> [int]:
+        """
+        Build a sequence intervals ``t1, t2, .., tN`` at which to retry this
+        task if it fails. Each value is in seconds and in total the task gets
+        retried for up to ``N`` times after the initial run. The first re-run
+        attempt happens after ``t1`` seconds, the second attempt ``t2`` secs
+        after the first attempt, and so on. If the sequence of intervals is
+        empty, the task never gets retried. Also, a task can stop retries by
+        raising a ``StopTask`` exception.
+
+        :return: the retry intervals or an empty list of no retries are needed.
+            This method returns an empty list so subclasses should override it
+            if they need retries.
+        """
+        return []
+
+    def _with_retries(self) -> Optional[Retry]:
+        ts = self.retry_intervals()
+        if ts:
+            return Retry(max=len(ts), interval=ts)
+        return None
 
     @abstractmethod
     def task_id(self) -> TaskId:
@@ -179,9 +231,22 @@ class Tasklet(ABC):
         return successful_task_retention_period()
 
     def failure_ttl(self) -> int:
+        """
+        How long, in seconds, to keep a task after it has failed permanently,
+        i.e. after all retries failed if retries were configured. Subclasses
+        can override if the value depends on the task. Otherwise, you get the
+        default TTL from the configuration store.
+
+        :return: how long to keep a task after it failed permanently.
+        """
         return failed_task_retention_period()
 
     def enqueue(self):
+        """
+        Put this task on the work queue if configured, otherwise run this task
+        immediately within the calling thread. You can control offloading of
+        tasks to the work queue by setting ``offload_to_work_queue``.
+        """
         if offload_to_work_queue():
             self._do_enqueue()
         else:
@@ -201,6 +266,7 @@ class Tasklet(ABC):
         try:
             job = q.enqueue(run_action, self,
                             job_id=tid,
+                            retry=self._with_retries(),
                             result_ttl=self.success_ttl(),
                             failure_ttl=self.failure_ttl())
         except Exception as e:
@@ -231,9 +297,63 @@ def _tasklet_from_rq_job(j: Job) -> Tasklet:
     """
     return j.args[0]    # (*)
 # NOTE.
-# When we enqueue the Tasklet object gets set to be the only argument
+# When we enqueue a job, the Tasklet object gets set to be the only argument
 # of run_action which is why the above works.
 
 
 def run_action(target: Tasklet):
     target.run()
+
+
+class RqExcMan:
+    """
+    Collects task exceptions and lets tasks stop execution immediately on
+    raising a ``StopTask`` exception.
+    This is a bit of a hack to remedy a couple of RQ shortcomings when it
+    comes to job retries:
+      - Job only collects a string rep of the last exception that happened.
+        If you have retries, you won't know why the previous attempts failed.
+      - Worker calls handle_job_failure b/f handle_exception. So you have no
+        easy way to stop any further attempts at running  a task if you realise
+        the failure is permanent.
+    """
+
+    EXC_META_KEY = 'exceptions'
+
+    @staticmethod
+    def _add_exception(j: Job, e: Optional[BaseException]):
+        j.meta.setdefault(RqExcMan.EXC_META_KEY, []).append(e)
+        j.save()
+
+    @staticmethod
+    def list_exceptions(j: Job) -> [Optional[BaseException]]:
+        return j.meta.get(RqExcMan.EXC_META_KEY, [])
+
+    @staticmethod
+    def exc_handler(j: Job, et: Type[BaseException],                   # (1)
+                    e: BaseException,
+                    tr: TracebackType) -> bool:
+        if isinstance(e, StopTask):
+            RqExcMan._add_exception(j, e.__cause__)
+            if j.is_scheduled:                                         # (2)
+                task = _tasklet_from_rq_job(j)
+                q = task.work_queue()
+                q.scheduled_job_registry.remove(j)
+                q.failed_job_registry.add(job=j, ttl=j.failure_ttl)    # (3)
+        else:
+            RqExcMan._add_exception(j, e)
+
+        return False                                                   # (4)
+# NOTE
+# 1. Exception handler args. RQ passes in the triple returned by the
+# `sys.exc_info` function.
+# 2. Next retry. If there are retries left, then Worker.handle_job_failure
+# schedules the job to run again. Since Worker.handle_exception, which
+# calls our exc_handler, gets called right after, the job status will be
+# 'scheduled' and the job will be in the scheduled job registry. So we've
+# got to undo all that and put the job on the failed registry instead.
+# Eyeball Worker.perform_job, handle_job_failure and handle_exception.
+# 3. exc_string. Not adding it since we've got our own exc list in j.meta.
+# 4. Exception handler chaining. The buck stops here. (Technically not
+# needed since we only install one handler, but good for the sake of
+# clarity.)

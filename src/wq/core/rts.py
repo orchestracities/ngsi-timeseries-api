@@ -8,13 +8,13 @@ the wrapper functions in this module.
 
 from multiprocessing import Pool
 from time import sleep
-from types import TracebackType
-from typing import Optional, Type
+from typing import Optional
 
 from rq import Queue, Worker
 from rq.job import Job
 
 from wq.core.cfg import queue_names, redis_connection, log_level
+from wq.core.task import RqExcMan
 
 
 # NOTE (Running RQ Workers)
@@ -41,18 +41,12 @@ from wq.core.cfg import queue_names, redis_connection, log_level
 # forked simultaneously.
 
 
-def _exc_handler(j: Job, et: Type[BaseException], e: BaseException,
-                 tr: TracebackType) -> bool:
-    # TODO
-    return False  # the buck stops here
-
-
 def _new_rq_worker() -> Worker:
     return Worker(queues=queue_names(),
                   connection=redis_connection(),
-                  queue_class=Queue,                      # (1)
-                  job_class=Job,                          # (2)
-                  exception_handlers=[_exc_handler])      # (3)
+                  queue_class=Queue,                              # (1)
+                  job_class=Job,                                  # (2)
+                  exception_handlers=[RqExcMan.exc_handler])      # (3)
 # NOTE
 # 1. We're relying on the default Queue class in our code, so this is just
 # a reminder not to use a custom class which vanilla RQ lets you do.
