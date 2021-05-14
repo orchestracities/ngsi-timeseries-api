@@ -8,7 +8,7 @@ import logging
 from redis import Redis
 
 from cache.factory import CacheEnvReader
-from utils.cfgreader import EnvReader, StrVar
+from utils.cfgreader import EnvReader, BoolVar, IntVar, StrVar
 
 
 def redis_connection() -> Redis:
@@ -21,6 +21,9 @@ def redis_connection() -> Redis:
     return Redis(host=host, port=port)
 
 
+OFFLOAD_WORK_VAR = BoolVar('WQ_OFFLOAD_WORK', False)
+
+
 def offload_to_work_queue() -> bool:
     """
     Offload task execution to the work queue?
@@ -28,8 +31,11 @@ def offload_to_work_queue() -> bool:
     :return: `True` to offload tasks to the work queue; `False` to execute
         them synchronously within the calling thread.
     """
-    return True
-    # TODO read from env
+    return EnvReader().safe_read(OFFLOAD_WORK_VAR)
+
+
+RECOVER_FROM_ENQUEUEING_FAILURE_VAR = \
+    BoolVar('WQ_RECOVER_FROM_ENQUEUEING_FAILURE', False)
 
 
 def recover_from_enqueueing_failure() -> bool:
@@ -49,8 +55,7 @@ def recover_from_enqueueing_failure() -> bool:
     :return: ``True`` for try synchronous task execution on enqueueing
         failure, ``False`` for raise an error instead.
     """
-    return False
-    # TODO read from env
+    return EnvReader().safe_read(RECOVER_FROM_ENQUEUEING_FAILURE_VAR)
 
 
 def default_queue_name() -> str:
@@ -70,12 +75,14 @@ def queue_names() -> [str]:
 # e.g. use a separate queue for each task type to prioritise execution.
 
 
+MAX_RETRIES_VAR = IntVar('WQ_MAX_RETRIES', 0)
+
+
 def max_retries() -> int:
     """
     :return: how many times a failed task should be retried.
     """
-    return 3
-    # TODO read from env
+    return EnvReader().safe_read(MAX_RETRIES_VAR)
 
 
 def retry_intervals() -> [int]:
@@ -99,6 +106,9 @@ def retry_intervals() -> [int]:
 # retry intervals.
 
 
+FAILURE_TTL_VAR = IntVar('WQ_FAILURE_TTL', 60 * 60 * 24 * 7)  # a week
+
+
 def failed_task_retention_period() -> int:
     """
     How long to keep failed tasks in the system. Past that period, failed
@@ -107,8 +117,10 @@ def failed_task_retention_period() -> int:
 
     :return: how long, in seconds, to keep failed tasks.
     """
-    return 60 * 60 * 24 * 7    # a week
-    # TODO read from env
+    return EnvReader().safe_read(FAILURE_TTL_VAR)
+
+
+SUCCESS_TTL_VAR = IntVar('WQ_SUCCESS_TTL', 60 * 60 * 24)  # a day
 
 
 def successful_task_retention_period() -> int:
@@ -118,12 +130,14 @@ def successful_task_retention_period() -> int:
 
     :return: how long, in seconds, to keep successful tasks.
     """
-    return 60 * 60 * 24    # a day
-    # TODO read from env
+    return EnvReader().safe_read(SUCCESS_TTL_VAR)
 
 # NOTE. Retention periods.
 # In the future we could have more fine-grained configuration so e.g. each
 # task type gets different retention periods.
+
+
+LOG_LEVEL_VAR = StrVar('LOGLEVEL', 'INFO')
 
 
 def log_level() -> int:
@@ -137,7 +151,7 @@ def log_level() -> int:
     :return: one of the log level IDs known to the ``logging`` lib.
     """
     r = EnvReader()
-    level_name = r.read(StrVar('LOGLEVEL', 'INFO')).upper()
+    level_name = r.safe_read(LOG_LEVEL_VAR).upper()
     try:
         return logging._nameToLevel[level_name]
     except KeyError:

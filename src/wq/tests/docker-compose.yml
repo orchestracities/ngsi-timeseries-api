@@ -64,6 +64,8 @@ services:
     ports:
       - "8668:8668"
     environment:
+      - WQ_OFFLOAD_WORK=true
+#      - WQ_MAX_RETRIES=3
       - QL_DEFAULT_DB=timescale
       - POSTGRES_HOST=timescale
       - POSTGRES_PORT=5432
