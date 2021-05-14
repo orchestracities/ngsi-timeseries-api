@@ -30,6 +30,11 @@ To configure QuantumLeap you can use the following environment variables:
 | `LOGLEVEL`         | Define the log level for all services (`DEBUG`, `INFO`, `WARNING` , `ERROR`)      |
 | `WORKERS`          | Define the number of gunicorn worker processes for handling requests. Default to `2` |
 | `THREADS`          | Define the number of gunicorn threads per worker.  Default to `1` **see notes**.  |
+| `WQ_OFFLOAD_WORK`  | Whether to offload insert tasks to a work queue. Default: `False`.  |
+| `WQ_RECOVER_FROM_ENQUEUEING_FAILURE`  | Whether to run tasks immediately if a work queue isn't available. Default: `False`. |
+| `WQ_MAX_RETRIES`   | How many times work queue processors should retry failed tasks. Default: 0 (no retries). |
+| `WQ_FAILURE_TTL`   | How long, in seconds, before removing failed tasks from the work queue. Default: 604800 (a week). |
+| `WQ_SUCCESS_TTL`   | How long, in seconds, before removing successfully run tasks from the work queue. Default: 86400 (a day). |
 
 ### Notes
 
@@ -70,6 +75,83 @@ To configure QuantumLeap you can use the following environment variables:
   in bytes (B) or `2^10` multiples (KiB, MiB, GiB), e.g. `10 B`, `1.2 KiB`,
   `0.9 GiB`. If this variable is not set (or the set value isn't valid),
   SQL inserts are processed normally without splitting data into batches.
+
+- `WQ_OFFLOAD_WORK`. The notify endpoint supports offloading the insert of
+  the received NGSI entities to separate work queue processes. Set this
+  variable to true to make QuantumLeap add the entities to a queue within
+  the Redis cache instead of inserting them directly into the DB backend,
+  which is what would happen if this variable weren't set or set to false.
+  (Note that when offloading insert tasks to a work queue, for entities to
+  actually be inserted in the DB backend, you will also have to have at
+  least one QuantumLeap process configured as a work queue processor.)
+  Any of the following (case insensitive) values will be interpreted as
+  true: 'true', 'yes', '1', 't', 'y'. Anything else counts for false, which
+  is also the default value if the variable is not set.
+
+- `WQ_RECOVER_FROM_ENQUEUEING_FAILURE`. Use this variable to specify what
+  to do if the notify endpoint is configured to offload insert tasks to
+  a work queue (`WQ_OFFLOAD_WORK=true`) but the enqueueing of an insert
+  task fails---typically this can happen when the Redis cache is temporarily
+  unavailable. If this variable is set to true, then QuantumLeap attempts
+  to recover from this situation by inserting the notify payload directly
+  in the DB backend, as if `WQ_OFFLOAD_WORK` were set to false. On the
+  other hand, if this variable is set to false or isn't set at all, then
+  QuantumLeap will return a server error. Notice that this variable is only
+  taken into account if `WQ_OFFLOAD_WORK=true`---if false, then inserts
+  are always executed synchronously within the notify endpoint.
+  Any of the following (case insensitive) values will be interpreted as
+  true: 'true', 'yes', '1', 't', 'y'. Anything else counts for false, which
+  is also the default value if the variable is not set.
+
+- `WQ_MAX_RETRIES`. When offloading insert tasks to a work queue, it is
+  possible to retry failed insert tasks. Regardless of the value of this
+  variable, the first time a task is fetched from the work queue, it is
+  run once. If this initial run fails and `WQ_MAX_RETRIES` is set to an
+  integer `M > 0`, then the task enters a retry cycle with up to `M` DB
+  insert attempts spaced out by an exponentially growing number of seconds.
+  (Task execution won't be attempted further if `M <= 0` or `WQ_MAX_RETRIES`
+  isn't set or it is set but its value can't be parsed as an integer.)
+  The retry cycle works as follows. Consider the growing sequence of positive
+  integers `S = { 20 * 2^k | k ∈ ℕ } = (20, 40, 80, 160, 320,...)`, interpret
+  them as seconds, call `t0` the time at which the first run failed, consider
+  the series `t0 + Σs[k] = (t0 + 20, t0 + 20 + 40, t0 + 20 + 40 + 80,...)`
+  and take the first `M` terms `t1 = t0 + 20,..., tM = t0 +...+ s[M]`.
+  Now schedule `M` task execution attempts at time points `t1,..., tM`.
+  On retrying task execution at time point `t[k]`, if the DB insert succeeds,
+  cancel any subsequent scheduled retries and flag the task as successful.
+  If the insert fails, what happens next depends on whether the failure is
+  transient or permanent. A transient failure is a situation where the task
+  may succeed if retried at some time in the future (e.g. a DB connection
+  goes down) whereas a permanent failure is a situation where the insert will
+  always fail because of a structural error---e.g. a mismatch between an NGSI
+  attribute type and its corresponding DB type. In the case of a permanent
+  failure, cancel any subsequent scheduled retries and flag the task as
+  failed. On the other hand, if the failure is transient, go on with the
+  next step of the retry cycle and attempt the task again at time point
+  `t[k+1]`. Irrespective of success or failure, if the `M`th attempt is
+  reached, the retry cycle ends then.
+
+- `WQ_FAILURE_TTL`. When using a work queue to process notify endpoint
+  payloads, the NGSI entities making up the payload will be kept in the
+  Redis cache for a period of time so that data can be inspected after
+  the insert task has run. More accurately, data are kept in Redis for
+  a number of seconds `ttl` past task completion. Regardless of outcome,
+  a task is considered complete when it has finished running if no retries
+  have been configured or when it has exited the retry cycle in the case of
+  retries. Let `t0` be the task completion time. Task data is kept in Redis
+  until `t0 + ttl`, past which point it will be automatically removed from
+  the Redis cache.
+  Use this variable to specify how long failed task data should be kept around
+  after the insert task completed with a failure. That is, use this variable
+  to specify the above `ttl` in seconds. The default value of `604800` seconds
+  (a week) will be used if this variable isn't set or it is set but its value
+  can't be parsed as an integer.
+
+- `WQ_SUCCESS_TTL`. This setting is analogous to `WQ_FAILURE_TTL`. Use this
+  variable to specify how long, in seconds, data of successful insert tasks
+  should be kept around. The default value of `86400` seconds (a day) will
+  be used if this variable isn't set or it is set but its value can't be
+  parsed as an integer.
 
 ## Database selection per different tenant
 
