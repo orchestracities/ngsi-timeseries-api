@@ -16,9 +16,9 @@ that you should expect from others):
   correct.
 - This project is released with a [Contributor Code of Conduct][conduct].
   By participating in this project, you agree to abide by its terms.
-- If you open a pull request, you must sign the [Individual Contributor
-  License Agreement][cla] by stating in a comment _"I have read the CLA
-  Document and I hereby sign the CLA"_
+- If you open a pull request, you must sign the
+  [Individual Contributor License Agreement][cla] by stating
+  in a comment _"I have read the CLA Document and I hereby sign the CLA"_
 - Please ensure that your contribution passes all tests. If there are
   test failures, you will need to address them before we can merge your
   contribution.
@@ -52,8 +52,8 @@ including contacting the maintainers directly.
 Keeping communication public means everybody can benefit and learn from
 the conversation.
 
-[cla]: https://fiware.github.io/contribution-requirements/individual-cla.pdf
-    "FIWARE Individual Contributor License Agreement"
+[cla]: https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/individual-cla.pdf
+    "Martel Open Source Software Individual Contributor License Agreement"
 [conduct]: ./CODE_OF_CONDUCT.md
     "Contributor Covenant Code of Conduct"
 [gi]: https://github.com/orchestracities/ngsi-timeseries-api/issues
