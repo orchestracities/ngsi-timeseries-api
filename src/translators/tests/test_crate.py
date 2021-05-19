@@ -25,7 +25,9 @@ def test_geo_point(translator):
     translator.insert([entity])
 
     # Check location is saved as a geo_point column in crate
-    op = 'select latitude(location), longitude(location) from etroom'
+
+    op = "select latitude(_doc['location']), longitude(_doc['location']) " \
+         "from etroom "
     translator.cursor.execute(op)
     res = translator.cursor.fetchall()
     assert len(res) == 1
@@ -69,8 +71,8 @@ def test_geo_point_null_values(translator):
     assert len(entities) == 1
 
     # Check location's None is saved as a geo_point column in crate
-    op = 'select latitude(location), longitude(location), temperature from ' \
-         'etroom order by time_index ASC'
+    op = "select latitude(_doc['location']), longitude(_doc['location']), temperature from " \
+         "etroom order by time_index ASC"
     translator.cursor.execute(op)
     res = translator.cursor.fetchall()
     assert len(res) == 2

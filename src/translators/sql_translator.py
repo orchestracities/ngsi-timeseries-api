@@ -365,7 +365,17 @@ class SQLTranslator(base_translator.BaseTranslator):
             start_time = datetime.now()
 
             for batch in to_insert_batches(rows):
-                self.cursor.executemany(stmt, batch)
+                res = self.cursor.executemany(stmt, batch)
+                # new version of crate does not bomb anymore when
+                # something goes wrong in multi entries
+                # simply it returns -2 for each row that have an issue
+                # TODO: improve error handling.
+                # using batches, we don't need to fail the whole set
+                # but only failing batches.
+                if isinstance(res, list):
+                    for i in range(len(res)):
+                        if res[i]['rowcount'] < 0:
+                            raise Exception('An insert failed')
 
             dt = datetime.now() - start_time
             time_difference = (dt.days * 24 * 60 * 60 + dt.seconds) \
@@ -1164,7 +1174,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             # TODO ORDER BY time_index asc is removed for the time being
             #  till we have a solution for
             #  https://github.com/crate/crate/issues/9854
-            op = stmt + "limit {limit} offset {offset}".format(
+            op = stmt + "ORDER BY time_index limit {limit} offset {offset}".format(
                 offset=offset,
                 limit=limit
             )
