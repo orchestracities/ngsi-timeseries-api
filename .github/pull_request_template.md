@@ -39,7 +39,7 @@ you considered, etc...
 
 
 
-[cla]: https://fiware.github.io/contribution-requirements/individual-cla.pdf
-    "FIWARE Individual Contributor License Agreement"
+[cla]: https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/individual-cla.pdf
+    "Martel Open Source Software Individual Contributor License Agreement"
 [contrib]: https://github.com/smartsdk/ngsi-timeseries-api/blob/master/CONTRIBUTING.md
     "Contributing to QuantumLeap"
