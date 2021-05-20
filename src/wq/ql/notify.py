@@ -91,6 +91,16 @@ def build_task_id_init_segment():
     return fid.fiware_svc_and_svc_path_repr()
 
 
+def empty_task_id_init_segment() -> str:
+    return ''
+
+
+def has_fiware_headers() -> bool:
+    hs = [fiware_s(), fiware_sp(), fiware_correlator()]
+    ks = [h for h in hs if h]
+    return len(ks) > 0
+
+
 def insert_task_finder(task_status: Optional[str] = None) \
         -> Callable[[str], Iterable[TaskInfo]]:
     qman = QMan(InsertAction.insert_queue())
@@ -143,6 +153,10 @@ def insert_task_count_calculator(task_status: Optional[str] = None) \
 
 
 def count_insert_tasks(task_status: Optional[str] = None):
-    task_id_prefix = build_task_id_init_segment()
+    if has_fiware_headers():
+        task_id_prefix = build_task_id_init_segment()
+    else:
+        task_id_prefix = empty_task_id_init_segment()
+
     calculate = insert_task_count_calculator(task_status)
     return calculate(task_id_prefix)
