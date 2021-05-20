@@ -1796,7 +1796,15 @@ paths:
   /wq/notifications:
     get:
       operationId: wq.ql.notify.list_insert_tasks
-      summary: "TODO"
+      summary: "Retrieve notification tasks offloaded to the work queue."
+      description: "This endpoint returns notification tasks in the work queue
+      for the given FIWARE service and service path. Optionally, it is possible
+      to specify task status and/or a FIWARE correlation ID to reduce scope
+      further, so that only tasks in the given status and/or having that ID
+      are considered. Each returned task object includes the original NGSI
+      entity payload that was submitted to the notify endpoint as well as task
+      runtime information: task ID, status, any errors occurred while executing
+      the task and how many retries are left if retries were configured."
       tags:
         - wq
       parameters:
@@ -1808,10 +1816,72 @@ paths:
         - $ref: '#/parameters/fiware-correlator'
       responses:
         200:
-          description: "TODO"
+          description: OK
+          schema:
+            type: array
+          examples:
+            application/json:
+              [
+                {
+                  "runtime": {
+                    "task_id": "eA==:Lw==:\"\":Mjc0ODQ0MzViZTFkNGMwOWFlOTQ3ZDY3ZjhmMjk4OTg=",
+                    "task_type": "<class 'wq.ql.notify.InsertAction'>",
+                    "status": "pending",
+                    "retries_left": 1,
+                    "errors": [
+                      "InterfaceError(\"Can't create a connection to host timescale and port 5432 (timeout is None and source_address is None).\")",
+                      "InterfaceError(\"Can't create a connection to host timescale and port 5432 (timeout is None and source_address is None).\")",
+                    ]
+                  },
+                  "input":
+                    {
+                      "fiware_service": "x",
+                      "fiware_service_path": "/",
+                      "fiware_correlator": null,
+                      "payload": [
+                        {
+                          "id": "Room:1",
+                          "type": "Room",
+                          "temperature": {"value": 23.3, "type": "Number"},
+                          "pressure": {"value": 720, "type": "Integer"},
+                          "time_index": "2021-05-14T15:57:11.848980"
+                        }
+                      ]
+                    }
+                },
+                {
+                  "runtime": {
+                    "task_id": "eA==:Lw==:\"\":NzU0NTQ0NzViZTFkNGMwOWFlOTQ3ZDY3ZjhmMjk4OTg=",
+                    "task_type": "<class 'wq.ql.notify.InsertAction'>",
+                    "status": "succeeded",
+                    "retries_left": 3,
+                    "errors": []
+                  },
+                  "input":
+                    {
+                      "fiware_service": "x",
+                      "fiware_service_path": "/",
+                      "fiware_correlator": null,
+                      "payload": [
+                        {
+                          "id": "Room:2",
+                          "type": "Room",
+                          "temperature": {"value": 20.7, "type": "Number"},
+                          "pressure": {"value": 702, "type": "Integer"},
+                          "time_index": "2021-05-14T15:58:39.745911"
+                        }
+                      ]
+                    }
+                },
+                null
+              ]
     delete:
       operationId: wq.ql.notify.delete_insert_tasks
-      summary: "TODO"
+      summary: "Delete notification tasks from the work queue."
+      description: "This endpoint deletes all notification tasks in the
+      work queue for the given FIWARE service and service path. Optionally,
+      it is possible to specify a FIWARE correlation ID to reduce scope
+      further, so that only tasks having that ID are deleted."
       tags:
         - wq
       parameters:
@@ -1821,12 +1891,20 @@ paths:
         - $ref: '#/parameters/fiware-correlator'
       responses:
         204:
-          description: "TODO"
+          description: OK
 
   /wq/notifications/summary:
     get:
       operationId: wq.ql.notify.list_insert_tasks_runtime_info
-      summary: "TODO"
+      summary: "Retrieve a summary of notification tasks offloaded to the work
+      queue."
+      description: "This endpoint returns runtime information about
+      notification tasks in the work queue for the given FIWARE service
+      and service path. Optionally, it is possible to specify a FIWARE
+      correlation ID to reduce scope further, so that only tasks having
+      that ID are considered. The runtime information includes task ID,
+      status, any errors occurred while executing the task and how many
+      retries are left if retries were configured."
       tags:
         - wq
       parameters:
@@ -1836,12 +1914,45 @@ paths:
         - $ref: '#/parameters/fiware-correlator'
       responses:
         200:
-          description: "TODO"
+          description: OK
+          schema:
+            type: array
+          examples:
+            application/json:
+              [
+                {
+                  "runtime": {
+                    "task_id": "eA==:Lw==:\"\":Mjc0ODQ0MzViZTFkNGMwOWFlOTQ3ZDY3ZjhmMjk4OTg=",
+                    "task_type": "<class 'wq.ql.notify.InsertAction'>",
+                    "status": "pending",
+                    "retries_left": 1,
+                    "errors": [
+                      "InterfaceError(\"Can't create a connection to host timescale and port 5432 (timeout is None and source_address is None).\")",
+                      "InterfaceError(\"Can't create a connection to host timescale and port 5432 (timeout is None and source_address is None).\")",
+                    ]
+                  }
+                },
+                {
+                  "runtime": {
+                    "task_id": "eA==:Lw==:\"\":NzU0NTQ0NzViZTFkNGMwOWFlOTQ3ZDY3ZjhmMjk4OTg=",
+                    "task_type": "<class 'wq.ql.notify.InsertAction'>",
+                    "status": "succeeded",
+                    "retries_left": 3,
+                    "errors": []
+                  }
+                },
+                null
+              ]
 
   /wq/notifications/count:
     get:
       operationId: wq.ql.notify.count_insert_tasks
-      summary: "TODO"
+      summary: "Count notification tasks offloaded to the work queue."
+      description: "This endpoint counts how many notification tasks are in
+      in the work queue, optionally filtering by tasks status, FIWARE service,
+      service path and correlation ID. This endpoint returns the size of the
+      set of tasks determined by the above input filters. If no filters are
+      specified, then the all tasks are counted."
       tags:
         - wq
       parameters:
@@ -1853,4 +1964,9 @@ paths:
         - $ref: '#/parameters/fiware-correlator'
       responses:
         200:
-          description: "TODO"
+          description: OK
+          schema:
+            type: number
+          examples:
+            application/json:
+              25
