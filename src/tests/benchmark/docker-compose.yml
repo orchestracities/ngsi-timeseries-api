@@ -20,7 +20,7 @@ services:
       - cratedata:/data
 
   redis:
-    image: redis
+    image: redis:${REDIS_VERSION}
     sysctls:
       net.core.somaxconn: 4096
       # see:
@@ -30,7 +30,7 @@ services:
       - "6379:6379"
 
   quantumleap:
-    image: ${QL_IMAGE:-smartsdk/quantumleap:latest}
+    image: ${QL_IMAGE:-orchestracities/quantumleap:latest}
     command: --config server/gconfig_telemetry.py
     sysctls:
       net.core.somaxconn: 4096
