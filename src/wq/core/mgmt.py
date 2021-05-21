@@ -12,7 +12,8 @@ from rq.job import Job, JobStatus
 from wq.core.task import WorkQ, _tasklet_from_rq_job, RqExcMan
 from wq.core.rqutils import RqJobId, find_job_ids, find_failed_job_ids, \
     find_successful_job_ids, find_pending_job_ids, load_jobs, delete_jobs, \
-    starts_with_matcher
+    starts_with_matcher, count_jobs, count_pending_jobs, count_failed_jobs, \
+    count_successful_jobs
 
 
 class TaskStatus(Enum):
@@ -151,43 +152,57 @@ class QMan:
         job_ids = find_job_ids(matcher)
         delete_jobs(job_ids)
 
-    def count_all_tasks(self, task_id_prefix: str) -> int:
-        """
-        Count all the tasks with an ID having the same prefix as the input.
-
-        :param task_id_prefix: the task ID prefix to match.
-        :return: the number of matching tasks.
-        """
-        return self._count_tasks(find_job_ids, task_id_prefix)
-
-    def count_pending_tasks(self, task_id_prefix: str) -> int:
-        """
-        Count all the pending tasks with an ID having the same prefix as
-        the input.
-
-        :param task_id_prefix: the task ID prefix to match.
-        :return: the number of matching tasks.
-        """
-        return self._count_tasks(self._pending_jid_finder, task_id_prefix)
-
-    def count_successful_tasks(self, task_id_prefix: str) -> int:
+    def count_all_tasks(self, task_id_prefix: Optional[str]) -> int:
         """
         Count all the tasks with an ID having the same prefix as the input
-        that executed successfully, i.e. tasks in the succeeded state.
+        if given, otherwise return the total number of tasks linked to the
+        work queue.
 
         :param task_id_prefix: the task ID prefix to match.
         :return: the number of matching tasks.
         """
+        if task_id_prefix is None:
+            return count_jobs(self._q)
+        return self._count_tasks(find_job_ids, task_id_prefix)
+
+    def count_pending_tasks(self, task_id_prefix: Optional[str]) -> int:
+        """
+        Count all the pending tasks with an ID having the same prefix as
+        the input if given, otherwise return the total number of tasks
+        linked to the work queue that are in the pending state.
+
+        :param task_id_prefix: the task ID prefix to match.
+        :return: the number of matching tasks.
+        """
+        if task_id_prefix is None:
+            return count_pending_jobs(self._q)
+        return self._count_tasks(self._pending_jid_finder, task_id_prefix)
+
+    def count_successful_tasks(self, task_id_prefix: Optional[str]) -> int:
+        """
+        Count all the tasks with an ID having the same prefix as the input
+        that executed successfully, i.e. tasks in the succeeded state. If
+        the input is ``None``, count all tasks in the succeeded state that
+        are linked to the queue.
+
+        :param task_id_prefix: the task ID prefix to match.
+        :return: the number of matching tasks.
+        """
+        if task_id_prefix is None:
+            return count_successful_jobs(self._q)
         return self._count_tasks(self._successful_jid_finder, task_id_prefix)
 
-    def count_failed_tasks(self, task_id_prefix: str) -> int:
+    def count_failed_tasks(self, task_id_prefix: Optional[str]) -> int:
         """
         Count all the failed tasks with an ID having the same prefix as
-        the input.
+        the input if given, otherwise return the total number of tasks
+        linked to the work queue that are in the failed state.
 
         :param task_id_prefix: the task ID prefix to match.
         :return: the number of matching tasks.
         """
+        if task_id_prefix is None:
+            return count_failed_jobs(self._q)
         return self._count_tasks(self._failed_jid_finder, task_id_prefix)
 
     def load_pending_tasks(self, task_id_prefix: str) -> Iterable[TaskInfo]:

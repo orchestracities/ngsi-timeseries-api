@@ -189,6 +189,54 @@ def find_failed_job_ids(q: Queue, job_id_matcher: str) -> Iterable[RqJobId]:
         q.failed_job_registry.key, job_id_matcher)
 
 
+def count_pending_jobs(q: Queue) -> int:
+    """
+    Count all pending jobs for the given queue.
+
+    :param q: the target queue.
+    :return: pending job tally.
+    """
+    queued = q.count
+    deferred = q.deferred_job_registry.count
+    scheduled = q.scheduled_job_registry.count
+    return queued + deferred + scheduled
+# NOTE. Consistency.
+# This is kind of accurate but not consistent with find_pending_job_ids.
+# That's the best we can do at the moment, but we should revisit it in
+# the future.
+
+
+def count_successful_jobs(q: Queue) -> int:
+    """
+    Count all successful jobs for the given queue.
+
+    :param q: the target queue.
+    :return: successful job tally.
+    """
+    return q.finished_job_registry.count
+
+
+def count_failed_jobs(q: Queue) -> int:
+    """
+    Count all failed jobs for the given queue.
+
+    :param q: the target queue.
+    :return: failed job tally.
+    """
+    return q.failed_job_registry.count
+
+
+def count_jobs(q: Queue) -> int:
+    """
+    Count all jobs for the given queue.
+
+    :param q: the target queue.
+    :return: job tally.
+    """
+    return count_pending_jobs(q) + count_successful_jobs(q) + \
+        count_failed_jobs(q)
+
+
 def load_jobs(job_ids: Iterable[RqJobId]) -> Iterable[Job]:
     """
     Iterate RQ jobs having an ID in the input set of ``job_ids``.
