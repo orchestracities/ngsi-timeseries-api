@@ -7,13 +7,16 @@ the wrapper functions in this module.
 """
 
 from multiprocessing import Pool
+import os
 from time import sleep
 from typing import Optional
 
 from rq import Queue, Worker
 from rq.job import Job
 
+from server.telemetry.monitor import Monitor
 from wq.core.cfg import queue_names, redis_connection, log_level
+from wq.core.mgmt import _task_info_from_rq_job
 from wq.core.task import RqExcMan
 
 
@@ -41,6 +44,42 @@ from wq.core.task import RqExcMan
 # forked simultaneously.
 
 
+class TelemetryWorker(Worker):
+    """
+    Extend RQ ``Worker`` to collect task duration samples using QuantumLeap
+    telemetry framework.
+    """
+
+    @staticmethod
+    def _new_monitor(monitoring_dir: str) -> Monitor:
+        return Monitor(monitoring_dir=monitoring_dir,
+                       with_runtime=False,
+                       with_profiler=False)
+
+    def __init__(self, *args, **kwargs):
+        monitoring_dir = kwargs.pop('monitoring_dir')
+        self.monitor = self._new_monitor(monitoring_dir)
+        self.duration_sample_id = ''
+        super().__init__(*args, **kwargs)
+
+    def register_birth(self):
+        os.makedirs(self.monitor.monitoring_dir(), exist_ok=True)
+        super().register_birth()
+
+    def execute_job(self, job, queue):
+        task_info = _task_info_from_rq_job(job)
+        key = f"task: {task_info.runtime.task_type}"
+        self.duration_sample_id = self.monitor.start_duration_sample()
+        try:
+            super().execute_job(job, queue)
+        finally:
+            self.monitor.stop_duration_sample(key, self.duration_sample_id)
+
+    def register_death(self):
+        self.monitor.stop()
+        super().register_death()
+
+
 def _new_rq_worker() -> Worker:
     return Worker(queues=queue_names(),
                   connection=redis_connection(),
@@ -63,9 +102,23 @@ def _new_rq_worker() -> Worker:
 # name will be a GUID, see __init__.
 
 
+def _new_telemetry_worker(monitoring_dir: str) -> Worker:
+    return TelemetryWorker(monitoring_dir=monitoring_dir,
+                           queues=queue_names(),
+                           connection=redis_connection(),
+                           queue_class=Queue,                            # (1)
+                           job_class=Job,                                # (2)
+                           exception_handlers=[RqExcMan.exc_handler])    # (3)
+# NOTE. See notes (1), (2), (3) above.
+
+
 def _start_worker(burst_mode: bool = False,
-                  max_tasks: Optional[int] = None):
-    w = _new_rq_worker()
+                  max_tasks: Optional[int] = None,
+                  monitoring_dir: Optional[str] = None):
+    if monitoring_dir:
+        w = _new_telemetry_worker(monitoring_dir)
+    else:
+        w = _new_rq_worker()
     w.work(with_scheduler=True,          # (1)
            burst=burst_mode,             # (2)
            max_jobs=max_tasks,           # (3)
@@ -86,13 +139,15 @@ class WorkerPool:
 
     def __init__(self, pool_size: int,
                  burst_mode: bool = False,
-                 max_tasks: Optional[int] = None):
+                 max_tasks: Optional[int] = None,
+                 monitoring_dir: Optional[str] = None):
         self.pool_size = pool_size
         self.burst_mode = burst_mode
         self.max_tasks = max_tasks
+        self.monitoring_dir = monitoring_dir
 
     def _run_worker(self, _):    # (*)
-        _start_worker(self.burst_mode, self.max_tasks)
+        _start_worker(self.burst_mode, self.max_tasks, self.monitoring_dir)
 # NOTE. Dummy arg.
 # Proc pool's map needs a function w/ one arg, otherwise it'll bomb out.
 
@@ -139,12 +194,13 @@ class WorkerPool:
 
 def start(pool_size: Optional[int] = None,
           burst_mode: bool = False,
-          max_tasks: Optional[int] = None):
+          max_tasks: Optional[int] = None,
+          monitoring_dir: Optional[str] = None):
     if pool_size is None or pool_size <= 1:
-        _start_worker(burst_mode, max_tasks)                   # (1)
+        _start_worker(burst_mode, max_tasks, monitoring_dir)    # (1)
     else:
-        wp = WorkerPool(pool_size, burst_mode, max_tasks)
-        wp.start()                                             # (2)
+        wp = WorkerPool(pool_size, burst_mode, max_tasks, monitoring_dir)
+        wp.start()                                              # (2)
 # NOTE
 # 1. RQ compat mode. For all intents and purposes, this is equivalent to
 # starting QuantumLeap WQ with the ``rq worker --with-scheduler`` command
