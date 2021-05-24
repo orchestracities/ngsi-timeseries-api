@@ -678,23 +678,23 @@ paths:
             properties:
               entityId:
                 type: string
+              entityType:
+                type: string
               index:
                 $ref: '#/definitions/IndexArray'
-              type:
-                type: string
           examples:
             application/json:
               [{
-                    "id": "Kitchen1",
+                    "entityId": "Kitchen1",
                     "index": [
                       "2018-01-07T15:44:59"],
-                    "type": "Kitchen"
+                    "entityType": "Kitchen"
               },
               {
-                    "id": "Kitchen2",
+                    "entityId": "Kitchen2",
                     "index": [
                       "2018-01-07T15:44:59"],
-                    "type": "Kitchen"
+                    "entityType": "Kitchen"
               }]
         404:
           description: "Not Found"
@@ -749,6 +749,8 @@ paths:
             properties:
               entityId:
                 type: string
+              entityType:
+                type: string
               attrName:
                 type: string
               index:
@@ -759,6 +761,7 @@ paths:
             application/json:
               {
                     "entityId": "Kitchen1",
+                    "entityType": "Kitchen",
                     "attrName": "temperature",
                     "index": ["2018-01-05T15:44:34", "2018-01-06T15:44:59",
                     "2018-01-07T15:44:59"],
@@ -874,6 +877,8 @@ paths:
             properties:
               entityId:
                 type: string
+              entityType:
+                type: string
               index:
                 $ref: '#/definitions/IndexArray'
               attributes:
@@ -884,6 +889,7 @@ paths:
             application/json:
               {
                   "entityId": "Kitchen1",
+                  "entityType": "Kitchen",
                   "index": ["2018-01-05T15:44:34", "2018-01-06T15:44:59",
                             "2018-01-07T15:44:59"],
                   "attributes": [
