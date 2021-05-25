@@ -109,19 +109,13 @@ def query(cursor, table_name, extra_clause=''):
 
     # Within Month
     stmt = "select entity_id, avg(temperature) from {} where time_index > '{}' {} group by entity_id".format(
-        table_name,
-        "2017-12-01T00:00",
-        extra_clause,
-    )
+        table_name, "2017-12-01T00:00", extra_clause, )
     cursor.execute(stmt)
     res[WM] = cursor.duration
 
     # Across Months
     stmt = "select month, avg(pressure) from {} where time_index > '{}' {} group by month".format(
-        table_name,
-        "2016-06-01T00:00",
-        extra_clause,
-    )
+        table_name, "2016-06-01T00:00", extra_clause, )
     cursor.execute(stmt)
     res[AM] = cursor.duration
 
@@ -180,9 +174,19 @@ def dump_test_results(f=sys.stdout):
         print("+" + "-" * 48 + "+", file=f)
         print("| QUERY SCOPE\t | SCENARIO 1\t| SCENARIO 2\t |", file=f)
         print("+" + "-" * 48 + "+", file=f)
-        print("| {}\t | {}\t| {}\t |".format(WM, res_sc1[T][WM], res_sc2[T][WM]), file=f)
+        print(
+            "| {}\t | {}\t| {}\t |".format(
+                WM,
+                res_sc1[T][WM],
+                res_sc2[T][WM]),
+            file=f)
         print("+" + "-" * 48 + "+", file=f)
-        print("| {}\t | {}\t| {}\t |".format(AM, res_sc1[T][AM], res_sc2[T][AM]), file=f)
+        print(
+            "| {}\t | {}\t| {}\t |".format(
+                AM,
+                res_sc1[T][AM],
+                res_sc2[T][AM]),
+            file=f)
         print("+" + "-" * 48 + "+", file=f)
 
     print_results(VC)
