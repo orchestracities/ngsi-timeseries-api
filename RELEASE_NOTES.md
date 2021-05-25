@@ -4,6 +4,8 @@
 
 ### New features
 
+- Support for CRATE 4.5
+
 ### Bug fixes
 
 ### Documentation
