@@ -26,12 +26,16 @@ def _meta_attribute(notification: dict, attr_name: str, meta_name: str) \
                        attr_name, 'metadata', meta_name, 'value')
 
 
-def _iter_metadata(notification: dict, meta_name: str) -> Iterable[MaybeString]:
+def _iter_metadata(
+        notification: dict,
+        meta_name: str) -> Iterable[MaybeString]:
     for attr_name in iter_entity_attrs(notification):
         yield _meta_attribute(notification, attr_name, meta_name)
 
 
-def time_index_priority_list(custom_index: str, notification: dict) -> datetime:
+def time_index_priority_list(
+        custom_index: str,
+        notification: dict) -> datetime:
     """
     Returns the next possible time_index value using the strategy described in
     the function select_time_index_value.
@@ -97,7 +101,8 @@ def select_time_index_value(custom_index: str, notification: dict) -> datetime:
     """
     current_time = datetime.now()
 
-    for index_candidate in time_index_priority_list(custom_index, notification):
+    for index_candidate in time_index_priority_list(
+            custom_index, notification):
         if index_candidate:
             return index_candidate
 

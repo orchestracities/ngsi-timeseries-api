@@ -94,11 +94,13 @@ class PostgresTranslator(sql_translator.SQLTranslator):
         if self.connection is None:
             try:
                 pg8000.paramstyle = "qmark"
-                self.connection = pg8000.connect(host=self.host, port=self.port,
-                                                 ssl_context=self.ssl,
-                                                 database=self.db_name,
-                                                 user=self.db_user,
-                                                 password=self.db_pass)
+                self.connection = pg8000.connect(
+                    host=self.host,
+                    port=self.port,
+                    ssl_context=self.ssl,
+                    database=self.db_name,
+                    user=self.db_user,
+                    password=self.db_pass)
                 self.connection.autocommit = True
                 self.ccm.set_connection('timescale', self.connection)
             except Exception as e:
@@ -181,7 +183,8 @@ class PostgresTranslator(sql_translator.SQLTranslator):
 
     @staticmethod
     def _ngsi_geojson_to_db(attr):
-        return geocoding.geojson.wktcodec.encode_as_wkt(attr['value'], srid=4326)
+        return geocoding.geojson.wktcodec.encode_as_wkt(
+            attr['value'], srid=4326)
 
     @staticmethod
     def _ngsi_slf_to_db(attr):

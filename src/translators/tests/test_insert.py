@@ -44,11 +44,13 @@ def test_insert_entity(translator, entity):
 
 
 @pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
-def test_insert_same_entity_with_different_attrs(translator, sameEntityWithDifferentAttrs):
+def test_insert_same_entity_with_different_attrs(
+        translator, sameEntityWithDifferentAttrs):
     """
     Test that the CrateTranslator can insert entity updates  that are of the same type but have different attributes.
     """
-    # Add time index to the updates. Use the dateModified meta data attribute of temperature.
+    # Add time index to the updates. Use the dateModified meta data attribute
+    # of temperature.
     for entity in sameEntityWithDifferentAttrs:
         entity[BaseTranslator.TIME_INDEX_NAME] = entity['temperature']['metadata']['dateModified']['value']
 
@@ -269,10 +271,12 @@ def test_unsupported_ngsi_type(translator):
     e = {
         "type": "SoMeWeIrDtYpE",
         "id": "sOmEwEiRdId",
-        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
+        TIME_INDEX_NAME: datetime.now(
+            timezone.utc).isoformat(
+            timespec='milliseconds'),
         "foo": {
             "type": "IgnoreThisDefinitivelyNotValidNGSITypeMessage",
-            "value": "BaR",
+                "value": "BaR",
         },
     }
     translator.insert([e])
@@ -291,15 +295,16 @@ def test_accept_unknown_ngsi_type(translator):
     e = {
         "type": "SoMeWeIrDtYpE",
         "id": "sOmEwEiRdId",
-        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
+        TIME_INDEX_NAME: datetime.now(
+            timezone.utc).isoformat(
+            timespec='milliseconds'),
         "address": {
             "type": "PostalAddress",
-            "value": {
-                "streetAddress": "18 Avenue Félix Faure",
-                "postalCode": "06000",
-                "addressLocality": "Nice",
-                "addressCountry": "France"
-            },
+                "value": {
+                    "streetAddress": "18 Avenue Félix Faure",
+                    "postalCode": "06000",
+                    "addressLocality": "Nice",
+                    "addressCountry": "France"},
         },
     }
     translator.insert([e])
@@ -318,15 +323,16 @@ def test_accept_special_chars(translator):
     e = {
         "type": "SoMe-WeIrD-tYpE",
         "id": "sOmE:wEiRd.Id",
-        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
+        TIME_INDEX_NAME: datetime.now(
+            timezone.utc).isoformat(
+            timespec='milliseconds'),
         "address": {
             "type": "Address-Type",
-            "value": {
-                "streetAddress": "18 Avenue Félix Faure",
-                "postalCode": "06000",
-                "addressLocality": "Nice",
-                "addressCountry": "France"
-            },
+                "value": {
+                    "streetAddress": "18 Avenue Félix Faure",
+                    "postalCode": "06000",
+                    "addressLocality": "Nice",
+                    "addressCountry": "France"},
         },
     }
     translator.insert([e])
@@ -340,7 +346,9 @@ def test_missing_type_defaults_to_string(translator):
     e = {
         "type": "SoMeWeIrDtYpE",
         "id": "sOmEwEiRdId",
-        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
+        TIME_INDEX_NAME: datetime.now(
+            timezone.utc).isoformat(
+            timespec='milliseconds'),
         "foo": {
             "value": "BaR",
         },
@@ -359,18 +367,11 @@ def test_missing_type_defaults_to_string(translator):
 def test_capitals(translator):
     entity_type = "SoMeWeIrDtYpE"
     e1 = {
-        "type": entity_type,
-        "id": "sOmEwEiRdId",
-        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
-        "Foo": {
-            "type": "Text",
-            "value": "FoO",
-        },
-        "bAr": {
-            "type": "Text",
-            "value": "bAr",
-        },
-    }
+        "type": entity_type, "id": "sOmEwEiRdId", TIME_INDEX_NAME: datetime.now(
+            timezone.utc).isoformat(
+            timespec='milliseconds'), "Foo": {
+                "type": "Text", "value": "FoO", }, "bAr": {
+            "type": "Text", "value": "bAr", }, }
     translator.insert([e1])
     entities = translator.query()
     assert len(entities) == 1
@@ -422,12 +423,13 @@ def test_long_json(translator):
     big_entity = {
         'id': 'entityId1',
         'type': 'type1',
-        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
+        TIME_INDEX_NAME: datetime.now(
+            timezone.utc).isoformat(
+            timespec='milliseconds'),
         'foo': {
             'type': 'Text',
-            'value': "SomeTextThatWillGetLong" * 2000
-        }
-    }
+                'value': "SomeTextThatWillGetLong" *
+            2000}}
     translator.insert([big_entity])
 
     r = translator.query()
@@ -474,10 +476,12 @@ def test_ISO8601(translator):
     e = {
         "type": "MyType",
         "id": "MyId",
-        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
+        TIME_INDEX_NAME: datetime.now(
+            timezone.utc).isoformat(
+            timespec='milliseconds'),
         "iso_attr": {
             "type": "ISO8601",
-            "value": "2018-03-20T13:26:38.722Z",
+                "value": "2018-03-20T13:26:38.722Z",
         },
     }
     translator.insert([e])
@@ -488,9 +492,9 @@ def test_ISO8601(translator):
     translator.clean()
 
 
-################################################################################
+##########################################################################
 # FIWARE DATA MODELS
-################################################################################
+##########################################################################
 @pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_air_quality_observed(translator, air_quality_observed):
     # Add TIME_INDEX as Reporter would

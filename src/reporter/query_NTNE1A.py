@@ -98,7 +98,8 @@ def query_NTNE1A(attr_name,  # In Path
             except Exception as ex:
                 t_date = ''
             index = [
-                f_date, t_date] if aggr_method and not aggr_period else e['index']
+                f_date,
+                t_date] if aggr_method and not aggr_period else e['index']
             entity = {
                 'entityId': e['id'],
                 'index': index,

@@ -65,5 +65,8 @@ def within(column: str, geometry: SlfGeometry) -> GeoIncidenceTerm:
     return GeoIncidenceTerm(column, GeoIncidenceType.WITHIN, geometry)
 
 
-def distance(column: str, point_from: SlfPoint, dist: float) -> GeoDistanceTerm:
+def distance(
+        column: str,
+        point_from: SlfPoint,
+        dist: float) -> GeoDistanceTerm:
     return GeoDistanceTerm(column, point_from, dist)
