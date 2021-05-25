@@ -9,16 +9,34 @@ on:
 
 jobs:
   build:
+    if: startsWith(github.head_ref, 'autopep8-patches') == false && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
       with:
-        # Make sure the actual branch is checked out when running on pull requests
-        ref: ${{ github.head_ref }}
-    - uses: creyD/action_autopep8@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        ref: ${{github.event.pull_request.head.ref}}
+        repository: ${{github.event.pull_request.head.repo.full_name}}
+    - name: autopep8
+      id: autopep8
+      uses: peter-evans/autopep8@v1
+      with:
+        args: --exit-code --recursive --in-place --aggressive --aggressive .
+    - name: Set autopep8 branch name
+      id: vars
+      run: echo ::set-output name=branch-name::"autopep8-patches/${{ github.head_ref }}"
+    - name: Create Pull Request
+      if: steps.autopep8.outputs.exit-code == 2
+      uses: peter-evans/create-pull-request@v3
+      with:
+        commit-message: autopep8 action fixes
+        title: Fixes by autopep8 action
+        body: This is an auto-generated PR with fixes by autopep8.
+        labels: autopep8, automated pr
+        branch: ${{ steps.vars.outputs.branch-name }}
+    - name: Fail if autopep8 made changes
+      if: steps.autopep8.outputs.exit-code == 2
+      run: exit 1
     - name: Lint
       uses: docker://avtodev/markdown-lint:v1 # fastest way
       with:
