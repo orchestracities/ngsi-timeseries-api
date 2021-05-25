@@ -8,7 +8,8 @@ class BaseTranslator(object):
     The usage after instantiation assumes setup is called first and dispose at last.
     """
 
-    # Note: Some databases will restrict the possible names for tables and columns.
+    # Note: Some databases will restrict the possible names for tables and
+    # columns.
     TIME_INDEX_NAME = TIME_INDEX_NAME
 
     def __init__(self, host, port, db_name):

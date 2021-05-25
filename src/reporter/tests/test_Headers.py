@@ -19,12 +19,26 @@ def test_for_valid_headers(notification):
     notification['data'][0] = {
         'id': 'Room0',
         'type': 'Room',
-        'temperature': {'type': 'Number', 'value': '100', 'metadata': {'dateModified': {'type': 'DateTime', 'value': '1980-01-30T00:00:00.000+00:00'}}},
-        'pressure': {'type': 'Number', 'value': '10', 'metadata': {'dateModified': {'type': 'DateTime', 'value': '1980-01-30T00:00:00.000+00:00'}}},
+        'temperature': {
+            'type': 'Number',
+            'value': '100',
+            'metadata': {
+                'dateModified': {
+                    'type': 'DateTime',
+                    'value': '1980-01-30T00:00:00.000+00:00'}}},
+        'pressure': {
+            'type': 'Number',
+                    'value': '10',
+                    'metadata': {
+                        'dateModified': {
+                            'type': 'DateTime',
+                            'value': '1980-01-30T00:00:00.000+00:00'}}},
     }
 
-    res_post = requests.post('{}'.format(notify_url), data=json.dumps(notification),
-                             headers=HEADERS_VALID)
+    res_post = requests.post(
+        '{}'.format(notify_url),
+        data=json.dumps(notification),
+        headers=HEADERS_VALID)
     time.sleep(1)
     assert res_post.status_code == 200
     assert res_post.json().startswith('Notification successfully processed')
@@ -34,13 +48,12 @@ def test_for_valid_headers(notification):
 
     assert res_get.status_code == 200
 
-    exp_values = {
-        "attributes": [{'attrName': 'pressure', 'values': [10.0]}, {'attrName': 'temperature', 'values': [100.0]}],
-        "entityId": 'Room0',
-        "index": [
-            '1980-01-30T00:00:00.000+00:00'
-        ]
-    }
+    exp_values = {"attributes": [{'attrName': 'pressure',
+                                  'values': [10.0]},
+                                 {'attrName': 'temperature',
+                                  'values': [100.0]}],
+                  "entityId": 'Room0',
+                  "index": ['1980-01-30T00:00:00.000+00:00']}
     assert res_get.json() == exp_values
     delete_entity_type('test', 'Room')
 
@@ -53,8 +66,10 @@ def test_for_invalid_headers(notification):
         'pressure': {'type': 'Number', 'value': '20', 'metadata': {}},
     }
 
-    res_post = requests.post('{}'.format(notify_url), data=json.dumps(notification),
-                             headers=HEADERS_VALID)
+    res_post = requests.post(
+        '{}'.format(notify_url),
+        data=json.dumps(notification),
+        headers=HEADERS_VALID)
 
     assert res_post.status_code == 200
     assert res_post.json().startswith('Notification successfully processed')
@@ -65,5 +80,6 @@ def test_for_invalid_headers(notification):
     assert res_get.status_code == 404
 
     exp_result = {
-        'description': 'No records were found for such query.', 'error': 'Not Found'}
+        'description': 'No records were found for such query.',
+        'error': 'Not Found'}
     assert res_get.json() == exp_result
