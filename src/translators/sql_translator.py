@@ -136,9 +136,13 @@ class SQLTranslator(base_translator.BaseTranslator):
         self.logger.debug("Translation completed | time={} msec".format(
             str(time_difference)))
 
+    def get_db_cache_name(self):
+        return self.dbCacheName
+
     def sql_error_handler(self, exception):
         raise NotImplementedError
 
+    # TODO is this still needed?
     def _refresh(self, entity_types, fiware_service=None):
         """
         Used for testing purposes only!
@@ -458,7 +462,9 @@ class SQLTranslator(base_translator.BaseTranslator):
             return True
         return False
 
-    # TODO this logic is too simple
+    # TODO this logic is too simple. looks like this actually only used
+    # in row 67 of reporter.py and in test_validate_notifivation (i.e
+    # most probably we can remove
     @staticmethod
     def is_text(attr_type):
         # TODO: verify: same logic in two different places!
@@ -524,17 +530,19 @@ class SQLTranslator(base_translator.BaseTranslator):
     @staticmethod
     def _is_ngsi_array(attr, attr_t):
         return (attr_t == NGSI_STRUCTURED_VALUE
-                and 'value' in attr and isinstance(attr['value'], list)) or attr_t == "Array"
+                and 'value' in attr and isinstance(attr['value'],
+                                                   list)) or attr_t == "Array"
 
     @staticmethod
     def _is_ngsi_object(attr, attr_t):
-        return attr_t == NGSI_STRUCTURED_VALUE or ('value' in attr and isinstance(attr['value'], dict))
+        return attr_t == NGSI_STRUCTURED_VALUE or (
+            'value' in attr and isinstance(attr['value'], dict))
 
     @staticmethod
     def _is_ngsi_ld_datetime_property(attr):
         if 'type' in attr and attr[
                 'type'] == 'Property' and 'value' in attr and isinstance(
-                    attr['value'], dict) \
+                attr['value'], dict) \
             and '@type' in attr['value'] and attr['value'][
                 '@type'] == 'DateTime':
             return True
@@ -554,12 +562,14 @@ class SQLTranslator(base_translator.BaseTranslator):
             elif attr['value'] is not None:
                 return float(attr['value'])
         except ValueError:
-            logging.warning('{} cannot be cast to {} replaced with None'.format(
-                attr.get('value', None), attr.get('type', None)))
+            logging.warning(
+                '{} cannot be cast to {} replaced with None'.format(
+                    attr.get('value', None), attr.get('type', None)))
             return None
         else:
-            logging.warning('{} cannot be cast to {} replaced with None'.format(
-                attr.get('value', None), attr.get('type', None)))
+            logging.warning(
+                '{} cannot be cast to {} replaced with None'.format(
+                    attr.get('value', None), attr.get('type', None)))
             return None
 
     @staticmethod
@@ -567,8 +577,9 @@ class SQLTranslator(base_translator.BaseTranslator):
         if 'value' in attr and SQLTranslator._is_iso_date(attr['value']):
             return attr['value']
         else:
-            logging.warning('{} cannot be cast to {} replaced with None'.format(
-                attr.get('value', None), attr.get('type', None)))
+            logging.warning(
+                '{} cannot be cast to {} replaced with None'.format(
+                    attr.get('value', None), attr.get('type', None)))
             return None
 
     @staticmethod
@@ -581,12 +592,14 @@ class SQLTranslator(base_translator.BaseTranslator):
             elif attr['value'] is not None:
                 return int(float(attr['value']))
         except ValueError:
-            logging.warning('{} cannot be cast to {} replaced with None'.format(
-                attr.get('value', None), attr.get('type', None)))
+            logging.warning(
+                '{} cannot be cast to {} replaced with None'.format(
+                    attr.get('value', None), attr.get('type', None)))
             return None
         else:
-            logging.warning('{} cannot be cast to {} replaced with None'.format(
-                attr.get('value', None), attr.get('type', None)))
+            logging.warning(
+                '{} cannot be cast to {} replaced with None'.format(
+                    attr.get('value', None), attr.get('type', None)))
             return None
 
     @staticmethod
@@ -603,8 +616,9 @@ class SQLTranslator(base_translator.BaseTranslator):
         elif isinstance(attr['value'], bool):
             return attr['value']
         else:
-            logging.warning('{} cannot be cast to {} replaced with None'.format(
-                attr.get('value', None), attr.get('type', None)))
+            logging.warning(
+                '{} cannot be cast to {} replaced with None'.format(
+                    attr.get('value', None), attr.get('type', None)))
             return None
 
     @staticmethod
@@ -633,12 +647,15 @@ class SQLTranslator(base_translator.BaseTranslator):
 
     @staticmethod
     def _ngsi_ld_datetime_to_db(attr):
-        if SQLTranslator._is_ngsi_ld_datetime_property(attr) and SQLTranslator._is_iso_date(attr['value']['@value']):
+        if SQLTranslator._is_ngsi_ld_datetime_property(
+                attr) and SQLTranslator._is_iso_date(attr['value']['@value']):
             return attr['value']['@value']
         else:
             if 'value' in attr:
-                logging.warning('{} cannot be cast to {} replaced with None'.format(
-                    attr['value'].get('@value', None), attr['value'].get('@type', None)))
+                logging.warning(
+                    '{} cannot be cast to {} replaced with None'.format(
+                        attr['value'].get('@value', None),
+                        attr['value'].get('@type', None)))
             else:
                 logging.warning(
                     'attribute "value" is missing, cannot perform cast')
@@ -719,7 +736,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         :return: list(unicode)
         """
         stmt = "select distinct table_name from {}".format(METADATA_TABLE_NAME)
-        key = None
+        key = ""
         if fiware_service:
             key = fiware_service.lower()
             where = " where table_name ~* '\"{}{}\"[.].*'"
@@ -1349,7 +1366,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         op = "delete from {} {}".format(table_name, where_clause)
         try:
             self.cursor.execute(op)
-            key = None
+            key = ""
             if fiware_service:
                 key = fiware_service.lower()
             self._remove_from_cache(self.dbCacheName, table_name)
@@ -1374,7 +1391,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         try:
             self.cursor.execute(op, [table_name])
             self._remove_from_cache(self.dbCacheName, table_name)
-            key = None
+            key = ""
             if fiware_service:
                 key = fiware_service.lower()
             self._remove_from_cache(key, "tableNames")
