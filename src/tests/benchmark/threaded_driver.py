@@ -62,10 +62,18 @@ def lookup_test_task(test_id: str) -> TestTask:
 
 class ThreadedDriver(Driver):
 
+    def __init__(self,
+                 max_workers: int = MAX_THREAD_WORKERS,
+                 requests_number: int = REQUESTS_N,
+                 monitoring_dir: str = MONITORING_DIR):
+        super().__init__(monitoring_dir=monitoring_dir)
+        self._max_workers = max_workers
+        self._request_n = requests_number
+
     def _do_run(self, test_id: str) -> TestRunResults:
         test_task = lookup_test_task(test_id)
-        with ThreadPoolExecutor(max_workers=MAX_THREAD_WORKERS) as executor:
-            return executor.map(test_task, range(REQUESTS_N))
+        with ThreadPoolExecutor(max_workers=self._max_workers) as executor:
+            return executor.map(test_task, range(self._request_n))
 
 
 if __name__ == "__main__":
