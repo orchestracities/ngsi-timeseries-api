@@ -9,7 +9,6 @@ from rq import Queue
 from server.telemetry.monitor import _new_bucket
 from translators.timescale import PostgresConnectionData
 from utils.cfgreader import EnvReader, IntVar, StrVar
-from wq.core import WorkQ
 from wq.core.cfg import redis_connection, default_queue_name
 from wq.tests.benchmark.samplers import RowCountSampler, WorkQSizeSampler
 
