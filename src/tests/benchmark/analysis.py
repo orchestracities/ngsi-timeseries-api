@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 
 from server.telemetry.pandas_import import TelemetryDB, TelemetryFrame, \
@@ -61,7 +63,7 @@ def plot_to_file(figure_name: str, data: pd.Series):
     fig.savefig(f"{figure_name}.pdf")
 
 
-db = TelemetryDB('_monitoring')
+db = TelemetryDB(Path('_monitoring'))
 
 # print_measurements_summaries(db.duration())
 # print_measurements_summaries(db.duration(), by_pid = True)
