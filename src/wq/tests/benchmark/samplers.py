@@ -47,8 +47,9 @@ class RowCountSampler(BackgroundRepeater):
             return 0
 
     def _observe(self, new_count: int, delta: int):
-        xs = observe_many((self.count_label(self._table_fqn), new_count),
-                          (self.delta_label(self._table_fqn), delta))
+        x1 = (self.count_label(self._table_fqn), float(new_count))
+        x2 = (self.delta_label(self._table_fqn), float(delta))
+        xs = observe_many(x1, x2)
         self._bucket.put(*xs)
 
     def _do_run(self) -> bool:
@@ -89,7 +90,7 @@ class WorkQSizeSampler(BackgroundRepeater):
         try:
             size = self._q_man.count_pending_tasks(task_id_prefix=None)
             label = self.size_label(self._q_name)
-            self._bucket.put(observe(label, size))
+            self._bucket.put(observe(label, float(size)))
         except Exception as e:
             print(e)
         return False

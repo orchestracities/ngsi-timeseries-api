@@ -27,6 +27,10 @@ class TestScript:
         this_file = Path(__file__)
         return this_file.parent
 
+    @staticmethod
+    def default_monitoring_dir() -> Path:
+        return TestScript.this_files_dir() / MONITORING_DIR_NAME
+
     def __init__(self,
                  monitoring_dir_name: str = MONITORING_DIR_NAME,
                  docker_compose_file_name: str = DOCKER_COMPOSE_FILE_NAME,
