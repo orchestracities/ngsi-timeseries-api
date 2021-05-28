@@ -96,13 +96,15 @@ class TestScript:
                                  monitoring_dir=str(self._mon_dir))
         workers.run(test_id=NOTIFY_TEST)
 
-    def main(self):
+    def main(self, with_docker=True):
         self._prep_monitoring_dir()
-        self._build_docker_images()
-        self._start_docker_and_wait_for_services()
+        if with_docker:
+            self._build_docker_images()
+            self._start_docker_and_wait_for_services()
 
         self._start_samplers()
         self._send_notify_requests()
         self._collect_telemetry_data()
 
-        self._stop_docker()
+        if with_docker:
+            self._stop_docker()
