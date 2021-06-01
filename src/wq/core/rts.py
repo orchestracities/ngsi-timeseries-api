@@ -11,7 +11,7 @@ import os
 from time import sleep
 from typing import Optional
 
-from rq import Queue, Worker
+from rq import Queue, SimpleWorker, Worker
 from rq.job import Job
 
 from server.telemetry.monitor import Monitor
@@ -41,10 +41,12 @@ from wq.core.task import RqExcMan
 #
 # 3. Worker processes tasks serially.
 # One task at a time in its own "Work Horse", but no two Work Horses get
-# forked simultaneously.
+# forked simultaneously. Unless you use SimpleWorker instead of the default
+# Worker, in which case no Work Horse gets forked, the task gets run in
+# the main process thread.
 
 
-class TelemetryWorker(Worker):
+class TelemetryWorker(SimpleWorker):
     """
     Extend RQ ``Worker`` to collect task duration samples using QuantumLeap
     telemetry framework.
@@ -81,11 +83,11 @@ class TelemetryWorker(Worker):
 
 
 def _new_rq_worker() -> Worker:
-    return Worker(queues=queue_names(),
-                  connection=redis_connection(),
-                  queue_class=Queue,                              # (1)
-                  job_class=Job,                                  # (2)
-                  exception_handlers=[RqExcMan.exc_handler])      # (3)
+    return SimpleWorker(queues=queue_names(),
+                        connection=redis_connection(),
+                        queue_class=Queue,                              # (1)
+                        job_class=Job,                                  # (2)
+                        exception_handlers=[RqExcMan.exc_handler])      # (3)
 # NOTE
 # 1. We're relying on the default Queue class in our code, so this is just
 # a reminder not to use a custom class which vanilla RQ lets you do.
