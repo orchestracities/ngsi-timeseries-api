@@ -702,7 +702,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             self._create_metadata_table()
             self._cache(self.dbCacheName,
                         METADATA_TABLE_NAME,
-                        None,
+                        "",
                         self.default_ttl)
 
         # Bring translation table!

@@ -6,7 +6,7 @@ from typing import Callable
 from tests.benchmark.driver_base import *
 
 
-MAX_THREAD_WORKERS = 10
+MAX_THREAD_WORKERS = 5
 
 
 thread_local = threading.local()

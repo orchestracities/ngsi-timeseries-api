@@ -54,11 +54,12 @@ services:
 
   quantumleap:
     build: ../../../
-    image: quantumleap
+    image: ${QL_IMAGE:-orchestracities/quantumleap:latest}
     # image: orchestracities/quantumleap:work-q
     depends_on:
 #      - crate
       - timescale
+      - redis
     networks:
       - wqtests
     ports:
@@ -75,15 +76,14 @@ services:
       - POSTGRES_USE_SSL=False
 #      - CRATE_HOST=${CRATE_HOST:-crate}
       - USE_GEOCODING=False
-      - CACHE_QUERIES=False
+      - CACHE_QUERIES=True
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - LOGLEVEL=DEBUG
+      - LOGLEVEL=ERROR
 
   quantumleap-wq:
     build: ../../../
-    # image: orchestracities/quantumleap:work-q
-    image: quantumleap
+    image: ${QL_IMAGE:-orchestracities/quantumleap:latest}
     entrypoint: python wq up
     depends_on:
       - redis
@@ -102,7 +102,8 @@ services:
 #      - CRATE_HOST=${CRATE_HOST:-crate}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - LOGLEVEL=DEBUG
+      - LOGLEVEL=ERROR
+      - CACHE_QUERIES=True
 
 networks:
     wqtests:
