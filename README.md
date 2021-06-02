@@ -67,13 +67,22 @@ Refer to the
 [Installation Guide](https://quantumleap.readthedocs.io/en/latest/admin/).
 
 QuantumLeap supports both Crate DB and Timescale as time-series DB
-backends but please bear in mind that at the moment we only support
-the following versions:
+backends. The following versions have been tested:
 
-- Crate backend: Crate DB version `4.1.*`
-- Timescale backend: Postgres version `10.*` or `11.*` +
-  Timescale extension `1.3.*` + Postgis extension `2.5.*`.
-  
+- Crate backend: Crate DB version `4.2.*` up to `4.5`
+- Timescale backend: Postgres version `10.*` up to `12` +
+  Timescale extension `1.3.*` up to `1.7.5` + Postgis extension `2.5.*`.
+
+As regards caching feature, QuantumLeap has been tested with Redis `4.*` up
+to `6.2.3`.
+Integration with Orion Context Broker is tested from version `2.2.0`
+up to `2.6.1`.
+
+Automated tests, to avoid too long testing time, are not combining all possible
+versions. This anyhow should not be an issue given that component
+integrations are not depending on each other.
+In general, only latest version listed is actively supported.
+
 PR [#373](https://github.com/orchestracities/ngsi-timeseries-api/pull/373)
 introduced basic support for NGSI-LD. In short this means that using
 the current endpoint you are able to store NGSI-LD payloads with few caveats
