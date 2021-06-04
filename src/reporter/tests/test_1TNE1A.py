@@ -70,7 +70,7 @@ def test_1TNE1A_defaults(service, reporter_dataset):
     # Assert Results
     expected_values = list(range(n_days))
     expected_index = [
-        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in expected_values
     ]
     expected_entities = [
         {
@@ -117,7 +117,7 @@ def test_1TNE1A_one_entity(service, reporter_dataset):
 
     expected_values = list(range(n_days))
     expected_index = [
-        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in expected_values
     ]
     expected_entities = [
         {
@@ -151,7 +151,7 @@ def test_1TNE1A_some_entities(service, reporter_dataset):
     # Assert Results
     expected_values = list(range(n_days))
     expected_index = [
-        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in expected_values
     ]
     expected_entities = [
         {
@@ -190,7 +190,7 @@ def test_1TNE1A_values_defaults(service, reporter_dataset):
     # Assert Results
     expected_values = list(range(n_days))
     expected_index = [
-        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in expected_values
     ]
     expected_entities = [
         {
@@ -247,7 +247,7 @@ def test_weird_ids(service, reporter_dataset):
     # Assert Results
     expected_values = list(range(n_days))
     expected_index = [
-        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in expected_values
     ]
     expected_entities = [
         {
@@ -294,23 +294,18 @@ def test_different_time_indexes(service):
     r = requests.get(query_url(etype=etype), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
-    expected_entities = [
-        {
-            'entityId': 'Room3',
-            'index': ['1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in range(4)],
-            'values': list(range(4)),
-        },
-        {
-            'entityId': 'Room1',
-            'index': ['1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in range(2)],
-            'values': list(range(2)),
-        },
-        {
-            'entityId': 'Room2',
-            'index': ['1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in range(3)],
-            'values': list(range(3)),
-        }
-    ]
+    expected_entities = [{'entityId': 'Room3',
+                          'index': ['1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in range(4)],
+                          'values': list(range(4)),
+                          },
+                         {'entityId': 'Room1',
+                          'index': ['1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in range(2)],
+                          'values': list(range(2)),
+                          },
+                         {'entityId': 'Room2',
+                          'index': ['1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in range(3)],
+                          'values': list(range(3)),
+                          }]
 
     expected = {
         'entityType': etype,
@@ -380,18 +375,16 @@ def test_aggregation_is_per_instance(service):
     assert r.status_code == 200, r.text
 
     # Assert Results
-    expected_entities = [
-        {
-            'entityId': 'Room0',
-            'index': ['1970-01-01T00:00:00+00:00', '1970-01-06T00:00:00+00:00'],
-            'values': [2],
-        },
-        {
-            'entityId': 'Room1',
-            'index': ['1970-01-01T00:00:00+00:00', '1970-01-06T00:00:00+00:00'],
-            'values': [5],
-        }
-    ]
+    expected_entities = [{'entityId': 'Room0',
+                          'index': ['1970-01-01T00:00:00+00:00',
+                                      '1970-01-06T00:00:00+00:00'],
+                          'values': [2],
+                          },
+                         {'entityId': 'Room1',
+                          'index': ['1970-01-01T00:00:00+00:00',
+                                    '1970-01-06T00:00:00+00:00'],
+                          'values': [5],
+                          }]
     obtained_data = r.json()
     assert isinstance(obtained_data, dict)
     assert obtained_data['entityType'] == etype
@@ -401,12 +394,12 @@ def test_aggregation_is_per_instance(service):
 
 
 @pytest.mark.parametrize("aggr_period, exp_index, ins_period", [
-    ("day",    ['1970-01-01T00:00:00.000+00:00',
-                '1970-01-02T00:00:00.000+00:00',
-                '1970-01-03T00:00:00.000+00:00'], "hour"),
-    ("hour",   ['1970-01-01T00:00:00.000+00:00',
-                '1970-01-01T01:00:00.000+00:00',
-                '1970-01-01T02:00:00.000+00:00'], "minute"),
+    ("day", ['1970-01-01T00:00:00.000+00:00',
+             '1970-01-02T00:00:00.000+00:00',
+             '1970-01-03T00:00:00.000+00:00'], "hour"),
+    ("hour", ['1970-01-01T00:00:00.000+00:00',
+              '1970-01-01T01:00:00.000+00:00',
+              '1970-01-01T02:00:00.000+00:00'], "minute"),
     ("minute", ['1970-01-01T00:00:00.000+00:00',
                 '1970-01-01T00:01:00.000+00:00',
                 '1970-01-01T00:02:00.000+00:00'], "second"),
@@ -446,7 +439,7 @@ def test_1TNE1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
         'aggrMethod': 'sum',
         'aggrPeriod': aggr_period,
     }
-    r = requests.get(query_url(etype=etype), params=query_params,  headers=h)
+    r = requests.get(query_url(etype=etype), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Assert Results

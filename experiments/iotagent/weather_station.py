@@ -70,8 +70,12 @@ if __name__ == '__main__':
 
             # Update
             attrs_to_update = get_attrs_to_update()
-            r = requests.patch('{}/v2/entities/{}/attrs'.format(ORION_URL, entity_id), data=json.dumps(attrs_to_update),
-                               headers=HEADERS_PUT)
+            r = requests.patch(
+                '{}/v2/entities/{}/attrs'.format(
+                    ORION_URL,
+                    entity_id),
+                data=json.dumps(attrs_to_update),
+                headers=HEADERS_PUT)
             if not r.ok:
                 raise RuntimeError(r.text)
             print("Updated: {}".format(attrs_to_update))
