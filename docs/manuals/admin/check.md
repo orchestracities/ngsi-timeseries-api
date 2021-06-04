@@ -29,18 +29,6 @@ If you don't use Postman, you can use the equivalent curl commands bellow.
 
     You should get a return status `200 OK`.
 
-1. Create an Orion Subscription via "QuantumLeap Subscribe"
-
-    ```bash
-    $ curl -X POST \
-    'http://0.0.0.0:8668/v2/subscribe?orionUrl=http://orion:1026/v2&quantumleapUrl=http://quantumleap:8668/v2&entityType=AirQualityObserved' \
-    -H 'Accept: application/json'
-    ```
-
-    Note we've just created a subscription for any change in any attribute of
-    entities of type [AirQualityObserved](https://github.com/FIWARE/data-models/tree/master/specs/Environment/AirQualityObserved).
-    You should get a return status `201 Created`.
-
 1. Check you cat get such subscription from Orion
 
     ```bash

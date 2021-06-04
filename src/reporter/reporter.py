@@ -37,7 +37,6 @@ from utils.common import iter_entity_attrs, TIME_INDEX_NAME
 import json
 import logging
 import requests
-from reporter.subscription_builder import build_subscription
 from reporter.timex import select_time_index_value_as_iso, \
     TIME_INDEX_HEADER_NAME
 from geocoding.location import normalize_location, LOCATION_ATTR_NAME
@@ -220,58 +219,6 @@ def config():
         "description": "This API method is not yet implemented."
     }
     return r, 501
-
-
-def subscribe(orion_url,
-              quantumleap_url,
-              entity_type=None,
-              entity_id=None,
-              id_pattern=None,
-              attributes=None,
-              observed_attributes=None,
-              notified_attributes=None,
-              throttling=None,
-              time_index_attribute=None):
-    # Validate Orion
-    log().warning("This API is deprecated, it will be removed in version 0.9")
-    try:
-        r = requests.get(orion_url)
-    except RequestException:
-        r = None
-    if r is None or not r.ok:
-        msg = {
-            "error": "Bad Request",
-            "description": "Orion is not reachable at {}".format(orion_url)
-        }
-        return msg, 400
-
-    # Prepare subscription
-    subscription = build_subscription(
-        quantumleap_url,
-        entity_type, entity_id, id_pattern,
-        attributes, observed_attributes, notified_attributes,
-        throttling, time_index_attribute)
-
-    # Send subscription
-    endpoint = '{}/subscriptions'.format(orion_url)
-    data = json.dumps(subscription)
-
-    headers = {'Content-Type': 'application/json'}
-    fiware_s = request.headers.get('fiware-service', None)
-    if fiware_s:
-        headers['fiware-service'] = fiware_s
-
-        fiware_sp = request.headers.get('fiware-servicepath', None)
-        if fiware_sp:
-            headers['fiware-servicepath'] = fiware_sp
-
-    r = requests.post(endpoint, data=data, headers=headers)
-    if not r.ok:
-        log().debug("subscribing to {} with headers: {} and data: {}")
-
-    msg = r.text + \
-        " - This API is deprecated, it will be removed in version 0.9"
-    return msg, r.status_code
 
 
 def _validate_query_params(attr_names, aggr_period, aggr_method,

@@ -41,10 +41,6 @@ Orion の専門家ではないのですか？問題はありません。QuantumL
 [Orionのドキュメント](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions)
 の対応するセクションで詳しく説明されています。
 
-サブスクリプションを作成するために、QuantumLeap は
-[/subscribe で、ここ](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb)
-にドキュメント化された API エンドポイントを提供します。
-
 また、Orion
 に直接アクセスして、好きなようにサブスクリプションを作成することもできます。
 Orion-QuantumLeap リンクを確立するために Orion

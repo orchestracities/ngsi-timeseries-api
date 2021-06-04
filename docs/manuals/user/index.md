@@ -37,11 +37,8 @@ through a subscription you need to create. It is therefore important that you
 understand well how the NGSIv2 Subscription mechanism works. This is carefully
 explained in the corresponding section of [Orion docs](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions).
 
-To create the subscription, QuantumLeap offers an API endpoint documented
-[here at /subscribe](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
-
-Alternatively, you can directly talk to Orion and create the subscription as you
-prefer. Here's an example of the payload of the subscription you need to create
+You can directly talk to Orion and create the subscription.
+Here's an example of the payload of the subscription you need to create
 in Orion to establish the link Orion-QuantumLeap.
 
 ```json
