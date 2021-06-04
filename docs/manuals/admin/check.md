@@ -29,6 +29,41 @@ If you don't use Postman, you can use the equivalent curl commands bellow.
 
     You should get a return status `200 OK`.
 
+1. Create an Orion Subscription via "Orion Subscriptions" as described in [Orion docs](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions)
+
+    ```bash
+    $ curl -X POST \
+    'http://0.0.0.0:1026/v2/subscriptions \
+    -H 'Accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{
+    "description": "A subscription to get info about Room1",
+    "subject": {
+      "entities": [
+        {
+          "id": ".*",
+          "type": "AirQualityObserved"
+        }
+      ],
+      "condition": {
+        "attrs": [
+        ]
+      }
+    },
+    "notification": {
+      "http": {
+        "url": "http://quantumleap:8668/v2/notify"
+      },
+      "attrs": [
+      ]
+    },
+    "expires": "2040-01-01T14:00:00.00Z"
+    ```
+
+    Note we've just created a subscription for any change in any attribute of
+    entities of type [AirQualityObserved](https://github.com/FIWARE/data-models/tree/master/specs/Environment/AirQualityObserved).
+    You should get a return status `201 Created`.
+
 1. Check you cat get such subscription from Orion
 
     ```bash

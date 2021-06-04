@@ -30,6 +30,18 @@ Postman を使用しない場合は、以下の同等の curl コマンドを使
 
   `200 OK` の返信ステータスを取得する必要があります。
 
+1. "QuantumLeap Subscribe" を通して、Orion のサブスクリプションを作成
+
+  ```bash
+  $ curl -X POST \
+  'http://0.0.0.0:8668/v2/subscribe?orionUrl=http://orion:1026/v2&quantumleapUrl=http://quantumleap:8668/v2&entityType=AirQualityObserved' \
+  -H 'Accept: application/json'
+  ```
+
+  [AirQualityObserved](https://github.com/FIWARE/data-models/tree/master/specs/Environment/AirQualityObserved)
+  型のエンティティの任意の属性の変更についてサブスクリプションを
+  作成したばかりです。`201 Created` の返信ステータスを取得する必要があります。
+
 1. Orion から次のようなサブスクリプションを取得を確認できますか？
 
   ```bash
