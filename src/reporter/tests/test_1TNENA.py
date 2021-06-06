@@ -60,9 +60,9 @@ def test_1TNENA_defaults(service, reporter_dataset):
 
     # Assert Results
     expected_temperatures = list(range(n_days))
-    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_pressures = [t * 10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i + 1) for i in expected_temperatures
     ]
     expected_attributes = [
         {
@@ -115,9 +115,9 @@ def test_1TNENA_one_entity(service, reporter_dataset):
     assert isinstance(obtained_data, dict)
 
     expected_temperatures = list(range(n_days))
-    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_pressures = [t * 10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i + 1) for i in expected_temperatures
     ]
 
     expected_attributes = [
@@ -159,9 +159,9 @@ def test_1TNENA_some_entities(service, reporter_dataset):
 
     # Assert Results
     expected_temperatures = list(range(n_days))
-    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_pressures = [t * 10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i + 1) for i in expected_temperatures
     ]
 
     expected_attributes = [
@@ -209,9 +209,9 @@ def test_1TNENA_values_defaults(service, reporter_dataset):
 
     # Assert Results
     expected_temperatures = list(range(n_days))
-    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_pressures = [t * 10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i + 1) for i in expected_temperatures
     ]
 
     expected_attributes = [
@@ -276,9 +276,9 @@ def test_weird_ids(service, reporter_dataset):
 
     # Assert Results
     expected_temperatures = list(range(n_days))
-    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_pressures = [t * 10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i + 1) for i in expected_temperatures
     ]
 
     expected_attributes = [
@@ -403,12 +403,12 @@ def test_aggregation_is_per_instance(service, reporter_dataset):
 
 
 @pytest.mark.parametrize("aggr_period, exp_index, ins_period", [
-    ("day",    ['1970-01-01T00:00:00.000+00:00',
-                '1970-01-02T00:00:00.000+00:00',
-                '1970-01-03T00:00:00.000+00:00'], "hour"),
-    ("hour",   ['1970-01-01T00:00:00.000+00:00',
-                '1970-01-01T01:00:00.000+00:00',
-                '1970-01-01T02:00:00.000+00:00'], "minute"),
+    ("day", ['1970-01-01T00:00:00.000+00:00',
+             '1970-01-02T00:00:00.000+00:00',
+             '1970-01-03T00:00:00.000+00:00'], "hour"),
+    ("hour", ['1970-01-01T00:00:00.000+00:00',
+              '1970-01-01T01:00:00.000+00:00',
+              '1970-01-01T02:00:00.000+00:00'], "minute"),
     ("minute", ['1970-01-01T00:00:00.000+00:00',
                 '1970-01-01T00:01:00.000+00:00',
                 '1970-01-01T00:02:00.000+00:00'], "second"),

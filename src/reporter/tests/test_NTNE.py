@@ -88,7 +88,7 @@ def test_NTNE_type(service, reporter_dataset):
     expected_type = 'Room'
     expected_values = list(range(n_days))
     expected_index = [
-        '1970-01-{:02}T00:00:00.000+00:00'.format(i+1) for i in expected_values
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i + 1) for i in expected_values
     ]
     expected = [{
         'id': 'Room0',

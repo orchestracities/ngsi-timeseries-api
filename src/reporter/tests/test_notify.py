@@ -184,7 +184,12 @@ def test_valid_no_modified(notification, service):
     ("Property", ["a", "b"], ["a", "b"]),
 ])
 @pytest.mark.parametrize("service", services)
-def test_valid_data_for_type(notification, service, e_type, e_value, exp_value):
+def test_valid_data_for_type(
+        notification,
+        service,
+        e_type,
+        e_value,
+        exp_value):
     del notification['data'][0]['temperature']
 
     notification['data'][0][e_type.lower()] = {
@@ -196,8 +201,12 @@ def test_valid_data_for_type(notification, service, e_type, e_value, exp_value):
                       headers=notify_header(service))
     assert r.status_code == 200
     time.sleep(SLEEP_TIME)
-    r = requests.get(query_url(attr_name=e_type.lower(), last=True), params=None,
-                     headers=query_header(service))
+    r = requests.get(
+        query_url(
+            attr_name=e_type.lower(),
+            last=True),
+        params=None,
+        headers=query_header(service))
     assert r.status_code == 200
     assert r.json()['values'][0] == exp_value
 
@@ -267,9 +276,8 @@ def test_multiple_data_elements(service, notification,
 
 
 @pytest.mark.parametrize("service", services)
-def test_multiple_data_elements_invalid_different_servicepath(service,
-                                                              notification,
-                                                              diffEntityWithDifferentAttrs):
+def test_multiple_data_elements_invalid_different_servicepath(
+        service, notification, diffEntityWithDifferentAttrs):
     """
     Test that the notify API can process notifications containing multiple elements in the data array
     and different fiwareServicePath.
@@ -289,8 +297,8 @@ def test_multiple_data_elements_invalid_different_servicepath(service,
 
 
 @pytest.mark.parametrize("service", services)
-def test_multiple_data_elements_different_servicepath(service, notification,
-                                                      diffEntityWithDifferentAttrs):
+def test_multiple_data_elements_different_servicepath(
+        service, notification, diffEntityWithDifferentAttrs):
     """
     Test that the notify API can process notifications containing multiple elements in the data array
     and different fiwareServicePath.
@@ -572,7 +580,7 @@ def test_no_value_with_type_for_attributes(service, notification):
     time.sleep(SLEEP_TIME)
     res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 200
-    assert res_get.json()['values'][0] == None
+    assert res_get.json()['values'][0] is None
     delete_entity_type(service, notification['data'][0]['type'])
 
 

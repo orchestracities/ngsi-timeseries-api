@@ -217,9 +217,14 @@ def from_geo_params(georel: Optional[str],
         geom = GeometryParser().parse(geometry, coords)
         if geom:
             query_type_parsers = [
-                IntersectsParser, DisjointParser, EqualsParser, CoveredByParser,
-                NearMinMaxParser, NearMaxMinParser, NearMinParser, NearMaxParser
-            ]
+                IntersectsParser,
+                DisjointParser,
+                EqualsParser,
+                CoveredByParser,
+                NearMinMaxParser,
+                NearMaxMinParser,
+                NearMinParser,
+                NearMaxParser]
             for p in query_type_parsers:
                 query = p(geom).parse(georel)
                 if query:
