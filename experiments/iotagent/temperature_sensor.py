@@ -43,38 +43,44 @@ def register():
     data = {
         "services": [
            {
-               "apikey":      API_KEY,
-               "cbroker":     ORION_URL,
+               "apikey": API_KEY,
+               "cbroker": ORION_URL,
                "entity_type": "thing",
-               "resource":    "/iot/d"
+               "resource": "/iot/d"
            }
         ]
     }
-    r = requests.post('{}/iot/services'.format(AGENT_CONFIG_URL, API_KEY,
-                                               DEVICE_ID), data=json.dumps(data), headers=CONFIG_HEADERS)
+    r = requests.post('{}/iot/services'.format(AGENT_CONFIG_URL,
+                                               API_KEY,
+                                               DEVICE_ID),
+                      data=json.dumps(data),
+                      headers=CONFIG_HEADERS)
     assert r.ok, r.text
 
     # Register Sensor
     data = {
         "devices": [
            {
-               "device_id":   DEVICE_ID,
+               "device_id": DEVICE_ID,
                "x": "my_entity_01",
                "entity_type": "thing",
-               "protocol":    "PDI-IoTA-UltraLight",
-               "timezone":    "Europe/Madrid",
+               "protocol": "PDI-IoTA-UltraLight",
+               "timezone": "Europe/Madrid",
                "attributes": [
                    {
                        "object_id": "t",
-                       "name":      "temperature",
-                       "type":      "float"
+                       "name": "temperature",
+                       "type": "float"
                    }
                ]
            }
         ]
     }
-    r = requests.post('{}/iot/devices'.format(AGENT_CONFIG_URL, API_KEY,
-                                              DEVICE_ID), data=json.dumps(data), headers=CONFIG_HEADERS)
+    r = requests.post('{}/iot/devices'.format(AGENT_CONFIG_URL,
+                                              API_KEY,
+                                              DEVICE_ID),
+                      data=json.dumps(data),
+                      headers=CONFIG_HEADERS)
     assert r.ok, r.text
 
 
@@ -88,12 +94,13 @@ def send():
 
 
 if __name__ == '__main__':
-    # Add any argument to avoid registration. Useful when restarting the sensor.
+    # Add any argument to avoid registration. Useful when restarting the
+    # sensor.
     if len(sys.argv) == 1:
         register()
         print("Configuration OK")
 
-    while 1:
+    while True:
         r = send()
         assert r.ok, r.text
         time.sleep(SLEEP)

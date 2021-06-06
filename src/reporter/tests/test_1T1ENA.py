@@ -58,9 +58,9 @@ def test_1T1ENA_defaults(service, reporter_dataset):
 
     # Assert
     expected_temperatures = list(range(n_days))
-    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_pressures = [t * 10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in expected_temperatures
     ]
     expected = {
         'entityId': entity_id,
@@ -88,7 +88,12 @@ def test_1T1ENA_defaults(service, reporter_dataset):
     ("max", 290, 29),
 ])
 @pytest.mark.parametrize("service", services)
-def test_1T1ENA_aggrMethod(service, reporter_dataset, aggr_meth, aggr_press, aggr_temp):
+def test_1T1ENA_aggrMethod(
+        service,
+        reporter_dataset,
+        aggr_meth,
+        aggr_press,
+        aggr_temp):
     # attrs is compulsory when using aggrMethod
     query_params = {
         'type': entity_type,
@@ -128,12 +133,12 @@ def test_1T1ENA_aggrMethod(service, reporter_dataset, aggr_meth, aggr_press, agg
 
 
 @pytest.mark.parametrize("aggr_period, exp_index, ins_period", [
-    ("month",  ['1970-01-01T00:00:00.000+00:00',
-                '1970-02-01T00:00:00.000+00:00',
-                '1970-03-01T00:00:00.000+00:00'], "day"),
-    ("hour",   ['1970-01-01T00:00:00.000+00:00',
-                '1970-01-01T01:00:00.000+00:00',
-                '1970-01-01T02:00:00.000+00:00'], "minute"),
+    ("month", ['1970-01-01T00:00:00.000+00:00',
+               '1970-02-01T00:00:00.000+00:00',
+               '1970-03-01T00:00:00.000+00:00'], "day"),
+    ("hour", ['1970-01-01T00:00:00.000+00:00',
+              '1970-01-01T01:00:00.000+00:00',
+              '1970-01-01T02:00:00.000+00:00'], "minute"),
     ("minute", ['1970-01-01T00:00:00.000+00:00',
                 '1970-01-01T00:01:00.000+00:00',
                 '1970-01-01T00:02:00.000+00:00'], "second"),
@@ -214,9 +219,9 @@ def test_1T1ENA_fromDate_toDate(service, reporter_dataset):
 
     # Expect only last N
     expected_temperatures = list(range(5, 17))
-    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_pressures = [t * 10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in expected_temperatures
     ]
     assert len(expected_index) == 12
     assert expected_index[0] == "1970-01-06T00:00:00+00:00"
@@ -255,9 +260,9 @@ def test_1T1ENA_fromDate(service, reporter_dataset):
 
     # Expect only last N
     expected_temperatures = list(range(23, 30))
-    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_pressures = [t * 10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in expected_temperatures
     ]
     assert len(expected_index) == 7
     assert expected_index[0] == "1970-01-24T00:00:00+00:00"
@@ -303,9 +308,9 @@ def test_1T1ENA_fromDate_and_last(service, last, reporter_dataset):
     if last < 7:
         max_range = last
     expected_temperatures = list(range(30 - max_range, 30))
-    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_pressures = [t * 10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in expected_temperatures
     ]
     assert len(expected_index) == max_range
 
@@ -343,9 +348,9 @@ def test_1T1ENA_fromDate_toDate_with_quotes(service, reporter_dataset):
 
     # Expect only last N
     expected_temperatures = list(range(5, 17))
-    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_pressures = [t * 10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in expected_temperatures
     ]
     assert len(expected_index) == 12
     assert expected_index[0] == "1970-01-06T00:00:00+00:00"
@@ -383,10 +388,10 @@ def test_1T1ENA_lastN(service, reporter_dataset):
     assert r.status_code == 200, r.text
 
     # Expect only last N
-    expected_temperatures = list(range(n_days-10, n_days))
-    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_temperatures = list(range(n_days - 10, n_days))
+    expected_pressures = [t * 10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in expected_temperatures
     ]
     assert len(expected_index) == 10
     assert expected_index[0] == "1970-01-21T00:00:00+00:00"
@@ -469,9 +474,9 @@ def test_1T1ENA_limit(service, reporter_dataset):
 
     # Expect only last N
     expected_temperatures = list(range(5))
-    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_pressures = [t * 10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in expected_temperatures
     ]
     assert len(expected_index) == 5
     assert expected_index[0] == "1970-01-01T00:00:00+00:00"
@@ -510,9 +515,9 @@ def test_1T1ENA_offset(service, reporter_dataset):
 
     # Expect only last N
     expected_temperatures = list(range(3, n_days))
-    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_pressures = [t * 10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in expected_temperatures
     ]
     assert len(expected_index) == 27
     assert expected_index[0] == "1970-01-04T00:00:00+00:00"
@@ -553,9 +558,9 @@ def test_1T1ENA_combined(service, reporter_dataset):
 
     # Expect only last N
     expected_temperatures = list(range(2, 20))
-    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_pressures = [t * 10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in expected_temperatures
     ]
     assert len(expected_index) == 18
     assert expected_index[0] == "1970-01-03T00:00:00+00:00"
@@ -593,9 +598,9 @@ def test_1T1ENA_values_defaults(service, reporter_dataset):
 
     # Assert
     expected_temperatures = list(range(n_days))
-    expected_pressures = [t*10 for t in expected_temperatures]
+    expected_pressures = [t * 10 for t in expected_temperatures]
     expected_index = [
-        '1970-01-{:02}T00:00:00+00:00'.format(i+1) for i in expected_temperatures
+        '1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in expected_temperatures
     ]
     expected = {
         'index': expected_index,

@@ -126,7 +126,7 @@ def test_delete_entities_defaults(translator):
     assert res == 20 * 2
 
     remaining = translator.query()
-    assert len(remaining) == (3-1) * 2
+    assert len(remaining) == (3 - 1) * 2
     assert all([r['type'] != type_to_delete for r in remaining])
     translator.clean()
 
