@@ -271,7 +271,7 @@ def test_multiple_data_elements(service, notification,
     time.sleep(SLEEP_TIME)
     r = requests.get(entities_url, params=None, headers=query_header(service))
     entities = r.json()
-    assert len(entities) == 4
+    assert len(entities) == 3
     delete_entity_type(service, diffEntityWithDifferentAttrs[0]['type'])
 
 
@@ -353,7 +353,7 @@ def test_time_index(service, notification):
     time.sleep(SLEEP_TIME)
     r = requests.get(entities_url, params=None, headers=query_header(service))
     entities = r.json()
-    assert len(entities) == 2
+    assert len(entities) == 1
     assert_equal_time_index_arrays(entities[0]['index'], [global_modified])
 
     # If not, use newest of changes
