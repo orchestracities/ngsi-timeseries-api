@@ -3,7 +3,12 @@ from datetime import datetime
 
 class RedisCache(object):
 
-    def __init__(self, redis_host, redis_port, redis_db, decode_responses=True):
+    def __init__(
+            self,
+            redis_host,
+            redis_port,
+            redis_db,
+            decode_responses=True):
         import redis
         self.redis = redis.StrictRedis(
             host=redis_host,
