@@ -271,7 +271,7 @@ def test_multiple_data_elements(service, notification,
     time.sleep(SLEEP_TIME)
     r = requests.get(entities_url, params=None, headers=query_header(service))
     entities = r.json()
-    assert len(entities) == 3
+    assert len(entities) == 4
     delete_entity_type(service, diffEntityWithDifferentAttrs[0]['type'])
 
 
@@ -353,7 +353,7 @@ def test_time_index(service, notification):
     time.sleep(SLEEP_TIME)
     r = requests.get(entities_url, params=None, headers=query_header(service))
     entities = r.json()
-    assert len(entities) == 1
+    assert len(entities) == 2
     assert_equal_time_index_arrays(entities[0]['index'], [global_modified])
 
     # If not, use newest of changes
@@ -508,7 +508,7 @@ def test_no_value_no_type_for_attributes(service, notification):
     # Give time for notification to be processed
     time.sleep(SLEEP_TIME)
     res_get = requests.get(url_new, headers=query_header(service))
-    assert res_get.status_code == 404
+    assert res_get.status_code == 200
     # Get value of attribute having value
     get_url_new = "{}/entities/Room1/attrs/pressure/value".format(QL_URL)
     url_new = '{}'.format(get_url_new)
