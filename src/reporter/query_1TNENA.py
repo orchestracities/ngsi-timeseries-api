@@ -129,7 +129,9 @@ def _prepare_response(entities, attrs, entity_type, entity_ids,
                 tzinfo=timezone.utc).isoformat()
         except Exception as ex:
             t_date = ''
-        index = [f_date, t_date] if aggr_method and not aggr_period else e['index']
+        index = [
+            f_date,
+            t_date] if aggr_method and not aggr_period else e['index']
         entity = {
             'entityId': e['id'],
             'index': index,

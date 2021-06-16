@@ -4,6 +4,9 @@
 
 ### New features
 
+- Support for CRATE 4.5 (#430)
+- Fix "None" Tenant query caching (required for no multi-tenant orion deployment)
+
 ### Bug fixes
 
 ### Documentation

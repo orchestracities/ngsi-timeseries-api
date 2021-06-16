@@ -25,7 +25,9 @@ def test_geo_point(translator):
     translator.insert([entity])
 
     # Check location is saved as a geo_point column in crate
-    op = 'select latitude(location), longitude(location) from etroom'
+
+    op = "select latitude(_doc['location']), longitude(_doc['location']) " \
+         "from etroom "
     translator.cursor.execute(op)
     res = translator.cursor.fetchall()
     assert len(res) == 1
@@ -58,19 +60,19 @@ def test_geo_point_null_values(translator):
     entity_new = {
         'id': 'Room1',
         'type': 'Room',
-        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
+        TIME_INDEX_NAME: datetime.now(
+            timezone.utc).isoformat(
+            timespec='milliseconds'),
         'temperature': {
             'type': 'Number',
-            'value': 19
-        }
-    }
+            'value': 19}}
     translator.insert([entity_new])
     entities = translator.query()
     assert len(entities) == 1
 
     # Check location's None is saved as a geo_point column in crate
-    op = 'select latitude(location), longitude(location), temperature from ' \
-         'etroom order by time_index ASC'
+    op = "select latitude(_doc['location']), longitude(_doc['location']), temperature from " \
+         "etroom order by time_index ASC"
     translator.cursor.execute(op)
     res = translator.cursor.fetchall()
     assert len(res) == 2

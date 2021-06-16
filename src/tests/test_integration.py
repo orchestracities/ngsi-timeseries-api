@@ -46,7 +46,9 @@ def test_integration_basic():
     try:
         entities = load_data()
         assert len(entities) > 1
-        check_data(entities)
+        # it seems data consolidation takes now longer in cratedb
+        time.sleep(20)
+        check_data(entities, True)
     finally:
         unload_data(entities)
         check_deleted_data(entities)

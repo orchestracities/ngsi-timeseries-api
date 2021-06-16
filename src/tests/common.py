@@ -4,7 +4,6 @@ import random
 import requests
 import time
 
-
 # INPUT VARIABLES
 QL_URL = os.environ.get("QL_URL", "http://localhost:8668")
 ORION_URL = os.environ.get("ORION_URL", "http://localhost:1026")
@@ -13,6 +12,8 @@ QL_URL_4ORION = os.environ.get("QL_URL_4ORION", "http://quantumleap:8668")
 
 # HELPER VARIABLES
 ENTITY_TYPE = "IntegrationTestEntity"
+
+UPDATES = 3
 
 
 class IntegrationTestEntity:
@@ -79,16 +80,23 @@ def create_entities():
 
 
 def post_orion_subscriptions(entities):
-    subscribe_url = "{}/v2/subscribe".format(QL_URL)
-    params = {
-        'orionUrl': '{}/v2'.format(ORION_URL_4QL),
-        'quantumleapUrl': '{}/v2'.format(QL_URL_4ORION),
-        'entityType': ENTITY_TYPE,
-        'throttling': 0,
-    }
-
+    subscribe_url = "{}/v2/subscriptions?options=skipInitialNotification".format(
+        ORION_URL)
     for e in entities:
-        r = requests.post(subscribe_url, params=params, headers=e.headers())
+        data = {
+            "description": "Notify me of all product price changes",
+            "subject": {
+                "entities": [{"idPattern": e.id, "type": e.type}],
+            },
+            "notification": {
+                "http": {
+                    "url": "{}/v2/notify".format(QL_URL_4ORION)
+                },
+            },
+            "throttling": 0
+        }
+        h = {'Content-Type': 'application/json', **e.headers()}
+        r = requests.post(subscribe_url, json=data, headers=h)
         assert r.status_code == 201, "Failed to create Orion Subscription. " \
                                      "{}".format(r.text)
 
@@ -111,22 +119,23 @@ def load_data():
         data = json.dumps(e.payload())
         res = requests.post(url, data=data, params=params, headers=h)
         assert res.ok, res.text
-        time.sleep(3)
 
     # Update Entities in Orion
-    for i in range(3):
+    for i in range(UPDATES):
+        # this sleep ensures that there is some time between entities
+        # updates, to avoid that orion combines notifications
+        time.sleep(1)
         for e in entities:
             url = "{}/v2/entities/{}/attrs".format(ORION_URL, e.id)
             h = {'Content-Type': 'application/json', **e.headers()}
             patch = e.update()
             res = requests.patch(url, data=json.dumps(patch), headers=h)
             assert res.ok, res.text
-            time.sleep(1)
 
     return entities
 
 
-def check_data(entities):
+def check_data(entities, check_n_indexes=False):
     check_orion_url()
     check_ql_url()
 
@@ -146,6 +155,13 @@ def check_data(entities):
         assert len(index) > 1
         assert index[0] != index[-1]
         assert len(index) == len(values)
+        # looking at orion logs, notifications are sent twice cbnotif=2
+        # on the initial creation, this brakes the counter.
+        # to solve the issue we added ?options=skipInitialNotification
+        # to subscription creation, but this may not be supported by old orion
+        #
+        if check_n_indexes:
+            assert len(index) == UPDATES + 1
 
         # Now without explicit type to trigger type search in metadata table
         res = requests.get(url, headers=e.headers())

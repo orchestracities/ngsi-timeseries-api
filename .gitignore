@@ -45,6 +45,7 @@ coverage.xml
 *,cover
 .hypothesis/
 .pytest_cache/
+test-results
 
 # Translations
 *.mo
@@ -95,4 +96,3 @@ ENV/
 # Custom
 plan.md
 
-test-results

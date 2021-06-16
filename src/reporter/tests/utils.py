@@ -142,7 +142,10 @@ class AttrQueryResultFormatter:
             'entityType': self.entity_type
         }]
 
-    def format(self, entities: Iterable[AttrValues], values_only=False) -> dict:
+    def format(
+            self,
+            entities: Iterable[AttrValues],
+            values_only=False) -> dict:
         values = self._values_for(entities)
 
         if values_only:
