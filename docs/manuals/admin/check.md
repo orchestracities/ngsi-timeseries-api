@@ -29,7 +29,8 @@ If you don't use Postman, you can use the equivalent curl commands bellow.
 
     You should get a return status `200 OK`.
 
-1. Create an Orion Subscription via "Orion Subscriptions" as described in [Orion docs](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions)
+1. Create an Orion Subscription via "Orion Subscriptions" as described 
+    in [Orion docs](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions)
 
     ```bash
     $ curl -X POST \
