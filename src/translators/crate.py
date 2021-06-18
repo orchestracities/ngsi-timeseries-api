@@ -174,7 +174,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
 
     def _should_insert_original_entities(self,
                                          insert_error: Exception) -> bool:
-        return isinstance(insert_error, exceptions.ProgrammingError)
+        return isinstance(insert_error, Exception)
 
     def _build_original_data_value(self, entity: dict,
                                    insert_error: Exception = None,

@@ -226,6 +226,5 @@ class OriginalDataScenarios:
         assert rs[0]['batch']
         assert rs[1]['batch']
 
-        counts = [rs[0]['count'], rs[1]['count']]
-        counts.sort()
+        counts = sorted([rs[0]['count'], rs[1]['count']])
         assert counts == [1, 2]

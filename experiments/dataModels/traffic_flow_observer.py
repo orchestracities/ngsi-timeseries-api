@@ -25,7 +25,7 @@ def create_entity(entity_id):
     date_from = (datetime.now() - timedelta(seconds=pivot)).isoformat()
     date_to = datetime.now().isoformat()
     intensity = random.randint(0, pivot)
-    avg_hw_time = 0 if intensity == 0 else float(pivot/intensity)
+    avg_hw_time = 0 if intensity == 0 else float(pivot / intensity)
     avg_speed = 1 + random.random() * 250
     avg_length = 2 + random.random() * 8
 
@@ -63,7 +63,7 @@ def get_attrs_to_update():
     date_from = (datetime.now() - timedelta(seconds=pivot)).isoformat()
     date_to = datetime.now().isoformat()
     intensity = random.randint(0, pivot)
-    avg_hw_time = 0 if intensity == 0 else float(pivot/intensity)
+    avg_hw_time = 0 if intensity == 0 else float(pivot / intensity)
     avg_speed = 10 + random.random() * 90
     avg_length = 2 + random.random() * 8
 

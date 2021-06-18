@@ -64,7 +64,7 @@ class DataGen:
 # then split into 6 batches.
 
 
-class TestDriver:
+class DriverTest:
 
     def __init__(self, translator: OriginalDataScenarios,
                  test_data: DataGen):
@@ -97,7 +97,7 @@ class TestDriver:
                          ids=['timescale', 'crate'])
 def test_insert_all_entities_in_one_go(translator):
     test_data = DataGen(insert_max_size=1024, min_batches=2)
-    driver = TestDriver(translator, test_data)
+    driver = DriverTest(translator, test_data)
     driver.run(with_batches=False)
 
 
@@ -106,7 +106,7 @@ def test_insert_all_entities_in_one_go(translator):
 @pytest.mark.parametrize('min_batches', [2, 3, 4])
 def test_insert_entities_in_batches(translator, min_batches):
     test_data = DataGen(insert_max_size=1024, min_batches=min_batches)
-    driver = TestDriver(translator, test_data)
+    driver = DriverTest(translator, test_data)
     driver.run(with_batches=True)
 
 
