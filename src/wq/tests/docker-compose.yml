@@ -84,7 +84,8 @@ services:
   quantumleap-wq:
     build: ../../../
     image: ${QL_IMAGE:-orchestracities/quantumleap:latest}
-    entrypoint: python wq up
+    entrypoint: supervisord -n -c ./wq/supervisord.conf
+#    entrypoint: python wq up
     depends_on:
       - redis
 #      - crate
@@ -92,6 +93,7 @@ services:
     networks:
       - wqtests
     environment:
+      - WQ_WORKERS=2
       - QL_DEFAULT_DB=timescale
       - POSTGRES_HOST=timescale
       - POSTGRES_PORT=5432

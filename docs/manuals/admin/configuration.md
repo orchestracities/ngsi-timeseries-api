@@ -35,6 +35,7 @@ To configure QuantumLeap you can use the following environment variables:
 | `WQ_MAX_RETRIES`   | How many times work queue processors should retry failed tasks. Default: 0 (no retries). |
 | `WQ_FAILURE_TTL`   | How long, in seconds, before removing failed tasks from the work queue. Default: 604800 (a week). |
 | `WQ_SUCCESS_TTL`   | How long, in seconds, before removing successfully run tasks from the work queue. Default: 86400 (a day). |
+| `WQ_WORKERS`       | How many worker queue processors to spawn. |
 
 ### Notes
 
@@ -153,6 +154,20 @@ To configure QuantumLeap you can use the following environment variables:
   be used if this variable isn't set or it is set but its value can't be
   parsed as an integer.
 
+- `WQ_WORKERS`. When using a work queue to process notify endpoint payloads,
+  you have to start one or more QuantumLeap work queue backends to service
+  the work queue where notify payloads are queued for processing. Each
+  QuantumLeap backend will fork a number of worker processes to service the
+  queue equal to the value of the `WQ_WORKERS` environment variable. To
+  start a QuantumLeap work queue backend you have to override the default
+  Docker image command with the following:
+  `supervisord -n -c ./wq/supervisord.conf`. This command requires that
+  `WQ_WORKERS` be set to a positive integer. For example if you set
+  `WQ_WORKERS=2`, two worker processes will be started to fetch notification
+  payloads from the queue and insert them in the database. These processes
+  are managed by [Supervisor][supervisor] and will be automatically restarted
+  if they crash.
+
 ## Database selection per different tenant
 
 QuantumLeap can use different time series databases to persist and
@@ -194,5 +209,7 @@ Crate back end.
 
 [crate]: ./crate.md
     "QuantumLeap Crate"
+[supervisor]: http://supervisord.org/
+    "Supervisor: A Process Control System"
 [timescale]: ./timescale.md
     "QuantumLeap Timescale"
