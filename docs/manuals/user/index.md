@@ -322,4 +322,3 @@ As of today, the query caching stores:
     "Timescale Home"
 [tsdb]: https://en.wikipedia.org/wiki/Time_series_database
     "Wikipedia - Time series database"
-
