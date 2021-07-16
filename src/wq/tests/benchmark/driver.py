@@ -1,10 +1,10 @@
 from pathlib import Path
 import shutil
-import subprocess
 from time import sleep
 
 from tests.benchmark.driver_base import NOTIFY_TEST
 from tests.benchmark.threaded_driver import ThreadedDriver
+from utils.tests.docker import dir_from_file_path, DockerCompose
 from wq.tests.benchmark.factory import new_row_count_sampler, DbType, \
     new_work_q_size_sampler
 
@@ -16,16 +16,11 @@ NOTIFY_REQUEST_N = 1000
 DB_TABLE_FQN = 'public.etroom'    # mt.etroom when using Crate?
 
 
-def sh(cmd_line: [str]):
-    subprocess.run(cmd_line, check=True)
-
-
 class TestScript:
 
     @staticmethod
     def this_files_dir() -> Path:
-        this_file = Path(__file__)
-        return this_file.parent
+        return dir_from_file_path(__file__)
 
     @staticmethod
     def default_monitoring_dir() -> Path:
@@ -40,7 +35,7 @@ class TestScript:
                  db_table_fqn: str = DB_TABLE_FQN):
         self._base_dir = self.this_files_dir()
         self._mon_dir = self._base_dir / monitoring_dir_name
-        self._docker_file = self._base_dir / docker_compose_file_name
+        self._docker = DockerCompose(__file__)
         self._max_client_threads = max_client_threads
         self._notify_request_n = notify_request_n
         self._db_backend = db_backend
@@ -53,22 +48,11 @@ class TestScript:
             shutil.rmtree(self._mon_dir)
         self._mon_dir.mkdir(parents=True)
 
-    def _run_composer_cmd(self, *xs):
-        compose = ['docker-compose', '-f', str(self._docker_file)]
-        cmd = compose + [x for x in xs]
-        sh(cmd)
-
-    def _build_docker_images(self):
-        self._run_composer_cmd('build')
-
     def _start_docker_and_wait_for_services(self):
-        self._run_composer_cmd('up', '-d')
+        self._docker.start()
         sleep(10)
         # TODO call QL's version endpoint rather than sleeping.
         # If it's up, then Redis & DB backend are up to b/c of docker deps.
-
-    def _stop_docker(self):
-        self._run_composer_cmd('down', '-v')
 
     def _start_samplers(self):
         self._db_sampler = new_row_count_sampler(self._mon_dir,
@@ -99,7 +83,7 @@ class TestScript:
     def main(self, with_docker=True):
         self._prep_monitoring_dir()
         if with_docker:
-            self._build_docker_images()
+            self._docker.build_images()
             self._start_docker_and_wait_for_services()
 
         self._start_samplers()
@@ -107,4 +91,4 @@ class TestScript:
         self._collect_telemetry_data()
 
         if with_docker:
-            self._stop_docker()
+            self._docker.stop()
