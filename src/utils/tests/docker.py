@@ -38,3 +38,9 @@ class DockerCompose:
 
     def stop(self):
         self.run_cmd('down', '-v')
+
+    def start_service(self, name: str):
+        self.run_cmd('start', name)
+
+    def stop_service(self, name: str):
+        self.run_cmd('stop', name)

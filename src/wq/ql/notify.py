@@ -52,7 +52,8 @@ class InsertAction(Tasklet):
                  fiware_service: Optional[str],
                  fiware_service_path: Optional[str],
                  fiware_correlation_id: Optional[str],
-                 payload: [dict]):
+                 payload: [dict],
+                 retry_intervals: [int] = None):
         self._id = FiwareTaskId(fiware_service, fiware_service_path,
                                 fiware_correlation_id)
         self._input = InsertActionInput(
@@ -61,6 +62,7 @@ class InsertAction(Tasklet):
             fiware_correlator=fiware_correlation_id,
             payload=payload
         )
+        self._retry_int = retry_intervals
 # NOTE. RQ arguments.
 # We always invoke RQ jobs with one argument, namely the Tasklet itself.
 # One reason for doing this is that RQ args is just an array, so there's
@@ -70,7 +72,9 @@ class InsertAction(Tasklet):
 # reordered in the method signature.
 
     def retry_intervals(self) -> [int]:
-        return cfg.retry_intervals()
+        if self._retry_int is None:
+            return cfg.retry_intervals()
+        return self._retry_int
 
     def run(self):
         data = self.task_input()

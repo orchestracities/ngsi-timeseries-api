@@ -10,7 +10,6 @@ from wq.tests.benchmark.factory import new_row_count_sampler, DbType, \
 
 
 MONITORING_DIR_NAME = '_monitoring'
-DOCKER_COMPOSE_FILE_NAME = 'docker-compose.yml'
 MAX_CLIENT_THREADS = 5
 NOTIFY_REQUEST_N = 1000
 DB_TABLE_FQN = 'public.etroom'    # mt.etroom when using Crate?
@@ -28,7 +27,6 @@ class TestScript:
 
     def __init__(self,
                  monitoring_dir_name: str = MONITORING_DIR_NAME,
-                 docker_compose_file_name: str = DOCKER_COMPOSE_FILE_NAME,
                  max_client_threads: int = MAX_CLIENT_THREADS,
                  notify_request_n: int = NOTIFY_REQUEST_N,
                  db_backend: DbType = DbType.TIMESCALE,
