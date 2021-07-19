@@ -1,9 +1,10 @@
 from conftest import QL_URL
 from datetime import datetime
-from reporter.tests.utils import delete_test_data, insert_test_data
+from reporter.tests.utils import delete_test_data, insert_test_data, send_notifications_different_types
 import pytest
 import requests
 import dateutil.parser
+import time
 
 entity_type = "Room"
 entity_type_1 = "Kitchen"
@@ -861,8 +862,7 @@ def test_NTNENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
         {
             'entityId': eid,
             'index': exp_index,
-            'values': [expected_temperatures, expected_temperatures,
-                       expected_temperatures]
+            'values': [10.0, 10.0, 10.0]
         },
     ]
     expected_types = [
@@ -1189,3 +1189,213 @@ def test_aggregation_is_per_instance(service, reporter_dataset):
         'attrs': expected_attrs
     }
     assert obtained == expected
+
+def test_aggregation_different_types():
+    attrs='temperature,intensity,boolean'
+    service='test'
+    delete_test_data(service, ['Test'])
+    send_notifications_different_types(service, 'Test', 'Test1')
+    time.sleep(1)
+    query_params = {
+        'attrs': attrs,
+        'aggrMethod': 'min'
+    }
+    r = query(params=query_params, service=service)
+    assert r.status_code == 200, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+
+    expected_attrs = [
+        {
+            'attrName': 'boolean',
+            'types':
+            [{
+                'entities':
+                [{
+                    'entityId': 'Test1',
+                    'index': ['',''],
+                    'values': [True]
+                }],
+                'entityType': 'Test'
+            }]
+        },
+        {
+            'attrName': 'intensity',
+            'types':
+            [{
+                'entities':
+                [{
+                    'entityId': 'Test1',
+                    'index': ['',''],
+                    'values': ['Low']
+                }],
+                'entityType': 'Test'
+            }]
+        },
+        {
+            'attrName': 'temperature',
+            'types':
+            [{
+                'entities':
+                [{
+                    'entityId': 'Test1',
+                    'index': ['',''],
+                    'values': [10.0]
+                }],
+                'entityType': 'Test'
+            }]
+        },
+    ]
+
+    expected = {
+        'attrs': expected_attrs
+    }
+
+    assert obtained == expected
+
+    # 'aggrMethod': 'max'
+
+    query_params = {
+        'attrs': attrs,
+        'aggrMethod': 'max',
+    }
+    r = query(params=query_params, service=service)
+    assert r.status_code == 200, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+    expected_attrs = [
+        {
+            'attrName': 'boolean',
+            'types':
+            [{
+                'entities':
+                [{
+                    'entityId': 'Test1',
+                    'index': ['',''],
+                    'values': [True]
+                }],
+                'entityType': 'Test'
+            }]
+        },
+        {
+            'attrName': 'intensity',
+            'types':
+            [{
+                'entities':
+                [{
+                    'entityId': 'Test1',
+                    'index': ['',''],
+                    'values': ['Low']
+                }],
+                'entityType': 'Test'
+            }]
+        },
+        {
+            'attrName': 'temperature',
+            'types':
+            [{
+                'entities':
+                [{
+                    'entityId': 'Test1',
+                    'index': ['',''],
+                    'values': [10.0]
+                }],
+                'entityType': 'Test'
+            }]
+        },
+    ]
+
+    expected = {
+        'attrs': expected_attrs
+    }
+    obtained = r.json()
+    assert obtained == expected
+
+    # 'aggrMethod': 'count'
+
+    query_params = {
+        'attrs': attrs,
+        'aggrMethod': 'count',
+    }
+    r = query(params=query_params, service=service)
+    assert r.status_code == 200, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+    expected_attrs = [
+        {
+            'attrName': 'boolean',
+            'types':
+            [{
+                'entities':
+                [{
+                    'entityId': 'Test1',
+                    'index': ['',''],
+                    'values': [1]
+                }],
+                'entityType': 'Test'
+            }]
+        },
+        {
+            'attrName': 'intensity',
+            'types':
+            [{
+                'entities':
+                [{
+                    'entityId': 'Test1',
+                    'index': ['',''],
+                    'values': [1]
+                }],
+                'entityType': 'Test'
+            }]
+        },
+        {
+            'attrName': 'temperature',
+            'types':
+            [{
+                'entities':
+                [{
+                    'entityId': 'Test1',
+                    'index': ['',''],
+                    'values': [1]
+                }],
+                'entityType': 'Test'
+            }]
+        },
+    ]
+
+    expected = {
+        'attrs': expected_attrs
+    }
+
+    obtained = r.json()
+    assert obtained == expected
+
+    # 'aggrMethod': 'avg'
+
+    query_params = {
+        'attrs': attrs,
+        'aggrMethod': 'avg'
+    }
+    r = query(params=query_params, service=service)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "Not Found",
+        "description": "No records were found for such query."
+    }
+
+    # 'aggrMethod': 'sum'
+
+    query_params = {
+        'attrs': attrs,
+        'aggrMethod': 'sum'
+    }
+    r = query(params=query_params, service=service)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "Not Found",
+        "description": "No records were found for such query."
+    }
+    delete_test_data(service, ['Test'])

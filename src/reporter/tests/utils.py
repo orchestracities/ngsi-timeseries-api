@@ -5,7 +5,6 @@ import requests
 import time
 from typing import Callable, Iterable, List, Tuple, Union
 
-
 def notify_url():
     return "{}/notify".format(QL_URL)
 
@@ -41,6 +40,47 @@ def get_notification(et, ei, attr_value, mod_value):
         ]
     }
 
+def get_notification_different_types(et, ei):
+    return [{
+        'subscriptionId': '5947d174793fe6f7eb5e39621',
+        'data': [
+            {
+                'id': ei,
+                'type': et,
+                'temperature': {
+                    'type': 'Number',
+                    'value': 10,
+                    'metadata': {
+                        'dateModified': {
+                            'type': 'DateTime',
+                            'value': '1970-01-01T00:00:00.000+00:00'
+                        }
+                    }
+                },
+                'intensity': {
+                    'type': 'Text',
+                    'value': 'Low',
+                    'metadata': {
+                        'dateModified': {
+                            'type': 'DateTime',
+                            'value': '1970-01-01T00:00:00.000+00:00'
+                        }
+                    }
+                },
+                'boolean': {
+                    'type': 'Boolean',
+                    'value': 1,
+                    'metadata': {
+                        'dateModified': {
+                            'type': 'DateTime',
+                            'value': '1970-01-01T00:00:00.000+00:00'
+                        }
+                    }
+                }
+            }
+        ]
+    }]
+
 
 def send_notifications(service, notifications):
     assert isinstance(notifications, list)
@@ -51,6 +91,15 @@ def send_notifications(service, notifications):
         r = requests.post(notify_url(), data=json.dumps(n), headers=h)
         assert r.ok
 
+def send_notifications_different_types(service, et, ei):
+    notifications = get_notification_different_types(et, ei)
+    assert isinstance(notifications, list)
+    h = {'Content-Type': 'application/json'}
+    if service:
+        h['Fiware-Service'] = service
+    for n in notifications:
+        r = requests.post(notify_url(), data=json.dumps(n), headers=h)
+        assert r.ok
 
 def insert_test_data(service, entity_types, n_entities=1, index_size=30,
                      entity_id=None, index_base=None, index_period="day"):
@@ -83,7 +132,6 @@ def insert_test_data(service, entity_types, n_entities=1, index_size=30,
                 send_notifications(service, [n])
 
     time.sleep(1)
-
 
 def delete_entity_type(service, entity_type, service_path=None):
     h = {}
