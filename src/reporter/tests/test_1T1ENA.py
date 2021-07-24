@@ -1,9 +1,10 @@
 from conftest import QL_URL
-from reporter.tests.utils import insert_test_data, delete_test_data
+from reporter.tests.utils import insert_test_data, delete_test_data, send_notifications_different_types
 import pytest
 import requests
 from utils.tests.common import assert_equal_time_index_arrays
 import dateutil.parser
+import time
 
 entity_type = 'Room'
 entity_id = 'Room0'
@@ -632,3 +633,149 @@ def test_not_found(service):
         "error": "Not Found",
         "description": "No records were found for such query."
     }
+
+def test_aggregation_different_types():
+    attrs='temperature,intensity,boolean'
+    service='test'
+    eid='Test1'
+    delete_test_data(service, ['Test'])
+    send_notifications_different_types(service, 'Test', eid)
+    time.sleep(1)
+    query_params = {
+        'attrs': attrs,
+        'aggrMethod': 'min'
+    }
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url('False', eid), params=query_params, headers=h)
+    assert r.status_code == 200, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+
+    expected_attrs = [
+        {
+            'attrName': 'boolean',
+            'values': [True]
+        },
+        {
+            'attrName': 'intensity',
+            'values': ['Low']
+        },
+        {
+            'attrName': 'temperature',
+            'values': [10.0]
+        }
+    ]
+
+    expected = {
+        'index': [],
+        'attributes': expected_attrs
+    }
+
+    assert obtained == expected
+
+    # 'aggrMethod': 'max'
+
+    query_params = {
+        'attrs': attrs,
+        'aggrMethod': 'max',
+    }
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url('False', eid), params=query_params, headers=h)
+    assert r.status_code == 200, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+
+    expected_attrs = [
+        {
+            'attrName': 'boolean',
+            'values': [True]
+        },
+        {
+            'attrName': 'intensity',
+            'values': ['Low']
+        },
+        {
+            'attrName': 'temperature',
+            'values': [10.0]
+        }
+    ]
+
+    expected = {
+        'index': [],
+        'attributes': expected_attrs
+    }
+
+    obtained = r.json()
+    assert obtained == expected
+
+    # 'aggrMethod': 'count'
+
+    query_params = {
+        'attrs': attrs,
+        'aggrMethod': 'count',
+    }
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url('False', eid), params=query_params, headers=h)
+    assert r.status_code == 200, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+
+    expected_attrs = [
+        {
+            'attrName': 'boolean',
+            'values': [1]
+        },
+        {
+            'attrName': 'intensity',
+            'values': [1]
+        },
+        {
+            'attrName': 'temperature',
+            'values': [1]
+        }
+    ]
+
+    expected = {
+        'index': [],
+        'attributes': expected_attrs
+    }
+
+    obtained = r.json()
+    assert obtained == expected
+
+    # 'aggrMethod': 'avg'
+
+    query_params = {
+        'attrs': attrs,
+        'aggrMethod': 'avg'
+    }
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url('False', eid), params=query_params, headers=h)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "Not Found",
+        "description": "No records were found for such query."
+    }
+
+    # 'aggrMethod': 'sum'
+
+    query_params = {
+        'attrs': attrs,
+        'aggrMethod': 'sum'
+    }
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url('False', eid), params=query_params, headers=h)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "Not Found",
+        "description": "No records were found for such query."
+    }
+    delete_test_data(service, ['Test'])
