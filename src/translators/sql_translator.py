@@ -1158,59 +1158,48 @@ class SQLTranslator(base_translator.BaseTranslator):
             for tn in table_names:
                 if "." in tn:
                     table_names.remove(tn)
-
         limit = min(10000, limit)
         offset = max(0, offset)
         len_tn = 0
         result = []
-        stmt = ''
         if len(table_names) > 0:
             for tn in sorted(table_names):
                 len_tn += 1
                 if len_tn != len(table_names):
-                    stmt += "select " \
-                            "entity_id, " \
-                            "entity_type, " \
-                            "max(time_index) as time_index " \
+                    op = "select * " \
                             "from {tn} {where_clause} " \
-                            "group by entity_id, entity_type " \
-                            "union all ".format(
+                            "order by time_index desc " \
+                            "limit 1 ".format(
                                 tn=tn,
                                 where_clause=where_clause
                             )
                 else:
-                    stmt += "select " \
-                            "entity_id, " \
-                            "entity_type, " \
-                            "max(time_index) as time_index " \
+                    op = "select * " \
                             "from {tn} {where_clause} " \
-                            "group by entity_id, entity_type ".format(
+                            "order by time_index desc " \
+                            "limit 1 ".format(
                                 tn=tn,
                                 where_clause=where_clause
                             )
-
+                            
             # TODO ORDER BY time_index asc is removed for the time being
             #  till we have a solution for
             #  https://github.com/crate/crate/issues/9854
-            op = stmt + "ORDER BY time_index limit {limit} offset {offset}".format(
-                offset=offset,
-                limit=limit
-            )
-
-            try:
-                self.cursor.execute(op)
-            except Exception as e:
-                self.sql_error_handler(e)
-                self.logger.error(str(e), exc_info=True)
-                entities = []
-            else:
-                res = self.cursor.fetchall()
-                col_names = ['entity_id', 'entity_type', 'time_index']
-                entities = self._format_response(res,
+                try:
+                    self.cursor.execute(op)
+                except Exception as e:
+                    self.sql_error_handler(e)
+                    self.logger.error(str(e), exc_info=True)
+                    entities = []
+                else:
+                    res = self.cursor.fetchall()
+                    col_names = self._column_names_from_query_meta(
+                        self.cursor.description)
+                    entities = self._format_response(res,
                                                  col_names,
                                                  tn,
                                                  None)
-            result.extend(entities)
+                result.extend(entities)
         return result
 
     def _format_response(self, resultset, col_names, table_name, last_n):
