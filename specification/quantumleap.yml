@@ -703,13 +703,33 @@ paths:
                     "entityId": "Kitchen1",
                     "index": [
                       "2018-01-07T15:44:59"],
-                    "entityType": "Kitchen"
+                      'pressure': 
+                             {
+                             'type': 'Number',
+                             'values': [290.0]
+                             },
+                      'temperature':
+                             {
+                             'type': 'Number',
+                             'values': [29.0]
+                             },
+                    "type": "Kitchen"
               },
               {
                     "entityId": "Kitchen2",
                     "index": [
                       "2018-01-07T15:44:59"],
-                    "entityType": "Kitchen"
+                      'pressure': 
+                             {
+                             'type': 'Number',
+                             'values': [290.0]
+                             },
+                      'temperature':
+                             {
+                             'type': 'Number',
+                             'values': [29.0]
+                             },
+                    "type": "Kitchen"
               }]
         404:
           description: "Not Found"
