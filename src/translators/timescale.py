@@ -194,7 +194,8 @@ class PostgresTranslator(sql_translator.SQLTranslator):
 
     @staticmethod
     def _ngsi_geojson_to_db(attr):
-        return geocoding.geojson.wktcodec.encode_as_wkt(attr['value'], srid=4326)
+        return geocoding.geojson.wktcodec.encode_as_wkt(
+            attr['value'], srid=4326)
 
     @staticmethod
     def _ngsi_slf_to_db(attr):
@@ -224,11 +225,12 @@ class PostgresTranslator(sql_translator.SQLTranslator):
             return None
 
         if ngsi_type in (NGSI_DATETIME, NGSI_ISO8601):
+            v = None
             try:
                 v = self._get_isoformat(db_value)
             except Exception as e:
                 # There is a type mismatch.
-                logging.warning("Column '{}' type is not TIMESTAMP".format(k))
+                logging.warning(f"Column type is not TIMESTAMP: {v}")
             return v
 
         if SlfGeometry.is_ngsi_slf_attr({'type': ngsi_type}):
