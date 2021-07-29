@@ -44,3 +44,9 @@ class DockerCompose:
 
     def stop_service(self, name: str):
         self.run_cmd('stop', name)
+
+    def pause_service(self, name: str):
+        self.run_cmd('pause', name)
+
+    def unpause_service(self, name: str):
+        self.run_cmd('unpause', name)
