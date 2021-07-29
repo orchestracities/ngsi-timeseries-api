@@ -3,7 +3,7 @@ from typing import Callable, Iterable, List, Optional
 from pydantic import BaseModel
 
 from reporter.httputil import *
-from translators.factory import translator_for
+from translators.factory import translator_for, error_analyser_for
 from wq.core import TaskInfo, TaskStatus, QMan, \
     CompositeTaskId, Tasklet, WorkQ, StopTask
 import wq.core.cfg as cfg
@@ -78,14 +78,15 @@ class InsertAction(Tasklet):
 
     def run(self):
         data = self.task_input()
-        with translator_for(data.fiware_service) as trans:
-            try:
+        try:
+            with translator_for(data.fiware_service) as trans:
                 trans.insert(data.payload, data.fiware_service,
                              data.fiware_service_path)
-            except Exception as e:
-                if trans.can_retry_insert(e):
-                    raise e
-                raise StopTask() from e
+        except Exception as e:
+            analyzer = error_analyser_for(data.fiware_service, e)
+            if analyzer.can_retry_insert():
+                raise e
+            raise StopTask() from e
 
 
 def build_task_id_init_segment():
