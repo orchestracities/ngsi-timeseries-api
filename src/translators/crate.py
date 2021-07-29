@@ -83,9 +83,6 @@ class CrateTranslator(sql_translator.SQLTranslator):
     def sql_error_handler(self, exception):
         return
 
-    def can_retry_insert(self, error: Exception) -> bool:
-        return isinstance(error, exceptions.ConnectionError)
-
     def get_db_version(self):
         stmt = "select version['number'] from sys.nodes"
         res = self._execute_query_via_cache(self.dbCacheName,

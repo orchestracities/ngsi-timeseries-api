@@ -1,15 +1,14 @@
-import logging
 from contextlib import contextmanager
 from datetime import datetime, timezone
 import pg8000
 from typing import Any, Sequence
 
 from translators import sql_translator
+from translators.errors import PostgresErrorAnalyzer
 from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
     NGSI_LD_GEOMETRY, NGSI_GEOJSON, NGSI_TEXT, NGSI_STRUCTURED_VALUE, \
-    TIME_INDEX, METADATA_TABLE_NAME, FIWARE_SERVICEPATH, TENANT_PREFIX
+    TIME_INDEX, METADATA_TABLE_NAME, TENANT_PREFIX
 from translators.timescale_geo_query import from_ngsi_query
-import logging
 import geocoding.geojson.wktcodec
 from geocoding.slf.geotypes import *
 import geocoding.slf.jsoncodec
@@ -112,12 +111,10 @@ class PostgresTranslator(sql_translator.SQLTranslator):
         self.cursor.close()
 
     def sql_error_handler(self, exception):
-        if exception.__class__ == BrokenPipeError:
+        analyzer = PostgresErrorAnalyzer(exception)
+        if analyzer.is_transient_error():
             self.ccm.reset_connection('timescale')
             self.setup()
-
-    def can_retry_insert(self, error: Exception) -> bool:
-        return isinstance(error, pg8000.InterfaceError)
 
     def get_health(self):
         health = {}
@@ -175,7 +172,6 @@ class PostgresTranslator(sql_translator.SQLTranslator):
         self.cursor.execute(stmt)
 
     def _update_data_table(self, table_name, new_columns, fiware_service):
-
         alt_cols = ', '.join('add column if not exists "{}" {}'
                              .format(cn.lower(), ct)
                              for cn, ct in new_columns.items())
