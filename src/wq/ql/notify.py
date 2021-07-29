@@ -83,10 +83,17 @@ class InsertAction(Tasklet):
                 trans.insert(data.payload, data.fiware_service,
                              data.fiware_service_path)
         except Exception as e:
-            analyzer = error_analyser_for(data.fiware_service, e)
-            if analyzer.can_retry_insert():
-                raise e
-            raise StopTask() from e
+            self._handle_exception(data.fiware_service, e)
+
+    @staticmethod
+    def _handle_exception(fiware_service: str, e: Exception):
+        if not cfg.offload_to_work_queue():
+            raise e
+
+        analyzer = error_analyser_for(fiware_service, e)
+        if analyzer.can_retry_insert():
+            raise e
+        raise StopTask() from e
 
 
 def build_task_id_init_segment():
