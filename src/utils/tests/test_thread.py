@@ -3,7 +3,7 @@ from time import sleep
 from utils.thread import BackgroundRepeater
 
 
-class TestRepeater(BackgroundRepeater):
+class RepeaterTest(BackgroundRepeater):
 
     def __init__(self, iterations: int):
         self.iterations = iterations
@@ -16,7 +16,7 @@ class TestRepeater(BackgroundRepeater):
 
 
 def test_kill_repeater():
-    r = TestRepeater(iterations=1000000000)
+    r = RepeaterTest(iterations=1000000000)
     r.start()
     sleep(1)
     r.kill()
@@ -26,7 +26,7 @@ def test_kill_repeater():
 
 
 def test_repeater_stops_after_hitting_iteration_limit():
-    r = TestRepeater(iterations=2)
+    r = RepeaterTest(iterations=2)
     r.start()
     r.join(2)
 
