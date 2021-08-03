@@ -653,6 +653,72 @@ paths:
 ################################################################################
 # PATHS: OUTPUT
 ################################################################################
+  /v2/{entityId}:
+    get:
+      operationId: reporter.query_Entity.query_Entity
+      summary: "Latest value of N attributes of a given entity instance."
+      description: "For example, query the entity for latest values of
+      attributes specific to fiware-Service and fiware-ServicePath."
+      tags:
+        - queries
+      parameters:
+        # In Path...
+        - $ref: '#/parameters/entityIdInPath'
+        # In Query...
+        - $ref: '#/parameters/type'
+        - $ref: '#/parameters/attrs'
+        # In Header...
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              entityId:
+                type: string
+              entityType:
+                type: string
+              index:
+                $ref: '#/definitions/IndexArray'
+              attributes:
+                type: array
+                items:
+                  $ref: '#/definitions/AttributeValues'
+          examples:
+            application/json:
+              {
+                  "entityId": "Kitchen1",
+                  "entityType": "Kitchen",
+                  "index": ["2018-01-05T15:44:34"],
+                  "attributes": [
+                    {
+                      "attrName": "temperature",
+                      "values": [24.1]
+                    },
+                    {
+                      "attrName": "pressure",
+                      "values": [1.01]
+                    }
+                  ]
+              }
+        404:
+          description: "Not Found"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              description:
+                type: string
+          examples:
+            application/json:
+              {
+                "error": "Not Found",
+                "description": "No records were found for such query."
+              }
+
   /v2/entities:
     get:
       operationId: reporter.query_NTNE.query_NTNE
