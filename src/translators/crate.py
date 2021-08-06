@@ -56,7 +56,8 @@ class CrateTranslator(sql_translator.SQLTranslator):
         self.connection = self.ccm.get_connection('crate')
         if self.connection is None:
             try:
-                self.connection = client.connect([url], error_trace=True)
+                # Added backoff_factor for retry interval between attempt of consecutive retries
+                self.connection = client.connect([url], error_trace=True, backoff_factor=0.1)
                 self.ccm.set_connection('crate', self.connection)
             except Exception as e:
                 self.logger.warning(str(e), exc_info=True)
