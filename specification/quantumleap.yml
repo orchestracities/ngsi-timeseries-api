@@ -377,7 +377,7 @@ paths:
                 "version": "0.0.1"
               }
 
-  /config:
+  /management/config:
     post:
       operationId: reporter.reporter.config
       summary: "(To Be Implemented) Customize your persistance configuration to
@@ -1793,7 +1793,7 @@ paths:
 # PATHS: WORK QUEUE
 ################################################################################
 
-  /wq/notifications:
+  /management/queue/notifications:
     get:
       operationId: wq.ql.notify.list_insert_tasks
       summary: "Retrieve notification tasks offloaded to the work queue."
@@ -1893,7 +1893,7 @@ paths:
         204:
           description: OK
 
-  /wq/notifications/summary:
+  /management/queue/notifications/summary:
     get:
       operationId: wq.ql.notify.list_insert_tasks_runtime_info
       summary: "Retrieve a summary of notification tasks offloaded to the work
@@ -1944,7 +1944,7 @@ paths:
                 null
               ]
 
-  /wq/notifications/count:
+  /management/queue/notifications/count:
     get:
       operationId: wq.ql.notify.count_insert_tasks
       summary: "Count notification tasks offloaded to the work queue."
