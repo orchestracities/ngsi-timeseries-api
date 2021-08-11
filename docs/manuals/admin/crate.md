@@ -24,19 +24,20 @@ it is using its admin interface, as documented [here](https://crate.io/docs/clie
 Alternatively, you can use its [HTTP api](https://crate.io/docs/crate/getting-started/en/latest/first-use/query.html#the-cratedb-http-endpoint),
 or any of its [supported clients](https://crate.io/docs/crate/tutorials/en/latest/getting-started/start-building/index.html).
 
-**Note**: Crate (3.x and 4.x) does not support nested arrays.
+**Note**- Crate(3.x and 4.x) does not support nested arrays.
 
-When a table is created with two columns `x` and `y` of type object and array(object). 
+When a table is created with two columns `x` and `y` of type object
+and array(object).
 Inserting an object in x and y gives a below exception message:
 ```
 create table t (x object, y array(object));
 insert into t (x) values ('{ "x": [1] }');
--- ok
+    - ok
 insert into t (x) values ('{ "x": [[1, 2], [3, 4]] }');
--- SQLActionException[ColumnValidationException: Validation failed for x: 
--- Cannot cast '{ "x": [[1, 2], [3, 4]] }' to type object]
+    - SQLActionException[ColumnValidationException: Validation failed for x:
+    -Cannot cast '{ "x": [[1, 2], [3, 4]] }' to type object]
 insert into t (y) values (['{ "x": [[1, 2], [3, 4]] }']);
--- SQLActionException[ElasticsearchParseException: nested arrays are not supported]
+  -SQLActionException[ElasticsearchParseException:nested arrays not supported]
 ```
 
 You can learn more about CrateDB by reading [the docs](https://crate.io/docs/crate/reference/).
