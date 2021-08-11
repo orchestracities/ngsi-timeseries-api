@@ -22,7 +22,8 @@ TestTask = Callable[[int], Result]
 
 
 def with_session(test_label: str,
-                 do: Callable[[requests.Session], requests.Response]) -> Result:
+                 do: Callable[[requests.Session],
+                              requests.Response]) -> Result:
     try:
         sample_id = monitor.start_duration_sample()
         with do(get_session()) as response:

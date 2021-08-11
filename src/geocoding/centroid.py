@@ -22,8 +22,8 @@ def centroid2d(points):
         centroid = (centroid[0] + p[0], centroid[1] + p[1])
         number_of_points += 1
 
-    centroid = [centroid[0]/number_of_points, centroid[1]/number_of_points] \
-        if number_of_points else None
+    centroid = [centroid[0] / number_of_points, centroid[1] /
+                number_of_points] if number_of_points else None
 
     return centroid
 #
