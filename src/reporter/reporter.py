@@ -27,12 +27,11 @@ interest and make QL actually perform the corresponding subscription to orion.
 I.e, QL must be told where orion is.
 """
 
-from flask import has_request_context, request
+from flask import request
 from geocoding import geocoding
 from geocoding.factory import get_geo_cache, is_geo_coding_available
 from requests import RequestException
 from translators.sql_translator import SQLTranslator
-from translators.factory import translator_for
 from utils.common import iter_entity_attrs, TIME_INDEX_NAME
 import json
 import logging
@@ -41,8 +40,9 @@ from reporter.subscription_builder import build_subscription
 from reporter.timex import select_time_index_value_as_iso, \
     TIME_INDEX_HEADER_NAME
 from geocoding.location import normalize_location, LOCATION_ATTR_NAME
-from exceptions.exceptions import AmbiguousNGSIIdError, UnsupportedOption, \
-    NGSIUsageError, InvalidParameterValue, InvalidHeaderValue
+from exceptions.exceptions import NGSIUsageError, InvalidParameterValue, InvalidHeaderValue
+from wq.ql.notify import InsertAction
+from reporter.httputil import fiware_correlator, fiware_s, fiware_sp
 
 
 def log():
@@ -166,20 +166,6 @@ def notify():
         # Always normalize location if there's one
         normalize_location(entity)
 
-    # Get FIWARE CORRELATOR - if any
-    fiware_c = request.headers.get('fiware_correlator', None)
-    # Get Remote address
-    remote_addr = request.remote_addr
-    # Define FIWARE tenant
-    fiware_s = request.headers.get('fiware-service', None)
-    # It seems orion always sends a 'Fiware-Servicepath' header with value '/'
-    # But this is not correctly documented in the API, so in order not to
-    # depend on this, QL will not treat servicepath if there's no service
-    # specified.
-    if fiware_s:
-        fiware_sp = request.headers.get('fiware-servicepath', None)
-    else:
-        fiware_sp = None
     res_entity = []
     e = None
     for entity in payload:
@@ -189,11 +175,9 @@ def notify():
             e_new = _filter_no_type_no_value_entities(e)
             res_entity.append(e_new)
     payload = res_entity
-    entity_id = [i["id"] for i in payload]
-    # Send valid entities to translator
     try:
-        with translator_for(fiware_s) as trans:
-            trans.insert(payload, fiware_s, fiware_sp)
+        InsertAction(fiware_s(), fiware_sp(), fiware_correlator(), payload) \
+            .enqueue()
     except Exception as e:
         msg = "Notification not processed or not updated: {}".format(e)
         log().error(msg, exc_info=True)
