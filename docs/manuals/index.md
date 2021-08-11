@@ -124,7 +124,7 @@ QuantumLeap's **Reporter** component parses and validates POSTed data.
 Additionally, if geo-coding is configured, the **Reporter** invokes
 the **Geocoder** component to harmonise the location representation
 of the notified entities, which involves looking up geographic information
-in [OpenStreetMap][osm] (OSM). 
+in [OpenStreetMap][osm] (OSM).
 At this stage, depending on the deployed mode you selected, data are immediately
 processed or stored in the cache for later processing.
 In the first case, the **Reporter** passes on
@@ -132,7 +132,7 @@ the validated and harmonised NGSI entities to a **Translator** component.
 In the second case, the **Reporter** stores on
 the validated and harmonised NGSI entities to the **Cache** component,
 that is acting as a message queue. The **Worker** component will read pending
-messages to be processed and will pass them to a **Translator** component. 
+messages to be processed and will pass them to a **Translator** component.
 
 **Translator** convert NGSI entities to tabular format and persist
 them as time series records in the database. There is a **Translator**
