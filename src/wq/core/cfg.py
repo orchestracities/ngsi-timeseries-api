@@ -94,7 +94,7 @@ def retry_intervals() -> [int]:
     :return: a list of retry intervals in seconds.
     """
     base_delay = 20  # seconds
-    return [(2**k)*base_delay for k in range(0, max_retries())]    # (2)
+    return [(2**k) * base_delay for k in range(0, max_retries())]    # (2)
 # NOTE.
 # 1. Keeping it simple for now.
 # But in the future, we may want to have different retry strategies and

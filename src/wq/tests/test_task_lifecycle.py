@@ -156,7 +156,7 @@ def test_retry():
         # wait a couple of secs to make sure wq attempts to run the task
         # at least once.
         svc_path = '/retry'
-        task = enqueue_entity(svc_path, retry_intervals=[1]*10)
+        task = enqueue_entity(svc_path, retry_intervals=[1] * 10)
 
         # up until now, all wq's attempts to run the task should've failed
         # b/c wq can't connect to the db.

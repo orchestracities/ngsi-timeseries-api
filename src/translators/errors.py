@@ -59,7 +59,7 @@ class PostgresErrorAnalyzer(ErrorAnalyzer):
 
         if isinstance(e, pg8000.ProgrammingError):         # (5)
             return len(e.args) > 0 and isinstance(e.args[0], dict) \
-               and e.args[0].get('C', '') == '55000'
+                and e.args[0].get('C', '') == '55000'
 
         return isinstance(e, ConnectionError) or \
             isinstance(e, pg8000.InterfaceError)           # (2), (3), (4)
