@@ -93,11 +93,13 @@ class PostgresTranslator(sql_translator.SQLTranslator):
         if self.connection is None:
             try:
                 pg8000.paramstyle = "qmark"
-                self.connection = pg8000.connect(host=self.host, port=self.port,
-                                                 ssl_context=self.ssl,
-                                                 database=self.db_name,
-                                                 user=self.db_user,
-                                                 password=self.db_pass)
+                self.connection = pg8000.connect(
+                    host=self.host,
+                    port=self.port,
+                    ssl_context=self.ssl,
+                    database=self.db_name,
+                    user=self.db_user,
+                    password=self.db_pass)
                 self.connection.autocommit = True
                 self.ccm.set_connection('timescale', self.connection)
             except Exception as e:

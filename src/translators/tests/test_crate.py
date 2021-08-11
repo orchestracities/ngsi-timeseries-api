@@ -60,12 +60,12 @@ def test_geo_point_null_values(translator):
     entity_new = {
         'id': 'Room1',
         'type': 'Room',
-        TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
+        TIME_INDEX_NAME: datetime.now(
+            timezone.utc).isoformat(
+            timespec='milliseconds'),
         'temperature': {
             'type': 'Number',
-            'value': 19
-        }
-    }
+            'value': 19}}
     translator.insert([entity_new])
     entities = translator.query()
     assert len(entities) == 1

@@ -8,7 +8,8 @@ def entity_pk(entity):
     """
     if 'type' not in entity and 'id' not in entity:
         # Allowance for tsdb back-and-forth.
-        # To avoid column name id in databases, we prefix it with entity_. Same for type, for consistence.
+        # To avoid column name id in databases, we prefix it with entity_. Same
+        # for type, for consistence.
         t, i = entity['entity_type'], entity['entity_id']
     else:
         t, i = entity['type'], entity['id']

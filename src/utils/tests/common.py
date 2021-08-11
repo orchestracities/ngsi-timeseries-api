@@ -51,7 +51,8 @@ def pick_random_entity_id(num_types, num_ids_per_type):
     :param num_ids_per_type:
     :return:
     """
-    return "{}-{}".format(int(random.uniform(0, num_types)), int(random.uniform(0, num_ids_per_type)))
+    return "{}-{}".format(int(random.uniform(0, num_types)),
+                          int(random.uniform(0, num_ids_per_type)))
 
 
 def add_attr(ent, attr_name, attr_value):
@@ -181,7 +182,7 @@ def assert_equal_time_index_arrays(index1, index2):
     for d0, d1 in zip(index1, index2):
         d0 = dateutil.parser.isoparse(d0)
         d1 = dateutil.parser.isoparse(d1)
-        assert abs(d0-d1).microseconds < 1000
+        assert abs(d0 - d1).microseconds < 1000
 
 
 def check_notifications_record(notifications, records):
