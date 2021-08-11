@@ -41,7 +41,7 @@ def wait_for_timescale(max_wait: float = 10.0, sleep_interval: float = 0.5):
         try:
             with postgres_translator_instance():
                 return
-        except:
+        except BaseException:
             time_left_to_wait -= sleep_interval
             sleep(sleep_interval)
     assert False, f"waited longer than {max_wait} secs for timescale!"

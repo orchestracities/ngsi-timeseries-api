@@ -34,7 +34,7 @@ class RowCountSampler(BackgroundRepeater):
         self._bucket.empty()
         try:
             self._db_con.close()
-        except:
+        except BaseException:
             pass
 
     def _count_rows(self) -> int:
