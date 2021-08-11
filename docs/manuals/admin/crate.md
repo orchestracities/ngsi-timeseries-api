@@ -29,7 +29,8 @@ or any of its [supported clients](https://crate.io/docs/crate/tutorials/en/lates
 When a table is created with two columns `x` and `y` of type object
 and array(object).
 Inserting an object in x and y gives a below exception message:
-```
+
+```#!/bin/bash
 create table t (x object, y array(object));
 insert into t (x) values ('{ "x": [1] }');
     - ok
