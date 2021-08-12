@@ -1,0 +1,13 @@
+@startuml
+state Pending {
+  Queued --> Running: fetch
+  Running --> Scheduled: fail[r<M]
+  Scheduled --> Running: fetch
+
+}
+Running --> Failed: fail[r=M]
+Running --> Succeded: succeed
+[*] --> Queued: enqueue
+Succeded --> [*]
+Failed --> [*]
+@enduml

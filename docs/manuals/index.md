@@ -110,11 +110,9 @@ QuantumLeap deployment scenario.
 
 In order for QuantumLeap to receive data from Orion, a client creates
 a subscription in Orion specifying which entities should be notified
-when a change happens. The diagram shows a client creating a subscription
-directly with QuantumLeap **(1)**: this is just a convenience end point
-in the QuantumLeap REST API that simply forwards the client subscription
-to Orion. (You can read more about setting up subscriptions in the
-[Orion Subscription][ql-man.sub] section of the QuantumLeap manual.)
+when a change happens **(1)**. (You can read more about setting up
+subscriptions in the [Orion Subscription][ql-man.sub] section of the
+QuantumLeap manual.)
 
 From this point on, when [Agents in the IoT layer][fw-catalogue] push
 data to the context broker **(2)**, if the data pertains to entities
@@ -126,13 +124,21 @@ QuantumLeap's **Reporter** component parses and validates POSTed data.
 Additionally, if geo-coding is configured, the **Reporter** invokes
 the **Geocoder** component to harmonise the location representation
 of the notified entities, which involves looking up geographic information
-in [OpenStreetMap][osm] (OSM). Finally, the **Reporter** passes on
+in [OpenStreetMap][osm] (OSM).
+At this stage, depending on the deployed mode you selected, data are immediately
+processed or stored in the cache for later processing.
+In the first case, the **Reporter** passes on
 the validated and harmonised NGSI entities to a **Translator** component.
-**Translators** convert NGSI entities to tabular format and persist
+In the second case, the **Reporter** stores on
+the validated and harmonised NGSI entities to the **Cache** component,
+that is acting as a message queue. The **Worker** component will read pending
+messages to be processed and will pass them to a **Translator** component.
+
+**Translator** convert NGSI entities to tabular format and persist
 them as time series records in the database. There is a **Translator**
 component in correspondence of each supported database back end - see
-section below. Depending on [configuration][ql-man.db-sel], the
-**Reporter** chooses which **Translator** to use.
+section below. Depending on the [configuration][ql-man.db-sel],
+a specific **Translator** is used.
 
 When a client queries the REST API to retrieve NGSI entities **(4)**,
 the **Reporter** and **Translator** interact to turn the Web query
@@ -147,13 +153,11 @@ also supports deleting historical records but note that presently
 it does **not** implement in full the NGSI-TSDB specification - please
 refer to the REST API [specification][ql-spec] for the details.
 
-Finally, the diagram shows Grafana querying the database directly
+Finally, the diagram shows a Dashboard querying the database directly
 in order to visualise time series for a Web client **(5)**.
-In principle, it should be possible to develop a Grafana plugin
-to query the QuantumLeap REST API instead of the database which
-would shield visualisation tools from QuantumLeap internals. In
-fact, there are plans to develop such a plugin in the (not-so-distant!)
-future.
+In principle, it should be possible to develop a Dashboard can also
+query the QuantumLeap REST API instead of the database which
+would shield visualisation tools from QuantumLeap internals.
 
 ## Database Back Ends
 
