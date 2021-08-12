@@ -163,8 +163,8 @@ def check_data(entities, check_n_indexes=False):
         if check_n_indexes:
             assert len(index) == UPDATES + 1
         else:
-            print("expected updates:" + UPDATES)
-            print("actual updates:" + len(index))
+            print("expected updates: {}".format(UPDATES))
+            print("actual updates: {}".format(len(index)))
 
         # Now without explicit type to trigger type search in metadata table
         res = requests.get(url, headers=e.headers())
