@@ -127,12 +127,12 @@ you can leverage the Helm Charts in [this repository](https://smartsdk-recipes.r
 
 In particular you will need to deploy:
 
-* [CrateDB](https://github.com/orchestracities/charts/tree/master/charts/crate)
-* [Optional/Alternative] Timescale - for which you can refer to [Patroni Helm Chart](https://github.com/helm/charts/tree/master/incubator/patroni).
-* [Optional, but required if using the query cache or the work queue] Redis.
+- [CrateDB](https://github.com/orchestracities/charts/tree/master/charts/crate)
+- [Optional/Alternative] Timescale - for which you can refer to [Patroni Helm Chart](https://github.com/helm/charts/tree/master/incubator/patroni).
+- [Optional, but required if using the query cache or the work queue] Redis.
   You can use
   [Dandy Developer's chart](https://github.com/DandyDeveloper/charts/tree/master/charts/redis-ha)
-* [QuantumLeap](https://github.com/orchestracities/charts/tree/master/charts/quantumleap)
+- [QuantumLeap](https://github.com/orchestracities/charts/tree/master/charts/quantumleap)
 
 ## FIWARE Releases Compatibility
 

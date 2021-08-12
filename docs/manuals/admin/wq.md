@@ -31,8 +31,8 @@ task from the queue and runs it to actually insert the NGSI entities
 into the DB, possibly retrying the insert at a later time if it fails.
 Clients connect to the Web app to manage notify tasks in the queue.
 
-
 ## Task life-cycle
+
 The way the QL Web app, the queue worker, RQ and Redis collaborate
 to process tasks is a key aspect of the QL work queue architecture.
 In a nutshell, the Web app creates a task and stores it, through RQ,
@@ -74,7 +74,7 @@ task only if *r < M*. So if *M* is set to 0, workers never retry failed
 tasks.
 
 A worker initially fetches a task in the `Queued` state (`fetch` event)
-at a certain time *t<sub>0</sub>* and tries to run it once. While a
+at a certain time *t(0)* and tries to run it once. While a
 task runs, it's in the `Running` state. After running a task, the worker
 checks if the task completed successfully. If so, the task transitions
 from the `Running` state to the `Succeeded` state—`succeed` event. On
@@ -86,26 +86,26 @@ time and the task enters the `Scheduled` state.
 
 The worker uses an exponential retry schedule *σ*. Retries get spaced
 out by an exponentially growing number of seconds defined by the sequence
-*s = { c⋅2<sup>n</sup> | k ∈ ℕ } = (c, 2c, 4c, 8c, 16c,...)* where *c*
+*s = { c⋅2^n | k ∈ ℕ } = (c, 2c, 4c, 8c, 16c,...)* where *c*
 is a constant number of seconds. (In the current implementation *c = 20*.)
 The retry schedule *σ* is the series of seconds defined recursively
 by
 
-1. *σ<sub>0</sub> = t<sub>0</sub>*
-2. *σ<sub>n+1</sub> = σ<sub>n</sub> + s<sub>n</sub>*
+1. *σ(0) = t(0)*
+2. *σ(n+1) = σ(n) + s(n)*
 
-So *σ = (t<sub>0</sub>, t<sub>0</sub> + c, t<sub>0</sub> + c + 2c, …)*
-and the zeroth schedule is the initial task execution at time *t<sub>0</sub>*
+So *σ = (t(0), t(0) + c, t(0) + c + 2c, …)*
+and the zeroth schedule is the initial task execution at time *t(0)*
 when the worker fetched the task from the queue for the first time,
-the first schedule is the time point *t<sub>0</sub> + c* at which the
-worker retries the task for the first time if the initial run at *t<sub>0</sub>*
-failed, the second schedule is the time point *t<sub>0</sub> + c + 2c*
+the first schedule is the time point *t(0) + c* at which the
+worker retries the task for the first time if the initial run at *t(0)*
+failed, the second schedule is the time point *t(0) + c + 2c*
 at which the worker retries the task for the second time if the first
-retry at *t<sub>0</sub> + c* failed, and so on.
+retry at *t(0) + c* failed, and so on.
 
-So the task may run at time point *σ<sub>k</sub>* with *0 ≤ k ≤ M*.
+So the task may run at time point *σ(k)* with *0 ≤ k ≤ M*.
 In particular, if a task sits in the `Scheduled` state, at time point
-*σ<sub>r+1</sub>* the worker fetches it and tries to run it again—`fetch`
+*σ(r+1)* the worker fetches it and tries to run it again—`fetch`
 event. Again, while the task runs, it's in the `Running` state. In
 transitioning from `Scheduled` to `Running`, the current number of
 retries *r* is increased by one.
@@ -124,11 +124,6 @@ configured success and failure TTL, respectively. When that TTL expires,
 Redis automatically deletes the task at which point the state machine
 reaches its final state.
 
-
-
-
-
 [task-life-cycle.dia]: ../rsrc/queue-state.png
 [rq]: https://python-rq.org/
     "RQ: Simple job queues for Python"
-    
