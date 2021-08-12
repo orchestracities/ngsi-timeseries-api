@@ -10,7 +10,7 @@ Grafana に同梱されている
 [Postgres のデータソース](http://docs.grafana.org/features/datasources/postgres/)
 です。
 
-[インストール・ガイド](./index.md) に従っているのであれば、Docker コンテナ内で
+[インストール・ガイド](./installing.md) に従っているのであれば、Docker コンテナ内で
 既に Grafana が実行されています。ローカルに展開されている場合は、おそらく
 [http://0.0.0.0:3000](http://0.0.0.0:3000) です。
 
@@ -36,7 +36,7 @@ Crate の推奨事項に従うことをお勧めします。
 - **Database** : これはデータベース・スキーマの名前です。デフォルトでは、
   CrateDB で `doc` を使用しますが、マルチ・テナンシーのヘッダーを使用している
   場合は、エンティティ型のテナントによってスキーマが定義されます。詳細は、
-  [マルチ・テナンシーのセクション](../user/index.md#multi-tenancy)
+  [マルチ・テナンシーのセクション](../user/using.md#multi-tenancy)
   を確認してください。
 - **User** : `crate` ユーザを使います
 - **SSL モード** : `無効にします`
@@ -63,10 +63,10 @@ Crate の推奨事項に従うことをお勧めします。
 フィールドのテーブルの指定に注意してください。
 
 テーブル名の前には `et` が付くことに注意してください。テーブル名がどのように
-定義されているかについては、[Data Retrieval](../user/index.md#data-retrieval)
+定義されているかについては、[Data Retrieval](../user/using.md#data-retrieval)
 のセクションを参照してくださいが、エンティティ型を認識する必要があります。
 
-[Time Index](../user/index.md##data-retrieval) のセクションで説明されている
+[Time Index](../user/using.md##data-retrieval) のセクションで説明されている
 ように、タイム・インデックスとして使われるカラムの名前は `time_index` です。
 
 ![alt text](../../manuals/rsrc/graph_example.png "Using the DataSource in your Graph")

@@ -9,7 +9,7 @@ your dashboards. In both cases, the Grafana data source to use is the
 [Postgres Datasource](http://docs.grafana.org/features/datasources/postgres/)
 which normally ships with recent versions of Grafana.
 
-If you followed the [Installation Guide](./index.md), you have already Grafana
+If you followed the [Installation Guide](./installing.md), you have already Grafana
 running in a Docker container. If deployed locally, it's probably at [http://0.0.0.0:3000](http://0.0.0.0:3000)
 
 If you're using the CrateDB back end, we suggest you read
@@ -33,7 +33,7 @@ docker-compose example, this should be `crate:5432`.
 - **Database**: This is the name of the database schema. By default, crate uses
 `doc` schema, but if you are using multi-tenancy headers, the schema will be
 defined by the tenant of the entity type. More info in the
-[Multi-tenancy section](../user/index.md#multi-tenancy).
+[Multi-tenancy section](../user/using.md#multi-tenancy).
 - **User**: Use `crate` user.
 - **SSL Mode**: `disable`.
 
@@ -58,11 +58,11 @@ The following is an example of a simple Graph using a datasource connected to
 CrateDB. Note the selection of the datasource (called CrateDB in this case), as
 well as the specification of the table in the *from* field.
 
-Note table names are prefixed by `et`. See the [Data Retrieval](../user/index.md#data-retrieval)
+Note table names are prefixed by `et`. See the [Data Retrieval](../user/using.md#data-retrieval)
 section to know how table names are defined, but you should recognise the
 entity type.
 
 Note the name of the column used as time index is `time_index`, as explained
-in the [Time Index](../user/index.md##data-retrieval) section.
+in the [Time Index](../user/using.md##data-retrieval) section.
 
 ![alt text](../rsrc/graph_example.png "Using the DataSource in your Graph")

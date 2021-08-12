@@ -8,13 +8,14 @@ theme: readthedocs
 markdown_extensions: [toc,fenced_code]
 extra_css: ["https://www.fiware.org/style/fiware_readthedocs.css", "https://www.fiware.org/style/fiware_readthedocs_core.css"]
 nav:
-  - Home: index.md
+  - Home: 'index.md'
   - 'User & Programmers Manual':
-    - 'Introduction': 'user/index.md'
+    - 'Using QuantumLeap': 'user/using.md'
+    - 'Results Pagination': 'user/pagination.md'
     - 'Troubleshooting': 'user/troubleshooting.md'
     - 'Contributing': 'user/contributing.md'
   - 'Installation & Administration Manual':
-    - 'Introduction': 'admin/index.md'
+    - 'Installing': 'admin/installing.md'
     - 'Sanity Check': 'admin/check.md'
     - 'Ports': 'admin/ports.md'
     - 'Configuration': 'admin/configuration.md'
@@ -24,3 +25,4 @@ nav:
     - 'Data-Migration': 'admin/dataMigration.md'
     - 'Bechmarks': 'admin/benchmarks.md'
     - 'Telemetry': 'admin/telemetry.md'
+    - 'Work Queue': 'admin/wq.md'

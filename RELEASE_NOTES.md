@@ -1,13 +1,25 @@
 # QuantumLeap Release Notes
 
-## 0.8.2-dev
+## 0.8.3-dev
+
+### New features
+
+### Bug fixes
+
+### Documentation
+
+### Technical debt
+
+## 0.8.2
 
 ### New features
 
 - Support for CRATE 4.5 (#430)
-- Fix "None" Tenant query caching (required for no multi-tenant orion deployment)
+- Introduced queue workflow support & upgraded gunicorn (#501)
 
 ### Bug fixes
+
+- Fix "None" Tenant query caching (required for no multi-tenant orion deployment)
 
 ### Documentation
 

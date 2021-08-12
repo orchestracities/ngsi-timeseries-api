@@ -81,8 +81,8 @@ Timescale コンテナ (PostGIS を使用) と、inittime として、
   使用されます。バックエンドと YAML 設定を選択する方法の詳細については、
   [データベース選択のセクション][admin.db] を参照してください
 
-[admin.db]: ./db-selection.md
-    "QuantumLeap Database Selection"
+[admin.db]: ./configuration.md
+    "QuantumLeap Configuration"
 [admin.dm]: ./dataMigration.md
     "QuantumLeap Data Migration"
 [postgres]: https://www.postgresql.org

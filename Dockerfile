@@ -8,6 +8,7 @@ COPY Pipfile /src/ngsi-timeseries-api/Pipfile
 COPY Pipfile.lock /src/ngsi-timeseries-api/Pipfile.lock
 RUN cd /src/ngsi-timeseries-api && { pipenv lock -r > /requirements.txt; }
 RUN pip install -r /requirements.txt
+RUN pip install supervisor
 
 FROM base
 RUN apk --no-cache add curl

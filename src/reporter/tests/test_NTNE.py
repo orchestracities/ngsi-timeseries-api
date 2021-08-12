@@ -43,17 +43,17 @@ def test_NTNE_defaults(service, reporter_dataset):
 
     obtained = r.json()
     expected = [{
-        "id": 'Kitchen0',
+        "entityId": 'Kitchen0',
         "index": [
             "1980-01-30T00:00:00.000+00:00"
         ],
-        "type": 'Kitchen'
+        "entityType": 'Kitchen'
     }, {
-        "id": 'Room0',
+        "entityId": 'Room0',
         "index": [
             "1970-01-30T00:00:00.000+00:00"
         ],
-        "type": 'Room'
+        "entityType": 'Room'
     }]
 
     assert obtained == expected
@@ -91,9 +91,9 @@ def test_NTNE_type(service, reporter_dataset):
         '1970-01-{:02}T00:00:00.000+00:00'.format(i + 1) for i in expected_values
     ]
     expected = [{
-        'id': 'Room0',
+        'entityId': 'Room0',
         'index': [expected_index[-1]],
-        'type': expected_type
+        'entityType': expected_type
     }]
     assert obtained == expected
 
@@ -125,13 +125,13 @@ def test_NTNE_fromDate_toDate(service, reporter_dataset):
     # Assert
     obtained = r.json()
     expected = [{
-        'id': expected_id_1,
+        'entityId': expected_id_1,
         'index': expected_index_1,
-        'type': expected_type_1
+        'entityType': expected_type_1
     }, {
-        'id': expected_id,
+        'entityId': expected_id,
         'index': expected_index,
-        'type': expected_type
+        'entityType': expected_type
     }]
     assert obtained == expected
 
@@ -161,13 +161,13 @@ def test_NTNE_fromDate_toDate_with_quotes(service, reporter_dataset):
     # Assert
     obtained = r.json()
     expected = [{
-        'id': expected_id_1,
+        'entityId': expected_id_1,
         'index': expected_index_1,
-        'type': expected_type_1
+        'entityType': expected_type_1
     }, {
-        'id': expected_id,
+        'entityId': expected_id,
         'index': expected_index,
-        'type': expected_type
+        'entityType': expected_type
     }]
     assert obtained == expected
 
@@ -193,9 +193,9 @@ def test_NTNE_limit(service, reporter_dataset):
     # Assert
     obtained = r.json()
     expected = [{
-        'id': expected_id,
+        'entityId': expected_id,
         'index': expected_index,
-        'type': expected_type
+        'entityType': expected_type
     }]
     assert len(obtained) == len(expected)
 
@@ -221,9 +221,9 @@ def test_NTNE_offset(service, reporter_dataset):
     # Assert
     obtained = r.json()
     expected = [{
-        'id': expected_id,
+        'entityId': expected_id,
         'index': expected_index,
-        'type': expected_type
+        'entityType': expected_type
     }]
     assert len(obtained) == len(expected)
 
@@ -251,8 +251,8 @@ def test_NTNE_combined(service, reporter_dataset):
     # Assert
     obtained = r.json()
     expected = [{
-        'id': expected_id,
+        'entityId': expected_id,
         'index': expected_index,
-        'type': expected_type
+        'entityType': expected_type
     }]
     assert obtained == expected
