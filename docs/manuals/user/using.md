@@ -125,7 +125,7 @@ before.
         "value": 720,
         "type": "Number",
         "metadata": {}
-    }
+    },
     "colour": {
         "value": "white",
         "type": "Text",
