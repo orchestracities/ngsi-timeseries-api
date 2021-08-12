@@ -1,324 +1,456 @@
-# QuantumLeap
+# Using QuantumLeap
 
-[![FIWARE Core Context Management](https://img.shields.io/badge/FIWARE-Core-233c68.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABsAAAAVCAYAAAC33pUlAAAABHNCSVQICAgIfAhkiAAAA8NJREFUSEuVlUtIFlEUx+eO+j3Uz8wSLLJ3pBiBUljRu1WLCAKXbXpQEUFERSQF0aKVFAUVrSJalNXGgmphFEhQiZEIPQwKLbEUK7VvZrRvbr8zzjfNl4/swplz7rn/8z/33HtmRhn/MWzbXmloHVeG0a+VSmAXorXS+oehVD9+0zDN9mgk8n0sWtYnHo5tT9daH4BsM+THQC8naK02jCZ83/HlKaVSzBey1sm8BP9nnUpdjOfl/Qyzj5ust6cnO5FItJLoJqB6yJ4QuNcjVOohegpihshS4F6S7DTVVlNtFFxzNBa7kcaEwUGcbVnH8xOJD67WG9n1NILuKtOsQG9FngOc+lciic1iQ8uQGhJ1kVAKKXUs60RoQ5km93IfaREvuoFj7PZsy9rGXE9G/NhBsDOJ63Acp1J82eFU7OIVO1OxWGwpSU5hb0GqfMydMHYSdiMVnncNY5Vy3VbwRUEydvEaRxmAOSSqJMlJISTxS9YWTYLcg3B253xsPkc5lXk3XLlwrPLuDPKDqDIutzYaj3eweMkPeCCahO3+fEIF8SfLtg/5oI3Mh0ylKM4YRBaYzuBgPuRnBYD3mmhA1X5Aka8NKl4nNz7BaKTzSgsLCzWbvyo4eK9r15WwLKRAmmCXXDoA1kaG2F4jWFbgkxUnlcrB/xj5iHxFPiBN4JekY4nZ6ccOiQ87hgwhe+TOdogT1nfpgEDTvYAucIwHxBfNyhpGrR+F8x00WD33VCNTOr/Wd+9C51Ben7S0ZJUq3qZJ2OkZz+cL87ZfWuePlwRcHZjeUMxFwTrJZAJfSvyWZc1VgORTY8rBcubetdiOk+CO+jPOcCRTF+oZ0okUIyuQeSNL/lPrulg8flhmJHmE2gBpE9xrJNkwpN4rQIIyujGoELCQz8ggG38iGzjKkXufJ2Klun1iu65bnJub2yut3xbEK3UvsDEInCmvA6YjMeE1bCn8F9JBe1eAnS2JksmkIlEDfi8R46kkEkMWdqOv+AvS9rcp2bvk8OAESvgox7h4aWNMLd32jSMLvuwDAwORSE7Oe3ZRKrFwvYGrPOBJ2nZ20Op/mqKNzgraOTPt6Bnx5citUINIczX/jUw3xGL2+ia8KAvsvp0ePoL5hXkXO5YvQYSFAiqcJX8E/gyX8QUvv8eh9XUq3h7mE9tLJoNKqnhHXmCO+dtJ4ybSkH1jc9XRaHTMz1tATBe2UEkeAdKu/zWIkUbZxD+veLxEQhhUFmbnvOezsJrk+zmqMo6vIL2OXzPvQ8v7dgtpoQnkF/LP8Ruu9zXdJHg4igAAAABJRU5ErkJgggA=)](https://www.fiware.org/developers/catalogue/)
-[![stackoverflow](https://img.shields.io/badge/tag-fiware-orange.svg?logo=stackoverflow)](https://stackoverflow.com/questions/tagged/fiware)
+First you need to have QuantumLeap and its complementary services running (of
+course). Refer to the [Installation Manual](../admin/index.md) for instructions.
 
-## Overview
+Then, you need to connect *Orion Context Broker* to QuantumLeap through an
+[NGSIv2 subscription](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions)
+for each [Entity Type](https://orioncontextbroker.docs.apiary.io/#introduction/specification/terminology)
+whose historical data you are interested in.
 
-QuantumLeap is a REST service for storing, querying and retrieving
-[NGSI v2][ngsi-spec] and [NGSI-LD][ngsi-ld-spec]
-(*experimental support*) spatial-temporal data. QuantumLeap converts
-NGSI semi-structured data into tabular format and stores it in a
-[time-series database][tsdb], associating each database record with
-a time index and, if present in the NGSI data, a location on Earth.
-REST clients can then retrieve NGSI entities by filtering entity sets
-through time ranges and spatial operators. Note that, from the client's
-stand point, these queries are defined on NGSI entities as opposed
-to database tables. However, the query functionality available through
-the REST interface is quite basic and most complex queries typically
-require clients to use the database directly.
+Not an Orion expert yet? No problem, you can create the subscription through
+QuantumLeap's API. However, you will still need to understand the basics of
+how subscriptions and notifications work, so take your time to read
+[the docs](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#ubscriptions).
 
-The REST [API specification][ql-spec], dubbed NGSI-TSDB, which
-QuantumLeap implements has been defined with the goal of providing
-a database-agnostic REST interface for the storage, querying and
-retrieval of NGSI entity time series that could be as close as possible
-to the NGSI specification itself. Thus NGSI-TSDB provides a uniform
-and familiar (to FIWARE developers) mechanism to access time
-series data which allows implementing services such as QuantumLeap
-to transparently support multiple database back ends. In fact,
-presently QuantumLeap supports both [CrateDB][crate] and
-[Timescale][timescale] as back end databases.
+Historical data for each entity type will be added in the QuantumLeap's database
+as long as the subscription is active, correctly configured and the entity in
+the notification is NGSI compliant.
 
-### NGSI-LD support
+In case the subscription is removed or its status is changed, no data will be
+added after that. Although the previous data stored in QuantumLeap's database
+will persist until it is removed externally using APIs to delete data stored
+in QuantumLeap.
 
-PR [#373](https://github.com/orchestracities/ngsi-timeseries-api/pulls/373)
-introduced basic support for basic [NGSI-LD][ngsi-ld-spec] relying on v2 API.
-In short this means that using the current endpoint QL can
-store NGSI-LD payloads with few caveats (see
-[#398](https://github.com/orchestracities/ngsi-timeseries-api/issues/398)):
+So, summing up, the usage flow is therefore the following...
 
-- temporal attributes are not currently supported
-  ([#395](https://github.com/orchestracities/ngsi-timeseries-api/issues/395));
-  what is relevant here is that this attributes are
-  used to create the time index of the series
+- Create an Orion subscription for each entity type of your interest
+- Insert/Update your entities in Orion as usual
+- Your historical data will be persisted in QuantumLeap's database
 
-- other attributes may be added as well in future (not a priority probably,
-  so may not be tackled any time
-  [#396](https://github.com/orchestracities/ngsi-timeseries-api/issues/396))
+Let's take a closer look at each step.
 
-- context is currently not stored.
+## Orion Subscription
 
-- query endpoints returns NGSIv2 data types.
+As stated before, the link between Orion and QuantumLeap is established
+through a subscription you need to create. It is therefore important that you
+understand well how the NGSIv2 Subscription mechanism works. This is carefully
+explained in the corresponding section of [Orion docs](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions).
 
-NGSI-LD temporal queries seem to have a semantic that implies that
-only numeric values are tracked in time series. This was never the case
-for QL that trace over time any attribute (also not numeric ones),
-since they may change as well.
+To create the subscription, QuantumLeap offers an API endpoint documented
+[here at /subscribe](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
 
-NGSI-LD semantics also seem to track values over time
-of single attributes. QL to enable to retrieve full entity values in a given
-point in time stores the whole entity in a single table (this avoids the need
-for JOINs that are notoriously time consuming - but on the other hand generates
-more sparse data). In doing so, we create for the entity a single time index,
-this is due to the fact that while different dateTime attributes can be defined
-and hence queried, only one can be used to index time series in
-all modern timeseries DB (to achieve performance).
-This imply that we have a policy to compute such time index (either custom
-and referring to an attribute of the entity, or using the "latest" time
-metadata linked to the entity or to an attribute).
-The issue is that if the notification payload sent to QL includes all
-attributes, also not update ones, QL will "timestamp" all values (also old ones)
-with that timestamp.
+Alternatively, you can directly talk to Orion and create the subscription as you
+prefer. Here's an example of the payload of the subscription you need to create
+in Orion to establish the link Orion-QuantumLeap.
 
-This means that the ability to track a specific value
-of an attribute in a point in time depends on the actual notification.
+```json
+    {
+        "description": "Test subscription",
+        "subject": {
+            "entities": [
+            {
+                "idPattern": ".*",
+                "type": "Room"
+            }
+            ],
+            "condition": {
+                "attrs": [
+                "temperature"
+                ]
+            }
+        },
+        "notification": {
+            "http": {
+                "url": "http://quantumleap:8668/v2/notify"
+            },
+            "attrs": [
+            "temperature"
+            ],
+            "metadata": ["dateCreated", "dateModified"]
+        },
+        "throttling": 5
+    }
+```
 
-In short, given that we aim to ensure both forward compatibility
-(data store as NGSIv2 can be queried in future as NGSI-LD)
-and backward compatibility (data store as NGSI-LD can be queried as NGSIv2),
-implementing NGSI-LD temporal api, may not be 100% compliant with
-the specs.
+Important things to notice from the subscription.
 
-### Relation to STH Comet
+- Notifications must come in complete [NGSI JSON Entity Representation](http://docs.orioncontextbroker.apiary.io/#introduction/specification/json-attribute-representation)
+ form. Other forms, such as the [simplified entity representation](http://docs.orioncontextbroker.apiary.io/#introduction/specification/simplified-entity-representation)
+ are **NOT** supported by QL because they lack information on attribute types,
+ required by QL to make proper translations. This means, *DO NOT* use options
+ like `"attrsFormat": "keyValues"`
 
-Although QuantumLeap and FIWARE [STH Comet][comet] share similar
-goals, Comet doesn't support multiple database back ends (only
-MongoDB is available) and doesn't support NGSI v2 either. While
-Comet per se is a fine piece of software, some of the needs and
-assumptions that prompted its developments are no longer current.
-QuantumLeap started out as an exploration of an alternative way
-to make historical data available to the FIWARE ecosystem without
-committing to a specific database back end.
+- The `"url"` field of the subscription specifies where Orion will send the
+notifications. I.e, this must be QuantumLeap's `/v2/notify` endpoint.
+By default, QuantumLeap listens at port `8668`. This url must be resolvable
+from Orion's container, so avoid using *localhost* or something that will not
+translate either by Docker, your `/etc/hosts` or DNS to the endpoint where
+QuantumLeap is running.
 
-## Operation
+- Though not compulsory, it is highly recommended to include the
+`"metadata": ["dateCreated", "dateModified"]` part in the `notification`
+part of the subscription. This instructs Orion to include the modification time
+of the attributes in the notification. This timestamp will be used as the
+**time index** in the database if possible. See the *Time Index* section for
+more details.
 
-Typically QuantumLeap acquires IoT data, in the form of NGSI entities,
-from a FIWARE IoT Agent layer indirectly through NGSI notifications
-set up upfront with the context broker, [Orion][orion]. (We assume
-the reader is familiar with the NGSI publish-subscribe mechanism
-described in the *Notification Messages* and *Subscriptions* sections
-of the [NGSI specification][ngsi-spec].) As mentioned earlier, incoming
-NGSI entities are converted to database records and stored in one
-of the configured time series database back ends---typically, a
-database cluster. Often visualisation tools such as [Grafana][grafana]
-are deployed too in order to visualise the time series data
-that QuantumLeap stores in the database. The below diagram illustrates
-relationships and interactions among these systems in a typical
-QuantumLeap deployment scenario.
+- You can create any valid NGSI subscription for your entities respecting the
+previous rules.
 
-![QL Architecture](rsrc/architecture.png)
+## Data Insertion
 
-In order for QuantumLeap to receive data from Orion, a client creates
-a subscription in Orion specifying which entities should be notified
-when a change happens. The diagram shows a client creating a subscription
-directly with QuantumLeap **(1)**: this is just a convenience end point
-in the QuantumLeap REST API that simply forwards the client subscription
-to Orion. (You can read more about setting up subscriptions in the
-[Orion Subscription][ql-man.sub] section of the QuantumLeap manual.)
+By now, it should be clear you don't typically insert data directly into
+QuantumLeap. You insert into Orion and Orion notifies QuantumLeap.
+For inserts and updates in Orion, refer to the [docs](http://fiware-orion.readthedocs.io/en/latest/user/walkthrough_apiv2/index.html#issuing-commands-to-the-broker).
 
-From this point on, when [Agents in the IoT layer][fw-catalogue] push
-data to the context broker **(2)**, if the data pertains to entities
-pinpointed by the client subscription, Orion forwards the data to
-QuantumLeap by POSTing NGSI entities to QuantumLeap's
-[notify end point][ql-spec] **(3)**.
+It's not a problem if inserts were done before you created the
+subscription. Of course, you will only get historical records of the updates
+happening after the subscription was created.
 
-QuantumLeap's **Reporter** component parses and validates POSTed data.
-Additionally, if geo-coding is configured, the **Reporter** invokes
-the **Geocoder** component to harmonise the location representation
-of the notified entities, which involves looking up geographic information
-in [OpenStreetMap][osm] (OSM). Finally, the **Reporter** passes on
-the validated and harmonised NGSI entities to a **Translator** component.
-**Translators** convert NGSI entities to tabular format and persist
-them as time series records in the database. There is a **Translator**
-component in correspondence of each supported database back end - see
-section below. Depending on [configuration][ql-man.db-sel], the
-**Reporter** chooses which **Translator** to use.
+Here's an example of an insert payload to Orion that will generate a
+notification to QuantumLeap based on the "Test subscription" example shown
+before.
 
-When a client queries the REST API to retrieve NGSI entities **(4)**,
-the **Reporter** and **Translator** interact to turn the Web query
-into a SQL query with spatial and temporal clauses, retrieve the
-database records and convert them back to the NSGI entity time series
-eventually returned to the client. As noted earlier, the query
-functionality available through the REST interface is quite basic:
-QuantumLeap supports filtering by time range, geographical queries
-as defined by the [NGSI specification][ngsi-spec] and simple
-aggregate functions such as averages. Other than that, QuantumLeap
-also supports deleting historical records but note that presently
-it does **not** implement in full the NGSI-TSDB specification - please
-refer to the REST API [specification][ql-spec] for the details.
+```json
+{
+    "id": "Room1",
+    "type": "Room",
+    "temperature": {
+        "value": 24.2,
+        "type": "Number",
+        "metadata": {}
+    },
+    "pressure": {
+        "value": 720,
+        "type": "Number",
+        "metadata": {}
+    }
+    "colour": {
+        "value": "white",
+        "type": "Text",
+        "metadata": {}
+    }
+}
+```
 
-Finally, the diagram shows Grafana querying the database directly
-in order to visualise time series for a Web client **(5)**.
-In principle, it should be possible to develop a Grafana plugin
-to query the QuantumLeap REST API instead of the database which
-would shield visualisation tools from QuantumLeap internals. In
-fact, there are plans to develop such a plugin in the (not-so-distant!)
-future.
+If you have a custom scenario and still want to directly insert to QuantumLeap,
+it is not impossible. However, you will have to use the same payload Orion uses
+in the Notification. Also, you will need attention to some other details you
+will have to discover on your own. This is not fully documented because it's not
+considered a common workflow.
 
-## Database Back Ends
+### Attributes DataType Translation
 
-One guiding principle in QuantumLeap design has been the ability
-to use multiple time series databases. This design choice is justified
-by the fact that a database product may be more suitable than
-another depending on circumstances at hand. Currently QuantumLeap
-can be used with both [CrateDB][crate] and [Timescale][timescale].
+You need to make sure your NGSI entities are using the valid NGSI types for the
+attributes, which are documented in the *Specification* section of the
+[NGSI API](http://telefonicaid.github.io/fiware-orion/api/v2/latest/).
+See the first column of the translation table below, and mind its
+capitalisation.
 
-The [Database Selection][ql-man.db-sel] section of this manual
-explains how to configure QuantumLeap to use one of the available
-database back ends.
+The tables below show which attribute types will be translated to which
+[CrateDB](https://crate.io/docs/crate/reference/sql/data_types.html)
+or [TimescaleDB](https://www.postgresql.org/docs/current/datatype.html) data types.
 
-### CrateDB back end
+#### CrateDB (v4.x) Translation Table
 
-[CrateDB][crate] is the default back end. It is easy to scale thanks
-to its shared-nothing architecture which lends itself well to
-[containerisation][crate-doc.cont] so it is relatively easy to
-manage a containerised CrateDB database cluster, e.g. using Kubernetes.
-Moreover, CrateDB uses [SQL][crate-doc.sql] to query data, with
-built-in extensions for temporal and [geographical queries][crate-doc.geo].
-CrateDB offers as well a Postgres API, making simpler its integration.
-For example, you can leverage Grafana [PostgreSQL plugin][grafana.pg]
-to visualise time series stored in CrateDB.
+| NGSI Type          | CrateDB Type          | Observation |
+| ------------------ |:-----------------------:| :-----------|
+|Array               | [array(string)](https://crate.io/docs/crate/reference/sql/data_types.html#array)           | [Issue 36: Support arrays of other types](https://github.com/smartsdk/ngsi-timeseries-api/issues/36) |
+|Boolean             | [boolean](https://crate.io/docs/crate/reference/sql/data_types.html#boolean)                 | - |
+|DateTime            | [timestampz](https://crate.io/docs/crate/reference/en/4.3/general/ddl/data-types.html#timestamp-with-time-zone)                 | 'ISO8601' can be used as equivalent of 'DateTime'. |
+|Integer             | [bigint](https://crate.io/docs/crate/reference/sql/data_types.html#numeric-types)                  | - |
+|[geo:point](http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities)            | [geo_point](https://crate.io/docs/crate/reference/sql/data_types.html#geo-point)               | **Attention!** NGSI uses "lat, long" order whereas CrateDB stores points in [long, lat] order.|
+|[geo:json](http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities)            | [geo_shape](https://crate.io/docs/crate/reference/sql/data_types.html#geo-shape)               | - |
+|Number              | [real](https://crate.io/docs/crate/reference/sql/data_types.html#numeric-types)                   |-|
+|Text                | [text](https://crate.io/docs/crate/reference/sql/data_types.html#data-type-text)                  | This is the default type if the provided NGSI Type is unsupported or wrong. |
+|StructuredValue     | [object](https://crate.io/docs/crate/reference/sql/data_types.html#object)                  |-|
 
-QuantumLeap stores NGSI entities in CrateDB using the `notify` endpoint.
+#### TimescaleDB (v12.x) Translation Table
 
-    -------------------------          ---------------
-    |        CrateDB        |  <-----  | QuantumLeap |-----O notify
-    -------------------------          ---------------
+| NGSI Type          | TimescaleDB Type          | Observation |
+| ------------------ |:-----------------------:| :-----------|
+|Array               | [jsonb](https://www.postgresql.org/docs/current/datatype-json.html)           |  |
+|Boolean             | [boolean](https://www.postgresql.org/docs/current/datatype-boolean.html)                 | - |
+|DateTime            | [timestamp WITH TIME ZONE](https://www.postgresql.org/docs/current/datatype-datetime.html)                 | 'ISO8601' can be used as equivalent of 'DateTime'. |
+|Integer             | [bigint](https://www.postgresql.org/docs/current/datatype-numeric.html#DATATYPE-INT)                  | - |
+|[geo:point](http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities)            | [geometry](https://postgis.net/docs/geometry.html)               | **Attention!** NGSI uses "lat, long" order whereas PostGIS/WGS84 stores points in [long, lat] order.|
+|[geo:json](http://docs.orioncontextbroker.apiary.io/#introduction/specification/geospatial-properties-of-entities)            | [geometry](https://postgis.net/docs/geometry.html)               | - |
+|Number              | [float](https://www.postgresql.org/docs/current/datatype-numeric.html#DATATYPE-FLOAT)                   |-|
+|Text                | [text](https://www.postgresql.org/docs/current/datatype-character.html)                  | This is the default type if the provided NGSI Type is unsupported or wrong. |
+|StructuredValue     | [jsonb](https://www.postgresql.org/docs/current/datatype-json.html)                  |-|
 
-### Timescale back end
+If the type of any of the received attributes is not present in the column
+*NGSI Type* of the previous table, the *NGSI Type* (and hence the SQL type)
+will be derived from the value. Using the following logic:
 
-[Timescale][timescale] is another time series databases that can be
-used with QuantumLeap as a back end to store NGSI entity time series.
-Indeed, QuantumLeap provides full support for storing NGSI entities in
-Timescale, including geographical features (encoded as GeoJSON or NGSI
-Simple Location Format), structured types and arrays.
+```python
+if a_type not in NGSI
+    type = Text
+    if a_value is a list:
+       type = Array
+    elif a_value is not None and a_value is an Object:
+        if a_type is 'Property' and a_value['@type'] is 'DateTime':
+            type = DateTime
+        else:
+            type = StructuredValue
+    elif a_value is int:
+        type = Integer
+    elif a_value is float:
+        type = Number
+    elif a_value is bool:
+        type = Boolean
+    elif a_value is an ISO DateTime:
+        type = DateTime
+```
 
-QuantumLeap stores NGSI entities in Timescale using the
-`notify` endpoint (as for CrateDB).
-The Timescale back end is made up of [PostgreSQL][postgres]
-with both Timescale and [PostGIS][postgis] extensions enabled:
+### Data Casting
 
-    -------------------------
-    | Timescale     PostGIS |          ---------------
-    | --------------------- |  <-----  | QuantumLeap |-----O notify
-    |       Postgres        |          ---------------
-    -------------------------
+QuantumLeap uses DB schemas to store data in a flat way. This decision design decision,
+while not being space efficient given that often many values do not change between
+sequential inserts and enforcing attribute to have a consistent type overtime,
+increase the speed of retrieval of full entities removing need for joins that
+would be otherwise requested.
 
-PostgreSQL is a rock-solid, battle-tested, open source database,
-and its PostGIS extension provides excellent support for advanced
-spatial functionality while the Timescale extension has fairly
-robust support for time series data. The mechanics of converting
-an NGSI entity to tabular format stay pretty much the same as in
-the Crate back end except for a few improvements:
+This means that if an entity attribute was in origin received as a `Number`, following
+insert changing the same attribute to `Text` would fail. To mitigate this failures,
+QL attempts data casting, if casting is not possible, values are replace with `None`,
+to ensure that the insert in the data base its not failing totally for the received
+entity.
 
-- NGSI arrays are stored as (indexable & queryable) JSON as opposed
-  to the flat array of strings in the Crate back end.
+The following table shows how the casting works through examples:
+
+| Type          | Original value          | Stored value |
+| ------------- |:-----------------------:| :------------|
+| Number | 1.0 | 1.0 |
+| Number | 1 | 1.0 |
+| Number | True | None |
+| Number | "1.0" | 1.0 |
+| Number | "2017-06-19T11:46:45.00Z" | None |
+| Integer | 1.0 | 1 |
+| Integer | 1 | 1 |
+| Integer | True | None |
+| Integer | "1.0" | 1 |
+| Integer | "2017-06-19T11:46:45.00Z" | None |
+| DateTime | 1.0 | None |
+| DateTime | 1 | None |
+| DateTime | True | None |
+| DateTime | "error" | None |
+| DateTime | "2017-06-19T11:46:45.00Z" | "2017-06-19T11:46:45.000+00:00" |
+| Text | 1.0 | "1.0" |
+| Text | 1 | "1" |
+| Text | True | "True" |
+| Text | "1.0" | "1.0" |
+| Text | "2017-06-19T11:46:45.00Z" | "2017-06-19T11:46:45.00Z" |
+| Text | ["a", "b"] | "['a', 'b']" |
+| Text | {"test": "test"} | "{'test': 'test'}" |
+| StructuredValue | 1.0 | None |
+| StructuredValue | 1 | None |
+| StructuredValue | True | None |
+| StructuredValue | "1.0" | None |
+| StructuredValue | "2017-06-19T11:46:45.00Z" | None |
+| StructuredValue | {"test": "test"} | {"test": "test"} |
+| StructuredValue | ["a", "b"] | ["a", "b"] |
+| Property | 1.0 | 1.0 |
+| Property | 1 | 1 |
+| Property | True | True |
+| Property | "1.0" | "1.0" |
+| Property | "2017-06-19T11:46:45.00Z" | "2017-06-19T11:46:45.000+00:00" |
+| Property | {"test": "test"} | {"test": "test"} |
+| Property | ["a", "b"] | ["a", "b"] |
+
+**N.B.:** Casting logic may change in the future!
+
+### [Time Index](#timeindex)
+
+A fundamental element in the time-series database is the **time index**.
+You may be wondering... where is it stored? QuantumLeap will persist the
+*time index* for each notification in a special column called `time_index`.
+
+The value that is used for the *time index* of a received notification is
+defined according to the following policy, which choses the first present and
+valid time value chosen from the following ordered list of options.
+
+1. Custom **time index**. The value of the `Fiware-TimeIndex-Attribute` http
+header. Note that for a notification to contain such header, the corresponding
+subscription has to be created with an `httpCustom` block, as detailed in the
+*Subscriptions and Custom Notifications* section of the [NGSI spec](http://fiware.github.io/specifications/ngsiv2/stable/).
+This is the way you can instruct QL to use custom attributes of the
+notification payload to be taken as *time index* indicators.
+
+1. Custom **time index** metadata. The most recent custom time index
+(the value of the `Fiware-TimeIndex-Attribute`)
+attribute value found in any of the attribute metadata sections in the notification.
+See the previous option about the details regarding subscriptions.
+
+1. **TimeInstant** attribute. As specified in the
+[FIWARE IoT agent documentation](https://github.com/telefonicaid/iotagent-node-lib#the-timeinstant-element).
+
+1. **TimeInstant** metadata. The most recent `TimeInstant` attribute value
+found in any of the attribute metadata sections in the notification.
+(Again, refer to the [FIWARE IoT agent documentation](https://github.com/telefonicaid/iotagent-node-lib#the-timeinstant-element).)
+
+1. **timestamp** attribute.
+
+1. **timestamp** metadata. The most recent `timestamp` attribute value found
+in any of the attribute metadata section in the notification.
+As specified in the
+[FIWARE data models documentation](https://fiware-datamodels.readthedocs.io/en/latest/guidelines/index.html#dynamic-attributes).
+
+1. **dateModified** attribute. If you payed attention in the
+[Orion Subscription section](#orion-subscription), this is the `"dateModified"`
+value notified by Orion.
+
+1. **dateModified** metadata. The most recent dateModified attribute value
+found in any of the attribute metadata sections in the notification.
+
+1. Finally, QL will use the **Current Time** (the time of notification
+reception) if none of the above options is present or none of the values found
+can actually be converted to a `datetime`.
+
+### Restrictions and Limitations
+
+- You cannot have two entity types with the same name but different
+capitalisation. E.g: `Preprocessor` and `preProcessor`. The same applies for
+attribute names of a given entity. I.e, attributes `hotSpot` and `hotspot`
+will be treated as the same. These are rare corner-cases, but it is worth
+keeping in mind this. Ultimately, the correct naming of types and attributes
+should respect the naming guidelines explained
+[here](http://fiware-datamodels.readthedocs.io/en/latest/guidelines/index.html).
+
+- Attributes metadata are still not being persisted. See [Issue 12](https://github.com/orchestracities/ngsi-timeseries-api/issues/12)
+
+- While support for multiple data in a single notification as been recently introduced
+  (See [PR 191](https://github.com/orchestracities/ngsi-timeseries-api/pull/191)),
+  The following limitations still apply: a error in a single data entity will invalidate
+  the all set. There is not optimisation for large message size.
+
+- Data are assumed to be consistent. I.e., if the first data notification for
+  an entity type use a given set of data types for the attributes, the following
+  data notifications must be consistent, or they will be rejected. E.g. if
+  the data type of attribute `speed` of entity type `car` is set initially
+  to `Number`, later on it cannot be set to `Text`.
   
-- GeoJSON and NGSI Simple Location Format attributes are stored as
-  spatial data that can be indexed and queried - full support for
-  spatial attributes is still patchy in the Crate back end.
+### Inserting data into QuantumLeap directly
 
-The `test_timescale_insert.py` file in the QuantumLeap source base
-contains quite a number of examples of how NGSI data are stored in
-Timescale.
+To insert the data directly into quantum leap, we can use
+`http://localhost:8668/v2/notify` API, i.e.
+To notify QuantumLeap about the arrival of a new NGSI notification.
 
-#### Note: querying & retrieving database
+Consider the below example:
 
-At the moment, QuantumLeap implement experimental querying
-of data through the QuantumLeap REST API.
-This means that while REST API on top of CrateDB
-have been tested in production, this is not the case for
-Timescale.
+```bash
+curl http://localhost:8668/v2/notify -s -S -H 'Content-Type: application/json' -d @- <<EOF
+{ 
+    "subscriptionId": "5ce3dbb331dfg9h71aad5deeaa", 
+    "data": [ 
+        { 
+            "id": "Room1", 
+            "temperature": 
+               { 
+                 "value": "10", 
+                 "type": "Number" 
+               }, 
+             "pressure": 
+               { 
+                 "value": "12", 
+                 "type": "Number" 
+               }, 
+            "type": "Room" 
+        } 
+    ] 
+}
+```
 
-## Cache Back End
+The data will be inserted into QuantumLeap successfully.
 
-To reduce queries to databases or to geocoding APIs, QuantumLeap
-leverages a cache. The only cache backend supported so far
-is Redis.
-Caching support for queries to databases is *experimental*.
+## Data Retrieval
 
-    --------------------          ---------------
-    |        DB        |  ------  | QuantumLeap |-----O notify
-    --------------------          ---------------
-                                         |
-                                         |                                         
-                                  ---------------
-                                  |    Redis    |
-                                  ---------------                                        
+To retrieve historical data from QuantumLeap, you can use the API endpoints
+documented [here](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
+Note there are a lot of possibilities, but not all of them are fully
+implemented yet.
 
-As of today, the query caching stores:
+If you want to, you can interact directly with the database. For more details
+refer to the [CrateDB](../admin/crate.md) or to the [Timescale](../admin/timescale.md)
+section of the docs. What you need to
+know in this case is that QuantumLeap will create one table per each entity
+type. Table names are formed with a prefix (et) plus the lowercase version of
+the entity type. I.e, if your entity type is *AirQualityObserved*, the
+corresponding table name will be *etairqualityobserved*. Table names should be
+prefixed also with the schema where they are defined. See the
+[Multi-tenancy](#multi-tenancy) section below.
 
-- Version of CrateDB. Different version of CrateDB supports different SQL
-  dialects, so at each request we check which version of CrateDB
-  we are using. By caching this information, each thread will ask
-  this information only once. Of course this could be passed as variable,
-  but then live updates would require QL down time. Currently, you can
-  update from a Crate version to another with almost zero down time (except
-  the one caused by Crate not being in ready state), you would need
-  only to clear the key `crate` from redis cache. TTL in this case is
-  1 hour, i.e. after one hour version will be checked again against CrateDB.
-  
-- Metadata table. The metadata table is used to store information about the
-  mapping between original NGSI attributes (including type) to db column names.
-  Basically this information is required to perform "consistent" data injection
-  and to correctly NGSI type retrieved attributes by queries. Given concurrency
-  due to the support of multithread and ha deployment, cache in this case has by
-  default a shorter TTL (60 sec). Cache is anyhow re-set every time a change to
-  Metadata table occurs (e.g. in case the incoming payload include a new
-  entityType or a new attribute for an existing entityType). **Metadata**
-  for a specific entityType are removed only if a entityType is dropped, not
-  in case all its values are removed.
+Finally, you can interact with your data visually using [Grafana](https://grafana.com/).
+See the [Grafana](../admin/grafana.md) section of the docs to see how.
 
-## Further Readings
+## Data Removal
 
-- The [Admin Guide][ql-man.admin] explains how to install and run
-  QuantumLeap.
-- The [User Manual][ql-man.user] delves into how to use it and connect
-  it to other complementary services.
-- [FIWARE Time Series][ql-tut]: a complete, step-by-step, hands-on tutorial
-  to learn how to set up and use QuantumLeap.
+You can remove historical data from QuantumLeap in two different ways.
 
-[comet]: https://fiware-sth-comet.readthedocs.io/en/latest/
-    "FIWARE STH Comet Manual"
-[crate]: http://www.crate.io
-    "CrateDB Home"
-[crate-doc.cont]: https://crate.io/docs/crate/guide/en/latest/deployment/containers/
-    "CrateDB Containers"
-[crate-doc.geo]: https://crate.io/docs/crate/reference/en/latest/general/dql/geo.html
-    "CrateDB Geo-search"
-[crate-doc.sql]: https://crate.io/docs/crate/reference/en/latest/sql/index.html
-    "CrateDB SQL"
-[fw-catalogue]: https://www.fiware.org/developers/catalogue/
-    "FIWARE Catalogue"
-[grafana]: http://www.grafana.com
-    "Grafana Home"
-[grafana.pg]: http://docs.grafana.org/features/datasources/postgres/
-    "Grafana PostgreSQL Data Source"
-[ngsi-spec]: https://fiware.github.io/specifications/ngsiv2/stable/
-    "FIWARE-NGSI v2 Specification"
-[ngsi-ld-spec]: https://www.etsi.org/deliver/etsi_gs/CIM/001_099/009/01.01.01_60/gs_CIM009v010101p.pdf
-    "ETSI NGSI-LD API Specification"
-[orion]: https://fiware-orion.readthedocs.io
-    "Orion Context Broker Home"
-[osm]: https://www.openstreetmap.org
-    "OpenStreeMap Home"
-[postgres]: https://www.postgresql.org
-    "PostgreSQL Home"
-[postgis]: https://postgis.net/
-    "PostGIS Home"
-[ql-man.admin]: ./admin/index.md
-    "QuantumLeap - Admin Guide"
-[ql-man.db-sel]: ./admin/db-selection.md
-    "QuantumLeap - Database Selection"
-[ql-man.sub]: ./user/index.md#orion-subscription
-    "QuantumLeap - Orion Subscription"
-[ql-man.user]: ./user/index.md
-    "QuantumLeap - User Manual"
-[ql-spec]: https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb
-    "NGSI-TSDB Specification"
-[ql-tut]: https://fiware-tutorials.readthedocs.io/en/latest/time-series-data/
-    "FIWARE Tutorials - Time Series Data"
-[timescale]: https://www.timescale.com
-    "Timescale Home"
-[tsdb]: https://en.wikipedia.org/wiki/Time_series_database
-    "Wikipedia - Time series database"
+- To remove all records of a given entity, use [this /entities delete API endpoint](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
+
+- To remove all records of all entities of a given type, use
+[this /types delete API endpoint](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
+
+Use the filters to delete only records in certain intervals of time.
+
+## Multi-tenancy
+
+QuantumLeap supports the use of different tenants, just like Orion does with
+the usage FIWARE headers documented
+[here](https://fiware-orion.readthedocs.io/en/master/user/multitenancy/index.html).
+
+Recall the use of tenancy headers (`Fiware-Service` and `Fiware-ServicePath`) is
+optional. Data insertion and retrieval will work by default without those.
+However, if you use headers for the insertion, you need to specify the same ones
+when querying data.
+
+Note in the case of QuantumLeap, the headers at the time of insertion should
+actually be used by the client at the time of creating the
+[Subscription to Orion](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions)
+and also by the device when pushing data to Orion. As mentioned, the same
+headers will have to be used in order to retrieve such data.
+
+In case you are interacting directly with the database, you need to know that
+QuantumLeap will use the `FIWARE-Service` as the
+database schema for
+[crate](https://crate.io/docs/crate/reference/en/latest/general/ddl/create-table.html?highlight=scheme#schemas)
+or [timescale](https://www.postgresql.org/docs/current/ddl-schemas.html),
+with a specific prefix. This way, if you insert an entity of type
+`Room` using the `Fiware-Service: magic` header, you should expect to find your
+table as `mtmagic.etroom`. This information is also useful for example if you
+are configuring the Grafana datasource, as explained in the
+[Grafana section](../admin/grafana.md) of the docs.
+
+## GeoCoding
+
+This is an optional and experimental feature of QuantumLeap, which helps
+harmonising the way location information is stored in the historical records.
+
+The idea is that if entities arrive in QuantumLeap with an attribute of type
+`StructuredValue` and named `address`, QuantumLeap interprets this as an address
+field typically found in the [FIWARE Data Models](https://github.com/fiware/dataModels).
+It then adds to the entity an attribute called `location` of the corresponding
+geo-type. This means, if the address is a complete address with city,
+street name and postal number, it maps that to a point and hence the generated
+attribute will be of type `geo:point`. Without a postal number, the address
+will represent the street (if any) or the city boundaries (if any) or even the
+country boundaries. In these cases the generated location will be of the
+`geo:json` form and will contain the values of such shapes.
+
+**WARNING:** This feature uses [OpenStreetMap](https://www.openstreetmap.org)
+and its Nominatim service. As such, you need to be aware of its
+[copyright notes](https://www.openstreetmap.org/copyright) and most importantly
+of their Usage Policies ([API Usage Policy](https://operations.osmfoundation.org/policies/api/)
+and [Nominatim Usage Policy](https://operations.osmfoundation.org/policies/nominatim/)).
+You should not abuse of this free service and you should cache your requests.
+This is why you need to specify a cache in order to enable the geocoding.
+QuantumLeap uses [Redis](https://redis.io/) for that.
+
+So, to enable this feature, you need to pass (at initialisation time) to the
+QuantumLeap container the environment variable `USE_GEOCODING` set to `True`
+and the environment variables `REDIS_HOST` and `REDIS_PORT` respectively set to
+the location of your REDIS instance and its access port. See the
+[docker-compose-dev.yml](https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
+for example.
