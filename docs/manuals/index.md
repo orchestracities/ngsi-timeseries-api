@@ -133,6 +133,8 @@ In the second case, the **Reporter** stores on
 the validated and harmonised NGSI entities to the **Cache** component,
 that is acting as a message queue. The **Worker** component will read pending
 messages to be processed and will pass them to a **Translator** component.
+The [Admin Guide][ql-man.admin] contains more details about the
+[work queue][ql-man.wq].
 
 **Translator** convert NGSI entities to tabular format and persist
 them as time series records in the database. There is a **Translator**
@@ -318,6 +320,8 @@ As of today, the query caching stores:
     "QuantumLeap - Orion Subscription"
 [ql-man.user]: ./user/using.md
     "QuantumLeap - User Manual"
+[ql-man.wq]: ./admin/wq.md
+    "QuantumLeap - Work Queue"
 [ql-spec]: https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb
     "NGSI-TSDB Specification"
 [ql-tut]: https://fiware-tutorials.readthedocs.io/en/latest/time-series-data/
