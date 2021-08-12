@@ -58,7 +58,7 @@ crate.client.exceptions.ProgrammingError: SQLActionException[ColumnValidationExc
 This related to the fact that CrateDB does not support 3D coordinates,
 as documented in [admin documentation](../admin/crate.md).
 
-### Crate(3.x and 4.x) does not support nested arrays.
+### Crate(3.x and 4.x) does not support nested arrays
 
 When a table is created with two columns `x` and `y` of type object
 and array(object).
