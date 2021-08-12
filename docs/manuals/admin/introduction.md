@@ -54,7 +54,7 @@ ed9f8a60b6e8        crate:1.0.5            "/docker-entrypoint.…"   2 minutes 
 92e2129fec9b        redis                  "docker-entrypoint.s…"   2 minutes ago       Up 2 minutes             0.0.0.0:6379->6379/tcp                                          docker_redis_1
 ```
 
-Now you're ready to use QuantumLeap as instructed in the [User Manual](../user/index.md).
+Now you're ready to use QuantumLeap as instructed in the [User Manual](../user/using.md).
 
 When you are done experimenting, remember to teardown things.
 

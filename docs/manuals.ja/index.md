@@ -202,13 +202,13 @@ REST API を介したデータのクエリと取得が計画されています�
     "PostgreSQL Home"
 [postgis]: https://postgis.net/
     "PostGIS Home"
-[ql-man.admin]: ./admin/index.md
+[ql-man.admin]: ./admin/introduction.md
     "QuantumLeap - Admin Guide"
-[ql-man.db-sel]: ./admin/db-selection.md
-    "QuantumLeap - Database Selection"
-[ql-man.sub]: ./user/index.md#orion-subscription
+[ql-man.db-sel]: ./admin/configuration.md
+    "QuantumLeap - Configuration"
+[ql-man.sub]: ./user/using.md#orion-subscription
     "QuantumLeap - Orion Subscription"
-[ql-man.user]: ./user/index.md
+[ql-man.user]: ./user/using.md
     "QuantumLeap - User Manual"
 [ql-spec]: https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb
     "NGSI-TSDB Specification"

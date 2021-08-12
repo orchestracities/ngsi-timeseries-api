@@ -19,7 +19,7 @@ and so on) についてクエリできます。
 現在、CrateDB は 2D 座標をサポートしていますが、
 [3D 座標](https://tools.ietf.org/html/rfc7946#section-3.1)はサポートしていません。
 
-[インストールガイド](./index.md)に従った場合は、Docker コンテナ内ですぐに
+[インストールガイド](./introduction.md)に従った場合は、Docker コンテナ内ですぐに
 使用できる CrateDB インスタンスがあります。
 これとインタラクションする最も簡単な方法は、
 [ここ](https://crate.io/docs/crate/guide/getting_started/connect/admin_ui.html)

@@ -1,7 +1,7 @@
 # Using QuantumLeap
 
 First you need to have QuantumLeap and its complementary services running (of
-course). Refer to the [Installation Manual](../admin/index.md) for instructions.
+course). Refer to the [Installation Manual](../admin/introduction.md) for instructions.
 
 Then, you need to connect *Orion Context Broker* to QuantumLeap through an
 [NGSIv2 subscription](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions)
