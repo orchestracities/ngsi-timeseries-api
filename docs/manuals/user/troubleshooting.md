@@ -25,14 +25,14 @@ subscription? I.e, will Orion trigger notifications for that insert/update?
 
 - Is the location of QuantumLeap expressed in the *notify_url* field of the
 subscription a resolvable url for the containerised Orion? Review the
-[Usage Section](./index.md) for more details.
+[Usage Section](./using.md) for more details.
 
 - Are you running the different components behind firewalls? If so, did you
 open the corresponding ports? (See the [Ports](../admin/ports.md) section.)
 
 ### Cannot retrieve data
 
-- Are you using the correct FIWARE headers for the tenant? Refer to the [Multi-tenancy](index.md#multi-tenancy)
+- Are you using the correct FIWARE headers for the tenant? Refer to the [Multi-tenancy](using.md#multi-tenancy)
 part of the docs.
 
 - Is the endpoint you are using implemented? Note for now some of them are not.
