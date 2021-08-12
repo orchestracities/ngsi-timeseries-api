@@ -25,3 +25,4 @@ nav:
     - 'Data-Migration': 'admin/dataMigration.md'
     - 'Bechmarks': 'admin/benchmarks.md'
     - 'Telemetry': 'admin/telemetry.md'
+    - 'Work Queue': 'admin/wq.md'
