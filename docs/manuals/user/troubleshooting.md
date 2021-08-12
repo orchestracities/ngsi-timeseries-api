@@ -58,6 +58,23 @@ crate.client.exceptions.ProgrammingError: SQLActionException[ColumnValidationExc
 This related to the fact that CrateDB does not support 3D coordinates,
 as documented in [admin documentation](../admin/crate.md).
 
+**Note**- Crate(3.x and 4.x) does not support nested arrays.
+
+When a table is created with two columns `x` and `y` of type object
+and array(object).
+Inserting an object in x and y gives a below exception message:
+
+```#!/bin/bash
+create table t (x object, y array(object));
+insert into t (x) values ('{ "x": [1] }');
+  - ok
+insert into t (x) values ('{ "x": [[1, 2], [3, 4]] }');
+  - SQLActionException[ColumnValidationException: Validation failed for x:
+  -Cannot cast '{ "x": [[1, 2], [3, 4]] }' to type object]
+insert into t (y) values (['{ "x": [[1, 2], [3, 4]] }']);
+  -SQLActionException[ElasticsearchParseException:nested arrays not supported]
+```
+
 ### Sometimes it takes more than 500 msec to read the data sent to Orion in QuantumLeap
 
 QuantumLeap is a Timeseries API that stores values forwarded by the Context Broker,
