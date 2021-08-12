@@ -43,6 +43,7 @@ def run_test(service, entity_type, attr_name):
     assert query_result == {
         'attrName': attr_name,
         'entityId': entity['id'],
+        'entityType': entity_type,
         'values': [entity[attr_name]['value']]
     }
 
