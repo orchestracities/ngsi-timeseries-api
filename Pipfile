@@ -24,8 +24,6 @@ objsize = "~=0.3"
 redis = "~=3.5"
 requests = ">=2.20"
 rq = "~=1.8"
-
-
 # run `pipenv install --dev` to get the packages below in your env
 
 [dev-packages]
@@ -39,6 +37,7 @@ pytest = "~=3.0"
 pytest-cov = "~=2.7.1"
 coveralls = "~=2.0"
 lovely-pytest-docker = "~=0.2.0"
+pyyaml = "~=5.4"
 
 [requires]
 python_version = "3.8"
