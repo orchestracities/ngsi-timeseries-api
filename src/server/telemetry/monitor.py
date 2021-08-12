@@ -233,6 +233,9 @@ class Monitor:
             self._profiler = Profile()
             self._profiler.enable()
 
+    def monitoring_dir(self) -> str:
+        return self._monitoring_dir
+
     def start_duration_sample(self) -> str:
         return self._duration_sampler.sample()
 

@@ -1,0 +1,110 @@
+version: '3'
+
+services:
+
+#  crate:
+#    image: crate:${CRATE_VERSION:-4.1.4}
+#    command: crate -Cauth.host_based.enabled=false
+#      -Ccluster.name=democluster -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*"
+#    sysctls:
+#      net.core.somaxconn: 4096
+#      # see:
+#      # - https://serverfault.com/questions/518862/
+#      # - http://veithen.io/2014/01/01/how-tcp-backlog-works-in-linux.html
+#    ports:
+#      # Admin UI
+#      - "4200:4200"
+#      # Transport protocol
+#      - "4300:4300"
+
+  timescale:
+    image: timescale/timescaledb-postgis:${TIMESCALE_VERSION}
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=*
+
+  quantumleap-db-setup:
+    build: ../../../../timescale-container/
+    image: quantumleap-db-setup
+    depends_on:
+      - timescale
+    environment:
+      - QL_DB_PASS=*
+      - QL_DB_INIT_DIR=/ql-db-init
+      - PG_HOST=timescale
+      - PG_PASS=*
+
+  redis:
+    image: redis:${REDIS_VERSION}
+    sysctls:
+      net.core.somaxconn: 4096
+      # see:
+      # - https://serverfault.com/questions/518862/
+      # - http://veithen.io/2014/01/01/how-tcp-backlog-works-in-linux.html
+    ports:
+      - "6379:6379"
+
+  quantumleap:
+    build: ../../../../
+    image: ${QL_IMAGE:-orchestracities/quantumleap:latest}
+    command: --config server/gconfig_telemetry.py
+    sysctls:
+      net.core.somaxconn: 4096
+      # see:
+      # - https://serverfault.com/questions/518862/
+      # - http://veithen.io/2014/01/01/how-tcp-backlog-works-in-linux.html
+    ports:
+      - "8668:8668"
+    depends_on:
+      - redis
+      - timescale
+#      - crate
+    environment:
+      - WQ_OFFLOAD_WORK=true
+#      - WQ_MAX_RETRIES=3
+      - QL_DEFAULT_DB=timescale
+      - POSTGRES_HOST=timescale
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB_NAME=quantumleap
+      - POSTGRES_DB_USER=quantumleap
+      - POSTGRES_DB_PASS=*
+      - POSTGRES_USE_SSL=False
+      - CRATE_HOST=${CRATE_HOST:-crate}
+      - USE_GEOCODING=False
+      - CACHE_QUERIES=False
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - LOGLEVEL=INFO
+    volumes:
+      - ./_monitoring:/src/ngsi-timeseries-api/src/_monitoring
+
+#  # docker compose up -d --scale quantumleap-wq=4
+  quantumleap-wq:
+    build: ../../../../
+    image: ${QL_IMAGE:-orchestracities/quantumleap:latest}
+    entrypoint: python wq up --max-tasks 1000 --collect-telemetry-in _monitoring
+    depends_on:
+      - redis
+      - timescale
+#      - crate
+    environment:
+      - QL_DEFAULT_DB=timescale
+      - POSTGRES_HOST=timescale
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB_NAME=quantumleap
+      - POSTGRES_DB_USER=quantumleap
+      - POSTGRES_DB_PASS=*
+      - POSTGRES_USE_SSL=False
+      - CRATE_HOST=${CRATE_HOST:-crate}
+      - CACHE_QUERIES=False
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - LOGLEVEL=DEBUG
+    volumes:
+      - ./_monitoring:/src/ngsi-timeseries-api/src/_monitoring
+
+networks:
+  default:
+  # driver_opts:
+  # com.docker.network.driver.mtu: ${DOCKER_MTU:-1400}
