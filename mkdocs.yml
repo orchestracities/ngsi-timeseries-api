@@ -10,11 +10,11 @@ extra_css: ["https://www.fiware.org/style/fiware_readthedocs.css", "https://www.
 nav:
   - Home: 'index.md'
   - 'User & Programmers Manual':
-    - 'Introduction': 'user/using.md'
+    - 'Using QuantumLeap': 'user/using.md'
     - 'Troubleshooting': 'user/troubleshooting.md'
     - 'Contributing': 'user/contributing.md'
   - 'Installation & Administration Manual':
-    - 'Introduction': 'admin/introduction.md'
+    - 'Installing': 'admin/introduction.md'
     - 'Sanity Check': 'admin/check.md'
     - 'Ports': 'admin/ports.md'
     - 'Configuration': 'admin/configuration.md'
