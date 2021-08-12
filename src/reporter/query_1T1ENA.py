@@ -99,6 +99,7 @@ def query_1T1ENA(entity_id,   # In Path
         index = [] if aggr_method and not aggr_period else entities[0]['index']
         res = {
             'entityId': entity_id,
+            'entityType': entities[0]['type'],
             'index': index,
             'attributes': attributes
         }
@@ -117,4 +118,5 @@ def query_1T1ENA_value(*args, **kwargs):
     res = query_1T1ENA(*args, **kwargs)
     if isinstance(res, dict):
         res.pop('entityId', None)
+        res.pop('entityType', None)
     return res

@@ -64,6 +64,7 @@ def test_1T1ENA_defaults(service, reporter_dataset):
     ]
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -116,6 +117,7 @@ def test_1T1ENA_aggrMethod(
     # Assert
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': [],
         'attributes': [
             {
@@ -187,6 +189,7 @@ def test_1T1ENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
     # Assert Results
     expected = {
         'entityId': eid,
+        'entityType': etype,
         'index': exp_index,
         'attributes': [
             {
@@ -230,6 +233,7 @@ def test_1T1ENA_fromDate_toDate(service, reporter_dataset):
     # Assert
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -271,6 +275,7 @@ def test_1T1ENA_fromDate(service, reporter_dataset):
     # Assert
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -317,6 +322,7 @@ def test_1T1ENA_fromDate_and_last(service, last, reporter_dataset):
     # Assert
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -359,6 +365,7 @@ def test_1T1ENA_fromDate_toDate_with_quotes(service, reporter_dataset):
     # Assert
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -400,6 +407,7 @@ def test_1T1ENA_lastN(service, reporter_dataset):
     # Assert
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -442,6 +450,7 @@ def test_1T1E1A_lastN_with_limit(service, reporter_dataset):
     ]
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -485,6 +494,7 @@ def test_1T1ENA_limit(service, reporter_dataset):
     # Assert
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -526,6 +536,7 @@ def test_1T1ENA_offset(service, reporter_dataset):
     # Assert
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -569,6 +580,7 @@ def test_1T1ENA_combined(service, reporter_dataset):
     # Assert
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {

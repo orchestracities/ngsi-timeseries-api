@@ -48,7 +48,12 @@ def query_NTNE(limit=10000,
     if entities:
         res = []
         for entity in entities:
-            res.append(entity)
+            res_entity = {
+                'entityId': entity['id'],
+                'entityType': entity['type'],
+                'index': entity['index']
+            }
+            res.append(res_entity)
         logging.getLogger(__name__).info("Query processed successfully")
         return res
 
