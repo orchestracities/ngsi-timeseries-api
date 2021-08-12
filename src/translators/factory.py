@@ -1,5 +1,8 @@
 import logging
+
 from translators.crate import CrateTranslatorInstance
+from translators.errors import ErrorAnalyzer, CrateErrorAnalyzer, \
+    PostgresErrorAnalyzer
 from translators.timescale import postgres_translator_instance
 from utils.cfgreader import EnvReader, YamlReader, StrVar, MaybeString
 from utils.jsondict import maybe_string_match
@@ -41,9 +44,14 @@ def default_backend() -> MaybeString:
     return env_backend or config_backend or CRATE_BACKEND
 
 
-def translator_for(fiware_service: str):
+def backend_id_for(fiware_service: str) -> str:
     backend = lookup_backend(fiware_service)
     backend = backend.strip().lower() if backend is not None else ''
+    return backend
+
+
+def translator_for(fiware_service: str):
+    backend = backend_id_for(fiware_service)
 
     if backend == CRATE_BACKEND:
         translator = CrateTranslatorInstance()
@@ -58,3 +66,12 @@ def translator_for(fiware_service: str):
     log().debug(
         f"Backend selected for tenant '{fiware_service}' is: {selected}")
     return translator
+
+
+def error_analyser_for(fiware_service: str, error: Exception) \
+        -> ErrorAnalyzer:
+    backend = backend_id_for(fiware_service)
+
+    if backend == TIMESCALE_BACKEND:
+        return PostgresErrorAnalyzer(error)
+    return CrateErrorAnalyzer(error)

@@ -91,7 +91,7 @@ Postman を使用しない場合は、以下の同等の curl コマンドを使
 
   これはサニティチェックであるため、簡略化のために `options=keyValues`
   を使用しています。実際にこのようなオプションを使用すると、
-  [ユーザ・ガイド](../user/index.md#orion-subscription)
+  [ユーザ・ガイド](../user/using.md#orion-subscription)
   で説明されているように変換機能が失われる可能性があります。
 
 1. Orion の同じエンティティの降水値を更新します。
