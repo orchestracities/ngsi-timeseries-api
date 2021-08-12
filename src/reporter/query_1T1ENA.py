@@ -19,7 +19,8 @@ def query_1T1ENA(entity_id,   # In Path
                  offset=0,
                  georel=None,
                  geometry=None,
-                 coords=None):
+                 coords=None,
+                 datasource=False):
     """
     See /entities/{entityId}/attrs/{attrName} in API Specification
     quantumleap.yml
@@ -54,7 +55,8 @@ def query_1T1ENA(entity_id,   # In Path
                                    offset=offset,
                                    fiware_service=fiware_s,
                                    fiware_servicepath=fiware_sp,
-                                   geo_query=geo_query)
+                                   geo_query=geo_query,
+                                   datasource=datasource)
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)
         logging.getLogger(__name__).error(msg, exc_info=True)
@@ -81,6 +83,9 @@ def query_1T1ENA(entity_id,   # In Path
         if len(entities) > 1:
             import warnings
             warnings.warn("Not expecting more than one result for a 1T1ENA.")
+
+        if datasource:
+            return entities[0]
 
         attributes = []
         ignore = ('type', 'id', 'index')

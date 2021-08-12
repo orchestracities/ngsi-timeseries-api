@@ -914,7 +914,8 @@ class SQLTranslator(base_translator.BaseTranslator):
               offset=0,
               fiware_service=None,
               fiware_servicepath=None,
-              geo_query: SlfQuery = None):
+              geo_query: SlfQuery = None,
+              datasource=False):
         """
         This translator method is used by all API query endpoints.
 
@@ -1089,18 +1090,29 @@ class SQLTranslator(base_translator.BaseTranslator):
 
         result = []
         for tn in sorted(table_names):
-            op = "select {select_clause} " \
-                 "from {tn} " \
-                 "{where_clause} " \
-                 "{order_group_clause} " \
-                 "limit {limit} offset {offset}".format(
-                     select_clause=select_clause,
-                     tn=tn,
-                     where_clause=where_clause,
-                     order_group_clause=order_group_clause,
-                     limit=limit,
-                     offset=offset,
-                 )
+            if datasource:
+                op = "select {select_clause} " \
+                     "from {tn} " \
+                     "{where_clause} " \
+                     "order by time_index desc " \
+                     "limit 1".format(
+                         select_clause=select_clause,
+                         tn=tn,
+                         where_clause=where_clause,
+                     )
+            else:
+                op = "select {select_clause} " \
+                     "from {tn} " \
+                     "{where_clause} " \
+                     "{order_group_clause} " \
+                     "limit {limit} offset {offset}".format(
+                         select_clause=select_clause,
+                         tn=tn,
+                         where_clause=where_clause,
+                         order_group_clause=order_group_clause,
+                         limit=limit,
+                         offset=offset,
+                     )
             try:
                 self.cursor.execute(op)
             except Exception as e:
