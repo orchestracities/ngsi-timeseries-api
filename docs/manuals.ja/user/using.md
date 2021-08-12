@@ -1,7 +1,7 @@
 # QuantumLeap の使用
 
 まず、QuantumLeap とその補完サービスを稼動させる必要があります。手順については、
-[インストール・マニュアル](../admin/introduction.md)を参照してください。
+[インストール・マニュアル](../admin/installing.md)を参照してください。
 
 次に、 興味のある履歴データを持つ
 [エンティティ・タイプ](https://orioncontextbroker.docs.apiary.io/#introduction/specification/terminology)

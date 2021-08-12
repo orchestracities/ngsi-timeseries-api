@@ -10,7 +10,7 @@ Grafana に同梱されている
 [Postgres のデータソース](http://docs.grafana.org/features/datasources/postgres/)
 です。
 
-[インストール・ガイド](./introduction.md) に従っているのであれば、Docker コンテナ内で
+[インストール・ガイド](./installing.md) に従っているのであれば、Docker コンテナ内で
 既に Grafana が実行されています。ローカルに展開されている場合は、おそらく
 [http://0.0.0.0:3000](http://0.0.0.0:3000) です。
 

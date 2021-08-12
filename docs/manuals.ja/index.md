@@ -202,7 +202,7 @@ REST API を介したデータのクエリと取得が計画されています�
     "PostgreSQL Home"
 [postgis]: https://postgis.net/
     "PostGIS Home"
-[ql-man.admin]: ./admin/introduction.md
+[ql-man.admin]: ./admin/installing.md
     "QuantumLeap - Admin Guide"
 [ql-man.db-sel]: ./admin/configuration.md
     "QuantumLeap - Configuration"

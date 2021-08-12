@@ -9,7 +9,7 @@ your dashboards. In both cases, the Grafana data source to use is the
 [Postgres Datasource](http://docs.grafana.org/features/datasources/postgres/)
 which normally ships with recent versions of Grafana.
 
-If you followed the [Installation Guide](./introduction.md), you have already Grafana
+If you followed the [Installation Guide](./installing.md), you have already Grafana
 running in a Docker container. If deployed locally, it's probably at [http://0.0.0.0:3000](http://0.0.0.0:3000)
 
 If you're using the CrateDB back end, we suggest you read

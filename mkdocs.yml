@@ -14,7 +14,7 @@ nav:
     - 'Troubleshooting': 'user/troubleshooting.md'
     - 'Contributing': 'user/contributing.md'
   - 'Installation & Administration Manual':
-    - 'Installing': 'admin/introduction.md'
+    - 'Installing': 'admin/installing.md'
     - 'Sanity Check': 'admin/check.md'
     - 'Ports': 'admin/ports.md'
     - 'Configuration': 'admin/configuration.md'
