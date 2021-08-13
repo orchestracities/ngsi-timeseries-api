@@ -43,7 +43,7 @@ jobs:
       - run:
           name: Upload coverage data to coveralls.io
           command: |
-              pip3 install --upgrade coveralls
+              pip3 install --upgrade pyyaml coveralls
               coveralls
   test_reporter:
     machine:
@@ -82,7 +82,7 @@ jobs:
       - run:
           name: Upload coverage data to coveralls.io
           command: |
-              pip3 install --upgrade coveralls
+              pip3 install --upgrade pyyaml coveralls
               coveralls
   test_others:
     machine:
@@ -121,16 +121,17 @@ jobs:
       - run:
           name: Upload coverage data to coveralls.io
           command: |
-              pip3 install --upgrade coveralls
+              pip3 install --upgrade pyyaml coveralls
               coveralls
   coveralls:
     machine:
       image: ubuntu-2004:202008-01
     steps:
+      - checkout
       - run:
           name: Upload coverage data to coveralls.io
           command: |
-              pip3 install --upgrade coveralls
+              pip3 install --upgrade pyyaml coveralls
               coveralls --finish
 workflows:
   main:

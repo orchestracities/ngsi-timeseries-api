@@ -90,7 +90,7 @@ If you don't use Postman, you can use the equivalent curl commands bellow.
 
     Note we used `options=keyValues` for simplification just because this is a
     sanity check. If you use such option in practice, you may loose translation
-    capabilities as explained in the [user guide](../user/index.md#orion-subscription).
+    capabilities as explained in the [user guide](../user/using.md#orion-subscription).
 
 1. Update the precipitation value of the same entity in Orion.
 
