@@ -54,12 +54,12 @@ class CrateTranslator(sql_translator.SQLTranslator):
         url = "{}:{}".format(self.host, self.port)
         self.ccm = ConnectionManager()
         self.connection = self.ccm.get_connection('crate')
+        backoff_factor = 0.0
         if self.connection is None:
             try:
                 # Added backoff_factor for retry interval between attempt of consecutive retries
-                backoff_factor = 0.0
-                if os.environ.get("backoff_factor"):
-                    backoff_factor = float(os.environ["backoff_factor"])
+                if os.environ.get("CRATE_BACKOFF_FACTOR"):
+                    backoff_factor = float(os.environ["CRATE_BACKOFF_FACTOR"])
                     self.connection = client.connect([url], error_trace=True, backoff_factor=backoff_factor)
                     self.ccm.set_connection('crate', self.connection)
             except Exception as e:
