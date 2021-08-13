@@ -85,6 +85,24 @@ def query_1T1ENA(entity_id,   # In Path
             warnings.warn("Not expecting more than one result for a 1T1ENA.")
 
         if datasource:
+            index_value = entities[0]['index'][0]
+            entities[0]['dateModified'] = {
+                "type": "DateTime",
+                "value": index_value
+            }
+            entities[0].pop('index', None)
+            ignore = ('type', 'id', 'dateModified')
+            attrs = [at for at in sorted(entities[0].keys()) if at not in ignore]
+            for at in attrs:
+                at_value = entities[0][at]['values'][0]
+                entities[0][at].pop('values', None)
+                entities[0][at]['value'] = at_value
+            entityId = entities[0]['id']
+            entityType = entities[0]['type']
+            entities[0]['entityId'] = entityId
+            entities[0]['entityType'] = entityType
+            entities[0].pop('id', None)
+            entities[0].pop('type', None)
             return entities[0]
 
         attributes = []

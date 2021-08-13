@@ -658,19 +658,23 @@ def test_1T1ENA_datasource(service, reporter_dataset):
 
     # Assert
     expected = {
-        'id': entity_id,
-        'type': entity_type,
-        'index': ['1970-01-30T00:00:00+00:00'],
+        'entityId': entity_id,
+        'entityType': entity_type,
+        'dateModified':
+            {
+                'type': 'DateTime',
+                'value': '1970-01-30T00:00:00.000+00:00'
+            },
         'pressure':
             {
                 'type': 'Number',
-                'values': [290.0],
+                'value': 290.0
             },
         'temperature':
             {
                 'type': 'Number',
-                'values': [29.0],
+                'value': 29.0
             }
     }
     obtained = r.json()
-    assert_1T1ENA_response(obtained, expected)
+    assert obtained == expected
