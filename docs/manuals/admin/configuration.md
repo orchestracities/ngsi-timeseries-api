@@ -8,6 +8,7 @@ To configure QuantumLeap you can use the following environment variables:
 | -------------------|-------------------------|
 | `CRATE_HOST`       | CrateDB Host            |
 | `CRATE_PORT`       | CrateDB Port            |
+| `CRATE_BACKOFF_FACTOR`   | The time between the retries to connect crate is controlled by `CRATE_BACKOFF_FACTOR`. Default value is `0.0` |
 | `DEFAULT_LIMIT`    | Max number of rows a query can retrieve |
 | `KEEP_RAW_ENTITY`  | Whether to store original entity data |
 | `INSERT_MAX_SIZE`  | Maximum amount of data a SQL (bulk) insert should take |
@@ -36,7 +37,6 @@ To configure QuantumLeap you can use the following environment variables:
 | `WQ_FAILURE_TTL`   | How long, in seconds, before removing failed tasks from the work queue. Default: 604800 (a week). |
 | `WQ_SUCCESS_TTL`   | How long, in seconds, before removing successfully run tasks from the work queue. Default: 86400 (a day). |
 | `WQ_WORKERS`       | How many worker queue processors to spawn. |
-| `CRATE_BACKOFF_FACTOR`   | The time between the retries to connect crate is controlled by `backoff_factor`. |
 
 ### Notes
 
@@ -169,10 +169,9 @@ To configure QuantumLeap you can use the following environment variables:
   are managed by [Supervisor][supervisor] and will be automatically restarted
   if they crash.
   
-- `CRATE_BACKOFF_FACTOR`. The time between the retries is controlled by
-  `backoff_factor`, which is used for retry interval between attempt of
-  consecutive next try and so on. The Maximum value of `backoff factor`
-  which can be set as 120 .
+- `CRATE_BACKOFF_FACTOR`. The time between the cratedb connection retries is
+  defined by `CRATE_BACKOFF_FACTOR`. The Maximum value of `CRATE_BACKOFF_FACTOR`
+  is: `120`. The default value is `0.0`.
 
 ## Database selection per different tenant
 
