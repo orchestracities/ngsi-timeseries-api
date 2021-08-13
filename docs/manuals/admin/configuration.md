@@ -36,7 +36,7 @@ To configure QuantumLeap you can use the following environment variables:
 | `WQ_FAILURE_TTL`   | How long, in seconds, before removing failed tasks from the work queue. Default: 604800 (a week). |
 | `WQ_SUCCESS_TTL`   | How long, in seconds, before removing successfully run tasks from the work queue. Default: 86400 (a day). |
 | `WQ_WORKERS`       | How many worker queue processors to spawn. |
-| `backoff_factor`   | The time between the retries to connect crate is controlled by `backoff_factor`. |
+| `CRATE_BACKOFF_FACTOR`   | The time between the retries to connect crate is controlled by `backoff_factor`. |
 
 ### Notes
 
@@ -169,8 +169,8 @@ To configure QuantumLeap you can use the following environment variables:
   are managed by [Supervisor][supervisor] and will be automatically restarted
   if they crash.
   
-- `backoff_factor`. The time between the retries is controlled by
-  backoff_factor, which is used for retry interval between attempt of
+- `CRATE_BACKOFF_FACTOR`. The time between the retries is controlled by
+  `backoff_factor`, which is used for retry interval between attempt of
   consecutive next try and so on. The Maximum value of `backoff factor`
   which can be set as 120 .
 
