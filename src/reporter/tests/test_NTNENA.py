@@ -862,7 +862,8 @@ def test_NTNENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
         {
             'entityId': eid,
             'index': exp_index,
-            'values': [10.0, 10.0, 10.0]
+            'values': [expected_temperatures, expected_temperatures,
+                       expected_temperatures]
         },
     ]
     expected_types = [
