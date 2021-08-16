@@ -8,6 +8,7 @@
 - Add sql query to retrieve only last values of entities (#500)
 
 ### Bug fixes
+
 - Fix attributes names in /v2/entities query (#478)
 
 ### Documentation
