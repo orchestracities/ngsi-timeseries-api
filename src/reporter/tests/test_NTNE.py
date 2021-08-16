@@ -11,6 +11,7 @@ services = ['t1', 't2']
 entity_type_1 = 'Kitchen'
 entity_id_1 = 'Kitchen0'
 
+
 def query_url():
     url = "{qlUrl}/entities"
     return url.format(
@@ -27,7 +28,7 @@ def reporter_dataset():
                          entity_id=entity_id_1)
     yield
     for service in services:
-        delete_test_data(service, [entity_type,  entity_type_1])
+        delete_test_data(service, [entity_type, entity_type_1])
 
 
 # TODO we removed order comparison given that in
@@ -40,16 +41,16 @@ def test_NTNE_defaults(service, reporter_dataset):
     obtained = r.json()
     expected_index = "1970-01-30T00:00:00.000+00:00"
     expected = [
-    {
-        'entityId': entity_id_1,
-        'index': expected_index,
-        'entityType': 'Kitchen'
-    },
-    {
-        'entityId': entity_id,
-        'index': expected_index,
-        'entityType': 'Room'
-    }
+        {
+            'entityId': entity_id_1,
+            'index': expected_index,
+            'entityType': 'Kitchen'
+        },
+        {
+            'entityId': entity_id,
+            'index': expected_index,
+            'entityType': 'Room'
+        }
     ]
     assert obtained == expected
 
@@ -85,7 +86,7 @@ def test_NTNE_type(service, reporter_dataset):
         'entityId': 'Room0',
         'index': expected_index,
         'entityType': expected_type
-         }
+    }
     ]
     assert obtained == expected
 
@@ -102,7 +103,7 @@ def test_NTNE_fromDate_toDate(service, reporter_dataset):
     h = {'Fiware-Service': service}
     r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
-    
+
     entity_id_1 = 'Kitchen0'
     entity_type_1 = 'Kitchen'
     entity_type = 'Room'
@@ -112,16 +113,16 @@ def test_NTNE_fromDate_toDate(service, reporter_dataset):
     # Assert
     obtained = r.json()
     expected = [
-    {
-        'entityId': entity_id_1,
-        'index': expected_index,
-        'entityType': entity_type_1
-    },
-    {
-        'entityId': entity_id,
-        'index': expected_index,
-        'entityType': entity_type
-    }]
+        {
+            'entityId': entity_id_1,
+            'index': expected_index,
+            'entityType': entity_type_1
+        },
+        {
+            'entityId': entity_id,
+            'index': expected_index,
+            'entityType': entity_type
+        }]
     assert obtained == expected
 
 
@@ -135,7 +136,7 @@ def test_NTNE_fromDate_toDate_with_quotes(service, reporter_dataset):
     h = {'Fiware-Service': service}
     r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
-    
+
     entity_id_1 = 'Kitchen0'
     entity_type_1 = 'Kitchen'
     entity_type = 'Room'
@@ -144,16 +145,16 @@ def test_NTNE_fromDate_toDate_with_quotes(service, reporter_dataset):
     # Assert
     obtained = r.json()
     expected = [
-    {
-        'entityId': entity_id_1,
-        'index': expected_index,
-        'entityType': entity_type_1
-    },
-    {
-        'entityId': entity_id,
-        'index': expected_index,
-        'entityType': entity_type
-    }]
+        {
+            'entityId': entity_id_1,
+            'index': expected_index,
+            'entityType': entity_type_1
+        },
+        {
+            'entityId': entity_id,
+            'index': expected_index,
+            'entityType': entity_type
+        }]
     assert obtained == expected
 
 
@@ -177,10 +178,10 @@ def test_NTNE_limit(service, reporter_dataset):
     obtained = r.json()
     expected = [
         {
-        'entityId': entity_id,
-        'index': expected_index,
-        'entityType': entity_type
-    }]
+            'entityId': entity_id,
+            'index': expected_index,
+            'entityType': entity_type
+        }]
     assert obtained == expected
 
 
@@ -204,10 +205,10 @@ def test_NTNE_offset(service, reporter_dataset):
     obtained = r.json()
     expected = [
         {
-        'entityId': entity_id,
-        'index': expected_index,
-        'entityType': entity_type
-    }]
+            'entityId': entity_id,
+            'index': expected_index,
+            'entityType': entity_type
+        }]
     assert obtained == expected
 
 
