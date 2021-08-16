@@ -2,7 +2,6 @@ from conftest import QL_URL
 from reporter.tests.utils import insert_test_data, delete_test_data
 from datetime import datetime
 import pytest
-import time
 import requests
 
 entity_type = 'Room'
@@ -38,7 +37,6 @@ def test_NTNE_defaults(service, reporter_dataset):
     h = {'Fiware-Service': service}
     r = requests.get(query_url(), headers=h)
     assert r.status_code == 200, r.text
-    time.sleep(3)
     obtained = r.json()
     expected_index = "1970-01-30T00:00:00.000+00:00"
     expected = [
@@ -96,7 +94,6 @@ def test_NTNE_type(service, reporter_dataset):
     query_params = {
         'type': entity_type
     }
-    time.sleep(3);
     h = {'Fiware-Service': service}
     r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
@@ -132,7 +129,6 @@ def test_NTNE_fromDate_toDate(service, reporter_dataset):
         'fromDate': "1970-01-06T00:00:00+00:00",
         'toDate': "1980-01-17T00:00:00+00:00",
     }
-    time.sleep(3);
     h = {'Fiware-Service': service}
     r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
@@ -186,7 +182,6 @@ def test_NTNE_fromDate_toDate_with_quotes(service, reporter_dataset):
         'fromDate': '"1970-01-06T00:00:00+00:00"',
         'toDate': '"1980-01-17T00:00:00+00:00"',
     }
-    time.sleep(3)
     h = {'Fiware-Service': service}
     r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
