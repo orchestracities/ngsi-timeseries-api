@@ -10,6 +10,7 @@
 ### Bug fixes
 
 - Fix attributes names in /v2/entities query (#478)
+- Fix index ordering in /v2/entities query (#521)
 
 ### Documentation
 

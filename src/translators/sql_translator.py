@@ -1178,7 +1178,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                 if len_tn != len(table_names):
                     stmt += " union all "
 
-            op = stmt + " ORDER BY time_index DESC limit {limit} offset {offset}".format(
+            op = stmt + " ORDER BY time_index DESC, entity_type, entity_id limit {limit} offset {offset}".format(
                 offset=offset,
                 limit=limit
             )
