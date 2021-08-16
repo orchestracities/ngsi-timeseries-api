@@ -695,41 +695,39 @@ paths:
                 type: string
               entityType:
                 type: string
-              index:
-                $ref: '#/definitions/IndexArray'
+              dateModified:
+                type: string
           examples:
             application/json:
               [{
-                    "entityId": "Kitchen1",
-                    "index": [
-                      "2018-01-07T15:44:59"],
-                      'pressure': 
-                             {
-                             'type': 'Number',
-                             'values': [290.0]
-                             },
-                      'temperature':
-                             {
-                             'type': 'Number',
-                             'values': [29.0]
-                             },
-                    "entityType": "Kitchen"
+                  "entityId": "Kitchen1",
+                  "dateModified": "2018-01-07T15:44:59",
+                  'pressure':
+                     {
+                     'type': 'Number',
+                     'value': 290.0
+                     },
+                  'temperature':
+                     {
+                     'type': 'Number',
+                     'value': 29.0
+                     },
+                  "entityType": "Kitchen"
               },
               {
-                    "entityId": "Kitchen2",
-                    "index": [
-                      "2018-01-07T15:44:59"],
-                      'pressure': 
-                             {
-                             'type': 'Number',
-                             'values': [290.0]
-                             },
-                      'temperature':
-                             {
-                             'type': 'Number',
-                             'values': [29.0]
-                             },
-                    "entityType": "Kitchen"
+                  "entityId": "Kitchen2",
+                  "dateModified": "2018-01-07T15:44:59",
+                  'pressure':
+                     {
+                     'type': 'Number',
+                     'value': 290.0
+                     },
+                  'temperature':
+                     {
+                     'type': 'Number',
+                     'value': 29.0
+                     },
+                  "entityType": "Kitchen"
               }]
         404:
           description: "Not Found"
