@@ -756,9 +756,11 @@ class SQLTranslator(base_translator.BaseTranslator):
             return []
         return [r[0] for r in table_names]
 
-    def _get_select_clause(self, attr_names, aggr_method, aggr_period):
-        if not attr_names:
+    def _get_select_clause(self, attr_names, aggr_method, aggr_period, max_time=None):
+        if not attr_names and not max_time:
             return '*'
+        if not attr_names and max_time:
+            return '*, max(time_index) as time_index'
 
         attrs = ['entity_type', 'entity_id']
         if aggr_method:
@@ -774,7 +776,10 @@ class SQLTranslator(base_translator.BaseTranslator):
             attrs.extend(m.format(aggr_method, a, a) for a in set(attr_names))
 
         else:
-            attrs.append(self.TIME_INDEX_NAME)
+            if max_time:
+                attrs.append('max(time_index) as time_index')
+            else:
+                attrs.append(self.TIME_INDEX_NAME)
             attrs.extend('"{}"'.format(a) for a in attr_names)
 
         select = ','.join(attrs)
@@ -1166,40 +1171,135 @@ class SQLTranslator(base_translator.BaseTranslator):
             for tn in sorted(table_names):
                 len_tn += 1
                 if len_tn != len(table_names):
-                    op = "select * " \
+                    stmt += "select " \
+                            "entity_id, " \
+                            "entity_type, " \
+                            "max(time_index) as time_index " \
                             "from {tn} {where_clause} " \
-                            "order by time_index desc " \
-                            "limit 1 ".format(
+                            "group by entity_id, entity_type " \
+                            "union all ".format(
                                 tn=tn,
                                 where_clause=where_clause
                             )
                 else:
-                    op = "select * " \
+                    stmt += "select " \
+                            "entity_id, " \
+                            "entity_type, " \
+                            "max(time_index) as time_index " \
                             "from {tn} {where_clause} " \
-                            "order by time_index desc " \
-                            "limit 1 ".format(
+                            "group by entity_id, entity_type ".format(
                                 tn=tn,
                                 where_clause=where_clause
                             )
-                            
+
             # TODO ORDER BY time_index asc is removed for the time being
             #  till we have a solution for
             #  https://github.com/crate/crate/issues/9854
-                try:
-                    self.cursor.execute(op)
-                except Exception as e:
-                    self.sql_error_handler(e)
-                    self.logger.error(str(e), exc_info=True)
-                    entities = []
-                else:
-                    res = self.cursor.fetchall()
-                    col_names = self._column_names_from_query_meta(
-                        self.cursor.description)
-                    entities = self._format_response(res,
+            op = stmt + "ORDER BY time_index limit {limit} offset {offset}".format(
+                offset=offset,
+                limit=limit
+            )
+
+            try:
+                self.cursor.execute(op)
+            except Exception as e:
+                self.sql_error_handler(e)
+                self.logger.error(str(e), exc_info=True)
+                entities = []
+            else:
+                res = self.cursor.fetchall()
+                col_names = ['entity_id', 'entity_type', 'time_index']
+                entities = self._format_response(res,
                                                  col_names,
                                                  tn,
                                                  None)
-                result.extend(entities)
+            result.extend(entities)
+        return result
+
+    def query_last_value(self,
+                  entity_type=None,
+                  attr_names=None,
+                  from_date=None,
+                  to_date=None,
+                  limit=10000,
+                  offset=0,
+                  fiware_service=None,
+                  fiware_servicepath=None):
+        if limit == 0:
+            return []
+
+        #todo filter only selected attributes.
+
+        lower_attr_names = [a.lower() for a in attr_names] \
+            if attr_names else attr_names
+
+        select_clause = self._get_select_clause(lower_attr_names,
+                                                aggr_method,
+                                                aggr_period)
+
+        where_clause = self._get_where_clause(None,
+                                              from_date,
+                                              to_date,
+                                              fiware_servicepath,
+                                              None)
+
+        if entity_type:
+            table_names = [self._et2tn(entity_type, fiware_service)]
+        else:
+            table_names = self._get_et_table_names(fiware_service)
+
+        if fiware_service is None:
+            for tn in table_names:
+                if "." in tn:
+                    table_names.remove(tn)
+        limit = min(10000, limit)
+        offset = max(0, offset)
+        len_tn = 0
+        result = []
+        if len(table_names) > 0:
+            for tn in sorted(table_names):
+                len_tn += 1
+                if len_tn != len(table_names):
+                    stmt += "select *, " \
+                            "max(time_index) as time_index " \
+                            "from {tn} {where_clause} " \
+                            "group by entity_id, entity_type " \
+                            "union all ".format(
+                                tn=tn,
+                                where_clause=where_clause
+                            )
+                else:
+                    stmt += "select *, " \
+                            "max(time_index) as time_index " \
+                            "from {tn} {where_clause} " \
+                            "group by entity_id, entity_type ".format(
+                                tn=tn,
+                                where_clause=where_clause
+                            )
+
+            # TODO ORDER BY time_index asc is removed for the time being
+            #  till we have a solution for
+            #  https://github.com/crate/crate/issues/9854
+            op = stmt + "ORDER BY time_index limit {limit} offset {offset}".format(
+                offset=offset,
+                limit=limit
+            )
+
+            try:
+                self.cursor.execute(op)
+            except Exception as e:
+                self.sql_error_handler(e)
+                self.logger.error(str(e), exc_info=True)
+                entities = []
+            else:
+                res = self.cursor.fetchall()
+                col_names = self._column_names_from_query_meta(
+                    self.cursor.description)
+                entities = self._format_response(res,
+                                             col_names,
+                                             tn,
+                                             None)
+            result.extend(entities)
         return result
 
     def _format_response(self, resultset, col_names, table_name, last_n):
