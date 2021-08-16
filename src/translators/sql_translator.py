@@ -756,11 +756,16 @@ class SQLTranslator(base_translator.BaseTranslator):
             return []
         return [r[0] for r in table_names]
 
-    def _get_select_clause(self, attr_names, aggr_method, aggr_period, prefix=''):
+    def _get_select_clause(
+            self,
+            attr_names,
+            aggr_method,
+            aggr_period,
+            prefix=''):
         if not attr_names:
-            return prefix+'*'
+            return prefix + '*'
 
-        attrs = [prefix+'entity_type',  prefix+'entity_id']
+        attrs = [prefix + 'entity_type', prefix + 'entity_id']
         if aggr_method:
             if aggr_period:
                 attrs.append(
@@ -774,8 +779,8 @@ class SQLTranslator(base_translator.BaseTranslator):
             attrs.extend(m.format(aggr_method, a, a) for a in set(attr_names))
 
         else:
-            attrs.append(prefix+self.TIME_INDEX_NAME)
-            attrs.extend(prefix+'"{}"'.format(a) for a in attr_names)
+            attrs.append(prefix + self.TIME_INDEX_NAME)
+            attrs.extend(prefix + '"{}"'.format(a) for a in attr_names)
 
         select = ','.join(attrs)
         return select
@@ -808,10 +813,10 @@ class SQLTranslator(base_translator.BaseTranslator):
             clauses.append(" {}entity_id in ({}) ".format(prefix, ids))
         if from_date:
             clauses.append(" {}{} >= '{}'".format(prefix, self.TIME_INDEX_NAME,
-                                                self._parse_date(from_date)))
+                                                  self._parse_date(from_date)))
         if to_date:
             clauses.append(" {}{} <= '{}'".format(prefix, self.TIME_INDEX_NAME,
-                                                self._parse_date(to_date)))
+                                                  self._parse_date(to_date)))
 
         if fiware_sp:
             # Match prefix of fiware service path
@@ -825,7 +830,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         else:
             # Match prefix of fiware service path
             clauses.append(" " + prefix + FIWARE_SERVICEPATH + " = ''")
-        #TODO implement prefix also for geo_clause
+        # TODO implement prefix also for geo_clause
         geo_clause = self._get_geo_clause(geo_query)
         if geo_clause:
             clauses.append(geo_clause)
@@ -1178,10 +1183,8 @@ class SQLTranslator(base_translator.BaseTranslator):
                 if len_tn != len(table_names):
                     stmt += " union all "
 
-            op = stmt + " ORDER BY time_index DESC limit {limit} offset {offset}".format(
-                offset=offset,
-                limit=limit
-            )
+            op = stmt + " ORDER BY time_index DESC, entity_type, entity_id limit {limit} offset {offset}".format(
+                offset=offset, limit=limit)
 
             try:
                 self.cursor.execute(op)
@@ -1200,19 +1203,19 @@ class SQLTranslator(base_translator.BaseTranslator):
         return result
 
     def query_last_value(self,
-                  entity_ids=None,
-                  entity_type=None,
-                  attr_names=None,
-                  from_date=None,
-                  to_date=None,
-                  limit=10000,
-                  offset=0,
-                  fiware_service=None,
-                  fiware_servicepath=None):
+                         entity_ids=None,
+                         entity_type=None,
+                         attr_names=None,
+                         from_date=None,
+                         to_date=None,
+                         limit=10000,
+                         offset=0,
+                         fiware_service=None,
+                         fiware_servicepath=None):
         if limit == 0:
             return []
 
-        #todo filter only selected attributes.
+        # todo filter only selected attributes.
 
         lower_attr_names = [a.lower() for a in attr_names] \
             if attr_names else attr_names
@@ -1235,15 +1238,12 @@ class SQLTranslator(base_translator.BaseTranslator):
             for tn in sorted(table_names):
                 len_tn += 1
                 prefix = 'a{len_tn}.'.format(
-                                len_tn=len_tn
-                            )
+                    len_tn=len_tn
+                )
                 select_clause = self._get_select_clause(lower_attr_names, None,
                                                         None, prefix=prefix)
-                where_clause_no_prefix = self._get_where_clause(entity_ids,
-                                                      from_date,
-                                                      to_date,
-                                                      fiware_servicepath,
-                                                      None)
+                where_clause_no_prefix = self._get_where_clause(
+                    entity_ids, from_date, to_date, fiware_servicepath, None)
                 where_clause = self._get_where_clause(entity_ids,
                                                       from_date,
                                                       to_date,
@@ -1260,12 +1260,12 @@ class SQLTranslator(base_translator.BaseTranslator):
                         "and a{len_tn}.entity_type = b{len_tn}.entity_type " \
                         "and a{len_tn}.time_index = b{len_tn}.time_index " \
                         "{where_clause} ".format(
-                                select=select_clause,
-                                tn=tn,
-                                len_tn=len_tn,
-                                where_clause_no_prefix=where_clause_no_prefix,
-                                where_clause=where_clause
-                            )
+                            select=select_clause,
+                            tn=tn,
+                            len_tn=len_tn,
+                            where_clause_no_prefix=where_clause_no_prefix,
+                            where_clause=where_clause
+                        )
                 if len_tn != len(table_names):
                     stmt += " union all "
 
@@ -1288,14 +1288,20 @@ class SQLTranslator(base_translator.BaseTranslator):
                 col_names = self._column_names_from_query_meta(
                     self.cursor.description)
                 entities = self._format_response(res,
-                                             col_names,
-                                             table_names,
-                                             None,
-                                             True)
+                                                 col_names,
+                                                 table_names,
+                                                 None,
+                                                 True)
             result.extend(entities)
         return result
 
-    def _format_response(self, resultset, col_names, table_names, last_n, single_value=False):
+    def _format_response(
+            self,
+            resultset,
+            col_names,
+            table_names,
+            last_n,
+            single_value=False):
         """
         :param resultset: list of query results for one entity_type
         :param col_names: list of columns affected in the query
@@ -1388,7 +1394,8 @@ class SQLTranslator(base_translator.BaseTranslator):
                 msg = "entity_type not available"
                 self.logger.error(msg)
                 raise RuntimeError(msg)
-            entity_type_resultset = [item for item in resultset if item[idx_entity_type].lower() in t]
+            entity_type_resultset = [
+                item for item in resultset if item[idx_entity_type].lower() in t]
             for r in entity_type_resultset:
                 for k, v in zip(col_names, r):
                     if k not in entity_attrs:
@@ -1496,7 +1503,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             self.sql_error_handler(e)
             self.logger.error(str(e), exc_info=True)
 
-        #TODO this can be removed most probably
+        # TODO this can be removed most probably
         if self.cursor.rowcount == 0 and table_name.startswith('"'):
             # See GH #173
             old_tn = ".".join([x.strip('"') for x in table_name.split('.')])
