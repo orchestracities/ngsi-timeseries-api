@@ -76,6 +76,7 @@ def query_1T1E1A(attr_name,   # In Path
         matched_attr = lookup_string_match(entities[0], attr_name)
         res = {
             'entityId': entities[0]['id'],
+            'entityType': entities[0]['type'],
             'attrName': attr_name,
             'index': index,
             'values': matched_attr['values'] if matched_attr else []
@@ -95,5 +96,6 @@ def query_1T1E1A_value(*args, **kwargs):
     res = query_1T1E1A(*args, **kwargs)
     if isinstance(res, dict):
         res.pop('entityId', None)
+        res.pop('entityType', None)
         res.pop('attrName', None)
     return res

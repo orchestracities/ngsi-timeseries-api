@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 
 rep=$(curl -s --unix-socket /var/run/docker.sock http://ping > /dev/null)
@@ -76,6 +76,15 @@ if [ -z $tests ] || [ $tests = "others" ]; then
 
   cd src/utils/tests
   test_suite_header "UTILS"
+  sh run_tests.sh
+  loc=$?
+  if [ "$tot" -eq 0 ]; then
+    tot=$loc
+  fi
+  cd -
+
+  cd src/wq/tests
+  test_suite_header "WORK QUEUE"
   sh run_tests.sh
   loc=$?
   if [ "$tot" -eq 0 ]; then

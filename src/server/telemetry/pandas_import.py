@@ -3,7 +3,7 @@ Utilities to import CSV telemetry data into Pandas data frames and series.
 """
 
 from glob import glob
-import os
+from pathlib import Path
 from typing import Optional
 
 import pandas as pd
@@ -13,18 +13,6 @@ from server.telemetry.flush import TIMEPOINT_CSV_FIELD, \
 from server.telemetry.monitor import DURATION_FILE_PREFIX, RUNTIME_FILE_PREFIX
 from server.telemetry.sampler import GC_COLLECTIONS, GC_COLLECTED, \
     GC_UNCOLLECTABLE, PROC_MAX_RSS, PROC_SYSTEM_TIME, PROC_USER_TIME
-
-
-def _csv_file_pattern(monitoring_dir: str, file_prefix: str) -> str:
-    return os.path.join(monitoring_dir, f"{file_prefix}*.csv")
-
-
-def _duration_file_pattern(monitoring_dir: str) -> str:
-    return _csv_file_pattern(monitoring_dir, DURATION_FILE_PREFIX)
-
-
-def _runtime_file_pattern(monitoring_dir: str) -> str:
-    return _csv_file_pattern(monitoring_dir, RUNTIME_FILE_PREFIX)
 
 
 def _parse_csv(pathname: str) -> pd.DataFrame:
@@ -39,7 +27,15 @@ def _parse_csv(pathname: str) -> pd.DataFrame:
 def _load_csv_files(pathname_pattern: str) -> pd.DataFrame:
     path_names = glob(pathname_pattern)
     frames = [_parse_csv(p) for p in path_names]
-    return pd.concat(frames, ignore_index=True)
+    if frames:
+        return pd.concat(frames, ignore_index=True)
+    return empty_telemetry_data_frame()
+
+
+def empty_telemetry_data_frame() -> pd.DataFrame:
+    cs = [TIMEPOINT_CSV_FIELD, MEASUREMENT_CSV_FIELD, LABEL_CSV_FIELD,
+          PID_CSV_FIELD]
+    return pd.DataFrame(columns=cs, data=[])
 
 
 class TelemetrySeries:
@@ -119,34 +115,28 @@ class TelemetryDB:
     """
 
     @staticmethod
-    def from_duration_data(monitoring_dir: str) -> 'TelemetryFrame':
+    def from_csv_files(monitoring_dir: Path,
+                       file_prefix: str) -> TelemetryFrame:
         """
-        Collect duration telemetry data into a Pandas frame.
-        Import every duration CSV file in the specified monitoring directory
-        into a Pandas frame and then join all the frames into one.
+        Collect telemetry data from CSV files into a Pandas frame.
+        Import each telemetry file in the given monitoring directory that
+        starts with the specified prefix into its own Pandas frame and then
+        join all the frames in a single one.
 
-        :param monitoring_dir: the directory containing telemetry data.
-        :return: the whole duration data set.
+        :param monitoring_dir: the path to the monitoring directory where
+            the collected telemetry data is.
+        :param file_prefix: the file name prefix to match.
+        :return: the whole data set.
         """
-        data = _load_csv_files(_duration_file_pattern(monitoring_dir))
+        pathname_pattern = monitoring_dir / f"{file_prefix}*.csv"
+        data = _load_csv_files(str(pathname_pattern))
         return TelemetryFrame(data)
 
-    @staticmethod
-    def from_runtime_data(monitoring_dir: str) -> 'TelemetryFrame':
-        """
-        Collect runtime telemetry data into a Pandas frame.
-        Import every duration CSV file in the specified monitoring directory
-        into a Pandas frame and then join all the frames into one.
-
-        :param monitoring_dir: the directory containing telemetry data.
-        :return: the whole runtime data set.
-        """
-        data = _load_csv_files(_runtime_file_pattern(monitoring_dir))
-        return TelemetryFrame(data)
-
-    def __init__(self, monitoring_dir: str):
-        self._duration_frame = self.from_duration_data(monitoring_dir)
-        self._runtime_frame = self.from_runtime_data(monitoring_dir)
+    def __init__(self, monitoring_dir: Path):
+        self._duration_frame = self.from_csv_files(monitoring_dir,
+                                                   DURATION_FILE_PREFIX)
+        self._runtime_frame = self.from_csv_files(monitoring_dir,
+                                                  RUNTIME_FILE_PREFIX)
 
     def duration(self) -> TelemetryFrame:
         return self._duration_frame

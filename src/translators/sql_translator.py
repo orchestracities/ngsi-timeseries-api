@@ -756,11 +756,11 @@ class SQLTranslator(base_translator.BaseTranslator):
             return []
         return [r[0] for r in table_names]
 
-    def _get_select_clause(self, attr_names, aggr_method, aggr_period):
+    def _get_select_clause(self, attr_names, aggr_method, aggr_period, prefix=''):
         if not attr_names:
-            return '*'
+            return prefix+'*'
 
-        attrs = ['entity_type', 'entity_id']
+        attrs = [prefix+'entity_type',  prefix+'entity_id']
         if aggr_method:
             if aggr_period:
                 attrs.append(
@@ -774,8 +774,8 @@ class SQLTranslator(base_translator.BaseTranslator):
             attrs.extend(m.format(aggr_method, a, a) for a in set(attr_names))
 
         else:
-            attrs.append(self.TIME_INDEX_NAME)
-            attrs.extend('"{}"'.format(a) for a in attr_names)
+            attrs.append(prefix+self.TIME_INDEX_NAME)
+            attrs.extend(prefix+'"{}"'.format(a) for a in attr_names)
 
         select = ','.join(attrs)
         return select
@@ -799,33 +799,33 @@ class SQLTranslator(base_translator.BaseTranslator):
         return min(last_n, limit)
 
     def _get_where_clause(self, entity_ids, from_date, to_date, fiware_sp=None,
-                          geo_query=None):
+                          geo_query=None, prefix=''):
         clauses = []
         where_clause = ""
 
         if entity_ids:
             ids = ",".join("'{}'".format(e) for e in entity_ids)
-            clauses.append(" entity_id in ({}) ".format(ids))
+            clauses.append(" {}entity_id in ({}) ".format(prefix, ids))
         if from_date:
-            clauses.append(" {} >= '{}'".format(self.TIME_INDEX_NAME,
+            clauses.append(" {}{} >= '{}'".format(prefix, self.TIME_INDEX_NAME,
                                                 self._parse_date(from_date)))
         if to_date:
-            clauses.append(" {} <= '{}'".format(self.TIME_INDEX_NAME,
+            clauses.append(" {}{} <= '{}'".format(prefix, self.TIME_INDEX_NAME,
                                                 self._parse_date(to_date)))
 
         if fiware_sp:
             # Match prefix of fiware service path
             if fiware_sp == '/':
                 clauses.append(
-                    " " + FIWARE_SERVICEPATH + " ~* '/.*'")
+                    " " + prefix + FIWARE_SERVICEPATH + " ~* '/.*'")
             else:
                 clauses.append(
-                    " " + FIWARE_SERVICEPATH + " ~* '"
+                    " " + prefix + FIWARE_SERVICEPATH + " ~* '"
                     + fiware_sp + "($|/.*)'")
         else:
             # Match prefix of fiware service path
-            clauses.append(" " + FIWARE_SERVICEPATH + " = ''")
-
+            clauses.append(" " + prefix + FIWARE_SERVICEPATH + " = ''")
+        #TODO implement prefix also for geo_clause
         geo_clause = self._get_geo_clause(geo_query)
         if geo_clause:
             clauses.append(geo_clause)
@@ -1158,41 +1158,27 @@ class SQLTranslator(base_translator.BaseTranslator):
             for tn in table_names:
                 if "." in tn:
                     table_names.remove(tn)
-
         limit = min(10000, limit)
         offset = max(0, offset)
         len_tn = 0
         result = []
-        stmt = ''
+        stmt = ""
         if len(table_names) > 0:
             for tn in sorted(table_names):
                 len_tn += 1
+                stmt += "select " \
+                        "entity_id, " \
+                        "entity_type, " \
+                        "max(time_index) as time_index " \
+                        "from {tn} {where_clause} " \
+                        "group by entity_id, entity_type".format(
+                            tn=tn,
+                            where_clause=where_clause
+                        )
                 if len_tn != len(table_names):
-                    stmt += "select " \
-                            "entity_id, " \
-                            "entity_type, " \
-                            "max(time_index) as time_index " \
-                            "from {tn} {where_clause} " \
-                            "group by entity_id, entity_type " \
-                            "union all ".format(
-                                tn=tn,
-                                where_clause=where_clause
-                            )
-                else:
-                    stmt += "select " \
-                            "entity_id, " \
-                            "entity_type, " \
-                            "max(time_index) as time_index " \
-                            "from {tn} {where_clause} " \
-                            "group by entity_id, entity_type ".format(
-                                tn=tn,
-                                where_clause=where_clause
-                            )
+                    stmt += " union all "
 
-            # TODO ORDER BY time_index asc is removed for the time being
-            #  till we have a solution for
-            #  https://github.com/crate/crate/issues/9854
-            op = stmt + "ORDER BY time_index limit {limit} offset {offset}".format(
+            op = stmt + " ORDER BY time_index DESC limit {limit} offset {offset}".format(
                 offset=offset,
                 limit=limit
             )
@@ -1208,18 +1194,115 @@ class SQLTranslator(base_translator.BaseTranslator):
                 col_names = ['entity_id', 'entity_type', 'time_index']
                 entities = self._format_response(res,
                                                  col_names,
-                                                 tn,
+                                                 table_names,
                                                  None)
             result.extend(entities)
         return result
 
-    def _format_response(self, resultset, col_names, table_name, last_n):
+    def query_last_value(self,
+                  entity_ids=None,
+                  entity_type=None,
+                  attr_names=None,
+                  from_date=None,
+                  to_date=None,
+                  limit=10000,
+                  offset=0,
+                  fiware_service=None,
+                  fiware_servicepath=None):
+        if limit == 0:
+            return []
+
+        #todo filter only selected attributes.
+
+        lower_attr_names = [a.lower() for a in attr_names] \
+            if attr_names else attr_names
+
+        if entity_type:
+            table_names = [self._et2tn(entity_type, fiware_service)]
+        else:
+            table_names = self._get_et_table_names(fiware_service)
+
+        if fiware_service is None:
+            for tn in table_names:
+                if "." in tn:
+                    table_names.remove(tn)
+        limit = min(10000, limit)
+        offset = max(0, offset)
+        len_tn = 0
+        result = []
+        stmt = ""
+        if len(table_names) > 0:
+            for tn in sorted(table_names):
+                len_tn += 1
+                prefix = 'a{len_tn}.'.format(
+                                len_tn=len_tn
+                            )
+                select_clause = self._get_select_clause(lower_attr_names, None,
+                                                        None, prefix=prefix)
+                where_clause_no_prefix = self._get_where_clause(entity_ids,
+                                                      from_date,
+                                                      to_date,
+                                                      fiware_servicepath,
+                                                      None)
+                where_clause = self._get_where_clause(entity_ids,
+                                                      from_date,
+                                                      to_date,
+                                                      fiware_servicepath,
+                                                      None, prefix=prefix)
+                stmt += "select {select} " \
+                        "from {tn} as a{len_tn} " \
+                        "join (select " \
+                        "entity_id, entity_type, " \
+                        "max(time_index) as time_index " \
+                        "from {tn} {where_clause_no_prefix} " \
+                        "group by entity_id, entity_type) b{len_tn} " \
+                        "on a{len_tn}.entity_id = b{len_tn}.entity_id " \
+                        "and a{len_tn}.entity_type = b{len_tn}.entity_type " \
+                        "and a{len_tn}.time_index = b{len_tn}.time_index " \
+                        "{where_clause} ".format(
+                                select=select_clause,
+                                tn=tn,
+                                len_tn=len_tn,
+                                where_clause_no_prefix=where_clause_no_prefix,
+                                where_clause=where_clause
+                            )
+                if len_tn != len(table_names):
+                    stmt += " union all "
+
+            # TODO ORDER BY time_index asc is removed for the time being
+            #  till we have a solution for
+            #  https://github.com/crate/crate/issues/9854
+            op = stmt + "ORDER BY time_index DESC limit {limit} offset {offset}".format(
+                offset=offset,
+                limit=limit
+            )
+
+            try:
+                self.cursor.execute(op)
+            except Exception as e:
+                self.sql_error_handler(e)
+                self.logger.error(str(e), exc_info=True)
+                entities = []
+            else:
+                res = self.cursor.fetchall()
+                col_names = self._column_names_from_query_meta(
+                    self.cursor.description)
+                entities = self._format_response(res,
+                                             col_names,
+                                             table_names,
+                                             None,
+                                             True)
+            result.extend(entities)
+        return result
+
+    def _format_response(self, resultset, col_names, table_names, last_n, single_value=False):
         """
         :param resultset: list of query results for one entity_type
         :param col_names: list of columns affected in the query
-        :param table_name: name of table where the query took place.
+        :param table_names: names of tables where the query took place.
         :param last_n: see last_n in query method.
         :param aggr_method: True if used in the request, false otherwise.
+        :param last_value: True if we return a single value for entity.
 
         :return: list of dicts. Possible scenarios
 
@@ -1259,8 +1342,12 @@ class SQLTranslator(base_translator.BaseTranslator):
 
         Indexes elements are time steps in ISO format.
         """
-        stmt = "select entity_attrs from {} " \
-               "where table_name = ?".format(METADATA_TABLE_NAME)
+        if isinstance(table_names, str):
+            table_names = [table_names]
+        cursors = ', '.join(list(map(lambda x: '?', table_names)))
+        stmt = "select table_name, entity_attrs from {} " \
+               "where table_name in ({})".format(METADATA_TABLE_NAME, cursors)
+
         try:
             # TODO we tested using cache here, but with current "delete"
             #  approach this causes issues scenario triggering the issue is:
@@ -1273,55 +1360,64 @@ class SQLTranslator(base_translator.BaseTranslator):
             #  below ttl) the same cache can be called despite there is no
             #  data. a possible solution is to create a cache based on query
             #  parameters that would cache all the results
-            self.cursor.execute(stmt, [table_name])
+            self.cursor.execute(stmt, table_names)
             res = self.cursor.fetchall()
         except Exception as e:
             self.sql_error_handler(e)
             self.logger.error(str(e), exc_info=True)
             res = {}
 
-        if len(res) == 0:
-            # See GH #173
-            tn = ".".join([x.strip('"') for x in table_name.split('.')])
-            self.cursor.execute(stmt, [tn])
-            res = self.cursor.fetchall()
-
-        if len(res) != 1:
-            msg = "Cannot have {} entries in table '{}' for PK '{}'"
-            msg = msg.format(len(res), METADATA_TABLE_NAME, table_name)
-            self.logger.error(msg)
-            raise RuntimeError(msg)
-
         entities = {}
-        entity_attrs = res[0][0]
 
         if last_n:
             # LastN induces DESC order, but we always return ASC order.
             resultset = reversed(resultset)
 
-        for r in resultset:
-            for k, v in zip(col_names, r):
-                if k not in entity_attrs:
-                    # implementation-specific columns not representing attrs
-                    # e.g. fiware-servicepath
-                    continue
+        for t in table_names:
+            entity_attrs = [tup[1] for tup in res if tup[0] == t]
+            if len(entity_attrs) == 0:
+                continue
+            if len(entity_attrs) > 1:
+                msg = "Cannot have {} entries in table '{}' for PK '{}'"
+                msg = msg.format(len(res), METADATA_TABLE_NAME, t)
+                self.logger.error(msg)
+                raise RuntimeError(msg)
+            entity_attrs = entity_attrs[0]
+            idx_entity_type = col_names.index('entity_type')
+            if idx_entity_type < 0:
+                msg = "entity_type not available"
+                self.logger.error(msg)
+                raise RuntimeError(msg)
+            entity_type_resultset = [item for item in resultset if item[idx_entity_type].lower() in t]
+            for r in entity_type_resultset:
+                for k, v in zip(col_names, r):
+                    if k not in entity_attrs:
+                        # implementation-specific columns not representing attrs
+                        # e.g. fiware-servicepath
+                        continue
 
-                e_id = r[col_names.index('entity_id')]
-                e = entities.setdefault(e_id, {})
-                original_name, original_type = entity_attrs[k]
+                    e_id = r[col_names.index('entity_id')]
+                    e = entities.setdefault(e_id, {})
+                    original_name, original_type = entity_attrs[k]
 
-                if original_name in (NGSI_TYPE, NGSI_ID):
-                    e[original_name] = v
+                    if original_name in (NGSI_TYPE, NGSI_ID):
+                        e[original_name] = v
 
-                elif original_name == self.TIME_INDEX_NAME:
-                    v = self._get_isoformat(v)
-                    e.setdefault('index', []).append(v)
+                    elif original_name == self.TIME_INDEX_NAME:
+                        v = self._get_isoformat(v)
+                        if single_value:
+                            e.setdefault('dateModified', v)
+                        else:
+                            e.setdefault('index', []).append(v)
 
-                else:
-                    attr_dict = e.setdefault(original_name, {})
-                    v = self._db_value_to_ngsi(v, original_type)
-                    attr_dict.setdefault('values', []).append(v)
-                    attr_dict['type'] = original_type
+                    else:
+                        attr_dict = e.setdefault(original_name, {})
+                        v = self._db_value_to_ngsi(v, original_type)
+                        if single_value:
+                            attr_dict.setdefault('value', v)
+                        else:
+                            attr_dict.setdefault('values', []).append(v)
+                        attr_dict['type'] = original_type
 
         return [entities[k] for k in sorted(entities.keys())]
 
@@ -1400,6 +1496,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             self.sql_error_handler(e)
             self.logger.error(str(e), exc_info=True)
 
+        #TODO this can be removed most probably
         if self.cursor.rowcount == 0 and table_name.startswith('"'):
             # See GH #173
             old_tn = ".".join([x.strip('"') for x in table_name.split('.')])

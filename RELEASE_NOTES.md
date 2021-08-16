@@ -1,13 +1,32 @@
 # QuantumLeap Release Notes
 
-## 0.8.2-dev
+## 0.8.3-dev
+
+### New features
+
+- Support configuration of back off factor for CrateDB (#503)
+- Add sql query to retrieve only last values of entities (#500)
+
+### Bug fixes
+
+- Fix attributes names in /v2/entities query (#478)
+
+### Documentation
+
+- Document API pagination (#511)
+
+### Technical debt
+
+## 0.8.2
 
 ### New features
 
 - Support for CRATE 4.5 (#430)
-- Fix "None" Tenant query caching (required for no multi-tenant orion deployment)
+- Introduced queue workflow support & upgraded gunicorn (#501)
 
 ### Bug fixes
+
+- Fix "None" Tenant query caching (required for no multi-tenant orion deployment)
 
 ### Documentation
 

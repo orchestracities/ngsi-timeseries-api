@@ -1,15 +1,14 @@
-import logging
 from contextlib import contextmanager
 from datetime import datetime, timezone
 import pg8000
-from typing import Any, Sequence
+from typing import Any, Callable, Sequence
 
 from translators import sql_translator
+from translators.errors import PostgresErrorAnalyzer
 from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
     NGSI_LD_GEOMETRY, NGSI_GEOJSON, NGSI_TEXT, NGSI_STRUCTURED_VALUE, \
-    TIME_INDEX, METADATA_TABLE_NAME, FIWARE_SERVICEPATH, TENANT_PREFIX
+    TIME_INDEX, METADATA_TABLE_NAME, TENANT_PREFIX
 from translators.timescale_geo_query import from_ngsi_query
-import logging
 import geocoding.geojson.wktcodec
 from geocoding.slf.geotypes import *
 import geocoding.slf.jsoncodec
@@ -114,9 +113,17 @@ class PostgresTranslator(sql_translator.SQLTranslator):
         self.cursor.close()
 
     def sql_error_handler(self, exception):
-        if exception.__class__ == BrokenPipeError:
+        analyzer = PostgresErrorAnalyzer(exception)
+        if analyzer.is_transient_error():
             self.ccm.reset_connection('timescale')
             self.setup()
+
+    def with_connection_guard(self, db_action: Callable):
+        try:
+            db_action()
+        except Exception as e:
+            self.sql_error_handler(e)
+            logging.debug(str(e), exc_info=True)
 
     def get_health(self):
         health = {}
@@ -146,40 +153,46 @@ class PostgresTranslator(sql_translator.SQLTranslator):
         return NGSI_TO_SQL[attr_t]
 
     def _create_data_table(self, table_name, table, fiware_service):
-        schema = self._svc_to_schema_name(fiware_service)
-        if schema:
-            stmt = "create schema if not exists {}".format(schema)
+        def do_create():
+            schema = self._svc_to_schema_name(fiware_service)
+            if schema:
+                stmt = f"create schema if not exists {schema}"
+                self.cursor.execute(stmt)
+
+            # NOTE. Postgres identifiers (like column and table names) become
+            # case sensitive when quoted like we do below in the CREATE TABLE
+            # statement.
+            columns = ', '.join('"{}" {}'.format(cn.lower(), ct)
+                                for cn, ct in table.items())
+            stmt = f"create table if not exists {table_name} ({columns})"
             self.cursor.execute(stmt)
 
-        # NOTE. Postgres identifiers (like column and table names) become case
-        # sensitive when quoted like we do below in the CREATE TABLE statement.
-        columns = ', '.join('"{}" {}'.format(cn.lower(), ct)
-                            for cn, ct in table.items())
-        stmt = "create table if not exists {} ({})".format(table_name, columns)
-        self.cursor.execute(stmt)
+            stmt = f"select create_hypertable('{table_name}', " + \
+                   f"'{self.TIME_INDEX_NAME}', if_not_exists => true)"
+            self.cursor.execute(stmt)
 
-        stmt = "select create_hypertable('{}', '{}', if_not_exists => true)" \
-            .format(table_name, self.TIME_INDEX_NAME)
-        self.cursor.execute(stmt)
+            alt_cols = ', '.join('add column if not exists "{}" {}'
+                                 .format(cn.lower(), ct)
+                                 for cn, ct in table.items())
+            stmt = "alter table {} {};".format(table_name, alt_cols)
+            self.cursor.execute(stmt)
 
-        alt_cols = ', '.join('add column if not exists "{}" {}'
-                             .format(cn.lower(), ct)
-                             for cn, ct in table.items())
-        stmt = "alter table {} {};".format(table_name, alt_cols)
-        self.cursor.execute(stmt)
+            ix_name = '"ix_{}_eid_and_tx"'.format(table_name.replace('"', ''))
+            stmt = f"create index if not exists {ix_name} " + \
+                f"on {table_name} (entity_id, {self.TIME_INDEX_NAME} desc)"
+            self.cursor.execute(stmt)
 
-        ix_name = '"ix_{}_eid_and_tx"'.format(table_name.replace('"', ''))
-        stmt = f"create index if not exists {ix_name} " + \
-            f"on {table_name} (entity_id, {self.TIME_INDEX_NAME} desc)"
-        self.cursor.execute(stmt)
+        self.with_connection_guard(do_create)
 
     def _update_data_table(self, table_name, new_columns, fiware_service):
+        def do_update():
+            alt_cols = ', '.join('add column if not exists "{}" {}'
+                                 .format(cn.lower(), ct)
+                                 for cn, ct in new_columns.items())
+            stmt = "alter table {} {};".format(table_name, alt_cols)
+            self.cursor.execute(stmt)
 
-        alt_cols = ', '.join('add column if not exists "{}" {}'
-                             .format(cn.lower(), ct)
-                             for cn, ct in new_columns.items())
-        stmt = "alter table {} {};".format(table_name, alt_cols)
-        self.cursor.execute(stmt)
+        self.with_connection_guard(do_update)
 
     @staticmethod
     def _ngsi_geojson_to_db(attr):
@@ -214,11 +227,12 @@ class PostgresTranslator(sql_translator.SQLTranslator):
             return None
 
         if ngsi_type in (NGSI_DATETIME, NGSI_ISO8601):
+            v = None
             try:
                 v = self._get_isoformat(db_value)
             except Exception as e:
                 # There is a type mismatch.
-                logging.warning("Column '{}' type is not TIMESTAMP".format(k))
+                logging.warning(f"Column type is not TIMESTAMP: {v}")
             return v
 
         if SlfGeometry.is_ngsi_slf_attr({'type': ngsi_type}):
@@ -249,19 +263,25 @@ class PostgresTranslator(sql_translator.SQLTranslator):
         return isinstance(insert_error, pg8000.ProgrammingError)
 
     def _create_metadata_table(self):
-        stmt = "create table if not exists {} " \
-               "(table_name text primary key, entity_attrs jsonb)"
-        op = stmt.format(METADATA_TABLE_NAME)
-        self.cursor.execute(op)
+        def do_create():
+            stmt = "create table if not exists {} " \
+                   "(table_name text primary key, entity_attrs jsonb)"
+            op = stmt.format(METADATA_TABLE_NAME)
+            self.cursor.execute(op)
+
+        self.with_connection_guard(do_create)
 
     def _store_metadata(self, table_name, persisted_metadata):
-        stmt = "insert into {} (table_name, entity_attrs) values (?, ?) " \
-               "on conflict (table_name) " \
-               "do update set entity_attrs = ?"
-        stmt = stmt.format(METADATA_TABLE_NAME)
-        entity_attrs_value = pg8000.PGJsonb(persisted_metadata)
-        self.cursor.execute(stmt, (table_name, entity_attrs_value,
-                                   entity_attrs_value))
+        def do_store():
+            stmt = "insert into {} (table_name, entity_attrs) values (?, ?)" \
+                   " on conflict (table_name)" \
+                   " do update set entity_attrs = ?"
+            stmt = stmt.format(METADATA_TABLE_NAME)
+            entity_attrs_value = pg8000.PGJsonb(persisted_metadata)
+            self.cursor.execute(stmt, (table_name, entity_attrs_value,
+                                       entity_attrs_value))
+
+        self.with_connection_guard(do_store)
 
     def _get_geo_clause(self, geo_query: SlfQuery = None) -> Optional[str]:
         return from_ngsi_query(geo_query)

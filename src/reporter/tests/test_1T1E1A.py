@@ -66,6 +66,7 @@ def test_1T1E1A_defaults(service, reporter_dataset):
     ]
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'attrName': attr_name,
         'index': exp_index,
         'values': exp_values
@@ -94,6 +95,7 @@ def test_1T1E1A_aggrMethod(service, reporter_dataset, aggr_method, aggr_value):
     obtained = r.json()
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'attrName': attr_name,
         'index': [],
         'values': [aggr_value]
@@ -157,6 +159,7 @@ def test_1T1E1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
     exp_avg = (0 + 1 + 2 + 3) / 4.
     expected = {
         'entityId': eid,
+        'entityType': etype,
         'attrName': attr_name,
         'index': exp_index,
         'values': [exp_avg, exp_avg, exp_avg]
@@ -189,6 +192,7 @@ def test_1T1E1A_fromDate_toDate(service, reporter_dataset):
     obtained = r.json()
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attrName': attr_name,
         'values': expected_values
@@ -221,6 +225,7 @@ def test_1T1E1A_fromDate_toDate_with_quotes(service, reporter_dataset):
     obtained = r.json()
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attrName': attr_name,
         'values': expected_values
@@ -252,6 +257,7 @@ def test_1T1E1A_lastN(service, reporter_dataset):
     obtained = r.json()
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'attrName': attr_name,
         'index': expected_index,
         'values': expected_values
@@ -286,6 +292,7 @@ def test_1T1E1A_lastN_with_limit(service, reporter_dataset):
     obtained = r.json()
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'attrName': attr_name,
         'index': expected_index,
         'values': expected_temperatures
@@ -317,6 +324,7 @@ def test_1T1E1A_limit(service, reporter_dataset):
     obtained = r.json()
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'attrName': attr_name,
         'index': expected_index,
         'values': expected_values
@@ -349,6 +357,7 @@ def test_1T1E1A_offset(service, reporter_dataset):
     obtained = r.json()
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'attrName': attr_name,
         'index': expected_index,
         'values': expected_values
@@ -384,6 +393,7 @@ def test_1T1E1A_combined(service, reporter_dataset):
     obtained = r.json()
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'attrName': attr_name,
         'index': expected_index,
         'values': expected_values

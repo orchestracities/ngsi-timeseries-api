@@ -54,7 +54,7 @@ ed9f8a60b6e8        crate:1.0.5            "/docker-entrypoint.…"   2 minutes 
 92e2129fec9b        redis                  "docker-entrypoint.s…"   2 minutes ago       Up 2 minutes             0.0.0.0:6379->6379/tcp                                          docker_redis_1
 ```
 
-Now you're ready to use QuantumLeap as instructed in the [User Manual](../user/index.md).
+Now you're ready to use QuantumLeap as instructed in the [User Manual](../user/using.md).
 
 When you are done experimenting, remember to teardown things.
 
@@ -98,6 +98,28 @@ By default QL will append the port `4200` to the hostname. You can of course
 add your required environment variables with `-e`. For more options see
 [docker run reference](https://docs.docker.com/engine/reference/run/).
 
+## Deploy QuantumLeap with the work queue
+
+When using a work queue, there are two sets of QuantumLeap processes:
+a set of Web servers that add tasks to a queue and a pool of queue worker
+processes that fetch tasks from the queue and run them asynchronously.
+The Web servers are QuantumLeap Web app instances configured to offload
+tasks to the work queue through the various `WQ_*` environment variables
+available for the Web app. A worker processes is a Python interpreter
+loaded with the same code as the Web app but started with a different
+entry point.
+
+There are several options to start worker processes. The QuantumLeap
+Docker image can start queue workers too, but the Docker entry point
+needs to be overridden—the default command starts the QuantumLeap Web
+app.
+
+- To start a Supervisor-managed pool of workers, set the `WQ_WORKERS`
+  environment variable to specify the pool size and override the Docker
+  entry point with: `supervisord -n -c ./wq/supervisord.conf`.
+- To start a single worker without Supervisor, just override the Docker
+  entry point with: `python wq up`.
+
 ## Deploy QuantumLeap in Kubernetes
 
 To deploy QuantumLeap services in Kubernetes,
@@ -105,9 +127,12 @@ you can leverage the Helm Charts in [this repository](https://smartsdk-recipes.r
 
 In particular you will need to deploy:
 
-* [CrateDB](https://github.com/orchestracities/charts/tree/master/charts/crate)
-* [Optional/Alternative] Timescale - for which you can refer to [Patroni Helm Chart](https://github.com/helm/charts/tree/master/incubator/patroni).
-* [QuantumLeap](https://github.com/orchestracities/charts/tree/master/charts/quantumleap)
+- [CrateDB](https://github.com/orchestracities/charts/tree/master/charts/crate)
+- [Optional/Alternative] Timescale - for which you can refer to [Patroni Helm Chart](https://github.com/helm/charts/tree/master/incubator/patroni).
+- [Optional, but required if using the query cache or the work queue] Redis.
+  You can use
+  [Dandy Developer's chart](https://github.com/DandyDeveloper/charts/tree/master/charts/redis-ha)
+- [QuantumLeap](https://github.com/orchestracities/charts/tree/master/charts/quantumleap)
 
 ## FIWARE Releases Compatibility
 

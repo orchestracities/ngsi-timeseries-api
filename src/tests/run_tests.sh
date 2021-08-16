@@ -43,7 +43,7 @@ tot=$?
 # Integration Test
 echo "\n"
 echo "Integration Test"
-pytest src/tests/test_integration.py --cov-report= --cov-config=.coveragerc --cov-append --cov=src/ \
+pytest -s src/tests/test_integration.py --cov-report= --cov-config=.coveragerc --cov-append --cov=src/ \
     --junitxml=test-results/junit-it.xml
 loc=$?
 if [ "$tot" -eq 0 ]; then
