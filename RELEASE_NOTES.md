@@ -4,7 +4,7 @@
 
 ### New features
 
-- Support configuration of back of factor for CrateDB (#503)
+- Support configuration of back off factor for CrateDB (#503)
 
 ### Bug fixes
 
