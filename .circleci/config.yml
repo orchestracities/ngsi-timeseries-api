@@ -192,8 +192,8 @@ workflows:
             - build
           matrix:
             parameters:
-              crate-version: ["4.5.1", "4.4.3", "4.2.7"]
-              timescale-version: ["2.3.0-pg13", "2.0.1-pg12", "1.7.5-pg12"]
+              crate-version: ["4.5.1", "4.2.7"]
+              timescale-version: ["2.3.0-pg13", "1.7.5-pg12"]
       - test_reporter:
           requires:
             - build
@@ -202,7 +202,7 @@ workflows:
             - build
           matrix:
             parameters:
-              orion-version: ["2.6.1", "2.5.2", "2.4.2"]
+              orion-version: ["2.6.1", "2.4.2"]
       - test_others:
           requires:
             - build
