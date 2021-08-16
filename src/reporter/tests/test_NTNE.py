@@ -42,32 +42,12 @@ def test_NTNE_defaults(service, reporter_dataset):
     expected = [
     {
         'entityId': entity_id_1,
-        'dateModified': expected_index,
-        'pressure':
-            {
-                'type': 'Number',
-                'value': 290.0,
-            },
-        'temperature':
-            {
-                'type': 'Number',
-                'value': 29.0,
-            },
+        'index': expected_index,
         'entityType': 'Kitchen'
     },
     {
         'entityId': entity_id,
-        'dateModified': expected_index,
-        'pressure':
-            {
-                'type': 'Number',
-                'value': 290.0,
-            },
-        'temperature':
-            {
-                'type': 'Number',
-                'value': 29.0,
-            },
+        'index': expected_index,
         'entityType': 'Room'
     }
     ]
@@ -103,18 +83,8 @@ def test_NTNE_type(service, reporter_dataset):
     expected_index = '1970-01-30T00:00:00.000+00:00'
     expected = [{
         'entityId': 'Room0',
-        'dateModified': expected_index,
-        'pressure':
-            {
-                'type': 'Number',
-                'value': 290.0,
-            },
-        'temperature':
-            {
-                'type': 'Number',
-                'value': 29.0,
-            },
-         'entityType': expected_type
+        'index': expected_index,
+        'entityType': expected_type
          }
     ]
     assert obtained == expected
@@ -144,32 +114,12 @@ def test_NTNE_fromDate_toDate(service, reporter_dataset):
     expected = [
     {
         'entityId': entity_id_1,
-        'dateModified': expected_index,
-        'pressure':
-            {
-                'type': 'Number',
-                'value': 290.0,
-            },
-        'temperature':
-            {
-                'type': 'Number',
-                'value': 29.0,
-            },
+        'index': expected_index,
         'entityType': entity_type_1
     },
     {
         'entityId': entity_id,
-        'dateModified': expected_index,
-        'pressure':
-            {
-                'type': 'Number',
-                'value': 290.0,
-            },
-        'temperature':
-            {
-                'type': 'Number',
-                'value': 29.0,
-            },
+        'index': expected_index,
         'entityType': entity_type
     }]
     assert obtained == expected
@@ -196,32 +146,12 @@ def test_NTNE_fromDate_toDate_with_quotes(service, reporter_dataset):
     expected = [
     {
         'entityId': entity_id_1,
-        'dateModified': expected_index,
-        'pressure':
-            {
-                'type': 'Number',
-                'value': 290.0,
-            },
-        'temperature':
-            {
-                'type': 'Number',
-                'value': 29.0,
-            },
+        'index': expected_index,
         'entityType': entity_type_1
     },
     {
         'entityId': entity_id,
-        'dateModified': expected_index,
-        'pressure':
-            {
-                'type': 'Number',
-                'value': 290.0,
-            },
-        'temperature':
-            {
-                'type': 'Number',
-                'value': 29.0,
-            },
+        'index': expected_index,
         'entityType': entity_type
     }]
     assert obtained == expected
@@ -248,17 +178,7 @@ def test_NTNE_limit(service, reporter_dataset):
     expected = [
         {
         'entityId': entity_id,
-        'dateModified': expected_index,
-        'pressure':
-            {
-                'type': 'Number',
-                'value': 290.0,
-            },
-        'temperature':
-            {
-                'type': 'Number',
-                'value': 29.0,
-            },
+        'index': expected_index,
         'entityType': entity_type
     }]
     assert obtained == expected
@@ -285,17 +205,7 @@ def test_NTNE_offset(service, reporter_dataset):
     expected = [
         {
         'entityId': entity_id,
-        'dateModified': expected_index,
-        'pressure':
-            {
-                'type': 'Number',
-                'value': 290.0,
-            },
-        'temperature':
-            {
-                'type': 'Number',
-                'value': 29.0,
-            },
+        'index': expected_index,
         'entityType': entity_type
     }]
     assert obtained == expected
@@ -322,17 +232,7 @@ def test_NTNE_combined(service, reporter_dataset):
     obtained = r.json()
     expected = [{
         'entityId': expected_id,
-        'dateModified': expected_index,
-        'pressure':
-            {
-                'type': 'Number',
-                'value': 290.0,
-            },
-        'temperature':
-            {
-                'type': 'Number',
-                'value': 29.0,
-            },
+        'index': expected_index,
         'entityType': expected_type
     }]
     assert obtained == expected

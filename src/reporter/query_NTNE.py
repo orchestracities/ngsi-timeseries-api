@@ -20,9 +20,8 @@ def query_NTNE(limit=10000,
     entities = None
     try:
         with translator_for(fiware_s) as trans:
-            entities = trans.query_last_value(limit=limit,
+            entities = trans.query_ids(limit=limit,
                                        entity_type=type_,
-                                       attr_names=None,
                                        from_date=from_date,
                                        to_date=to_date,
                                        offset=offset,
@@ -51,6 +50,7 @@ def query_NTNE(limit=10000,
         for entity in entities:
             entity['entityId'] = entity['id']
             entity['entityType'] = entity['type']
+            entity['index'] = entity['index'][0]
             del entity['id']
             del entity['type']
             res.append(entity)

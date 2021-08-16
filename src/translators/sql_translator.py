@@ -1162,35 +1162,23 @@ class SQLTranslator(base_translator.BaseTranslator):
         offset = max(0, offset)
         len_tn = 0
         result = []
+        stmt = ""
         if len(table_names) > 0:
             for tn in sorted(table_names):
                 len_tn += 1
+                stmt += "select " \
+                        "entity_id, " \
+                        "entity_type, " \
+                        "max(time_index) as time_index " \
+                        "from {tn} {where_clause} " \
+                        "group by entity_id, entity_type".format(
+                            tn=tn,
+                            where_clause=where_clause
+                        )
                 if len_tn != len(table_names):
-                    stmt += "select " \
-                            "entity_id, " \
-                            "entity_type, " \
-                            "max(time_index) as time_index " \
-                            "from {tn} {where_clause} " \
-                            "group by entity_id, entity_type " \
-                            "union all ".format(
-                                tn=tn,
-                                where_clause=where_clause
-                            )
-                else:
-                    stmt += "select " \
-                            "entity_id, " \
-                            "entity_type, " \
-                            "max(time_index) as time_index " \
-                            "from {tn} {where_clause} " \
-                            "group by entity_id, entity_type ".format(
-                                tn=tn,
-                                where_clause=where_clause
-                            )
+                    stmt += " union all "
 
-            # TODO ORDER BY time_index asc is removed for the time being
-            #  till we have a solution for
-            #  https://github.com/crate/crate/issues/9854
-            op = stmt + "ORDER BY time_index limit {limit} offset {offset}".format(
+            op = stmt + " ORDER BY time_index DESC limit {limit} offset {offset}".format(
                 offset=offset,
                 limit=limit
             )
@@ -1206,12 +1194,13 @@ class SQLTranslator(base_translator.BaseTranslator):
                 col_names = ['entity_id', 'entity_type', 'time_index']
                 entities = self._format_response(res,
                                                  col_names,
-                                                 tn,
+                                                 table_names,
                                                  None)
             result.extend(entities)
         return result
 
     def query_last_value(self,
+                  entity_ids=None,
                   entity_type=None,
                   attr_names=None,
                   from_date=None,
@@ -1250,12 +1239,12 @@ class SQLTranslator(base_translator.BaseTranslator):
                             )
                 select_clause = self._get_select_clause(lower_attr_names, None,
                                                         None, prefix=prefix)
-                where_clause_no_prefix = self._get_where_clause(None,
+                where_clause_no_prefix = self._get_where_clause(entity_ids,
                                                       from_date,
                                                       to_date,
                                                       fiware_servicepath,
                                                       None)
-                where_clause = self._get_where_clause(None,
+                where_clause = self._get_where_clause(entity_ids,
                                                       from_date,
                                                       to_date,
                                                       fiware_servicepath,
