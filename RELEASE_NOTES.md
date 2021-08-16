@@ -4,9 +4,13 @@
 
 ### New features
 
+- Support configuration of back off factor for CrateDB (#503)
+
 ### Bug fixes
 
 ### Documentation
+
+- Document API pagination (#511)
 
 ### Technical debt
 

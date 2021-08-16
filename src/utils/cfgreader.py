@@ -70,6 +70,15 @@ class IntVar(EVar):
         return int(rep)
 
 
+class FloatVar(EVar):
+    """
+    An env value parsed as an integer.
+    """
+
+    def _do_read(self, rep: str) -> float:
+        return float(rep)
+
+
 class BoolVar(EVar):
     """
     An env value parsed as a boolean. It evaluates to true just in case the
