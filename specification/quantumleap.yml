@@ -696,20 +696,18 @@ paths:
               entityType:
                 type: string
               index:
-                $ref: '#/definitions/IndexArray'
+                type: string
           examples:
             application/json:
               [{
-                    "entityId": "Kitchen1",
-                    "index": [
-                      "2018-01-07T15:44:59"],
-                    "entityType": "Kitchen"
+                  "entityId": "Kitchen1",
+                  "index": "2018-01-07T15:44:59",
+                  "entityType": "Kitchen"
               },
               {
-                    "entityId": "Kitchen2",
-                    "index": [
-                      "2018-01-07T15:44:59"],
-                    "entityType": "Kitchen"
+                  "entityId": "Kitchen2",
+                  "index": "2018-01-07T15:44:59",
+                  "entityType": "Kitchen"
               }]
         404:
           description: "Not Found"

@@ -354,7 +354,7 @@ def test_time_index(service, notification):
     r = requests.get(entities_url, params=None, headers=query_header(service))
     entities = r.json()
     assert len(entities) == 1
-    assert_equal_time_index_arrays(entities[0]['index'], [global_modified])
+    assert_equal_time_index_arrays([entities[0]['index']], [global_modified])
 
     # If not, use newest of changes
     notification['data'][0].pop('dateModified')
@@ -377,7 +377,7 @@ def test_time_index(service, notification):
     r = requests.get(entities_url, params=None, headers=query_header(service))
     entities = r.json()
     assert len(entities) == 1
-    obtained = entities[0]['index']
+    obtained = [entities[0]['index']]
     assert_equal_time_index_arrays(obtained, [global_modified, newer])
 
     # Otherwise, use current time.
@@ -394,7 +394,7 @@ def test_time_index(service, notification):
     r = requests.get(entities_url, params=None, headers=query_header(service))
     entities = r.json()
     assert len(entities) == 1
-    obtained = entities[0]['index']
+    obtained = [entities[0]['index']]
     assert obtained[-1].startswith("{}".format(current.year))
     delete_entity_type(service, notification['data'][0]['type'])
 
