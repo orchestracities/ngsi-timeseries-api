@@ -51,9 +51,8 @@ def query_NTNE(limit=10000,
         for entity in entities:
             entity['entityId'] = entity['id']
             entity['entityType'] = entity['type']
-            entity['entityId'] = entity['id']
-            entity.pop(id)
-            entity.pop(type)
+            del entity['id']
+            del entity['type']
             res.append(entity)
         logging.getLogger(__name__).info("Query processed successfully")
         return res

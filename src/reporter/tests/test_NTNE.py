@@ -40,37 +40,35 @@ def test_NTNE_defaults(service, reporter_dataset):
     assert r.status_code == 200, r.text
     time.sleep(3)
     obtained = r.json()
-    expected_index = [
-        "1970-01-30T00:00:00.000+00:00"
-     ]
+    expected_index = "1970-01-30T00:00:00.000+00:00"
     expected = [
     {
         'entityId': entity_id_1,
-        'index': expected_index,
+        'dateModified': expected_index,
         'pressure':
             {
                 'type': 'Number',
-                'values': [290.0],
+                'value': 290.0,
             },
         'temperature':
             {
                 'type': 'Number',
-                'values': [29.0],
+                'value': 29.0,
             },
         'entityType': 'Kitchen'
     },
     {
         'entityId': entity_id,
-        'index': expected_index,
+        'dateModified': expected_index,
         'pressure':
             {
                 'type': 'Number',
-                'values': [290.0],
+                'value': 290.0,
             },
         'temperature':
             {
                 'type': 'Number',
-                'values': [29.0],
+                'value': 29.0,
             },
         'entityType': 'Room'
     }
@@ -105,22 +103,19 @@ def test_NTNE_type(service, reporter_dataset):
     # Assert
     obtained = r.json()
     expected_type = 'Room'
-    expected_values = list(range(n_days))
-    expected_index = [
-        '1970-01-30T00:00:00.000+00:00'
-    ]
+    expected_index = '1970-01-30T00:00:00.000+00:00'
     expected = [{
         'entityId': 'Room0',
-        'index': [expected_index[-1]],
+        'dateModified': expected_index,
         'pressure':
             {
                 'type': 'Number',
-                'values': [290.0],
+                'value': 290.0,
             },
         'temperature':
             {
                 'type': 'Number',
-                'values': [29.0],
+                'value': 29.0,
             },
          'entityType': expected_type
          }
@@ -146,40 +141,38 @@ def test_NTNE_fromDate_toDate(service, reporter_dataset):
     entity_type_1 = 'Kitchen'
     entity_type = 'Room'
     entity_id = 'Room0'
-    expected_index = [
-        '1970-01-30T00:00:00.000+00:00'
-    ]
+    expected_index = '1970-01-30T00:00:00.000+00:00'
 
     # Assert
     obtained = r.json()
     expected = [
     {
         'entityId': entity_id_1,
-        'index': expected_index,
+        'dateModified': expected_index,
         'pressure':
             {
                 'type': 'Number',
-                'values': [290.0],
+                'value': 290.0,
             },
         'temperature':
             {
                 'type': 'Number',
-                'values': [29.0],
+                'value': 29.0,
             },
         'entityType': entity_type_1
     },
     {
         'entityId': entity_id,
-        'index': expected_index,
+        'dateModified': expected_index,
         'pressure':
             {
                 'type': 'Number',
-                'values': [290.0],
+                'value': 290.0,
             },
         'temperature':
             {
                 'type': 'Number',
-                'values': [29.0],
+                'value': 29.0,
             },
         'entityType': entity_type
     }]
@@ -202,39 +195,37 @@ def test_NTNE_fromDate_toDate_with_quotes(service, reporter_dataset):
     entity_type_1 = 'Kitchen'
     entity_type = 'Room'
     entity_id = 'Room0'
-    expected_index = [
-        '1970-01-30T00:00:00.000+00:00'
-    ]
+    expected_index = '1970-01-30T00:00:00.000+00:00'
     # Assert
     obtained = r.json()
     expected = [
     {
         'entityId': entity_id_1,
-        'index': expected_index,
+        'dateModified': expected_index,
         'pressure':
             {
                 'type': 'Number',
-                'values': [290.0],
+                'value': 290.0,
             },
         'temperature':
             {
                 'type': 'Number',
-                'values': [29.0],
+                'value': 29.0,
             },
         'entityType': entity_type_1
     },
     {
         'entityId': entity_id,
-        'index': expected_index,
+        'dateModified': expected_index,
         'pressure':
             {
                 'type': 'Number',
-                'values': [290.0],
+                'value': 290.0,
             },
         'temperature':
             {
                 'type': 'Number',
-                'values': [29.0],
+                'value': 29.0,
             },
         'entityType': entity_type
     }]
@@ -252,49 +243,30 @@ def test_NTNE_limit(service, reporter_dataset):
     h = {'Fiware-Service': service}
     r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
-    
-    entity_id_1 = 'Kitchen0'
-    entity_type_1 = 'Kitchen'
-    entity_type = 'Room'
-    entity_id = 'Room0'
-    expected_index = [
-        '1970-01-30T00:00:00.000+00:00'
-    ]
+
+    entity_type = 'Kitchen'
+    entity_id = 'Kitchen0'
+    expected_index = '1970-01-30T00:00:00.000+00:00'
 
     # Assert
     obtained = r.json()
     expected = [
         {
-        'entityId': entity_id_1,
-        'index': expected_index,
-        'pressure':
-            {
-                'type': 'Number',
-                'values': [290.0],
-            },
-        'temperature':
-            {
-                'type': 'Number',
-                'values': [29.0],
-            },
-        'entityType': entity_type_1
-        },
-        {
         'entityId': entity_id,
-        'index': expected_index,
+        'dateModified': expected_index,
         'pressure':
             {
                 'type': 'Number',
-                'values': [290.0],
+                'value': 290.0,
             },
         'temperature':
             {
                 'type': 'Number',
-                'values': [29.0],
+                'value': 29.0,
             },
         'entityType': entity_type
     }]
-    assert len(obtained) == len(expected)
+    assert obtained == expected
 
 
 # TODO we removed order comparison given that in
@@ -308,29 +280,30 @@ def test_NTNE_offset(service, reporter_dataset):
     h = {'Fiware-Service': service}
     r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
-    
-    entity_id_1 = 'Kitchen0'
-    entity_type_1 = 'Kitchen'
-    entity_type = 'Kitchen'
-    entity_id = 'Kitchen0'
-    expected_index = [
-        '1970-01-30T00:00:00.000+00:00'
-    ]
+
+    entity_type = 'Room'
+    entity_id = 'Room0'
+    expected_index = '1970-01-30T00:00:00.000+00:00'
 
     # Assert
     obtained = r.json()
     expected = [
-    {
-        'entityId': entity_id_1,
-        'index': expected_index,
-        'entityType': entity_type_1
-    },        
-    {
+        {
         'entityId': entity_id,
-        'index': expected_index,
+        'dateModified': expected_index,
+        'pressure':
+            {
+                'type': 'Number',
+                'value': 290.0,
+            },
+        'temperature':
+            {
+                'type': 'Number',
+                'value': 29.0,
+            },
         'entityType': entity_type
     }]
-    assert len(obtained) == len(expected)
+    assert obtained == expected
 
 
 @pytest.mark.parametrize("service", services)
@@ -348,24 +321,22 @@ def test_NTNE_combined(service, reporter_dataset):
     assert r.status_code == 200, r.text
     expected_type = 'Room'
     expected_id = 'Room0'
-    expected_index = [
-        '1970-01-30T00:00:00.000+00:00'
-    ]
+    expected_index = '1970-01-30T00:00:00.000+00:00'
 
     # Assert
     obtained = r.json()
     expected = [{
         'entityId': expected_id,
-        'index': expected_index,
+        'dateModified': expected_index,
         'pressure':
             {
                 'type': 'Number',
-                'values': [290.0],
+                'value': 290.0,
             },
         'temperature':
             {
                 'type': 'Number',
-                'values': [29.0],
+                'value': 29.0,
             },
         'entityType': expected_type
     }]
