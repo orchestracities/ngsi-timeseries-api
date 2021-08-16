@@ -8,6 +8,7 @@ To configure QuantumLeap you can use the following environment variables:
 | -------------------|-------------------------|
 | `CRATE_HOST`       | CrateDB Host            |
 | `CRATE_PORT`       | CrateDB Port            |
+| `CRATE_BACKOFF_FACTOR`   | The time between the retries to connect crate is controlled by `CRATE_BACKOFF_FACTOR`. Default value is `0.0` |
 | `DEFAULT_LIMIT`    | Max number of rows a query can retrieve |
 | `KEEP_RAW_ENTITY`  | Whether to store original entity data |
 | `INSERT_MAX_SIZE`  | Maximum amount of data a SQL (bulk) insert should take |
@@ -167,6 +168,10 @@ To configure QuantumLeap you can use the following environment variables:
   payloads from the queue and insert them in the database. These processes
   are managed by [Supervisor][supervisor] and will be automatically restarted
   if they crash.
+  
+- `CRATE_BACKOFF_FACTOR`. The time between the cratedb connection retries is
+  defined by `CRATE_BACKOFF_FACTOR`. The Maximum value of `CRATE_BACKOFF_FACTOR`
+  is: `120`. The default value is `0.0`.
 
 ## Database selection per different tenant
 
