@@ -713,7 +713,7 @@ paths:
                              'type': 'Number',
                              'values': [29.0]
                              },
-                    "type": "Kitchen"
+                    "entityType": "Kitchen"
               },
               {
                     "entityId": "Kitchen2",
@@ -729,7 +729,7 @@ paths:
                              'type': 'Number',
                              'values': [29.0]
                              },
-                    "type": "Kitchen"
+                    "entityType": "Kitchen"
               }]
         404:
           description: "Not Found"
