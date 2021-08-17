@@ -72,7 +72,8 @@ def test_cache_failure(docker_services, enable_caching, translator):
     assert result.rowcount > 0
     entity_table = translator._get_et_table_names(fiware_service)[0]
     db_cache_name = translator.get_db_cache_name()
-    assert translator._is_query_in_cache(db_cache_name, METADATA_TABLE_NAME) is False
+    assert translator._is_query_in_cache(
+        db_cache_name, METADATA_TABLE_NAME) is False
     assert translator._is_query_in_cache(db_cache_name, entity_table) is False
     docker_services.start('redis')
     translator.clean()
