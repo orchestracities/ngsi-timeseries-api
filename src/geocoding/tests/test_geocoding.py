@@ -42,7 +42,7 @@ def test_non_dict_entity():
 def test_empty_dict_entity():
     entity = dict()
     try:
-       geocoding.add_location(entity)
+        geocoding.add_location(entity)
     except Exception as e:
         assert isinstance(e, InvalidNGSIEntity)
 
