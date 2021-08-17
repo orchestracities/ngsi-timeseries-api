@@ -13,6 +13,17 @@ translators = [
 
 
 @pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
-def test_health(translator):
+def test_health_pass(translator):
     health = translator.get_health()
     assert health['status'] == 'pass'
+
+
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
+def test_health_fail(docker_services, translator):
+    docker_services._docker_compose.execute('stop', 'crate')
+    docker_services._docker_compose.execute('stop', 'timescale')
+    health = translator.get_health()
+    assert health['status'] == 'fail'
+    docker_services.start('crate')
+    docker_services.start('timescale')
+    docker_services.start('quantumleap-db-setup')

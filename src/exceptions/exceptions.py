@@ -34,6 +34,16 @@ class AmbiguousNGSIIdError(NGSIUsageError):
         NGSIUsageError.__init__(self, msg.format(entity_id))
 
 
+class InvalidNGSIEntity(NGSIUsageError):
+    """
+    Examples include an entity without entity_id or entity_type.
+    """
+
+    def __init__(self, entity=None):
+        msg = "The entity is not a valid {}. "
+        NGSIUsageError.__init__(self, msg.format(entity))
+
+
 class InvalidParameterValue(QLError):
     """
     Passed parameter value is not valid.

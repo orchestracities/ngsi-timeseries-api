@@ -1,9 +1,5 @@
 import pytest
 import os
-import time
-import timeit
-
-from conftest import REDIS_PORT
 
 
 @pytest.fixture(scope='module')

@@ -7,6 +7,7 @@ from geocoding import geocoding
 import copy
 import geojson
 import pytest
+from exceptions.exceptions import InvalidNGSIEntity
 
 
 def assert_lon_lat(entity, expected_lon, expected_lat):
@@ -22,6 +23,7 @@ def test_valid_address():
     geocoding.is_valid_address(None, 10, None, None, None)[0] is False
     geocoding.is_valid_address("Via San Gottardo", None, None, None, None)[
         0] is False
+    geocoding.is_valid_address(None, None, None, None, None)[0] is False
     geocoding.is_valid_address(None, None, None, None, "Italy")[0] is True
     geocoding.is_valid_address(None, None, "Milan", None, None)[0] is True
     geocoding.is_valid_address("Via San Gottardo", None, "Milan", None, None)[
@@ -35,6 +37,24 @@ def test_non_dict_entity():
         geocoding.add_location(entity)
     except Exception as e:
         assert isinstance(e, TypeError)
+
+
+def test_empty_dict_entity():
+    entity = dict()
+    try:
+       geocoding.add_location(entity)
+    except Exception as e:
+        assert isinstance(e, InvalidNGSIEntity)
+
+
+def test_no_address_entity():
+    entity = {
+        'id': 'test-id',
+        'type': 'test-type'
+    }
+    res = geocoding.add_location(entity)
+    assert 'address' not in res
+    assert 'location' not in res
 
 
 def test_entity_with_location(air_quality_observed):
