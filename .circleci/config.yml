@@ -5,6 +5,23 @@ jobs:
     machine: true
     steps:
       - checkout
+      - run: sudo chown -R circleci:circleci /usr/local/bin
+      - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
+      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib 
+      - restore_cache:  # ensure this step occurs *before* installing dependencies
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+      - run:
+          command: |
+            export WORKON_HOME=~/.venv
+            pip install pipenv
+            pipenv install --dev
+      - save_cache:
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          paths:
+            - "~/.venv"
+            - "/usr/local/bin"
+            - "/usr/local/lib/python3.8"
+            - "/opt/circleci/.pyenv/versions/3.8.5/lib"
       - run: docker build -t orchestracities/quantumleap .
   test_translator:
     parameters:

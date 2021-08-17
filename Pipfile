@@ -27,7 +27,7 @@ rq = "~=1.8"
 # run `pipenv install --dev` to get the packages below in your env
 
 [dev-packages]
-aiohttp = "~=3.7"
+aiohttp = ">=3.7.4"
 backoff = "~=1.1"
 matplotlib = "~=3.3"
 pandas = "~=1.1"
