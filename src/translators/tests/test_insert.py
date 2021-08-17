@@ -37,38 +37,38 @@ def test_parameters_validation(translator):
     try:
         translator._get_limit(limit_invalid, last_n_none)
     except Exception as e:
-        assert type(e) == InvalidParameterValue
+        assert isinstance(e, InvalidParameterValue)
     assert translator._get_limit(limit_valid, last_n_valid) == last_n_valid
     assert translator._get_limit(limit_none, last_n_valid) == last_n_valid
     assert translator._get_limit(limit_too_big, last_n_valid) == last_n_valid
     try:
         translator._get_limit(limit_invalid, last_n_valid)
     except Exception as e:
-        assert type(e) == InvalidParameterValue
+        assert isinstance(e, InvalidParameterValue)
     try:
         translator._get_limit(limit_valid, last_n_invalid)
     except Exception as e:
-        assert type(e) == InvalidParameterValue
+        assert isinstance(e, InvalidParameterValue)
     try:
         translator._get_limit(limit_none, last_n_invalid)
     except Exception as e:
-        assert type(e) == InvalidParameterValue
+        assert isinstance(e, InvalidParameterValue)
     try:
         translator._get_limit(limit_too_big, last_n_invalid)
     except Exception as e:
-        assert type(e) == InvalidParameterValue
+        assert isinstance(e, InvalidParameterValue)
     try:
         translator._get_limit(limit_invalid, last_n_invalid)
     except Exception as e:
-        assert type(e) == InvalidParameterValue
+        assert isinstance(e, InvalidParameterValue)
     try:
         translator._parse_limit(limit_none)
     except Exception as e:
-        assert type(e) == InvalidParameterValue
+        assert isinstance(e, InvalidParameterValue)
     try:
         translator._parse_last_n(last_n_none)
     except Exception as e:
-        assert type(e) == InvalidParameterValue
+        assert isinstance(e, InvalidParameterValue)
 
 
 @pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
@@ -104,7 +104,7 @@ def test_ngsi_attr_to_db(translator):
         },
         'type': 'Property'
     }
-    #number
+    # number
     assert translator._ngsi_number_to_db(boolean) is None
     assert translator._ngsi_number_to_db(integer) == 1.0
     assert translator._ngsi_number_to_db(float) == 1.1
@@ -113,7 +113,7 @@ def test_ngsi_attr_to_db(translator):
     assert translator._ngsi_number_to_db(structured_value) is None
     assert translator._ngsi_number_to_db(array) is None
     assert translator._ngsi_number_to_db(datetime) is None
-    #integer
+    # integer
     assert translator._ngsi_integer_to_db(boolean) is None
     assert translator._ngsi_integer_to_db(integer) == 1
     assert translator._ngsi_integer_to_db(float) == 1
@@ -122,7 +122,7 @@ def test_ngsi_attr_to_db(translator):
     assert translator._ngsi_integer_to_db(structured_value) is None
     assert translator._ngsi_integer_to_db(array) is None
     assert translator._ngsi_integer_to_db(datetime) is None
-    #datetime
+    # datetime
     assert translator._ngsi_datetime_to_db(boolean) is None
     assert translator._ngsi_datetime_to_db(integer) is None
     assert translator._ngsi_datetime_to_db(float) is None
@@ -130,8 +130,9 @@ def test_ngsi_attr_to_db(translator):
     assert translator._ngsi_datetime_to_db(string_not_number) is None
     assert translator._ngsi_datetime_to_db(structured_value) is None
     assert translator._ngsi_datetime_to_db(array) is None
-    assert translator._ngsi_datetime_to_db(datetime) == "2018-03-20T13:26:38.722Z"
-    #boolean
+    assert translator._ngsi_datetime_to_db(
+        datetime) == "2018-03-20T13:26:38.722Z"
+    # boolean
     assert translator._ngsi_boolean_to_db(boolean) is True
     assert translator._ngsi_boolean_to_db(integer) is True
     assert translator._ngsi_boolean_to_db(float) is None
@@ -140,7 +141,7 @@ def test_ngsi_attr_to_db(translator):
     assert translator._ngsi_boolean_to_db(structured_value) is None
     assert translator._ngsi_boolean_to_db(array) is None
     assert translator._ngsi_boolean_to_db(datetime) is None
-    #text
+    # text
     assert translator._ngsi_text_to_db(boolean) == "True"
     assert translator._ngsi_text_to_db(integer) == "1"
     assert translator._ngsi_text_to_db(float) == "1.1"
@@ -149,7 +150,7 @@ def test_ngsi_attr_to_db(translator):
     assert translator._ngsi_text_to_db(structured_value) == "{'structured': 1}"
     assert translator._ngsi_text_to_db(array) == "['ok', 'not_ok']"
     assert translator._ngsi_text_to_db(datetime) == "2018-03-20T13:26:38.722Z"
-    #ngsi_ld_datetime
+    # ngsi_ld_datetime
     assert translator._ngsi_ld_datetime_to_db(boolean) is None
     assert translator._ngsi_ld_datetime_to_db(integer) is None
     assert translator._ngsi_ld_datetime_to_db(float) is None
@@ -158,7 +159,8 @@ def test_ngsi_attr_to_db(translator):
     assert translator._ngsi_ld_datetime_to_db(structured_value) is None
     assert translator._ngsi_ld_datetime_to_db(array) is None
     assert translator._ngsi_ld_datetime_to_db(datetime) is None
-    assert translator._ngsi_ld_datetime_to_db(ngsi_ld_datetime) == "2018-03-20T13:26:38.722Z"
+    assert translator._ngsi_ld_datetime_to_db(
+        ngsi_ld_datetime) == "2018-03-20T13:26:38.722Z"
 
 
 @pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
@@ -193,14 +195,38 @@ def test_compute_type(translator):
     }
     entity_id = 'test'
     entity_type = 'undefined'
-    assert translator._compute_type(entity_id, entity_type, boolean) == translator.NGSI_TO_SQL['Boolean']
-    assert translator._compute_type(entity_id, entity_type, integer) == translator.NGSI_TO_SQL['Integer']
-    assert translator._compute_type(entity_id, entity_type, float) == translator.NGSI_TO_SQL['Number']
-    assert translator._compute_type(entity_id, entity_type, string_number) == translator.NGSI_TO_SQL[NGSI_TEXT]
-    assert translator._compute_type(entity_id, entity_type, structured_value) == translator.NGSI_TO_SQL[NGSI_STRUCTURED_VALUE]
-    assert translator._compute_type(entity_id, entity_type, array) == translator.NGSI_TO_SQL['Array']
-    assert translator._compute_type(entity_id, entity_type, datetime) == translator.NGSI_TO_SQL[NGSI_DATETIME]
-    assert translator._compute_type(entity_id, entity_type, ngsi_ld_datetime) == translator.NGSI_TO_SQL[NGSI_DATETIME]
+    assert translator._compute_type(
+        entity_id,
+        entity_type,
+        boolean) == translator.NGSI_TO_SQL['Boolean']
+    assert translator._compute_type(
+        entity_id,
+        entity_type,
+        integer) == translator.NGSI_TO_SQL['Integer']
+    assert translator._compute_type(
+        entity_id,
+        entity_type,
+        float) == translator.NGSI_TO_SQL['Number']
+    assert translator._compute_type(
+        entity_id,
+        entity_type,
+        string_number) == translator.NGSI_TO_SQL[NGSI_TEXT]
+    assert translator._compute_type(
+        entity_id,
+        entity_type,
+        structured_value) == translator.NGSI_TO_SQL[NGSI_STRUCTURED_VALUE]
+    assert translator._compute_type(
+        entity_id,
+        entity_type,
+        array) == translator.NGSI_TO_SQL['Array']
+    assert translator._compute_type(
+        entity_id,
+        entity_type,
+        datetime) == translator.NGSI_TO_SQL[NGSI_DATETIME]
+    assert translator._compute_type(
+        entity_id,
+        entity_type,
+        ngsi_ld_datetime) == translator.NGSI_TO_SQL[NGSI_DATETIME]
 
 
 @pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
@@ -209,7 +235,7 @@ def test_insert_empty_dict(translator):
     try:
         translator.insert(entities)
     except Exception as e:
-        assert type(e) == TypeError
+        assert isinstance(e, TypeError)
     finally:
         translator.clean()
 
