@@ -12,7 +12,6 @@ from geocoding.slf import SlfQuery
 import dateutil.parser
 from typing import Any, List, Optional, Sequence
 from uuid import uuid4
-import pickle
 
 from cache.factory import get_cache, is_cache_available
 from translators.insert_splitter import to_insert_batches
@@ -1667,8 +1666,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             try:
                 value = self.cache.get(tenant_name, key)
                 if value:
-                    res = pickle.loads(value)
-                    return res
+                    return value
             except Exception as e:
                 self.logger.warning("Caching not available, metadata data may "
                                     "not be consistent: " + str(e),
@@ -1698,8 +1696,6 @@ class SQLTranslator(base_translator.BaseTranslator):
     def _cache(self, tenant_name, key, value=None, ex=None):
         if self.cache:
             try:
-                if value:
-                    value = pickle.dumps(value)
                 self.cache.put(tenant_name, key, value, ex)
             except Exception as e:
                 self.logger.warning("Caching not available, metadata data may "

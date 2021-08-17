@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+
+  redis:
+    image: redis:${REDIS_VERSION:-4}
+    ports:
+      - "6379:6379"
+    networks:
+        - reportertests
+
+networks:
+    reportertests:
+        driver: bridge

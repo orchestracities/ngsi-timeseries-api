@@ -65,6 +65,15 @@ if [ -z $tests ] || [ $tests = "others" ]; then
   fi
   cd -
 
+  cd src/cache/tests
+  test_suite_header "CACHE"
+  sh run_tests.sh
+  loc=$?
+  if [ "$tot" -eq 0 ]; then
+    tot=$loc
+  fi
+  cd -
+
   cd src/sql/tests
   test_suite_header "SQL"
   sh run_tests.sh
