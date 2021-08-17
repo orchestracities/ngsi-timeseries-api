@@ -32,7 +32,7 @@ def test_expire(docker_redis):
 
     cache.put(key, value, 1)
     assert cache.get(key) == value
-    sleep(2)
+    cache.expire(key)
     assert cache.get(key) is None
 
     cache.flushall()
