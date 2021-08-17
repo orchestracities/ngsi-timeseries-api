@@ -78,8 +78,9 @@ def test_entity_add_point_negative_coord(air_quality_observed):
     air_quality_observed.pop('location')
 
     air_quality_observed['address']['value'] = {
-        "streetAddress": "Acolman",
+        "streetAddress": "Calle Acolman",
         "postOfficeBoxNumber": "22",
+        "postalCode": "55120",
         "addressLocality": "Ecatepec de Morelos",
         "addressCountry": "MX",
     }
