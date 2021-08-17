@@ -30,7 +30,7 @@ def docker_stack(docker_services):
     docker_services.start('redis')
     docker_services.start('quantumleap-db-setup')
     docker_services.wait_for_service(
-         "crate",
-         4200,
-         check_server=check_crate,
+        "crate",
+        4200,
+        check_server=check_crate,
     )

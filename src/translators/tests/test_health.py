@@ -31,7 +31,7 @@ def test_health_fail(docker_services, translator):
     docker_services.start('quantumleap-db-setup')
 
     docker_services.wait_for_service(
-         "crate",
-         4200,
-         check_server=check_crate,
+        "crate",
+        4200,
+        check_server=check_crate,
     )
