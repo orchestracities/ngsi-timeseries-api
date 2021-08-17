@@ -560,7 +560,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                 return attr['value']
             elif attr['value'] is not None:
                 return float(attr['value'])
-        except ValueError:
+        except (ValueError, TypeError) as e:
             logging.warning(
                 '{} cannot be cast to {} replaced with None'.format(
                     attr.get('value', None), attr.get('type', None)))
@@ -590,7 +590,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                 return attr['value']
             elif attr['value'] is not None:
                 return int(float(attr['value']))
-        except ValueError:
+        except (ValueError, TypeError) as e:
             logging.warning(
                 '{} cannot be cast to {} replaced with None'.format(
                     attr.get('value', None), attr.get('type', None)))
@@ -653,8 +653,8 @@ class SQLTranslator(base_translator.BaseTranslator):
             if 'value' in attr:
                 logging.warning(
                     '{} cannot be cast to {} replaced with None'.format(
-                        attr['value'].get('@value', None),
-                        attr['value'].get('@type', None)))
+                        attr['value'],
+                        'datetime'))
             else:
                 logging.warning(
                     'attribute "value" is missing, cannot perform cast')
@@ -1612,40 +1612,37 @@ class SQLTranslator(base_translator.BaseTranslator):
             # if attribute is complex assume it as an NGSI StructuredValue
             # TODO we should support type name different from NGSI types
             # but mapping to NGSI types
-            if self._attr_is_structured(attr):
-                return self.NGSI_TO_SQL[NGSI_STRUCTURED_VALUE]
-            else:
-                value = attr.get('value', None) or attr.get('object', None)
-                sql_type = self.NGSI_TO_SQL[NGSI_TEXT]
-                if isinstance(value, list):
-                    sql_type = self.NGSI_TO_SQL['Array']
-                elif value is not None and isinstance(value, dict):
-                    if attr_t == 'Property' \
-                            and '@type' in value \
-                            and value['@type'] == 'DateTime':
-                        sql_type = self.NGSI_TO_SQL[NGSI_DATETIME]
-                    else:
-                        sql_type = self.NGSI_TO_SQL[NGSI_STRUCTURED_VALUE]
-                elif isinstance(value, int):
-                    sql_type = self.NGSI_TO_SQL['Integer']
-                elif isinstance(value, float):
-                    sql_type = self.NGSI_TO_SQL['Number']
-                elif isinstance(value, bool):
-                    sql_type = self.NGSI_TO_SQL['Boolean']
-                elif self._is_iso_date(value):
+            value = attr.get('value', None) or attr.get('object', None)
+            sql_type = self.NGSI_TO_SQL[NGSI_TEXT]
+            if isinstance(value, list):
+                sql_type = self.NGSI_TO_SQL['Array']
+            elif value is not None and isinstance(value, dict):
+                if '@type' in value and value['@type'] == 'DateTime' \
+                        and '@value' in value \
+                        and self._is_iso_date(value['@value']):
                     sql_type = self.NGSI_TO_SQL[NGSI_DATETIME]
+                elif self._attr_is_structured(attr):
+                    sql_type = self.NGSI_TO_SQL[NGSI_STRUCTURED_VALUE]
+            elif isinstance(value, int) and not isinstance(value, bool):
+                sql_type = self.NGSI_TO_SQL['Integer']
+            elif isinstance(value, float):
+                sql_type = self.NGSI_TO_SQL['Number']
+            elif isinstance(value, bool):
+                sql_type = self.NGSI_TO_SQL['Boolean']
+            elif self._is_iso_date(value):
+                sql_type = self.NGSI_TO_SQL[NGSI_DATETIME]
 
-                supported_types = ', '.join(self.NGSI_TO_SQL.keys())
-                msg = ("'{}' is not a supported NGSI type"
-                       " for Attribute:  '{}' "
-                       " and id : '{}'. "
-                       "Please use any of the following: {}. "
-                       "Falling back to {}.")
-                self.logger.warning(msg.format(
-                    attr_t, attr, entity_id, supported_types,
-                    sql_type))
+            supported_types = ', '.join(self.NGSI_TO_SQL.keys())
+            msg = ("'{}' is not a supported NGSI type"
+                   " for Attribute:  '{}' "
+                   " and id : '{}'. "
+                   "Please use any of the following: {}. "
+                   "Falling back to {}.")
+            self.logger.warning(msg.format(
+                attr_t, attr, entity_id, supported_types,
+                sql_type))
 
-                return sql_type
+            return sql_type
 
         else:
             # Github issue 44: Disable indexing for long string
