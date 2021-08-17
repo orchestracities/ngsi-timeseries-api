@@ -18,6 +18,25 @@ def assert_lon_lat(entity, expected_lon, expected_lat):
     assert float(lat) == pytest.approx(expected_lat, abs=1e-2)
 
 
+def test_valid_address():
+    geocoding.is_valid_address(None, 10, None, None, None)[0] is False
+    geocoding.is_valid_address("Via San Gottardo", None, None, None, None)[
+        0] is False
+    geocoding.is_valid_address(None, None, None, None, "Italy")[0] is True
+    geocoding.is_valid_address(None, None, "Milan", None, None)[0] is True
+    geocoding.is_valid_address("Via San Gottardo", None, "Milan", None, None)[
+        0] is True
+
+
+def test_non_dict_entity():
+    entity = "string"
+
+    try:
+        geocoding.add_location(entity)
+    except Exception as e:
+        assert type(e) == TypeError
+
+
 def test_entity_with_location(air_quality_observed):
     # Adding location to an entity with location does nothing
     assert 'location' in air_quality_observed
@@ -54,28 +73,23 @@ def test_entity_add_point(air_quality_observed):
 
     assert_lon_lat(r, expected_lon=51.23, expected_lat=4.42)
 
-# TODO Inspect why this test fails
 
-
-@pytest.mark.skip(reason="no way of currently testing this")
 def test_entity_add_point_negative_coord(air_quality_observed):
     air_quality_observed.pop('location')
 
     air_quality_observed['address']['value'] = {
         "streetAddress": "Acolman",
         "postOfficeBoxNumber": "22",
-        "addressLocality": "Ciudad de México",
+        "addressLocality": "Ecatepec de Morelos",
         "addressCountry": "MX",
     }
 
     r = geocoding.add_location(air_quality_observed)
     assert r is air_quality_observed
 
-    assert_lon_lat(r, expected_lon=19.51, expected_lat=-99.08)
+    assert_lon_lat(r, expected_lon=19.5411019, expected_lat=-99.0341571)
 
 
-# TODO Inspect why this test fails
-@pytest.mark.skip(reason="no way of currently testing this")
 def test_entity_add_street_line(air_quality_observed):
     air_quality_observed.pop('location')
 
@@ -96,8 +110,6 @@ def test_entity_add_street_line(air_quality_observed):
     assert len(geo['coordinates']) > 1
 
 
-# TODO: see #358
-@pytest.mark.skip(reason="see #358")
 def test_entity_add_city_shape(air_quality_observed):
     air_quality_observed.pop('location')
 
@@ -145,7 +157,7 @@ def test_multiple_entities(air_quality_observed):
     assert len(r) == 2
 
 
-def test_caching(air_quality_observed, monkeypatch):
+def test_caching(docker_redis, air_quality_observed, monkeypatch):
     air_quality_observed.pop('location')
 
     air_quality_observed['address']['value'] = {
@@ -175,3 +187,7 @@ def test_caching(air_quality_observed, monkeypatch):
 
     finally:
         cache.redis.flushall()
+
+
+def test_health():
+    geocoding.get_health()['status'] == 'pass'
