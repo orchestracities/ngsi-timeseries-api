@@ -34,7 +34,7 @@ def test_non_dict_entity():
     try:
         geocoding.add_location(entity)
     except Exception as e:
-        assert type(e) == TypeError
+        assert isinstance(e, TypeError)
 
 
 def test_entity_with_location(air_quality_observed):
