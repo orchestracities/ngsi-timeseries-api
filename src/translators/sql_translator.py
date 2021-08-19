@@ -13,7 +13,7 @@ import dateutil.parser
 from typing import Any, List, Optional, Sequence
 from uuid import uuid4
 import pickle
-
+from crate.client.exceptions import ProgrammingError
 from cache.factory import get_cache, is_cache_available
 from translators.insert_splitter import to_insert_batches
 from utils.connection_manager import Borg
@@ -140,6 +140,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         return self.dbCacheName
 
     def sql_error_handler(self, exception):
+        #raise exception
         raise NotImplementedError
 
     # TODO is this still needed?
@@ -1103,6 +1104,14 @@ class SQLTranslator(base_translator.BaseTranslator):
                  )
             try:
                 self.cursor.execute(op)
+
+            except ProgrammingError as e:
+                self.sql_error_handler(e)
+                self.logger.error(str(e), exc_info=True)
+                entities = []
+                if ('Cannot cast' in e.message):
+                    return (result, "AggrMethod cannot be applied")
+
             except Exception as e:
                 # TODO due to this except in case of sql errors,
                 # all goes fine, and users gets 404 as result
@@ -1110,6 +1119,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                 self.sql_error_handler(e)
                 self.logger.error(str(e), exc_info=True)
                 entities = []
+                return (result, "Not Found")
             else:
                 res = self.cursor.fetchall()
                 col_names = self._column_names_from_query_meta(
@@ -1119,7 +1129,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                                                  tn,
                                                  last_n)
             result.extend(entities)
-        return result
+        return (result, "ok")
 
     @staticmethod
     def _column_names_from_query_meta(cursor_description: Sequence) -> [str]:

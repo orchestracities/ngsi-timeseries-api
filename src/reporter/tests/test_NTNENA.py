@@ -1,6 +1,6 @@
 from conftest import QL_URL
 from datetime import datetime
-from reporter.tests.utils import delete_test_data, insert_test_data, send_notifications_different_types
+from reporter.tests.utils import delete_test_data, insert_test_data, insert_test_data_different_types
 import pytest
 import requests
 import dateutil.parser
@@ -44,6 +44,16 @@ def reporter_dataset():
     yield
     for service in services:
         delete_test_data(service, [entity_type, entity_type_1])
+
+@pytest.fixture(scope='module')
+def reporter_dataset_different_types():
+    for service in services:
+        insert_test_data_different_types(service, [entity_type], n_entities=1, index_size=4,
+                         entity_id=entity_id)
+
+    yield
+    for service in services:
+        delete_test_data(service, [entity_type])
 
 
 @pytest.mark.parametrize("service", services)
@@ -1165,6 +1175,7 @@ def test_aggregation_is_per_instance(service, reporter_dataset):
     assert r.status_code == 200, r.text
 
     obtained = r.json()
+    delete_test_data(service, [entity_type])
     assert isinstance(obtained, dict)
     expected_index = ['', '']
     expected_entities = [
@@ -1191,12 +1202,9 @@ def test_aggregation_is_per_instance(service, reporter_dataset):
     }
     assert obtained == expected
 
-def test_aggregation_different_types():
+@pytest.mark.parametrize("service", services)
+def test_aggregation_different_types(service, reporter_dataset_different_types):
     attrs='temperature,intensity,boolean'
-    service='test'
-    delete_test_data(service, ['Test'])
-    send_notifications_different_types(service, 'Test', 'Test1')
-    time.sleep(1)
     query_params = {
         'attrs': attrs,
         'aggrMethod': 'min'
@@ -1214,11 +1222,11 @@ def test_aggregation_different_types():
             [{
                 'entities':
                 [{
-                    'entityId': 'Test1',
+                    'entityId': 'Room1',
                     'index': ['',''],
-                    'values': [True]
+                    'values': [False]
                 }],
-                'entityType': 'Test'
+                'entityType': 'Room'
             }]
         },
         {
@@ -1227,11 +1235,11 @@ def test_aggregation_different_types():
             [{
                 'entities':
                 [{
-                    'entityId': 'Test1',
+                    'entityId': 'Room1',
                     'index': ['',''],
-                    'values': ['Low']
+                    'values': ['str1']
                 }],
-                'entityType': 'Test'
+                'entityType': 'Room'
             }]
         },
         {
@@ -1240,11 +1248,11 @@ def test_aggregation_different_types():
             [{
                 'entities':
                 [{
-                    'entityId': 'Test1',
+                    'entityId': 'Room1',
                     'index': ['',''],
-                    'values': [10.0]
+                    'values': [0.0]
                 }],
-                'entityType': 'Test'
+                'entityType': 'Room'
             }]
         },
     ]
@@ -1273,11 +1281,11 @@ def test_aggregation_different_types():
             [{
                 'entities':
                 [{
-                    'entityId': 'Test1',
+                    'entityId': 'Room1',
                     'index': ['',''],
                     'values': [True]
                 }],
-                'entityType': 'Test'
+                'entityType': 'Room'
             }]
         },
         {
@@ -1286,11 +1294,11 @@ def test_aggregation_different_types():
             [{
                 'entities':
                 [{
-                    'entityId': 'Test1',
+                    'entityId': 'Room1',
                     'index': ['',''],
-                    'values': ['Low']
+                    'values': ['str1']
                 }],
-                'entityType': 'Test'
+                'entityType': 'Room'
             }]
         },
         {
@@ -1299,11 +1307,11 @@ def test_aggregation_different_types():
             [{
                 'entities':
                 [{
-                    'entityId': 'Test1',
+                    'entityId': 'Room1',
                     'index': ['',''],
-                    'values': [10.0]
+                    'values': [3.0]
                 }],
-                'entityType': 'Test'
+                'entityType': 'Room'
             }]
         },
     ]
@@ -1332,11 +1340,11 @@ def test_aggregation_different_types():
             [{
                 'entities':
                 [{
-                    'entityId': 'Test1',
+                    'entityId': 'Room1',
                     'index': ['',''],
-                    'values': [1]
+                    'values': [4]
                 }],
-                'entityType': 'Test'
+                'entityType': 'Room'
             }]
         },
         {
@@ -1345,11 +1353,11 @@ def test_aggregation_different_types():
             [{
                 'entities':
                 [{
-                    'entityId': 'Test1',
+                    'entityId': 'Room1',
                     'index': ['',''],
-                    'values': [1]
+                    'values': [4]
                 }],
-                'entityType': 'Test'
+                'entityType': 'Room'
             }]
         },
         {
@@ -1358,11 +1366,11 @@ def test_aggregation_different_types():
             [{
                 'entities':
                 [{
-                    'entityId': 'Test1',
+                    'entityId': 'Room1',
                     'index': ['',''],
-                    'values': [1]
+                    'values': [4]
                 }],
-                'entityType': 'Test'
+                'entityType': 'Room'
             }]
         },
     ]
@@ -1383,8 +1391,8 @@ def test_aggregation_different_types():
     r = query(params=query_params, service=service)
     assert r.status_code == 404, r.text
     assert r.json() == {
-        "error": "Not Found",
-        "description": "No records were found for such query."
+        "error": "AggrMethod cannot be applied",
+        "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
     }
 
     # 'aggrMethod': 'sum'
@@ -1396,7 +1404,6 @@ def test_aggregation_different_types():
     r = query(params=query_params, service=service)
     assert r.status_code == 404, r.text
     assert r.json() == {
-        "error": "Not Found",
-        "description": "No records were found for such query."
+        "error": "AggrMethod cannot be applied",
+        "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
     }
-    delete_test_data(service, ['Test'])
