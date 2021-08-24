@@ -644,37 +644,3 @@ def test_not_found(service):
         "error": "Not Found",
         "description": "No records were found for such query."
     }
-
-@pytest.mark.parametrize("service", services)
-def test_1T1ENA_datasource(service, reporter_dataset):
-    # Query
-    query_params = {
-        'datasource': True,
-    }
-    h = {'Fiware-Service': service}
-
-    r = requests.get(query_url(), params=query_params, headers=h)
-    assert r.status_code == 200, r.text
-
-    # Assert
-    expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
-        'dateModified':
-            {
-                'type': 'DateTime',
-                'value': '1970-01-30T00:00:00.000+00:00'
-            },
-        'pressure':
-            {
-                'type': 'Number',
-                'value': 290.0
-            },
-        'temperature':
-            {
-                'type': 'Number',
-                'value': 29.0
-            }
-    }
-    obtained = r.json()
-    assert obtained == expected
