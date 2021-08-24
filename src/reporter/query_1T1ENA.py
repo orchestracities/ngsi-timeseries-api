@@ -19,8 +19,7 @@ def query_1T1ENA(entity_id,   # In Path
                  offset=0,
                  georel=None,
                  geometry=None,
-                 coords=None,
-                 datasource=False):
+                 coords=None):
     """
     See /entities/{entityId}/attrs/{attrName} in API Specification
     quantumleap.yml
@@ -55,8 +54,7 @@ def query_1T1ENA(entity_id,   # In Path
                                    offset=offset,
                                    fiware_service=fiware_s,
                                    fiware_servicepath=fiware_sp,
-                                   geo_query=geo_query,
-                                   datasource=datasource)
+                                   geo_query=geo_query)
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)
         logging.getLogger(__name__).error(msg, exc_info=True)
@@ -83,27 +81,6 @@ def query_1T1ENA(entity_id,   # In Path
         if len(entities) > 1:
             import warnings
             warnings.warn("Not expecting more than one result for a 1T1ENA.")
-
-        if datasource:
-            index_value = entities[0]['index'][0]
-            entities[0]['dateModified'] = {
-                "type": "DateTime",
-                "value": index_value
-            }
-            entities[0].pop('index', None)
-            ignore = ('type', 'id', 'dateModified')
-            attrs = [at for at in sorted(entities[0].keys()) if at not in ignore]
-            for at in attrs:
-                at_value = entities[0][at]['values'][0]
-                entities[0][at].pop('values', None)
-                entities[0][at]['value'] = at_value
-            entityId = entities[0]['id']
-            entityType = entities[0]['type']
-            entities[0]['entityId'] = entityId
-            entities[0]['entityType'] = entityType
-            entities[0].pop('id', None)
-            entities[0].pop('type', None)
-            return entities[0]
 
         attributes = []
         ignore = ('type', 'id', 'index')

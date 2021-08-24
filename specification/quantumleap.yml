@@ -63,6 +63,24 @@ definitions:
                 type: "DateTime"
                 value: 2017-06-19T11:46:45.00Z
 
+  Entities:
+    type: object
+    required:
+    - "entities"
+    properties:
+      entities:
+        type: array
+        items:
+          $ref: '#/definitions/Entity'
+      attributes:
+        type: array
+    example:
+      entities: 
+        - id: Kitchen
+          type: Room
+      attributes:
+          "temperature"
+
 
 ################################################################################
 # DEFINITIONS: Response objects
@@ -116,6 +134,11 @@ definitions:
       values:
         $ref: '#/definitions/ValuesArray'
 
+  AttributesArray:
+    type: array
+    items:
+      type: string
+    description: "Array of the attributes name"
 
 ################################################################################
 # PARAMETERS: IN HEADERS
@@ -334,14 +357,6 @@ parameters:
     to the table are decommissioned and no further writes are possible. In fact,
     race conditions are possible if entities of that type are POSTed to the
     notify endpoint while the underlying clean-up procedure is in progress."
-  datasource:
-    in: query
-    name: datasource
-    type: boolean
-    default: false
-    description: "Optional. When retrieving an enity, setting this parameter to 
-     true will result in latest value of attributes as response, so QL can
-     act as data source returning the last value of a given entity."
   taskStatus:
     in: query
     name: taskStatus
@@ -674,6 +689,78 @@ paths:
         500:
           description: "Internal server error."
 
+  /v2/op/queryContext:
+    post:
+      operationId: reporter.queryContext.queryContext
+      summary: "Query QuantumLeap for the latest value of entity."
+      description: ""
+      parameters:
+        - in: body
+          name: Entities
+          required: true
+          schema:
+            $ref: '#/definitions/Entities'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
+      tags:
+        - input
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              entityId:
+                type: string
+              entityType:
+                type: string
+              index:
+                $ref: '#/definitions/IndexArray'
+              attributes:
+                type: array
+                items:
+                  $ref: '#/definitions/AttributeValues'
+              dateModified:
+                type: string
+              attrName:
+                type: string
+          examples:
+            application/json:
+              {
+                  "entityId": "Kitchen1",
+                  "entityType": "Kitchen",
+                  "dateModified":
+                    {
+                      "type": "DateTime",
+                      "value": "2018-01-05T15:44:34"
+                    },
+                  "temperature":
+                    {
+                      "type": "Number",
+                      "value": 24.1
+                    },
+                  "pressure":
+                    {
+                      "type": "Number",
+                      "value": 10.1
+                    }
+              }
+        404:
+          description: "Not Found"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              description:
+                type: string
+          examples:
+            application/json:
+              {
+                "error": "Not Found",
+                "description": "No records were found for such query."
+              }
+
 ################################################################################
 # PATHS: OUTPUT
 ################################################################################
@@ -888,7 +975,6 @@ paths:
         - $ref: '#/parameters/georel'
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
-        - $ref: '#/parameters/datasource'
         # In Header...
         - $ref: '#/parameters/fiware-Service'
         - $ref: '#/parameters/fiware-ServicePath'

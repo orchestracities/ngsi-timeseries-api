@@ -16,7 +16,7 @@ from uuid import uuid4
 from cache.factory import get_cache, is_cache_available
 from translators.insert_splitter import to_insert_batches
 from utils.connection_manager import Borg
-
+import pdb
 # NGSI TYPES
 # Based on Orion output because official docs don't say much about these :(
 NGSI_DATETIME = 'DateTime'
@@ -918,8 +918,7 @@ class SQLTranslator(base_translator.BaseTranslator):
               offset=0,
               fiware_service=None,
               fiware_servicepath=None,
-              geo_query: SlfQuery = None,
-              datasource=False):
+              geo_query: SlfQuery = None):
         """
         This translator method is used by all API query endpoints.
 
@@ -1094,29 +1093,18 @@ class SQLTranslator(base_translator.BaseTranslator):
 
         result = []
         for tn in sorted(table_names):
-            if datasource:
-                op = "select {select_clause} " \
-                     "from {tn} " \
-                     "{where_clause} " \
-                     "order by time_index desc " \
-                     "limit 1".format(
-                         select_clause=select_clause,
-                         tn=tn,
-                         where_clause=where_clause,
-                     )
-            else:
-                op = "select {select_clause} " \
-                     "from {tn} " \
-                     "{where_clause} " \
-                     "{order_group_clause} " \
-                     "limit {limit} offset {offset}".format(
-                         select_clause=select_clause,
-                         tn=tn,
-                         where_clause=where_clause,
-                         order_group_clause=order_group_clause,
-                         limit=limit,
-                         offset=offset,
-                     )
+            op = "select {select_clause} " \
+                 "from {tn} " \
+                 "{where_clause} " \
+                 "{order_group_clause} " \
+                 "limit {limit} offset {offset}".format(
+                     select_clause=select_clause,
+                     tn=tn,
+                     where_clause=where_clause,
+                     order_group_clause=order_group_clause,
+                     limit=limit,
+                     offset=offset,
+                 )
             try:
                 self.cursor.execute(op)
             except Exception as e:
@@ -1225,7 +1213,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                          fiware_servicepath=None):
         if limit == 0:
             return []
-
+        pdb.set_trace()
         # todo filter only selected attributes.
 
         lower_attr_names = [a.lower() for a in attr_names] \

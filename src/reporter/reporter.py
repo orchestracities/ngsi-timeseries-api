@@ -106,6 +106,19 @@ def _validate_payload(payload):
                 'An entity update is missing value '
                 'for attribute {}'.format(attr))
 
+def _validate_entity(entity):
+    """
+    :param entity:
+        The received json data in the query.
+    :return: str | None
+        Error message, if any.
+    """
+    # The entity must be uniquely identifiable
+    if 'type' not in entity:
+        return 'Entity type is required'
+
+    if 'id' not in entity:
+        return 'Entity id is required'
 
 def _filter_empty_entities(payload):
     log().debug('Received payload')
