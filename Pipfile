@@ -27,7 +27,7 @@ rq = "~=1.8"
 # run `pipenv install --dev` to get the packages below in your env
 
 [dev-packages]
-aiohttp = "~=3.7"
+aiohttp = ">=3.7.4"
 backoff = "~=1.1"
 matplotlib = "~=3.3"
 pandas = "~=1.1"
@@ -36,7 +36,7 @@ pytest-flask = "~=0.10"
 pytest = "~=3.0"
 pytest-cov = "~=2.7.1"
 coveralls = "~=2.0"
-lovely-pytest-docker = "~=0.2.0"
+lovely-pytest-docker = "~=0.2.1"
 pyyaml = "~=5.4"
 
 [requires]
