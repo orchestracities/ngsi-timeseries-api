@@ -5,9 +5,9 @@ from translators.factory import translator_for
 import logging
 from .geo_query_handler import handle_geo_query
 
-def queryContext():
+def query():
     """
-    See /op/queryContext in API Specification
+    See /op/query in API Specification
     quantumleap.yml
     """
     if request.json is None:

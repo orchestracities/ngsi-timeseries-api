@@ -693,7 +693,7 @@ paths:
 
   /v2/op/query:
     post:
-      operationId: reporter.queryContext.queryContext
+      operationId: reporter.query.query
       summary: "Query QuantumLeap for the latest value of entity."
       description: ""
       parameters:
