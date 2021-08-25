@@ -44,9 +44,29 @@ if [ -z $tests ] || [ $tests = "reporter" ]; then
   cd -
 fi
 
+if [ -z $tests ] || [ $tests = "integration" ]; then
+  cd src/tests/
+  test_suite_header "BACKWARD COMPAT & INTEGRATION"
+  sh run_tests.sh
+  loc=$?
+  if [ "$tot" -eq 0 ]; then
+    tot=$loc
+  fi
+  cd -
+fi
+
 if [ -z $tests ] || [ $tests = "others" ]; then
   cd src/geocoding/tests
   test_suite_header "GEO-CODING"
+  sh run_tests.sh
+  loc=$?
+  if [ "$tot" -eq 0 ]; then
+    tot=$loc
+  fi
+  cd -
+
+  cd src/cache/tests
+  test_suite_header "CACHE"
   sh run_tests.sh
   loc=$?
   if [ "$tot" -eq 0 ]; then
@@ -65,15 +85,6 @@ if [ -z $tests ] || [ $tests = "others" ]; then
 
   cd src/utils/tests
   test_suite_header "UTILS"
-  sh run_tests.sh
-  loc=$?
-  if [ "$tot" -eq 0 ]; then
-    tot=$loc
-  fi
-  cd -
-
-  cd src/tests/
-  test_suite_header "BACKWARD COMPAT & INTEGRATION"
   sh run_tests.sh
   loc=$?
   if [ "$tot" -eq 0 ]; then

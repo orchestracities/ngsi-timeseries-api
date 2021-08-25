@@ -1,3 +1,6 @@
+#vegeta
+results.bin
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -20,6 +23,7 @@ lib64/
 parts/
 sdist/
 var/
+_build/
 *.egg-info/
 .installed.cfg
 *.egg

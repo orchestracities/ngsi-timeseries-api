@@ -26,6 +26,7 @@ def check_time_index(service, input_index, expected_index=None):
     # Check Response
     expected = {
         'entityId': 'Room0',
+        'entityType': 'Room',
         'attrName': 'temperature',
         'index': expected_index,
         'values': [0, 1, 2]
