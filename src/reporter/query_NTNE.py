@@ -3,7 +3,7 @@ from flask import request
 from reporter.reporter import _validate_query_params
 from translators.factory import translator_for
 import logging
-
+import warnings
 
 def query_NTNE(limit=10000,
                type_=None,  # In Query
@@ -55,6 +55,7 @@ def query_NTNE(limit=10000,
             del entity['type']
             res.append(entity)
         logging.getLogger(__name__).info("Query processed successfully")
+        logging.warn("usage of  id and type rather than entityId and entityType from version 0.9")
         return res
 
     r = {

@@ -3,6 +3,7 @@ from flask import request
 from reporter.reporter import _validate_query_params
 from translators.factory import translator_for
 import logging
+import warnings
 from .geo_query_handler import handle_geo_query
 from utils.jsondict import lookup_string_match
 
@@ -93,6 +94,7 @@ def query_1TNE1A(attr_name,   # In Path
                                 from_date,
                                 to_date,)
         logging.getLogger(__name__).info("Query processed successfully")
+        logging.warn("usage of  id and type rather than entityId and entityType from version 0.9")
         return res
 
     r = {
@@ -160,4 +162,5 @@ def query_1TNE1A_value(*args, **kwargs):
         res.pop('attrName', None)
         res['values'] = res['entities']
         res.pop('entities', None)
+    logging.warn("usage of  id and type rather than entityId and entityType from version 0.9")
     return res

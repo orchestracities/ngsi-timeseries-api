@@ -3,6 +3,7 @@ from flask import request
 from reporter.reporter import _validate_query_params
 from translators.factory import translator_for
 import logging
+import warnings
 from .geo_query_handler import handle_geo_query
 from utils.jsondict import lookup_string_match
 
@@ -69,7 +70,6 @@ def query_1T1E1A(attr_name,   # In Path
 
     if entities:
         if len(entities) > 1:
-            import warnings
             warnings.warn("Not expecting more than one result for a 1T1E1A.")
 
         index = [] if aggr_method and not aggr_period else entities[0]['index']
@@ -82,6 +82,7 @@ def query_1T1E1A(attr_name,   # In Path
             'values': matched_attr['values'] if matched_attr else []
         }
         logging.getLogger(__name__).info("Query processed successfully")
+        logging.warn("usage of  id and type rather than entityId and entityType from version 0.9")
         return res
 
     r = {
@@ -98,4 +99,5 @@ def query_1T1E1A_value(*args, **kwargs):
         res.pop('entityId', None)
         res.pop('entityType', None)
         res.pop('attrName', None)
+    logging.warn("usage of  id and type rather than entityId and entityType from version 0.9")
     return res
