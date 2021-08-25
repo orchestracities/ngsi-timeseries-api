@@ -106,19 +106,26 @@ def _validate_payload(payload):
                 'An entity update is missing value '
                 'for attribute {}'.format(attr))
 
-def _validate_entity(entity):
+def _validate_body(payload):
     """
-    :param entity:
+    :param payload:
         The received json data in the query.
     :return: str | None
         Error message, if any.
     """
-    # The entity must be uniquely identifiable
-    if 'type' not in entity:
-        return 'Entity type is required'
-
-    if 'id' not in entity:
-        return 'Entity id is required'
+    # Not Supported parameters
+    if 'expression' in payload:
+        return 'expression is Not Supported'
+    if 'metadata' in payload:
+        return 'metadata is Not Supported'
+    for et in payload['entities']: 
+        # The entity must be uniquely identifiable
+        if 'type' not in et:
+            return 'Entity type is required'
+        if 'id' not in et:
+            return 'Entity id is required'
+        if 'idPattern' in et:
+            return 'idPattern is Not Supported'
 
 def _filter_empty_entities(payload):
     log().debug('Received payload')

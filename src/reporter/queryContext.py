@@ -1,10 +1,9 @@
 from exceptions.exceptions import NGSIUsageError, InvalidParameterValue
 from flask import request
-from reporter.reporter import _validate_query_params, _validate_entity
+from reporter.reporter import _validate_query_params, _validate_body
 from translators.factory import translator_for
 import logging
 from .geo_query_handler import handle_geo_query
-import pdb
 
 def queryContext():
     """
@@ -18,19 +17,22 @@ def queryContext():
     if 'entities' not in request.json:
         return 'Discarding query due to lack of request body ' \
                'content.', 400
-
+    # Validate request body
+    error = _validate_body(request.json)
+    if error:
+        return error, 400
     entity = request.json['entities']
-    attrs = request.json['attributes']
+    attrs = request.json['attrs']
 
     fiware_s = request.headers.get('fiware-service', None)
     fiware_sp = request.headers.get('fiware-servicepath', None)
 
+    if fiware_sp == '/':
+        fiware_sp = None
+
     res = []
     # Validate entity
     for et in entity:
-        error = _validate_entity(et)
-        if error:
-            return error, 400
         entity_type = et["type"]
         entity_id = et["id"]
         eid = entity_id.split()
@@ -69,13 +71,14 @@ def queryContext():
                 import warnings
                 warnings.warn("Not expecting more than one result for a 1T1ENA.")
 
-        logging.getLogger(__name__).info("Query processed successfully")
-        res.append(entities)
+            logging.getLogger(__name__).info("Query processed successfully")
+            entities[0].pop("dateModified")
+            res.append(entities[0])
+        else:
+            r = {
+                "error": "Not Found",
+                "description": "No records were found for such query."
+            }
+            logging.getLogger(__name__).info("No value found for query")
+            return r, 404
     return res
-
-    r = {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
-    logging.getLogger(__name__).info("No value found for query")
-    return r, 404

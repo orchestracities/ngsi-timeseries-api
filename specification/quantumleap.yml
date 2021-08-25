@@ -74,6 +74,8 @@ definitions:
           $ref: '#/definitions/Entity'
       attributes:
         type: array
+        items:
+          $ref: '#/definitions/AttributesArray'
     example:
       entities: 
         - id: Kitchen
@@ -689,14 +691,14 @@ paths:
         500:
           description: "Internal server error."
 
-  /v2/op/queryContext:
+  /v2/op/query:
     post:
       operationId: reporter.queryContext.queryContext
       summary: "Query QuantumLeap for the latest value of entity."
       description: ""
       parameters:
         - in: body
-          name: Entities
+          name: entities
           required: true
           schema:
             $ref: '#/definitions/Entities'
@@ -714,14 +716,6 @@ paths:
                 type: string
               entityType:
                 type: string
-              index:
-                $ref: '#/definitions/IndexArray'
-              attributes:
-                type: array
-                items:
-                  $ref: '#/definitions/AttributeValues'
-              dateModified:
-                type: string
               attrName:
                 type: string
           examples:
@@ -729,11 +723,6 @@ paths:
               {
                   "entityId": "Kitchen1",
                   "entityType": "Kitchen",
-                  "dateModified":
-                    {
-                      "type": "DateTime",
-                      "value": "2018-01-05T15:44:34"
-                    },
                   "temperature":
                     {
                       "type": "Number",
