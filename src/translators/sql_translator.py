@@ -1413,7 +1413,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                             n = {
                                 'value': v,
                                 'type': 'DateTime'
-                                }
+                            }
                             e.setdefault('dateModified', n)
                         else:
                             e.setdefault('index', []).append(v)

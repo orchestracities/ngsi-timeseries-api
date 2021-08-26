@@ -721,10 +721,11 @@ def test_query_last_value(translator):
     result = translator.query_last_value()
     assert len(result) == 2
     original = entities[5]
-    original.pop('time_index')
+    original_index = original.pop('time_index')
     returned = result[1]
-    returned.pop('dateModified')
+    returned_index = returned.pop('dateModified')
     assert original == returned
+    assert original_index == returned_index['value']
     translator.clean()
 
 
