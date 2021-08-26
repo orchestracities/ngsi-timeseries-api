@@ -1412,7 +1412,11 @@ class SQLTranslator(base_translator.BaseTranslator):
                     elif original_name == self.TIME_INDEX_NAME:
                         v = self._get_isoformat(v)
                         if single_value:
-                            e.setdefault('dateModified', v)
+                            n = {
+                                'value': v,
+                                'type': 'DateTime'
+                                }
+                            e.setdefault('dateModified', n)
                         else:
                             e.setdefault('index', []).append(v)
 

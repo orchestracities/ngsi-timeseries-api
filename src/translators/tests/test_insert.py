@@ -719,7 +719,12 @@ def test_query_last_value(translator):
     result = translator.insert(entities)
     assert result.rowcount > 0
     result = translator.query_last_value()
-    assert len(result) > 0
+    assert len(result) == 2
+    original = entities[5]
+    original.pop('time_index')
+    returned = result[1]
+    returned.pop('dateModified')
+    assert original == returned
     translator.clean()
 
 
