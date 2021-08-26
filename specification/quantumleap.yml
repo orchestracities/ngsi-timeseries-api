@@ -63,16 +63,17 @@ definitions:
                 type: "DateTime"
                 value: 2017-06-19T11:46:45.00Z
 
-  Entities:
+  queryInput:
     type: object
     required:
     - "entities"
+    - "attrs"
     properties:
       entities:
         type: array
         items:
           $ref: '#/definitions/Entity'
-      attributes:
+      attrs:
         type: array
         items:
           $ref: '#/definitions/AttributesArray'
@@ -80,7 +81,7 @@ definitions:
       entities: 
         - id: Kitchen
           type: Room
-      attributes:
+      attrs:
           "temperature"
 
 
@@ -701,7 +702,7 @@ paths:
           name: entities
           required: true
           schema:
-            $ref: '#/definitions/Entities'
+            $ref: '#/definitions/queryInput'
         - $ref: '#/parameters/fiware-Service'
         - $ref: '#/parameters/fiware-ServicePath'
       tags:
