@@ -34,3 +34,8 @@ def docker_stack(docker_services):
         4200,
         check_server=check_crate,
     )
+
+
+@pytest.fixture(scope='session')
+def docker_services_project_name():
+    return "reporter-test"
