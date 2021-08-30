@@ -593,17 +593,13 @@ def test_issue_537(service, notification):
         "serialNumber": {
             "type": "Text",
             "value": "type as Moosbllord, new value name doesthismatter2 and random values in an array",
-            "metadata": {}
-        },
+            "metadata": {}},
         "doesthismatter2": {
             "type": "Moosbllord",
             "value": [
                 "oglera8978sdfasd",
-                "fdasfa6786sdf"
-            ],
-            "metadata": {}
-        }
-    }
+                "fdasfa6786sdf"],
+            "metadata": {}}}
     url = '{}'.format(notify_url)
     get_url = "{}/entities/six/attrs/doesthismatter2/value".format(
         QL_URL)
