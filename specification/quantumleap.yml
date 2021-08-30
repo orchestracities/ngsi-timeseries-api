@@ -1823,6 +1823,8 @@ paths:
           description: OK
           schema:
             type: array
+            items:
+              type: object
           examples:
             application/json:
               [
@@ -1876,8 +1878,7 @@ paths:
                         }
                       ]
                     }
-                },
-                null
+                }
               ]
     delete:
       operationId: wq.ql.notify.delete_insert_tasks
@@ -1921,6 +1922,8 @@ paths:
           description: OK
           schema:
             type: array
+            items:
+              type: object
           examples:
             application/json:
               [
