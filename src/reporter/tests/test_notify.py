@@ -583,6 +583,7 @@ def test_no_value_with_type_for_attributes(service, notification):
     assert res_get.json()['values'][0] is None
     delete_entity_type(service, notification['data'][0]['type'])
 
+
 @pytest.mark.parametrize("service", services)
 def test_issue_537(service, notification):
     # entity with one Null value and no type
@@ -596,7 +597,7 @@ def test_issue_537(service, notification):
         },
         "doesthismatter2": {
             "type": "Moosbllord",
-#            "type": "Array",
+            #            "type": "Array",
             "value": [
                 "oglera8978sdfasd",
                 "fdasfa6786sdf"
@@ -616,10 +617,11 @@ def test_issue_537(service, notification):
     res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 200
     assert res_get.json()['values'][0] == [
-                "oglera8978sdfasd",
-                "fdasfa6786sdf"
-            ]
+        "oglera8978sdfasd",
+        "fdasfa6786sdf"
+    ]
     delete_entity_type(service, notification['data'][0]['type'])
+
 
 @pytest.mark.parametrize("service", services)
 def test_issue_382(service, notification):
