@@ -597,7 +597,6 @@ def test_issue_537(service, notification):
         },
         "doesthismatter2": {
             "type": "Moosbllord",
-            #            "type": "Array",
             "value": [
                 "oglera8978sdfasd",
                 "fdasfa6786sdf"
