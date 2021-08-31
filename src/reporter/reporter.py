@@ -56,22 +56,26 @@ def is_text(attr_type):
 
 def has_value(entity, attr_name):
     attr = entity.get(attr_name, {})
+    attr_value = None
     if attr is None:
         attr = {}
-    attr_value = attr.get('value', None)
-    attr_type = attr.get('type', None)
+    # work around to not drop during validation `modifiedAt` and `observedAt`
+    elif isinstance(attr, dict):
+        attr_value = attr.get('value', None)
+        attr_type = attr.get('type', None)
+        if attr_value is None:
+            return False
 
-    if attr_value is None:
-        return False
-
-    if is_text(attr_type):
-        return True
+        if is_text(attr_type):
+            return True
+    else:
+        attr_value = attr
 
     if isinstance(attr_value, str):
         attr_value = attr_value.strip()
 
     # If type != Text and value == '', make value = null
-    return attr_value != ''
+    return attr_value != '' and attr_value is not None
 
 
 def _validate_payload(payload):
@@ -113,7 +117,10 @@ def _filter_empty_entities(payload):
     empty = False
     attrs.remove('time_index')
     for j in attrs:
-        value = payload[j]['value']
+        if 'value' in payload[j]:
+            value = payload[j]['value']
+        else:
+            value = payload[j]
         if isinstance(value, int) and value is not None:
             empty = True
         elif value:
@@ -129,9 +136,13 @@ def _filter_no_type_no_value_entities(payload):
     attrs.remove('time_index')
     for i in attrs:
         attr = payload.get(i, {})
-        attr_value = attr.get('value', None)
-        attr_type = attr.get('type', None)
-        if not attr_type and not attr_value:
+        try:
+            attr_value = attr.get('value', None)
+            attr_type = attr.get('type', None)
+            if not attr_type and not attr_value:
+                del payload[i]
+        # remove attributes without value or type
+        except Exception as e:
             del payload[i]
 
     return payload
@@ -172,6 +183,9 @@ def notify():
         # Validate entity update
         e = _filter_empty_entities(entity)
         if e is not None:
+            # this is not NGSI-LD compliant for `modifiedAt` and similar
+            # the logic should be as well changed if we introduce support
+            # for `keyValues` formatting
             e_new = _filter_no_type_no_value_entities(e)
             res_entity.append(e_new)
     payload = res_entity
