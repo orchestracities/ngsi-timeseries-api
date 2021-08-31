@@ -1,6 +1,6 @@
 from exceptions.exceptions import NGSIUsageError, InvalidParameterValue
 from flask import request
-from reporter.reporter import _validate_query_params, _validate_body
+from reporter.reporter import _validate_query_params
 from translators.factory import translator_for
 import logging
 from .geo_query_handler import handle_geo_query
@@ -82,3 +82,24 @@ def query():
             logging.getLogger(__name__).info("No value found for query")
             return r, 404
     return res
+
+def _validate_body(payload):
+    """
+    :param payload:
+        The received json data in the query.
+    :return: str | None
+        Error message, if any.
+    """
+    # Not Supported parameters
+    if 'expression' in payload:
+        return 'expression is Not Supported'
+    if 'metadata' in payload:
+        return 'metadata is Not Supported'
+    for et in payload['entities']:
+        # The entity must be uniquely identifiable
+        if 'type' not in et:
+            return 'Entity type is required'
+        if 'id' not in et:
+            return 'Entity id is required'
+        if 'idPattern' in et:
+            return 'idPattern is Not Supported'

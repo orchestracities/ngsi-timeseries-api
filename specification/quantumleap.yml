@@ -138,7 +138,7 @@ definitions:
         $ref: '#/definitions/ValuesArray'
 
   AttributesArray:
-    type: array
+    type: string
     items:
       type: string
     description: "Array of the attributes name"
