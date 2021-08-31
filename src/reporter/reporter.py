@@ -110,7 +110,6 @@ def _validate_payload(payload):
                 'An entity update is missing value '
                 'for attribute {}'.format(attr))
 
-
 def _filter_empty_entities(payload):
     log().debug('Received payload')
     attrs = list(iter_entity_attrs(payload))
