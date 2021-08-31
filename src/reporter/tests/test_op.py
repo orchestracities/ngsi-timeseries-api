@@ -15,6 +15,7 @@ services = ['t1', 't2']
 
 query_url = "{}/op/query".format(QL_URL)
 
+
 @pytest.fixture(scope='module')
 def reporter_dataset():
     for service in services:
@@ -22,6 +23,7 @@ def reporter_dataset():
     yield
     for service in services:
         delete_test_data(service, [entity_type])
+
 
 def headers(service=None, service_path=None, content_type=True):
     h = {}
@@ -33,6 +35,7 @@ def headers(service=None, service_path=None, content_type=True):
         h['Fiware-ServicePath'] = service_path
 
     return h
+
 
 @pytest.mark.parametrize("service", services)
 def test_query_defaults(service, reporter_dataset):
@@ -61,18 +64,21 @@ def test_query_defaults(service, reporter_dataset):
             'type': entity_type,
             'temperature': {
                 'type': 'Number',
-                'value': 100
+                'value': 29.0
             },
             'pressure': {
                 'type': 'Number',
-                'value': 10
+                'value': 290.0
+            },
+            'dateModified': {
+                "type": "DateTime",
+                "value": "1970-01-30T00:00:00.000+00:00"
             }
-         }
+        }
     ]
 
     obtained = r.json()
-    obtained[0].pop("dateModified")
-    obtained == expected
+    assert obtained == expected
 
 
 @pytest.mark.parametrize("service", services)
@@ -138,9 +144,9 @@ def test_query_metadata(service, reporter_dataset):
             'temperature',
             'pressure'
         ],
-        'metadata': {
+        'metadata': [
             'timestamp'
-        }
+        ]
     }
 
     r = requests.post('{}'.format(query_url),
@@ -190,13 +196,8 @@ def test_query_no_type(service, reporter_dataset):
     r = requests.post('{}'.format(query_url),
                       data=json.dumps(body),
                       headers=headers(service))
-    assert r.status_code == 400, r.text
-    assert r.json() == {
-        'detail': "'type' is a required property - 'entities.0'", 
-        'status': 400, 
-        'title': 'Bad Request', 
-        'type': 'about:blank'
-    }
+    assert r.status_code == 400
+    assert r.json() == 'Entity type is required'
 
 
 @pytest.mark.parametrize("service", services)
@@ -217,9 +218,4 @@ def test_query_no_id(service, reporter_dataset):
                       data=json.dumps(body),
                       headers=headers(service))
     assert r.status_code == 400, r.text
-    assert r.json() == {
-        'detail': "'id' is a required property - 'entities.0'", 
-        'status': 400, 
-        'title': 'Bad Request', 
-        'type': 'about:blank'
-    }
+    assert r.json() == "Entity id is required"
