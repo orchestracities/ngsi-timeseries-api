@@ -297,6 +297,24 @@ in any of the attribute metadata section in the notification.
 As specified in the
 [FIWARE data models documentation](https://fiware-datamodels.readthedocs.io/en/latest/guidelines/index.html#dynamic-attributes).
 
+1. **observedAt** NGSI-LD metadata. The most recent `observedAt` attribute value
+found in any of the attributes in the notification.
+As specified in the
+[NGSI-LD](https://github.com/smart-data-models/data-models/blob/master/ngsi-ld_howto.md#steps-to-migrate-to-json-ld).
+
+1. **modifiedAt** NGSI-LD metadata. The most recent `modifiedAt` attribute value
+found in any of the attributes in the notification.
+As specified in the
+[NGSI-LD](https://github.com/smart-data-models/data-models/blob/master/ngsi-ld_howto.md#steps-to-migrate-to-json-ld).
+
+1. **observedAt** NGSI-LD / NGSIv2 attribute.
+As specified in the
+[NGSI-LD](https://github.com/smart-data-models/data-models/blob/master/ngsi-ld_howto.md#steps-to-migrate-to-json-ld).
+
+1. **modifiedAt** NGSI-LD / NGSIv2 attribute.
+As specified in the
+[NGSI-LD](https://github.com/smart-data-models/data-models/blob/master/ngsi-ld_howto.md#steps-to-migrate-to-json-ld).
+
 1. **dateModified** attribute. If you payed attention in the
 [Orion Subscription section](#orion-subscription), this is the `"dateModified"`
 value notified by Orion.
