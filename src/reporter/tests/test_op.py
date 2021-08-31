@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from conftest import QL_URL
 from reporter.tests.utils import insert_test_data, delete_test_data
 import pytest
@@ -62,17 +64,21 @@ def test_query_defaults(service, reporter_dataset):
             'type': entity_type,
             'temperature': {
                 'type': 'Number',
-                'value': 100
+                'value': 29.0
             },
             'pressure': {
                 'type': 'Number',
-                'value': 10
+                'value': 290.0
+            },
+            'dateModified': {
+                "type": "DateTime",
+                "value": "1970-01-30T00:00:00.000+00:00"
             }
         }
     ]
 
     obtained = r.json()
-    obtained == expected
+    assert obtained == expected
 
 
 @pytest.mark.parametrize("service", services)
@@ -138,9 +144,9 @@ def test_query_metadata(service, reporter_dataset):
             'temperature',
             'pressure'
         ],
-        'metadata': {
+        'metadata': [
             'timestamp'
-        }
+        ]
     }
 
     r = requests.post('{}'.format(query_url),
@@ -151,7 +157,7 @@ def test_query_metadata(service, reporter_dataset):
 
 
 @pytest.mark.parametrize("service", services)
-def test_query_metadata(service, reporter_dataset):
+def test_query_id_pattern(service, reporter_dataset):
     body = {
         'entities': [
             {
@@ -190,13 +196,8 @@ def test_query_no_type(service, reporter_dataset):
     r = requests.post('{}'.format(query_url),
                       data=json.dumps(body),
                       headers=headers(service))
-    assert r.status_code == 400, r.text
-    assert r.json() == {
-        'detail': "'type' is a required property - 'entities.0'",
-        'status': 400,
-        'title': 'Bad Request',
-        'type': 'about:blank'
-    }
+    assert r.status_code == 400
+    assert r.json() == 'Entity type is required'
 
 
 @pytest.mark.parametrize("service", services)
@@ -217,9 +218,4 @@ def test_query_no_id(service, reporter_dataset):
                       data=json.dumps(body),
                       headers=headers(service))
     assert r.status_code == 400, r.text
-    assert r.json() == {
-        'detail': "'id' is a required property - 'entities.0'",
-        'status': 400,
-        'title': 'Bad Request',
-        'type': 'about:blank'
-    }
+    assert r.json() == "Entity id is required"
