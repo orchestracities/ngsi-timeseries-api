@@ -35,11 +35,12 @@ def query():
         entities = None
         try:
             with translator_for(fiware_s()) as trans:
-                entities = trans.query_last_value(attr_names=attrs,
-                                       entity_type=entity_type,
-                                       entity_ids=eid,
-                                       fiware_service=fiware_s(),
-                                       fiware_servicepath=fiware_sp())
+                entities = trans.query_last_value(
+                    attr_names=attrs,
+                    entity_type=entity_type,
+                    entity_ids=eid,
+                    fiware_service=fiware_s(),
+                    fiware_servicepath=fiware_sp())
         except NGSIUsageError as e:
             msg = "Bad Request Error: {}".format(e)
             logging.getLogger(__name__).error(msg, exc_info=True)
@@ -64,7 +65,8 @@ def query():
         if entities:
             if len(entities) > 1:
                 import warnings
-                warnings.warn("Not expecting more than one result for a 1T1ENA.")
+                warnings.warn(
+                    "Not expecting more than one result for a 1T1ENA.")
 
             logging.getLogger(__name__).info("Query processed successfully")
             res.append(entities[0])
