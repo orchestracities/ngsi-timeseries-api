@@ -6,6 +6,7 @@
 
 - Support configuration of back off factor for CrateDB (#503)
 - Add sql query to retrieve only last values of entities (#500)
+- Added support for NGSI-LD temporal property 'modifiedAt' and 'observedAt' (#433)
 
 ### Bug fixes
 
