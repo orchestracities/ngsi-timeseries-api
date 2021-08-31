@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from conftest import QL_URL
 from reporter.tests.utils import insert_test_data, delete_test_data
 import pytest
@@ -69,7 +71,9 @@ def test_query_defaults(service, reporter_dataset):
     ]
 
     obtained = r.json()
+    obtained[0].pop("dateModified")
     obtained == expected
+
 
 @pytest.mark.parametrize("service", services)
 def test_query_not_found(service, reporter_dataset):
@@ -95,6 +99,7 @@ def test_query_not_found(service, reporter_dataset):
         "description": "No records were found for such query."
     }
 
+
 @pytest.mark.parametrize("service", services)
 def test_query_expression(service, reporter_dataset):
     body = {
@@ -118,6 +123,7 @@ def test_query_expression(service, reporter_dataset):
                       headers=headers(service))
     assert r.status_code == 400, r.text
     assert r.json() == 'expression is Not Supported'
+
 
 @pytest.mark.parametrize("service", services)
 def test_query_metadata(service, reporter_dataset):
@@ -143,8 +149,9 @@ def test_query_metadata(service, reporter_dataset):
     assert r.status_code == 400, r.text
     assert r.json() == 'metadata is Not Supported'
 
+
 @pytest.mark.parametrize("service", services)
-def test_query_metadata(service, reporter_dataset):
+def test_query_id_pattern(service, reporter_dataset):
     body = {
         'entities': [
             {
@@ -164,6 +171,7 @@ def test_query_metadata(service, reporter_dataset):
                       headers=headers(service))
     assert r.status_code == 400, r.text
     assert r.json() == 'idPattern is Not Supported'
+
 
 @pytest.mark.parametrize("service", services)
 def test_query_no_type(service, reporter_dataset):
@@ -189,6 +197,7 @@ def test_query_no_type(service, reporter_dataset):
         'title': 'Bad Request', 
         'type': 'about:blank'
     }
+
 
 @pytest.mark.parametrize("service", services)
 def test_query_no_id(service, reporter_dataset):
