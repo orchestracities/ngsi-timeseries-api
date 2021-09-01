@@ -13,6 +13,7 @@ services = ['t1', 't2']
 
 query_url = "{}/op/query".format(QL_URL)
 
+
 @pytest.fixture(scope='module')
 def reporter_dataset():
     for service in services:
@@ -20,6 +21,7 @@ def reporter_dataset():
     yield
     for service in services:
         delete_test_data(service, [entity_type])
+
 
 def headers(service=None, service_path=None, content_type=True):
     h = {}
@@ -31,6 +33,7 @@ def headers(service=None, service_path=None, content_type=True):
         h['Fiware-ServicePath'] = service_path
 
     return h
+
 
 @pytest.mark.parametrize("service", services)
 def test_query_defaults(service, reporter_dataset):
@@ -65,11 +68,12 @@ def test_query_defaults(service, reporter_dataset):
                 'type': 'Number',
                 'value': 10
             }
-         }
+        }
     ]
 
     obtained = r.json()
     obtained == expected
+
 
 @pytest.mark.parametrize("service", services)
 def test_query_not_found(service, reporter_dataset):
@@ -95,6 +99,7 @@ def test_query_not_found(service, reporter_dataset):
         "description": "No records were found for such query."
     }
 
+
 @pytest.mark.parametrize("service", services)
 def test_query_expression(service, reporter_dataset):
     body = {
@@ -118,6 +123,7 @@ def test_query_expression(service, reporter_dataset):
                       headers=headers(service))
     assert r.status_code == 400, r.text
     assert r.json() == 'expression is Not Supported'
+
 
 @pytest.mark.parametrize("service", services)
 def test_query_metadata(service, reporter_dataset):
@@ -143,6 +149,7 @@ def test_query_metadata(service, reporter_dataset):
     assert r.status_code == 400, r.text
     assert r.json() == 'metadata is Not Supported'
 
+
 @pytest.mark.parametrize("service", services)
 def test_query_metadata(service, reporter_dataset):
     body = {
@@ -165,6 +172,7 @@ def test_query_metadata(service, reporter_dataset):
     assert r.status_code == 400, r.text
     assert r.json() == 'idPattern is Not Supported'
 
+
 @pytest.mark.parametrize("service", services)
 def test_query_no_type(service, reporter_dataset):
     body = {
@@ -184,11 +192,12 @@ def test_query_no_type(service, reporter_dataset):
                       headers=headers(service))
     assert r.status_code == 400, r.text
     assert r.json() == {
-        'detail': "'type' is a required property - 'entities.0'", 
-        'status': 400, 
-        'title': 'Bad Request', 
+        'detail': "'type' is a required property - 'entities.0'",
+        'status': 400,
+        'title': 'Bad Request',
         'type': 'about:blank'
     }
+
 
 @pytest.mark.parametrize("service", services)
 def test_query_no_id(service, reporter_dataset):
@@ -209,8 +218,8 @@ def test_query_no_id(service, reporter_dataset):
                       headers=headers(service))
     assert r.status_code == 400, r.text
     assert r.json() == {
-        'detail': "'id' is a required property - 'entities.0'", 
-        'status': 400, 
-        'title': 'Bad Request', 
+        'detail': "'id' is a required property - 'entities.0'",
+        'status': 400,
+        'title': 'Bad Request',
         'type': 'about:blank'
     }

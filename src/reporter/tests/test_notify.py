@@ -704,10 +704,10 @@ def test_json_ld_observed_at_meta(service, notification):
         "id": "urn:ngsi-ld:Device:filling001",
         "type": "FillingSensor",
         "filling": {
-        "type": "Property",
-        "value": 0.94,
-        "unitCode": "C62",
-        "observedAt": "2021-01-28T12:33:20.000Z"
+            "type": "Property",
+            "value": 0.94,
+            "unitCode": "C62",
+            "observedAt": "2021-01-28T12:33:20.000Z"
         }
     }
     url = '{}'.format(notify_url)
@@ -722,7 +722,8 @@ def test_json_ld_observed_at_meta(service, notification):
     res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 200
     expected_value = [notification['data'][0]['filling']['observedAt']]
-    assert_equal_time_index_arrays([res_get.json()['index'][0]], expected_value)
+    assert_equal_time_index_arrays(
+        [res_get.json()['index'][0]], expected_value)
     delete_entity_type(service, notification['data'][0]['type'])
 
 
@@ -751,7 +752,8 @@ def test_json_ld_modified_at_meta(service, notification):
     res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 200
     expected_value = [notification['data'][0]['filling']['modifiedAt']]
-    assert_equal_time_index_arrays([res_get.json()['index'][0]], expected_value)
+    assert_equal_time_index_arrays(
+        [res_get.json()['index'][0]], expected_value)
     delete_entity_type(service, notification['data'][0]['type'])
 
 
@@ -782,7 +784,8 @@ def test_json_ld_both_at_meta(service, notification):
     res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 200
     expected_value = [notification['data'][0]['filling']['observedAt']]
-    assert_equal_time_index_arrays([res_get.json()['index'][0]], expected_value)
+    assert_equal_time_index_arrays(
+        [res_get.json()['index'][0]], expected_value)
     delete_entity_type(service, notification['data'][0]['type'])
 
 
@@ -811,7 +814,8 @@ def test_json_ld_date_modified_at_attribute(service, notification):
     res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 200
     expected_value = [notification['data'][0]['modifiedAt']]
-    assert_equal_time_index_arrays([res_get.json()['index'][0]], expected_value)
+    assert_equal_time_index_arrays(
+        [res_get.json()['index'][0]], expected_value)
     delete_entity_type(service, notification['data'][0]['type'])
 
 
@@ -850,6 +854,8 @@ def test_json_ld_date_observed(service, notification):
     time.sleep(SLEEP_TIME)
     res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 200
-    expected_value = [notification['data'][0]['dateObserved']['value']['@value']]
-    assert_equal_time_index_arrays([res_get.json()['index'][0]], expected_value)
+    expected_value = [notification['data'][0]
+                      ['dateObserved']['value']['@value']]
+    assert_equal_time_index_arrays(
+        [res_get.json()['index'][0]], expected_value)
     delete_entity_type(service, notification['data'][0]['type'])
