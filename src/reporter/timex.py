@@ -30,8 +30,10 @@ def _meta_attribute(notification: dict, attr_name: str, meta_name: str) \
                        attr_name, 'metadata', meta_name, 'value')
 
 
-def _json_ld_meta_attribute(notification: dict, attr_name: str, meta_name: str) \
-        -> MaybeString:
+def _json_ld_meta_attribute(
+        notification: dict,
+        attr_name: str,
+        meta_name: str) -> MaybeString:
     return maybe_value(notification,
                        attr_name, meta_name)
 
