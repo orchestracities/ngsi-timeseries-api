@@ -274,7 +274,7 @@ valid time value chosen from the following ordered list of options.
 1. Custom **time index**. The value of the `Fiware-TimeIndex-Attribute` http
 header. Note that for a notification to contain such header, the corresponding
 subscription has to be created with an `httpCustom` block, as
-detailed in the *Subscriptions and Custom Notifications* section 
+detailed in the *Subscriptions and Custom Notifications* section
 of the [NGSI spec](http://fiware.github.io/specifications/ngsiv2/stable/).
 This is the way you can instruct QL to use custom attributes of the
 notification payload to be taken as *time index* indicators.
@@ -323,7 +323,7 @@ This value is returned by NGSI-LD brokers only when `options=sysAttr`:
     > `/csourceSubscriptions/` and all of its sub-resources, implementations
     > shall support the parameter specified in the table below
     >
-    > * `options` - a comma separated list of strings. When its value includes
+    > - `options` - a comma separated list of strings. When its value includes
     >   the keyword `sysAttrs`, a representation of NGSI-LD Elements shall be
     >   provided so that the system-generated attributes `createdAt`,
     >   `modifiedAt` are included in the response payload body.
