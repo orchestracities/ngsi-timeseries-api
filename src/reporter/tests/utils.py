@@ -42,7 +42,7 @@ def get_notification(et, ei, attr_value, mod_value):
     }
 
 
-def send_notifications(service, notifications, service_path):
+def send_notifications(service, notifications, service_path=None):
     assert isinstance(notifications, list)
     h = {'Content-Type': 'application/json'}
     if service:
