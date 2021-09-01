@@ -7,6 +7,7 @@ from typing import Any, Optional, Sequence
 
 from geocoding.slf.querytypes import SlfQuery
 from translators import sql_translator
+from translators.errors import CrateErrorAnalyzer
 from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
     NGSI_GEOJSON, NGSI_GEOPOINT, NGSI_TEXT, NGSI_STRUCTURED_VALUE, \
     NGSI_LD_GEOMETRY, TIME_INDEX, METADATA_TABLE_NAME, FIWARE_SERVICEPATH
@@ -86,7 +87,13 @@ class CrateTranslator(sql_translator.SQLTranslator):
         self.cursor.close()
 
     def sql_error_handler(self, exception):
-        return
+        analyzer = CrateErrorAnalyzer(exception)
+        err_msg = analyzer.is_transient_error()
+        if err_msg == "ConnectionError":
+            self.ccm.reset_connection('crate')
+            self.setup()
+        logging.error(err_msg)
+        return err_msg
 
     def get_db_version(self):
         stmt = "select version['number'] from sys.nodes"

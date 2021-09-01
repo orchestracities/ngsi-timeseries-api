@@ -1112,10 +1112,10 @@ class SQLTranslator(base_translator.BaseTranslator):
                 # TODO due to this except in case of sql errors,
                 # all goes fine, and users gets 404 as result
                 # Reason 1: fiware_service_path column in legacy dbs.
-                self.sql_error_handler(e)
+                err_msg = self.sql_error_handler(e)
                 self.logger.error(str(e), exc_info=True)
                 entities = []
-                return (result, "Not Found")
+                return (result, err_msg)
             else:
                 res = self.cursor.fetchall()
                 col_names = self._column_names_from_query_meta(

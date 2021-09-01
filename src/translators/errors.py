@@ -93,6 +93,13 @@ class CrateErrorAnalyzer(ErrorAnalyzer):
     def error(self) -> Exception:
         return self._error
 
-    def is_transient_error(self) -> bool:
-        return isinstance(self._error,
-                          crate.client.exceptions.ConnectionError)
+    def is_transient_error(self):
+        e = self._error
+        if isinstance(e, crate.client.exceptions.ProgrammingError):
+            if 'Cannot cast' in e.message:
+                return ("AggrMethod cannot be applied")
+            else:
+                return ("Not Found")
+
+        elif isinstance(e, crate.client.exceptions.ConnectionError):
+            return ("ConnectionError")
