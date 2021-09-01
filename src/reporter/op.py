@@ -7,7 +7,6 @@ from .geo_query_handler import handle_geo_query
 from reporter.httputil import fiware_s, fiware_sp
 
 
-
 def query():
     """
     See /op/query in API Specification
@@ -79,7 +78,6 @@ def query():
             logging.getLogger(__name__).info("No value found for query")
             return r, 404
     return res, 200
-
 
 
 def _validate_body(payload):
