@@ -25,9 +25,11 @@ def create_notification(entity_type='Room', entity_id='Room1', subs_id=None):
         ]
     }
 
+
 @pytest.fixture
 def notification():
     return create_notification()
+
 
 @pytest.fixture()
 def clean():
