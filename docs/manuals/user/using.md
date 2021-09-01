@@ -274,7 +274,7 @@ valid time value chosen from the following ordered list of options.
 1. Custom **time index**. The value of the `Fiware-TimeIndex-Attribute` http
 header. Note that for a notification to contain such header, the corresponding
 subscription has to be created with an `httpCustom` block, as
- detailed in the *Subscriptions and Custom Notifications* section 
+detailed in the *Subscriptions and Custom Notifications* section 
 of the [NGSI spec](http://fiware.github.io/specifications/ngsiv2/stable/).
 This is the way you can instruct QL to use custom attributes of the
 notification payload to be taken as *time index* indicators.
@@ -318,12 +318,14 @@ As specified in the
 As by [ETSI Specification](https://www.etsi.org/deliver/etsi_gs/CIM/001_099/009/01.04.01_60/gs_cim009v010401p.pdf)
 This value is returned by NGSI-LD brokers only when `options=sysAttr`:
 
-    > For HTTP GET operations performed over the resources `/entities/`, `/subscriptions/`, `/csourceRegistrations/`,
-    > `/csourceSubscriptions/` and all of its sub-resources, implementations shall support the parameter specified in
-    > the table below
-    > 
-    > * `options` - a comma separated list of strings. When its value includes the keyword `sysAttrs`, a
-    >   representation of NGSI-LD Elements shall be provided so that the system-generated attributes `createdAt`,
+    > For HTTP GET operations performed over the resources `/entities/`,
+    > `/subscriptions/`, `/csourceRegistrations/`,
+    > `/csourceSubscriptions/` and all of its sub-resources, implementations
+    > shall support the parameter specified in the table below
+    >
+    > * `options` - a comma separated list of strings. When its value includes
+    >   the keyword `sysAttrs`, a representation of NGSI-LD Elements shall be
+    >   provided so that the system-generated attributes `createdAt`,
     >   `modifiedAt` are included in the response payload body.
 
 1. **dateModified** attribute. If you payed attention in the
