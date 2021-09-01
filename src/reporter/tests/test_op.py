@@ -82,6 +82,44 @@ def test_query_defaults(service, reporter_dataset):
 
 
 @pytest.mark.parametrize("service", services)
+def test_query_one_attribute(service, reporter_dataset):
+    body = {
+        'entities': [
+            {
+                'type': entity_type,
+                'id': entity_id
+            }
+        ],
+        'attrs': [
+            'temperature'
+        ]
+    }
+
+    r = requests.post('{}'.format(query_url),
+                      data=json.dumps(body),
+                      headers=headers(service))
+    assert r.status_code == 200
+
+    # Assert
+    expected = [
+        {
+            'id': entity_id,
+            'type': entity_type,
+            'temperature': {
+                'type': 'Number',
+                'value': 29.0
+            },
+            'dateModified': {
+                "type": "DateTime",
+                "value": "1970-01-30T00:00:00.000+00:00"
+            }
+        }
+    ]
+
+    obtained = r.json()
+    assert obtained == expected
+
+@pytest.mark.parametrize("service", services)
 def test_query_not_found(service, reporter_dataset):
     body = {
         'entities': [
@@ -219,3 +257,75 @@ def test_query_no_id(service, reporter_dataset):
                       headers=headers(service))
     assert r.status_code == 400, r.text
     assert r.json() == "Entity id is required"
+
+
+@pytest.mark.parametrize("service", services)
+def test_default_service_path(service):
+    service_path = '/'
+    alt_service_path = '/notdefault'
+    insert_test_data(service, [entity_type], n_entities=1, index_size=30, service_path=service_path)
+    insert_test_data(service, [entity_type], n_entities=1, index_size=15, service_path=alt_service_path)
+
+    body = {
+        'entities': [
+            {
+                'type': entity_type,
+                'id': entity_id
+            }
+        ],
+        'attrs': [
+            'temperature',
+            'pressure'
+        ]
+    }
+
+    r = requests.post('{}'.format(query_url),
+                      data=json.dumps(body),
+                      headers=headers(service, service_path))
+    assert r.status_code == 200, r.text
+    assert len(r.json()) == 1
+    assert r.json()[0]['temperature']['value'] == 29
+    r = requests.post('{}'.format(query_url),
+                      data=json.dumps(body),
+                      headers=headers(service, alt_service_path))
+    assert r.status_code == 200, r.text
+    assert len(r.json()) == 1
+    assert r.json()[0]['temperature']['value'] == 14
+    delete_test_data(service, [entity_type], service_path=service_path)
+    delete_test_data(service, [entity_type], service_path=alt_service_path)
+
+
+@pytest.mark.parametrize("service", services)
+def test_none_service_path(service):
+    service_path = None
+    alt_service_path = '/notdefault'
+    insert_test_data(service, [entity_type], n_entities=1, index_size=30, service_path=service_path)
+    insert_test_data(service, [entity_type], n_entities=1, index_size=15, service_path=alt_service_path)
+
+    body = {
+        'entities': [
+            {
+                'type': entity_type,
+                'id': entity_id
+            }
+        ],
+        'attrs': [
+            'temperature',
+            'pressure'
+        ]
+    }
+
+    r = requests.post('{}'.format(query_url),
+                      data=json.dumps(body),
+                      headers=headers(service, service_path))
+    assert r.status_code == 200, r.text
+    assert r.json()[0]['temperature']['value'] == 29
+    assert len(r.json()) == 1
+    r = requests.post('{}'.format(query_url),
+                      data=json.dumps(body),
+                      headers=headers(service, alt_service_path))
+    assert r.status_code == 200, r.text
+    assert r.json()[0]['temperature']['value'] == 14
+    assert len(r.json()) == 1
+    delete_test_data(service, [entity_type], service_path=service_path)
+    delete_test_data(service, [entity_type], service_path=alt_service_path)
