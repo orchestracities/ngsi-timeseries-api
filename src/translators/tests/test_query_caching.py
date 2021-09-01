@@ -58,4 +58,22 @@ def test_cache_insert_with_tenant(enable_caching, translator):
     check_cache_operations(translator, fiware_service, entity_table)
     translator.clean()
 
-# TODO test caching failure (turn off the docker service)
+
+@pytest.mark.parametrize("translator", [
+    pytest.lazy_fixture('crate_translator'),
+    pytest.lazy_fixture('timescale_translator')
+], ids=["crate", "timescale"])
+def test_cache_failure(docker_services, enable_caching, translator):
+    fiware_service = "Test"
+    docker_services._docker_compose.execute('stop', 'redis')
+    entities = create_random_entities(1, 2, 3, use_time=True, use_geo=True)
+    result = translator.insert(entities, fiware_service=fiware_service,
+                               fiware_servicepath="/")
+    assert result.rowcount > 0
+    entity_table = translator._get_et_table_names(fiware_service)[0]
+    db_cache_name = translator.get_db_cache_name()
+    assert translator._is_query_in_cache(
+        db_cache_name, METADATA_TABLE_NAME) is False
+    assert translator._is_query_in_cache(db_cache_name, entity_table) is False
+    docker_services.start('redis')
+    translator.clean()
