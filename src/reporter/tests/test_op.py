@@ -119,6 +119,7 @@ def test_query_one_attribute(service, reporter_dataset):
     obtained = r.json()
     assert obtained == expected
 
+
 @pytest.mark.parametrize("service", services)
 def test_query_not_found(service, reporter_dataset):
     body = {
@@ -263,8 +264,18 @@ def test_query_no_id(service, reporter_dataset):
 def test_default_service_path(service):
     service_path = '/'
     alt_service_path = '/notdefault'
-    insert_test_data(service, [entity_type], n_entities=1, index_size=30, service_path=service_path)
-    insert_test_data(service, [entity_type], n_entities=1, index_size=15, service_path=alt_service_path)
+    insert_test_data(
+        service,
+        [entity_type],
+        n_entities=1,
+        index_size=30,
+        service_path=service_path)
+    insert_test_data(
+        service,
+        [entity_type],
+        n_entities=1,
+        index_size=15,
+        service_path=alt_service_path)
 
     body = {
         'entities': [
@@ -299,8 +310,18 @@ def test_default_service_path(service):
 def test_none_service_path(service):
     service_path = None
     alt_service_path = '/notdefault'
-    insert_test_data(service, [entity_type], n_entities=1, index_size=30, service_path=service_path)
-    insert_test_data(service, [entity_type], n_entities=1, index_size=15, service_path=alt_service_path)
+    insert_test_data(
+        service,
+        [entity_type],
+        n_entities=1,
+        index_size=30,
+        service_path=service_path)
+    insert_test_data(
+        service,
+        [entity_type],
+        n_entities=1,
+        index_size=15,
+        service_path=alt_service_path)
 
     body = {
         'entities': [
