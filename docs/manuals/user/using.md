@@ -316,7 +316,7 @@ As specified in the
 As specified in the
 [NGSI-LD](https://github.com/smart-data-models/data-models/blob/master/ngsi-ld_howto.md#steps-to-migrate-to-json-ld).
 As by [ETSI Specification](https://www.etsi.org/deliver/etsi_gs/CIM/001_099/009/01.04.01_60/gs_cim009v010401p.pdf)
-This value is returned by NGSI-LD brokers only when `options=sysAttr`:
+this attribute is returned by NGSI-LD brokers only when `options=sysAttr`:
 
     > For HTTP GET operations performed over the resources `/entities/`,
     > `/subscriptions/`, `/csourceRegistrations/`,
