@@ -42,6 +42,8 @@ import json
 import logging
 import requests
 
+from exceptions.exceptions import InvalidNGSIEntity
+
 logger = logging.getLogger(__name__)
 
 TYPE_POINT = 0
@@ -85,6 +87,9 @@ def add_location(entity, raise_error=False, session=None, cache=None):
     # Validate Entity
     if not isinstance(entity, dict):
         raise TypeError
+
+    if 'type' not in entity or 'id' not in entity:
+        raise InvalidNGSIEntity(entity)
 
     if 'location' in entity:
         return entity

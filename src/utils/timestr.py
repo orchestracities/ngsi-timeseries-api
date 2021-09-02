@@ -19,9 +19,14 @@ def to_datetime(rep: MaybeString) -> MaybeDateTime:
     :param rep: the string representation, typically in ISO 8601 format.
     :return: the converted ``datetime`` or ``None`` if conversion fails.
     """
-    if rep:
+    if rep and '@value' not in rep:
         try:
             return parse(rep)
+        except (ValueError, OverflowError):
+            return None
+    elif rep and '@value' in rep:
+        try:
+            return parse(rep['@value'])
         except (ValueError, OverflowError):
             return None
     return None

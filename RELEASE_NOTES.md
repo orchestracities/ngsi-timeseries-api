@@ -4,9 +4,18 @@
 
 ### New features
 
+- Support configuration of back off factor for CrateDB (#503)
+- Add sql query to retrieve only last values of entities (#500)
+- Added support for NGSI-LD temporal property 'modifiedAt' and 'observedAt' (#433)
+
 ### Bug fixes
 
+- Fix attributes names in /v2/entities query (#478)
+- Fix index ordering in /v2/entities query (#521)
+
 ### Documentation
+
+- Document API pagination (#511)
 
 ### Technical debt
 

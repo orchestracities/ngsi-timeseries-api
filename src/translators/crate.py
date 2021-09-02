@@ -12,7 +12,7 @@ from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
     NGSI_LD_GEOMETRY, TIME_INDEX, METADATA_TABLE_NAME, FIWARE_SERVICEPATH
 import logging
 from .crate_geo_query import from_ngsi_query
-from utils.cfgreader import EnvReader, StrVar, IntVar
+from utils.cfgreader import EnvReader, StrVar, IntVar, FloatVar
 from utils.connection_manager import ConnectionManager
 
 # CRATE TYPES
@@ -54,9 +54,14 @@ class CrateTranslator(sql_translator.SQLTranslator):
         url = "{}:{}".format(self.host, self.port)
         self.ccm = ConnectionManager()
         self.connection = self.ccm.get_connection('crate')
+        # Added backoff_factor for retry interval between attempt of
+        # consecutive retries
+        backoff_factor = EnvReader(log=logging.getLogger(__name__).debug) \
+            .read(FloatVar('CRATE_BACKOFF_FACTOR', 0.0))
         if self.connection is None:
             try:
-                self.connection = client.connect([url], error_trace=True)
+                self.connection = client.connect(
+                    [url], error_trace=True, backoff_factor=backoff_factor)
                 self.ccm.set_connection('crate', self.connection)
             except Exception as e:
                 self.logger.warning(str(e), exc_info=True)
