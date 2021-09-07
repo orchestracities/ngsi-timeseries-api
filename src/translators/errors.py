@@ -51,18 +51,23 @@ class PostgresErrorAnalyzer(ErrorAnalyzer):
     def error(self) -> Exception:
         return self._error
 
-    def is_transient_error(self) -> bool:
+    def is_transient_error(self):
         e = self._error
         if isinstance(e, struct.error):                    # (1)
             msg = str(e)
-            return msg.startswith('unpack_from requires a buffer')
+            return ('unpack_from requires a buffer')
 
         if isinstance(e, pg8000.ProgrammingError):         # (5)
-            return len(e.args) > 0 and isinstance(e.args[0], dict) \
-                and e.args[0].get('C', '') == '55000'
+            if len(e.args) > 0 and isinstance(e.args[0], dict) \
+                and e.args[0].get('C', '') == '42883':
+                return ("AggrMethod cannot be applied")
+            else:
+                return ("Not Found")
 
-        return isinstance(e, ConnectionError) or \
-            isinstance(e, pg8000.InterfaceError)           # (2), (3), (4)
+        elif isinstance(e, ConnectionError)or \
+            isinstance(e, pg8000.InterfaceError):           # (2), (3), (4)
+            return ("ConnectionError")
+
 # NOTE. Transient errors.
 # 1. Socket reads. If the connection goes down while pg8000 is reading from
 # the socket, there will be less bytes in the underlying C socket than pg8000

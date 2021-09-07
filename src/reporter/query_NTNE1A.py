@@ -47,7 +47,7 @@ def query_NTNE1A(attr_name,  # In Path
         entity_ids = [s.strip() for s in id_.split(',') if s]
     try:
         with translator_for(fiware_s) as trans:
-            entities = trans.query(attr_names=[attr_name],
+            entities, err = trans.query(attr_names=[attr_name],
                                    entity_type=type_,
                                    entity_ids=entity_ids,
                                    aggr_method=aggr_method,
@@ -78,6 +78,23 @@ def query_NTNE1A(attr_name,  # In Path
         msg = "Internal server Error: {}".format(e)
         logging.getLogger(__name__).error(msg, exc_info=True)
         return msg, 500
+
+    if err == "AggrMethod cannot be applied":
+        r = {
+            "error": "AggrMethod cannot be applied",
+            "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
+        }
+        logging.getLogger(__name__).info("AggrMethod cannot be applied")
+        return r, 404
+
+    else:
+        r = {
+            "error": "Not Found",
+            "description": "No records were found for such query."
+        }
+        logging.getLogger(__name__).info("No value found for query")
+        return r, 404
+
     attributes = []
     entries = []
     entity_value = []

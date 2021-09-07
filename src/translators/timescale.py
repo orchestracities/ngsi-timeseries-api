@@ -114,9 +114,12 @@ class PostgresTranslator(sql_translator.SQLTranslator):
 
     def sql_error_handler(self, exception):
         analyzer = PostgresErrorAnalyzer(exception)
-        if analyzer.is_transient_error():
+        err_msg = analyzer.is_transient_error()
+        if err_msg == "ConnectionError":
             self.ccm.reset_connection('timescale')
             self.setup()
+        logging.error(err_msg)
+        return err_msg
 
     def with_connection_guard(self, db_action: Callable):
         try:
