@@ -63,6 +63,27 @@ definitions:
                 type: "DateTime"
                 value: 2017-06-19T11:46:45.00Z
 
+  queryInput:
+    type: object
+    required:
+    - "entities"
+    - "attrs"
+    properties:
+      entities:
+        type: array
+        items:
+          $ref: '#/definitions/Entity'
+      attrs:
+        type: array
+        items:
+          $ref: '#/definitions/AttributesArray'
+    example:
+      entities: 
+        - id: Kitchen
+          type: Room
+      attrs:
+          "temperature"
+
 
 ################################################################################
 # DEFINITIONS: Response objects
@@ -116,6 +137,11 @@ definitions:
       values:
         $ref: '#/definitions/ValuesArray'
 
+  AttributesArray:
+    type: string
+    items:
+      type: string
+    description: "Array of the attributes name"
 
 ################################################################################
 # PARAMETERS: IN HEADERS
@@ -341,6 +367,7 @@ parameters:
     enum: [pending, succeeded, failed]
     description: "Optional parameter to filter tasks by status in the work
     queue management endpoints."
+
 
 ################################################################################
 # PATHS: META
@@ -664,6 +691,65 @@ paths:
           description: "You specified an unreachable Orion url for QuantumLeap."
         500:
           description: "Internal server error."
+
+  /v2/op/query:
+    post:
+      operationId: reporter.query.query
+      summary: "Query QuantumLeap for the latest value of entity."
+      description: ""
+      parameters:
+        - in: body
+          name: entities
+          required: true
+          schema:
+            $ref: '#/definitions/queryInput'
+        - $ref: '#/parameters/fiware-Service'
+        - $ref: '#/parameters/fiware-ServicePath'
+      tags:
+        - input
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              entityId:
+                type: string
+              entityType:
+                type: string
+              attrName:
+                type: string
+          examples:
+            application/json:
+              {
+                  "entityId": "Kitchen1",
+                  "entityType": "Kitchen",
+                  "temperature":
+                    {
+                      "type": "Number",
+                      "value": 24.1
+                    },
+                  "pressure":
+                    {
+                      "type": "Number",
+                      "value": 10.1
+                    }
+              }
+        404:
+          description: "Not Found"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              description:
+                type: string
+          examples:
+            application/json:
+              {
+                "error": "Not Found",
+                "description": "No records were found for such query."
+              }
 
 ################################################################################
 # PATHS: OUTPUT
@@ -1823,6 +1909,8 @@ paths:
           description: OK
           schema:
             type: array
+            items:
+              type: object
           examples:
             application/json:
               [
@@ -1876,8 +1964,7 @@ paths:
                         }
                       ]
                     }
-                },
-                null
+                }
               ]
     delete:
       operationId: wq.ql.notify.delete_insert_tasks
@@ -1921,6 +2008,8 @@ paths:
           description: OK
           schema:
             type: array
+            items:
+              type: object
           examples:
             application/json:
               [

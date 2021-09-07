@@ -16,7 +16,6 @@ from uuid import uuid4
 from cache.factory import get_cache, is_cache_available
 from translators.insert_splitter import to_insert_batches
 from utils.connection_manager import Borg
-
 # NGSI TYPES
 # Based on Orion output because official docs don't say much about these :(
 NGSI_DATETIME = 'DateTime'
@@ -1214,7 +1213,6 @@ class SQLTranslator(base_translator.BaseTranslator):
                          fiware_servicepath=None):
         if limit == 0:
             return []
-
         # todo filter only selected attributes.
 
         lower_attr_names = [a.lower() for a in attr_names] \
