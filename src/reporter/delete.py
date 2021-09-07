@@ -34,20 +34,6 @@ def delete_entity(entity_id, type_=None, from_date=None, to_date=None):
 def delete_entities(entity_type, from_date=None, to_date=None,
                     drop_table=False):
     with translator_for(fiware_s()) as trans:
-        if fiware_sp() is not None:
-            e = None
-            e = fiware_sp().split(",")
-            for i in e:
-                count = len(e)
-                if count > 1:
-                    return "request has more than one fiware service path", 422
-                elif drop_table:
-                    trans.drop_table(etype=entity_type,
-                                     fiware_service=fiware_s())
-                    logging.getLogger(__name__).info(
-                        "dropped entity_type {}".format(entity_type))
-                    return 'entity table dropped', 204
-
         deleted = trans.delete_entities(etype=entity_type,
                                         from_date=from_date,
                                         to_date=to_date,
