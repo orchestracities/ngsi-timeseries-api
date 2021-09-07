@@ -397,7 +397,6 @@ class SQLTranslator(base_translator.BaseTranslator):
             )
             self._insert_original_entities_in_failed_batch(
                 table_name, entities, e)
-            # raise
 
     def _build_insert_params_and_values(
             self, col_names: List[str], rows: List[List],
