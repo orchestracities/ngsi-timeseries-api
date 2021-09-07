@@ -11,6 +11,7 @@ notify_url = "{}/notify".format(QL_URL)
 
 SLEEP_TIME = 1
 
+
 def insert_test_data(service, service_path=None, entity_id=None):
     # 3 entity types, 2 entities for each, 10 updates for each entity.
     for t in ("AirQualityObserved", "Room", "TrafficFlowObserved"):
@@ -363,6 +364,7 @@ def test_delete_different_servicepaths():
     url = '{}/entities/{}'.format(QL_URL, 'un3')
     r = requests.get(url, params=params, headers=h)
     assert r.status_code == 404, r.text
+
 
 def test_drop_table():
     """
