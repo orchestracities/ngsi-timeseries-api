@@ -13,6 +13,7 @@ entity_id_1 = 'Kitchen0'
 
 SLEEP_TIME = 1
 
+
 def query_url():
     url = "{qlUrl}/entities"
     return url.format(

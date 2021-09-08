@@ -13,6 +13,7 @@ n_days = 6
 services = ['t1', 't2']
 SLEEP_TIME = 1
 
+
 def query_url(values=False, etype=entity_type):
     url = "{qlUrl}/types/{entityType}/attrs/{attrName}"
     if values:

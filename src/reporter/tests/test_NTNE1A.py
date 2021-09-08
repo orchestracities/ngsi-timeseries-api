@@ -19,6 +19,7 @@ services = ['t1', 't2']
 
 SLEEP_TIME = 1
 
+
 def ix_intervals():
     bs = list(range(0, result_gen.time_index_size)) + [None]
     prod = [(i, j) for i in bs for j in bs]

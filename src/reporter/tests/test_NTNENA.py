@@ -18,6 +18,7 @@ services = ['t1', 't2']
 
 SLEEP_TIME = 1
 
+
 def query_url(values=False):
     url = "{qlUrl}/attrs"
     if values:
