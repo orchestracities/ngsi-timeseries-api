@@ -140,7 +140,7 @@ as a command argument, as in the Docker Compose snippet below:
 
 ```bash
 quantumleap:
-    image: smartsdk/quantumleap:latest
+    image: orchestracities/quantumleap:latest
     command: --config server/gconfig_telemetry.py
 ...
 ```

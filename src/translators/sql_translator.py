@@ -527,9 +527,10 @@ class SQLTranslator(base_translator.BaseTranslator):
 
     @staticmethod
     def _is_ngsi_array(attr, attr_t):
-        return (attr_t == NGSI_STRUCTURED_VALUE
-                and 'value' in attr and isinstance(attr['value'],
-                                                   list)) or attr_t == "Array"
+        return (attr_t == NGSI_STRUCTURED_VALUE and 'value' in attr
+                and isinstance(attr['value'], list)) \
+            or ('value' in attr and isinstance(attr['value'], list)) \
+            or attr_t == "Array"
 
     @staticmethod
     def _is_ngsi_object(attr, attr_t):
