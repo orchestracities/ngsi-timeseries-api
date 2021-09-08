@@ -73,7 +73,7 @@ class PostgresErrorAnalyzer(ErrorAnalyzer):
         e = self._error
         if isinstance(e, struct.error):                    # (1)
             msg = str(e)
-            return ('unpack_from requires a buffer')
+            return msg.startswith('unpack_from requires a buffer')
 
         if isinstance(e, pg8000.ProgrammingError):         # (5)
             return len(e.args) > 0 and isinstance(e.args[0], dict) \

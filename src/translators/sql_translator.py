@@ -138,7 +138,6 @@ class SQLTranslator(base_translator.BaseTranslator):
         return self.dbCacheName
 
     def sql_error_handler(self, exception):
-        #raise exception
         raise NotImplementedError
 
     # TODO is this still needed?
