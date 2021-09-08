@@ -69,7 +69,7 @@ class PostgresErrorAnalyzer(ErrorAnalyzer):
                 and e.args[0].get('C', '') == '42883':
                 return ("AggrMethod cannot be applied")
 
-    def is_transient_error(self):
+    def is_transient_error(self) -> bool:
         e = self._error
         if isinstance(e, struct.error):                    # (1)
             msg = str(e)
