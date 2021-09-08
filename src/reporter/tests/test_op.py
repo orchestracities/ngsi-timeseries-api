@@ -16,6 +16,7 @@ query_url = "{}/op/query".format(QL_URL)
 
 SLEEP_TIME = 1
 
+
 @pytest.fixture(scope='module')
 def reporter_dataset():
     for service in services:

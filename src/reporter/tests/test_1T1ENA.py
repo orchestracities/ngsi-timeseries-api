@@ -14,6 +14,7 @@ n_days = 30
 services = ['t1', 't2']
 SLEEP_TIME = 1
 
+
 def query_url(values=False, eid=entity_id):
     url = "{qlUrl}/entities/{entityId}"
     if values:
@@ -166,7 +167,7 @@ def test_1T1ENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
                          index_size=3,
                          index_base=base,
                          index_period=ins_period)
-    time.sleep(2*SLEEP_TIME)
+    time.sleep(2 * SLEEP_TIME)
     # aggrPeriod needs aggrMethod
     query_params = {
         'type': etype,
