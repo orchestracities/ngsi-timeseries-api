@@ -17,12 +17,13 @@ contributions"
     - For multiple contributions tackling different functionalities, create
       different branches
     - For all the new functionalities provide tests (see `setup_dev_env.sh`
-      and `run.sh` in the root to understand how tests can be run locally)
-1. When done, verify that all tests are passing
+      and `run_tests.sh` in the root to understand how tests can be run locally)
 1. Recall to update docs. Markdown documents, need to follow best practises.
   To help you in linting your markdown before pushing changes, use the script
   `lint.md.sh`.
-1. If so, create a pull request against our repository (we cannot review pull
+1. Update `RELEASE_NOTES.md`
+1. When done, verify that all tests are passing.
+1. If so, create a pull request against our repository (we will not review pull
   requests with failing tests)
 1. Wait for the review
     - Implement required changes
@@ -109,10 +110,10 @@ In the current project tree structure you can find:
 - `ngsi-timeseries-api`
   - `docs`: Holds documentation files.
   - `docker`: To hold docker-related files for the scope of the project.
-  - `experiments`: Sandbox for quick manual tests to try some stuff and
-  derive new test cases.
+  - `timescale-container`: Contains the code for setting up timescale db.
   - `specification`: Contains the OpenAPI definition that QL implements.
   - `src`: Source code folder.
+    - `cache`: Holds the code for managing the metadata cache.
     - `geocoding`: Holds the code for interacting with OSM and doing geo-related
       processing.
     - `reporter`: Modules acting as the receiver of the notifications and API
@@ -121,6 +122,7 @@ In the current project tree structure you can find:
     - `translators`: Specific translators for each time-series databases,
     responsible for interacting with the lower-level database details.
     - `utils`: Common shared stuff looking for a better place to live in.
+    - `wq`: Code for using the queue workflow injection.
 
 [contrib]: https://github.com/orchestracities/ngsi-timeseries-api/blob/master/CONTRIBUTING.md
     "Contributing to QuantumLeap"
