@@ -89,7 +89,7 @@ introduced basic support for NGSI-LD. In short this means that using
 the current endpoint you are able to store NGSI-LD payloads with few caveats
 (see [#398](https://github.com/orchestracities/ngsi-timeseries-api/issue/398))
 
-# Docker Images
+## Docker Images
 
 Docker images are available on
 [docker hub](https://hub.docker.com/r/orchestracities/quantumleap/):
