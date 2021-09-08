@@ -87,7 +87,7 @@ def insert_test_data(service, entity_types, n_entities=1, index_size=30,
     # NOTE. CRATEDB consolidation requires some time.
     # time.sleep(min(1.0, len(entity_types) * n_entities * index_size * 0.3))
     time.sleep(0.9)
-    
+
 
 def delete_entity_type(service, entity_type, service_path=None):
     h = {}
