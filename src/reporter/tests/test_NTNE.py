@@ -1,6 +1,5 @@
 from conftest import QL_URL
 from reporter.tests.utils import insert_test_data, delete_test_data
-import time
 import pytest
 import requests
 
@@ -10,8 +9,6 @@ n_days = 30
 services = ['t1', 't2']
 entity_type_1 = 'Kitchen'
 entity_id_1 = 'Kitchen0'
-
-SLEEP_TIME = 1
 
 def query_url():
     url = "{qlUrl}/entities"
@@ -27,7 +24,6 @@ def reporter_dataset():
                          entity_id=entity_id)
         insert_test_data(service, [entity_type_1], n_entities=1, index_size=30,
                          entity_id=entity_id_1)
-    time.sleep(SLEEP_TIME)
     yield
     for service in services:
         delete_test_data(service, [entity_type, entity_type_1])

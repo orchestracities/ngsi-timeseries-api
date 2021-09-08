@@ -5,14 +5,12 @@ from utils.tests.common import assert_equal_time_index_arrays
 import pytest
 import requests
 import dateutil.parser
-import time
 
 entity_type = 'Room'
 attr_name_1 = 'temperature'
 attr_name_2 = 'pressure'
 n_days = 6
 services = ['t1', 't2']
-SLEEP_TIME = 1
 
 
 def query_url(etype=entity_type, values=False):
@@ -30,7 +28,6 @@ def reporter_dataset():
     for service in services:
         insert_test_data(service, [entity_type], n_entities=3,
                          index_size=n_days)
-    time.sleep(SLEEP_TIME)
     yield
     for service in services:
         delete_test_data(service, [entity_type])

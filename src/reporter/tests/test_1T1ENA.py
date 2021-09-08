@@ -2,7 +2,6 @@ from conftest import QL_URL
 from reporter.tests.utils import insert_test_data, delete_test_data
 import pytest
 import requests
-import time
 from utils.tests.common import assert_equal_time_index_arrays
 import dateutil.parser
 
@@ -12,7 +11,6 @@ temperature = 'temperature'
 pressure = 'pressure'
 n_days = 30
 services = ['t1', 't2']
-SLEEP_TIME = 1
 
 def query_url(values=False, eid=entity_id):
     url = "{qlUrl}/entities/{entityId}"
@@ -28,7 +26,6 @@ def query_url(values=False, eid=entity_id):
 def reporter_dataset():
     for service in services:
         insert_test_data(service, [entity_type], n_entities=1, index_size=30)
-    time.sleep(SLEEP_TIME)
     yield
     for service in services:
         delete_test_data(service, [entity_type])
@@ -166,7 +163,6 @@ def test_1T1ENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
                          index_size=3,
                          index_base=base,
                          index_period=ins_period)
-    time.sleep(2*SLEEP_TIME)
     # aggrPeriod needs aggrMethod
     query_params = {
         'type': etype,

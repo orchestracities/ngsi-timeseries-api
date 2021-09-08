@@ -5,7 +5,6 @@ import pytest
 import requests
 import dateutil.parser
 from statistics import mean
-import time
 
 entity_id_1 = "Room1"
 entity_id_2 = "Room2"
@@ -17,7 +16,6 @@ index = result_gen.time_index()
 
 services = ['t1', 't2']
 
-SLEEP_TIME = 1
 
 def ix_intervals():
     bs = list(range(0, result_gen.time_index_size)) + [None]
@@ -44,7 +42,6 @@ def reporter_dataset():
                          index_size=sz, entity_id=entity_id_1)
         insert_test_data(service, [entity_type], n_entities=1,
                          index_size=sz, entity_id=entity_id_2)
-    time.sleep(SLEEP_TIME)
     yield
     for service in services:
         delete_test_data(service, [entity_type])
@@ -220,7 +217,6 @@ def test_NTNE1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
                          index_size=5,
                          index_base=base,
                          index_period=ins_period)
-    time.sleep(SLEEP_TIME)
 
     # aggrPeriod needs aggrMethod
     query_params = {

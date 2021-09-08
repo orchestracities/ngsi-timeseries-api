@@ -4,14 +4,12 @@ from reporter.tests.utils import insert_test_data, delete_test_data
 from utils.tests.common import assert_equal_time_index_arrays
 import pytest
 import requests
-import time
 import dateutil.parser
 
 entity_type = 'Room'
 attr_name = 'temperature'
 n_days = 6
 services = ['t1', 't2']
-SLEEP_TIME = 1
 
 def query_url(values=False, etype=entity_type):
     url = "{qlUrl}/types/{entityType}/attrs/{attrName}"
@@ -29,7 +27,6 @@ def reporter_dataset():
     for service in services:
         insert_test_data(service, [entity_type], n_entities=3,
                          index_size=n_days)
-    time.sleep(SLEEP_TIME)
     yield
     for service in services:
         delete_test_data(service, [entity_type])
@@ -286,7 +283,6 @@ def test_different_time_indexes(service):
     insert_test_data(service, [etype], entity_id='Room1', index_size=2)
     insert_test_data(service, [etype], entity_id='Room3', index_size=4)
     insert_test_data(service, [etype], entity_id='Room2', index_size=3)
-    time.sleep(SLEEP_TIME)
 
     query_params = {
         'type': etype,
@@ -334,8 +330,6 @@ def test_aggregation_is_per_instance(service):
     # below.
     insert_test_data(service, [etype], entity_id='Room0', index_size=3)
     insert_test_data(service, [etype], entity_id='Room1', index_size=9)
-
-    time.sleep(SLEEP_TIME)
 
     query_params = {
         'type': etype,

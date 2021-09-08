@@ -4,7 +4,6 @@ from reporter.tests.utils import delete_test_data, insert_test_data
 import pytest
 import requests
 import dateutil.parser
-import time
 
 entity_type = "Room"
 entity_type_1 = "Kitchen"
@@ -16,7 +15,6 @@ n_days = 4
 
 services = ['t1', 't2']
 
-SLEEP_TIME = 1
 
 def query_url(values=False):
     url = "{qlUrl}/attrs"
@@ -41,7 +39,6 @@ def reporter_dataset():
                          entity_id=entity_id_1)
         insert_test_data(service, [entity_type_1], entity_id=entity_id_1_1,
                          index_size=3)
-    time.sleep(SLEEP_TIME)
     yield
     for service in services:
         delete_test_data(service, [entity_type, entity_type_1])
@@ -836,8 +833,6 @@ def test_NTNENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
                          index_size=5,
                          index_base=base,
                          index_period=ins_period)
-
-    time.sleep(SLEEP_TIME)
 
     # aggrPeriod needs aggrMethod
     query_params = {
