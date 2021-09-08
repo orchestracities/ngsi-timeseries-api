@@ -1041,8 +1041,11 @@ class SQLTranslator(base_translator.BaseTranslator):
         last_n = self._parse_last_n(last_n)
         limit = self._parse_limit(limit)
 
+        result = []
+        message = 'ok'
+
         if last_n == 0 or limit == 0:
-            return []
+            return (result, message)
 
         if entity_id and entity_ids:
             raise NGSIUsageError("Cannot use both entity_id and entity_ids "
@@ -1059,7 +1062,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             entity_type = self._get_entity_type(entity_id, fiware_service)
 
             if not entity_type:
-                return []
+                return (result, message)
 
             if len(entity_type.split(',')) > 1:
                 raise AmbiguousNGSIIdError(entity_id)
@@ -1092,7 +1095,6 @@ class SQLTranslator(base_translator.BaseTranslator):
         limit = self._get_limit(limit, last_n)
         offset = max(0, offset)
 
-        result = []
         for tn in sorted(table_names):
             op = "select {select_clause} " \
                  "from {tn} " \
@@ -1117,9 +1119,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                 self.logger.error(str(e), exc_info=True)
                 entities = []
                 if err_msg:
-                    return (result, err_msg)
-                else:
-                    return (result, str(e))
+                    message = err_msg
             else:
                 res = self.cursor.fetchall()
                 col_names = self._column_names_from_query_meta(
@@ -1129,7 +1129,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                                                  tn,
                                                  last_n)
             result.extend(entities)
-        return (result, "ok")
+        return (result, message)
 
     @staticmethod
     def _column_names_from_query_meta(cursor_description: Sequence) -> [str]:

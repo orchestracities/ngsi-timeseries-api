@@ -90,7 +90,6 @@ class CrateTranslator(sql_translator.SQLTranslator):
         analyzer = CrateErrorAnalyzer(exception)
         err_msg = analyzer.is_aggregation_error()
         if err_msg:
-            logging.error(err_msg)
             return err_msg
         if analyzer.is_transient_error():
             self.ccm.reset_connection('crate')
