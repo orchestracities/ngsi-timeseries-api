@@ -350,3 +350,49 @@ def test_none_service_path(service):
     assert len(r.json()) == 1
     delete_test_data(service, [entity_type], service_path=service_path)
     delete_test_data(service, [entity_type], service_path=alt_service_path)
+
+
+def test_none_service():
+    service = None
+    service_path = None
+    alt_service_path = '/notdefault'
+    insert_test_data(
+        service,
+        [entity_type],
+        n_entities=1,
+        index_size=30,
+        service_path=service_path)
+    insert_test_data(
+        service,
+        [entity_type],
+        n_entities=1,
+        index_size=15,
+        service_path=alt_service_path)
+
+    body = {
+        'entities': [
+            {
+                'type': entity_type,
+                'id': entity_id
+            }
+        ],
+        'attrs': [
+            'temperature',
+            'pressure'
+        ]
+    }
+
+    r = requests.post('{}'.format(query_url),
+                      data=json.dumps(body),
+                      headers=headers(service, service_path))
+    assert r.status_code == 200, r.text
+    assert r.json()[0]['temperature']['value'] == 29
+    assert len(r.json()) == 1
+    r = requests.post('{}'.format(query_url),
+                      data=json.dumps(body),
+                      headers=headers(service, alt_service_path))
+    assert r.status_code == 200, r.text
+    assert r.json()[0]['temperature']['value'] == 14
+    assert len(r.json()) == 1
+    delete_test_data(service, [entity_type], service_path=service_path)
+    delete_test_data(service, [entity_type], service_path=alt_service_path)

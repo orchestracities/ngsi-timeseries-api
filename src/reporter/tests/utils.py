@@ -84,8 +84,8 @@ def insert_test_data(service, entity_types, n_entities=1, index_size=30,
                 eid = entity_id or '{}{}'.format(et, ei)
                 n = get_notification(et, eid, attr_value=i, mod_value=dt)
                 send_notifications(service, [n], service_path)
-
-    time.sleep(1)
+    #TODO do we need this?
+    # time.sleep(1)
 
 
 def delete_entity_type(service, entity_type, service_path=None):
