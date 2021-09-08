@@ -9,6 +9,7 @@ services = ['t1', 't2']
 
 SLEEP_TIME = 1
 
+
 def check_time_index(service, input_index, expected_index=None):
     expected_index = expected_index or input_index
 

@@ -12,6 +12,7 @@ pressure = 'pressure'
 n_days = 30
 services = ['t1', 't2']
 
+
 def query_url(values=False, eid=entity_id):
     url = "{qlUrl}/entities/{entityId}"
     if values:

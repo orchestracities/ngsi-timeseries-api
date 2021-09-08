@@ -8,6 +8,7 @@ services = ['t1', 't2']
 
 SLEEP_TIME = 1
 
+
 def notify(service, entity):
     notification_data = [{'data': [entity]}]
     send_notifications(service, notification_data)

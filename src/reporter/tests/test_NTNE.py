@@ -10,6 +10,7 @@ services = ['t1', 't2']
 entity_type_1 = 'Kitchen'
 entity_id_1 = 'Kitchen0'
 
+
 def query_url():
     url = "{qlUrl}/entities"
     return url.format(

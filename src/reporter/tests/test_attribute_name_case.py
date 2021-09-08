@@ -52,7 +52,7 @@ def insert_entities(service):
 def manage_db_entities():
     for service in services:
         insert_entities(service)
-    time.sleep(2*SLEEP_TIME)
+    time.sleep(2 * SLEEP_TIME)
 
     yield
 

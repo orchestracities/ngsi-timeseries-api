@@ -16,6 +16,7 @@ n_days = 4
 services = ['t1', 't2']
 
 
+
 def query_url(values=False):
     url = "{qlUrl}/attrs"
     if values:

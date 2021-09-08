@@ -17,6 +17,7 @@ index = result_gen.time_index()
 services = ['t1', 't2']
 
 
+
 def ix_intervals():
     bs = list(range(0, result_gen.time_index_size)) + [None]
     prod = [(i, j) for i in bs for j in bs]
