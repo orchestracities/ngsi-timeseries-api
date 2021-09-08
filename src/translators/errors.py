@@ -29,6 +29,17 @@ class ErrorAnalyzer(ABC):
         """
         pass
 
+    @abstractmethod
+    def is_aggregation_error(self) -> str:
+        """
+        Is aggregation error? e.g. Aggregation method sum
+        cannot be applied on bool.
+
+        :return: ``AggrMethod cannot be applied`` if aggregation
+        method cannot be used.
+        """
+        pass
+
     def can_retry_insert(self) -> bool:
         """
         Take an error raised by the ``insert`` method and decide if you
@@ -51,6 +62,13 @@ class PostgresErrorAnalyzer(ErrorAnalyzer):
     def error(self) -> Exception:
         return self._error
 
+    def is_aggregation_error(self) -> str:
+        e = self._error
+        if isinstance(e, pg8000.ProgrammingError):
+            if len(e.args) > 0 and isinstance(e.args[0], dict) \
+                and e.args[0].get('C', '') == '42883':
+                return ("AggrMethod cannot be applied")
+
     def is_transient_error(self):
         e = self._error
         if isinstance(e, struct.error):                    # (1)
@@ -58,16 +76,11 @@ class PostgresErrorAnalyzer(ErrorAnalyzer):
             return ('unpack_from requires a buffer')
 
         if isinstance(e, pg8000.ProgrammingError):         # (5)
-            if len(e.args) > 0 and isinstance(e.args[0], dict) \
-                and e.args[0].get('C', '') == '42883':
-                return ("AggrMethod cannot be applied")
-            else:
-                return ("Not Found")
+            return len(e.args) > 0 and isinstance(e.args[0], dict) \
+                and e.args[0].get('C', '') == '55000'
 
-        elif isinstance(e, ConnectionError)or \
-            isinstance(e, pg8000.InterfaceError):           # (2), (3), (4)
-            return ("ConnectionError")
-
+        return isinstance(e, ConnectionError) or \
+            isinstance(e, pg8000.InterfaceError)           # (2), (3), (4)
 # NOTE. Transient errors.
 # 1. Socket reads. If the connection goes down while pg8000 is reading from
 # the socket, there will be less bytes in the underlying C socket than pg8000
@@ -98,13 +111,12 @@ class CrateErrorAnalyzer(ErrorAnalyzer):
     def error(self) -> Exception:
         return self._error
 
-    def is_transient_error(self):
+    def is_aggregation_error(self) -> str:
         e = self._error
         if isinstance(e, crate.client.exceptions.ProgrammingError):
             if 'Cannot cast' in e.message:
                 return ("AggrMethod cannot be applied")
-            else:
-                return ("Not Found")
 
-        elif isinstance(e, crate.client.exceptions.ConnectionError):
-            return ("ConnectionError")
+    def is_transient_error(self) -> bool:
+        return isinstance(self._error,
+                          crate.client.exceptions.ConnectionError)

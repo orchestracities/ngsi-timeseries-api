@@ -95,14 +95,6 @@ def query_1TNENA(entity_type=None,  # In Path
         logging.getLogger(__name__).info("AggrMethod cannot be applied")
         return r, 404
 
-    else:
-        r = {
-            "error": "Not Found",
-            "description": "No records were found for such query."
-        }
-        logging.getLogger(__name__).info("No value found for query")
-        return r, 404
-
     if entities:
         res = _prepare_response(entities,
                                 attrs,

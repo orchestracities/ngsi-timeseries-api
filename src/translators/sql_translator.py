@@ -1115,7 +1115,10 @@ class SQLTranslator(base_translator.BaseTranslator):
                 err_msg = self.sql_error_handler(e)
                 self.logger.error(str(e), exc_info=True)
                 entities = []
-                return (result, err_msg)
+                if err_msg:
+                    return (result, err_msg)
+                else:
+                    return (result, str(e))
             else:
                 res = self.cursor.fetchall()
                 col_names = self._column_names_from_query_meta(
