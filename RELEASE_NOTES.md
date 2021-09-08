@@ -4,17 +4,23 @@
 
 ### New features
 
-- Support configuration of back off factor for CrateDB (#503)
-- Add sql query to retrieve only last values of entities (#500)
 - Added support for NGSI-LD temporal property 'modifiedAt' and 'observedAt' (#433)
+- Increase test coverage (#524)
+- Add sql query to retrieve only last values of entities (#500)
+- Support configuration of back off factor for CrateDB (#503)
 
 ### Bug fixes
 
+- Fix automated docker builds are broken (#557)
+- Fix arbitrary type arrays cause errors when inserting (#537)
+- Fix OpenAPI spec for /wq/management (#544)
 - Fix attributes names in /v2/entities query (#478)
 - Fix index ordering in /v2/entities query (#521)
 
 ### Documentation
 
+- Improve contributing docuemntation (#557)
+- Introduce reference about `options=sysAttrs` for ngsi-ld time indexing (#546)
 - Document API pagination (#511)
 
 ### Technical debt

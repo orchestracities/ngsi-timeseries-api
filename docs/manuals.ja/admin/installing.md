@@ -98,7 +98,7 @@ Docker Swarm Cluster 上のサービスとして HA　に QuantumLeap
 単に以下を実行するだけです :
 
 ```bash
-docker run -d -p 8668:8668 -e "CRATE_HOST=http://your_crate_location" smartsdk/quantumleap
+docker run -d -p 8668:8668 -e "CRATE_HOST=http://your_crate_location" orchestracities/quantumleap
 ```
 
 環境変数 `CRATE_HOST` は、QuantumLeap に CrateDB に到達する場所を通知するので、
