@@ -1,5 +1,5 @@
 from conftest import QL_URL
-from datetime import datetime
+import time
 from exceptions.exceptions import AmbiguousNGSIIdError
 from reporter.tests.utils import insert_test_data, delete_test_data
 from utils.tests.common import assert_equal_time_index_arrays
@@ -12,6 +12,7 @@ entity_id = 'Room0'
 attr_name = 'temperature'
 n_days = 30
 services = ['t1', 't2']
+SLEEP_TIME = 1
 
 
 def query_url(entity_type='Room', eid='Room0', values=False):
@@ -29,6 +30,7 @@ def query_url(entity_type='Room', eid='Room0', values=False):
 def reporter_dataset():
     for service in services:
         insert_test_data(service, [entity_type], n_entities=1, index_size=30)
+    time.sleep(SLEEP_TIME)
     yield
     for service in services:
         delete_test_data(service, [entity_type])
@@ -490,6 +492,7 @@ def test_no_type_not_unique(service):
                      n_entities=2,
                      index_size=2,
                      entity_id=shared_entity_id)
+    time.sleep(SLEEP_TIME)
 
     url = "{qlUrl}/entities/{entityId}/attrs/temperature".format(
         qlUrl=QL_URL,

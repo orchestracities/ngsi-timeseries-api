@@ -6,14 +6,15 @@ import pytest
 
 services = ['t1', 't2']
 
+SLEEP_TIME = 1
 
 def notify(service, entity):
     notification_data = [{'data': [entity]}]
     send_notifications(service, notification_data)
+    time.sleep(SLEEP_TIME)
 
 
 def get_all_stored_attributes(service, entity_id):
-    time.sleep(2)
     h = {'Fiware-Service': service}
     url = "{}/entities/{}".format(QL_URL, entity_id)
     response = requests.get(url, headers=h)

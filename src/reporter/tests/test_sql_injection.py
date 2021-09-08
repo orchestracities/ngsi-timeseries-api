@@ -1,8 +1,7 @@
-from conftest import QL_URL, do_clean_crate
+from conftest import QL_URL
 import pytest
 import requests
 import time
-import urllib
 from .utils import send_notifications, delete_entity_type
 
 entity_type = 'TestDevice'
@@ -18,6 +17,7 @@ entity2_id = 'd2'
 
 tenants = ['t1', 't2']
 
+SLEEP_TIME = 1
 
 def mk_entity(eid):
     return {
@@ -50,7 +50,7 @@ def insert_entities(service):
 def manage_db_entities():
     for service in tenants:
         insert_entities(service)
-    time.sleep(2)
+    time.sleep(SLEEP_TIME)
 
     yield
 
