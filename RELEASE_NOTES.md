@@ -19,6 +19,7 @@
 
 ### Documentation
 
+- Improve contributing docuemntation (#557)
 - Introduce reference about `options=sysAttrs` for ngsi-ld time indexing (#546)
 - Document API pagination (#511)
 
