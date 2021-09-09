@@ -31,7 +31,7 @@ def query(values=False, params=None, service=None):
     return requests.get(query_url(values), params=params, headers=h)
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def reporter_dataset():
     for service in services:
         insert_test_data(service, [entity_type], n_entities=1, index_size=4,
@@ -45,7 +45,7 @@ def reporter_dataset():
     for service in services:
         delete_test_data(service, [entity_type, entity_type_1])
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def reporter_dataset_different_types():
     for service in services:
         insert_test_data_different_types(service, [entity_type], n_entities=1, index_size=4,
@@ -1201,13 +1201,137 @@ def test_aggregation_is_per_instance(service, reporter_dataset):
     }
     assert obtained == expected
 
-@pytest.mark.parametrize("service", services)
-def test_aggregation_different_types(service, reporter_dataset_different_types):
+
+def test_aggregation_different_types_timescale(reporter_dataset_different_types, service = 't1'):
     attrs='temperature,intensity,boolean'
     query_params = {
         'attrs': attrs,
         'aggrMethod': 'min'
     }
+    # timescale do not support min on boolean
+    r = query(params=query_params, service=service)
+    assert r.status_code == 404, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+
+    expected = 'AggrMethod cannot be applied'
+
+    assert obtained['error'] == expected
+
+    # 'aggrMethod': 'max'
+
+    query_params = {
+        'attrs': attrs,
+        'aggrMethod': 'max',
+    }
+
+    # timescale do not support max on boolean
+    r = query(params=query_params, service=service)
+    assert r.status_code == 404, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+
+    expected = 'AggrMethod cannot be applied'
+
+    assert obtained['error'] == expected
+
+    # 'aggrMethod': 'count'
+
+    query_params = {
+        'attrs': attrs,
+        'aggrMethod': 'count',
+    }
+    r = query(params=query_params, service=service)
+    assert r.status_code == 200, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+    expected_attrs = [
+        {
+            'attrName': 'boolean',
+            'types':
+            [{
+                'entities':
+                [{
+                    'entityId': 'Room1',
+                    'index': ['',''],
+                    'values': [4]
+                }],
+                'entityType': 'Room'
+            }]
+        },
+        {
+            'attrName': 'intensity',
+            'types':
+            [{
+                'entities':
+                [{
+                    'entityId': 'Room1',
+                    'index': ['',''],
+                    'values': [4]
+                }],
+                'entityType': 'Room'
+            }]
+        },
+        {
+            'attrName': 'temperature',
+            'types':
+            [{
+                'entities':
+                [{
+                    'entityId': 'Room1',
+                    'index': ['',''],
+                    'values': [4]
+                }],
+                'entityType': 'Room'
+            }]
+        },
+    ]
+
+    expected = {
+        'attrs': expected_attrs
+    }
+
+    obtained = r.json()
+    assert obtained == expected
+
+    # 'aggrMethod': 'avg'
+
+    query_params = {
+        'attrs': attrs,
+        'aggrMethod': 'avg'
+    }
+    r = query(params=query_params, service=service)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "AggrMethod cannot be applied",
+        "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
+    }
+
+    # 'aggrMethod': 'sum'
+
+    query_params = {
+        'attrs': attrs,
+        'aggrMethod': 'sum'
+    }
+    r = query(params=query_params, service=service)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "AggrMethod cannot be applied",
+        "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
+    }
+
+
+def test_aggregation_different_types_crate( reporter_dataset_different_types, service = 't2'):
+    attrs='temperature,intensity,boolean'
+    query_params = {
+        'attrs': attrs,
+        'aggrMethod': 'min',
+        'type': 'Room'
+    }
+    # crate supports min on boolean
     r = query(params=query_params, service=service)
     assert r.status_code == 200, r.text
 
