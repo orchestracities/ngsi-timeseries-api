@@ -1175,7 +1175,6 @@ def test_aggregation_is_per_instance(service, reporter_dataset):
     assert r.status_code == 200, r.text
 
     obtained = r.json()
-    delete_test_data(service, [entity_type])
     assert isinstance(obtained, dict)
     expected_index = ['', '']
     expected_entities = [
