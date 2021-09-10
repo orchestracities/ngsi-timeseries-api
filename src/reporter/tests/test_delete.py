@@ -261,7 +261,7 @@ def test_delete_347():
                       data=json.dumps(data),
                       headers=hn)
     assert r.status_code == 200, r.text
-    time.sleep(1)
+    time.sleep(SLEEP_TIME)
     # check that value is in the database
     url = '{}/entities/{}'.format(QL_URL, 'un3')
     r = requests.get(url, params=params, headers=h)
@@ -337,7 +337,7 @@ def test_delete_different_servicepaths():
     assert r.text != ''
 
     # Delete /a
-    time.sleep(2)
+    time.sleep(SLEEP_TIME)
     url = '{}/types/{}'.format(QL_URL, entity_type)
     r = requests.delete(url, params=params, headers=h)
     assert r.status_code == 204, r.text

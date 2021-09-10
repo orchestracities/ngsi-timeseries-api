@@ -5,6 +5,8 @@ import time
 import urllib
 from reporter.tests.utils import send_notifications, delete_entity_type
 
+SLEEP_TIME = 1
+
 
 def mk_entity(eid, entity_type, attr_name):
     return {
@@ -20,7 +22,7 @@ def mk_entity(eid, entity_type, attr_name):
 def insert_entity(service, entity):
     notification_data = [{'data': [entity]}]
     send_notifications(service, notification_data)
-    time.sleep(1)
+    time.sleep(SLEEP_TIME)
 
 
 def query_entity(service, entity_id, attr_name):
