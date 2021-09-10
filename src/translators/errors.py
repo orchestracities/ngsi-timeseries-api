@@ -30,13 +30,12 @@ class ErrorAnalyzer(ABC):
         pass
 
     @abstractmethod
-    def is_aggregation_error(self) -> str:
+    def is_aggregation_error(self) -> bool:
         """
         Is aggregation error? e.g. Aggregation method sum
         cannot be applied on bool.
 
-        :return: ``AggrMethod cannot be applied`` if aggregation
-        method cannot be used.
+        :return: ``True`` for yes, ``False`` for no.
         """
         pass
 
@@ -62,12 +61,11 @@ class PostgresErrorAnalyzer(ErrorAnalyzer):
     def error(self) -> Exception:
         return self._error
 
-    def is_aggregation_error(self) -> str:
+    def is_aggregation_error(self) -> bool:
         e = self._error
         if isinstance(e, pg8000.ProgrammingError):
-            if len(e.args) > 0 and isinstance(e.args[0], dict) \
-                and e.args[0].get('C', '') == '42883':
-                return ("AggrMethod cannot be applied")
+            return len(e.args) > 0 and isinstance(e.args[0], dict) \
+                and e.args[0].get('C', '') == '42883'
 
     def is_transient_error(self) -> bool:
         e = self._error
@@ -111,11 +109,10 @@ class CrateErrorAnalyzer(ErrorAnalyzer):
     def error(self) -> Exception:
         return self._error
 
-    def is_aggregation_error(self) -> str:
+    def is_aggregation_error(self) -> bool:
         e = self._error
         if isinstance(e, crate.client.exceptions.ProgrammingError):
-            if 'Cannot cast' in e.message:
-                return ("AggrMethod cannot be applied")
+            return 'Cannot cast' in e.message or 'UnsupportedFeatureException' in e.message
 
     def is_transient_error(self) -> bool:
         return isinstance(self._error,

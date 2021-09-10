@@ -88,9 +88,8 @@ class CrateTranslator(sql_translator.SQLTranslator):
 
     def sql_error_handler(self, exception):
         analyzer = CrateErrorAnalyzer(exception)
-        err_msg = analyzer.is_aggregation_error()
-        if err_msg:
-            return err_msg
+        if analyzer.is_aggregation_error():
+            return "AggrMethod cannot be applied"
         if analyzer.is_transient_error():
             self.ccm.reset_connection('crate')
             self.setup()
