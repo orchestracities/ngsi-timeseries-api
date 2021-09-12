@@ -1,6 +1,5 @@
 from conftest import QL_URL
 from reporter.tests.utils import insert_test_data, delete_test_data
-from datetime import datetime
 import pytest
 import requests
 

@@ -200,7 +200,7 @@ def test_valid_data_for_type(
                       data=json.dumps(notification),
                       headers=notify_header(service))
     assert r.status_code == 200
-    time.sleep(SLEEP_TIME)
+    time.sleep(2 * SLEEP_TIME)
     r = requests.get(
         query_url(
             attr_name=e_type.lower(),

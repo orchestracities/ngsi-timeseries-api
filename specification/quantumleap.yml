@@ -63,7 +63,7 @@ definitions:
                 type: "DateTime"
                 value: 2017-06-19T11:46:45.00Z
 
-  queryInput:
+  opQueryInput:
     type: object
     required:
     - "entities"
@@ -72,11 +72,20 @@ definitions:
       entities:
         type: array
         items:
-          $ref: '#/definitions/Entity'
+          type: object
+          properties:
+            idPattern:
+                type: string
+            type:
+                type: string
+            id:
+                type: string
+      expression:
+        type: object
       attrs:
         type: array
         items:
-          $ref: '#/definitions/AttributesArray'
+          type: string
     example:
       entities: 
         - id: Kitchen
@@ -136,12 +145,6 @@ definitions:
         $ref: '#/definitions/IndexArray'
       values:
         $ref: '#/definitions/ValuesArray'
-
-  AttributesArray:
-    type: string
-    items:
-      type: string
-    description: "Array of the attributes name"
 
 ################################################################################
 # PARAMETERS: IN HEADERS
@@ -694,15 +697,16 @@ paths:
 
   /v2/op/query:
     post:
-      operationId: reporter.query.query
-      summary: "Query QuantumLeap for the latest value of entity."
-      description: ""
+      operationId: reporter.op.query
+      summary: "QL as Context Provider API."
+      description: "Allows QL to act as context provider by returning the last value stored for the entities queried.
+      At the time being, `idPattern` and `expression` are not implemented."
       parameters:
         - in: body
           name: entities
           required: true
           schema:
-            $ref: '#/definitions/queryInput'
+            $ref: '#/definitions/opQueryInput'
         - $ref: '#/parameters/fiware-Service'
         - $ref: '#/parameters/fiware-ServicePath'
       tags:

@@ -1,5 +1,4 @@
 from conftest import QL_URL
-from datetime import datetime
 from exceptions.exceptions import AmbiguousNGSIIdError
 from reporter.tests.utils import insert_test_data, delete_test_data
 from utils.tests.common import assert_equal_time_index_arrays
