@@ -162,6 +162,7 @@ def query_NTNENA(id_=None,  # In Query
     logging.getLogger(__name__).info("No value found for query")
     return r, 404
 
+
 def query_NTNENA_value(*args, **kwargs):
     res = query_NTNENA(*args, **kwargs)
     if isinstance(res, dict):

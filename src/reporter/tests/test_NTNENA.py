@@ -4,7 +4,6 @@ from reporter.tests.utils import delete_test_data, insert_test_data
 import pytest
 import requests
 import dateutil.parser
-import time
 
 entity_type = "Room"
 entity_type_1 = "Kitchen"
