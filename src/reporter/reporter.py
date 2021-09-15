@@ -259,9 +259,9 @@ def subscribe(orion_url,
     if fiware_s:
         headers['fiware-service'] = fiware_s
 
-        fiware_sp = request.headers.get('fiware-servicepath', None)
-        if fiware_sp:
-            headers['fiware-servicepath'] = fiware_sp
+    fiware_sp = request.headers.get('fiware-servicepath', '/')
+    if fiware_sp:
+        headers['fiware-servicepath'] = fiware_sp
 
     r = requests.post(endpoint, data=data, headers=headers)
     if not r.ok:

@@ -42,7 +42,7 @@ def get_notification(et, ei, attr_value, mod_value):
     }
 
 
-def send_notifications(service, notifications, service_path=None):
+def send_notifications(service, notifications, service_path='/'):
     assert isinstance(notifications, list)
     h = {'Content-Type': 'application/json'}
     if service:
@@ -56,7 +56,7 @@ def send_notifications(service, notifications, service_path=None):
 
 def insert_test_data(service, entity_types, n_entities=1, index_size=30,
                      entity_id=None, index_base=None, index_period="day",
-                     service_path=None):
+                     service_path='/'):
     assert isinstance(entity_types, list)
     index_base = index_base or datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc)
 
@@ -89,7 +89,7 @@ def insert_test_data(service, entity_types, n_entities=1, index_size=30,
     time.sleep(0.9)
 
 
-def delete_entity_type(service, entity_type, service_path=None):
+def delete_entity_type(service, entity_type, service_path='/'):
     h = {}
     if service:
         h['Fiware-Service'] = service
@@ -105,7 +105,7 @@ def delete_entity_type(service, entity_type, service_path=None):
 #    assert r.status_code == 204
 
 
-def delete_test_data(service, entity_types, service_path=None):
+def delete_test_data(service, entity_types, service_path='/'):
     assert isinstance(entity_types, list)
 
     for et in entity_types:

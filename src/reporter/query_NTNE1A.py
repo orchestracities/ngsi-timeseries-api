@@ -7,6 +7,7 @@ from translators.factory import translator_for
 from exceptions.exceptions import NGSIUsageError, InvalidParameterValue
 import dateutil.parser
 from datetime import datetime, timezone
+from .httputil import fiware_s, fiware_sp
 
 
 def query_NTNE1A(attr_name,  # In Path
@@ -39,8 +40,6 @@ def query_NTNE1A(attr_name,  # In Path
     if r:
         return r, c
 
-    fiware_s = request.headers.get('fiware-service', None)
-    fiware_sp = request.headers.get('fiware-servicepath', None)
     entities = None
     entity_ids = None
     if id_:
@@ -58,8 +57,8 @@ def query_NTNE1A(attr_name,  # In Path
                                    last_n=last_n,
                                    limit=limit,
                                    offset=offset,
-                                   fiware_service=fiware_s,
-                                   fiware_servicepath=fiware_sp,
+                                   fiware_service=fiware_s(),
+                                   fiware_servicepath=fiware_sp(),
                                    geo_query=geo_query)
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)

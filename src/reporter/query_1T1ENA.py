@@ -4,6 +4,7 @@ from reporter.reporter import _validate_query_params
 from translators.factory import translator_for
 import logging
 from .geo_query_handler import handle_geo_query
+from .httputil import fiware_s, fiware_sp
 
 
 def query_1T1ENA(entity_id,   # In Path
@@ -36,9 +37,6 @@ def query_1T1ENA(entity_id,   # In Path
     if attrs is not None:
         attrs = attrs.split(',')
 
-    fiware_s = request.headers.get('fiware-service', None)
-    fiware_sp = request.headers.get('fiware-servicepath', None)
-
     entities = None
     try:
         with translator_for(fiware_s) as trans:
@@ -52,8 +50,8 @@ def query_1T1ENA(entity_id,   # In Path
                                    last_n=last_n,
                                    limit=limit,
                                    offset=offset,
-                                   fiware_service=fiware_s,
-                                   fiware_servicepath=fiware_sp,
+                                   fiware_service=fiware_s(),
+                                   fiware_servicepath=fiware_sp(),
                                    geo_query=geo_query)
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)

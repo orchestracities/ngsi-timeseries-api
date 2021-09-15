@@ -12,7 +12,7 @@ def fiware_sp() -> str:
     """
     :return: The content of the FIWARE service path header if any.
     """
-    return request.headers.get('fiware-servicepath', None)
+    return request.headers.get('fiware-servicepath', '/')
 
 
 def fiware_correlator() -> str:
