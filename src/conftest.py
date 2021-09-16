@@ -40,7 +40,7 @@ def clean_mongo():
     do_clean_mongo()
 
 
-def headers(service, service_path, content_type=True):
+def headers(service, service_path='/', content_type=True):
     h = {}
     if content_type:
         h['Content-Type'] = 'application/json'
@@ -58,31 +58,31 @@ class OrionClient(object):
     def __init__(self, host, port):
         self.url = 'http://{}:{}'.format(host, port)
 
-    def subscribe(self, subscription, service=None, service_path=None):
+    def subscribe(self, subscription, service=None, service_path='/'):
         r = requests.post('{}/v2/subscriptions'.format(self.url),
                           data=json.dumps(subscription),
                           headers=headers(service, service_path))
         return r
 
-    def insert(self, entity, service=None, service_path=None):
+    def insert(self, entity, service=None, service_path='/'):
         r = requests.post('{}/v2/entities'.format(self.url),
                           data=json.dumps(entity),
                           headers=headers(service, service_path))
         return r
 
-    def update_attr(self, entity_id, attrs, service=None, service_path=None):
+    def update_attr(self, entity_id, attrs, service=None, service_path='/'):
         r = requests.patch('{}/v2/entities/{}/attrs'.format(self.url, entity_id),
                            data=json.dumps(attrs),
                            headers=headers(service, service_path))
         return r
 
-    def delete(self, entity_id, service=None, service_path=None):
+    def delete(self, entity_id, service=None, service_path='/'):
         r = requests.delete('{}/v2/entities/{}'.format(self.url, entity_id),
                             headers=headers(service, service_path))
         return r
 
     def delete_subscription(self, subscription_id, service=None,
-                            service_path=None):
+                            service_path='/'):
         r = requests.delete(
             '{}/v2/subscriptions/{}'.format(self.url, subscription_id),
             headers=headers(service, service_path))
@@ -133,7 +133,7 @@ def crate_translator(clean_crate):
     class Translator(CrateTranslator):
 
         def insert(self, entities,
-                   fiware_service=None, fiware_servicepath=None):
+                   fiware_service=None, fiware_servicepath='/'):
             r = CrateTranslator.insert(self, entities,
                                        fiware_service, fiware_servicepath)
             self._refresh(set([e['type'] for e in entities]),
@@ -196,7 +196,7 @@ def timescale_translator():
     class Translator(PostgresTranslator):
 
         def insert(self, entities,
-                   fiware_service=None, fiware_servicepath=None):
+                   fiware_service=None, fiware_servicepath='/'):
             r = PostgresTranslator.insert(self, entities,
                                           fiware_service, fiware_servicepath)
             return r
