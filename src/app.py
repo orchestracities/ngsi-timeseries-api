@@ -21,7 +21,7 @@ class RequestFormatter(logging.Formatter):
             record.corr = None
             record.remote_addr = None
             record.srv = None
-            record.subserv = '/'
+            record.subserv = None
             record.payload = None
 
         return super().format(record)

@@ -18,7 +18,7 @@ class FiwareTaskId(CompositeTaskId):
                  fiware_correlation_id: Optional[str]):
         super().__init__(
             fiware_service or '',
-            fiware_service_path or '/',
+            fiware_service_path or '',
             fiware_correlation_id or ''
         )
 
@@ -50,9 +50,9 @@ class InsertAction(Tasklet):
 
     def __init__(self,
                  fiware_service: Optional[str],
+                 fiware_service_path: Optional[str],
                  fiware_correlation_id: Optional[str],
                  payload: [dict],
-                 fiware_service_path: Optional[str] = '/',
                  retry_intervals: [int] = None):
         self._id = FiwareTaskId(fiware_service, fiware_service_path,
                                 fiware_correlation_id)
