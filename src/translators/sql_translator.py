@@ -282,7 +282,8 @@ class SQLTranslator(base_translator.BaseTranslator):
             'entity_type': self.NGSI_TO_SQL['Text'],
             self.TIME_INDEX_NAME: self.NGSI_TO_SQL[TIME_INDEX],
             FIWARE_SERVICEPATH: self.NGSI_TO_SQL['Text'],
-            ORIGINAL_ENTITY_COL: self.NGSI_TO_SQL[NGSI_STRUCTURED_VALUE]
+            ORIGINAL_ENTITY_COL: self.NGSI_TO_SQL[NGSI_STRUCTURED_VALUE],
+            'instanceId': self.NGSI_TO_SQL['Text']
         }
 
         # Preserve original attr names and types
@@ -482,6 +483,8 @@ class SQLTranslator(base_translator.BaseTranslator):
                 values.append(e[self.TIME_INDEX_NAME])
             elif cn == FIWARE_SERVICEPATH:
                 values.append(fiware_servicepath or '')
+            elif cn == 'instanceId':
+                values.append(str(uuid4()))
             else:
                 # Normal attributes
                 try:
