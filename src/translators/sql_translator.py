@@ -484,7 +484,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             elif cn == FIWARE_SERVICEPATH:
                 values.append(fiware_servicepath or '')
             elif cn == 'instanceId':
-                values.append(str(uuid4()))
+                values.append("urn:ngsi-ld:"+str(uuid4()))
             else:
                 # Normal attributes
                 try:
