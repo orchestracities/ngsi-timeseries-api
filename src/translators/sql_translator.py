@@ -1296,6 +1296,67 @@ class SQLTranslator(base_translator.BaseTranslator):
             result.extend(entities)
         return result
 
+    def query_instanceId(self,
+                        entity_id=None,
+                        entity_type=None,
+                        from_date=None,
+                        to_date=None,
+                        limit=10000,
+                        offset=0,
+                        fiware_service=None,
+                        fiware_servicepath=None):
+        if limit == 0:
+            return []
+
+        if entity_id and not entity_type:
+            entity_type = self._get_entity_type(entity_id, fiware_service)
+
+            if not entity_type:
+                return []
+
+            if len(entity_type.split(',')) > 1:
+                raise AmbiguousNGSIIdError(entity_id)
+
+        if entity_type:
+            table_names = [self._et2tn(entity_type, fiware_service)]
+        else:
+            table_names = self._get_et_table_names(fiware_service)
+
+        if entity_id:
+            entity_ids = tuple([entity_id])
+
+        where_clause = self._get_where_clause(entity_ids,
+                                              from_date,
+                                              to_date,
+                                              fiware_servicepath)
+
+
+        limit = min(10000, limit)
+        offset = max(0, offset)
+        result = []
+        if len(table_names) > 0:
+            for tn in sorted(table_names):
+                op = "select instanceId " \
+                     "from {tn} " \
+                     "{where_clause} " \
+                     "limit {limit} offset {offset}".format(
+                         tn=tn,
+                         where_clause=where_clause,
+                         limit=limit,
+                         offset=offset
+                     )
+
+                try:
+                    self.cursor.execute(op)
+                except Exception as e:
+                    self.sql_error_handler(e)
+                    self.logger.error(str(e), exc_info=True)
+                    entities = []
+                else:
+                    res = self.cursor.fetchall()
+                    result.extend(res)
+        return result
+
     def _format_response(
             self,
             resultset,
