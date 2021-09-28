@@ -1550,11 +1550,8 @@ class SQLTranslator(base_translator.BaseTranslator):
 
             for et in all_types:
                 stmt = "select distinct(entity_type) from {}".format(et)
-                if fiware_servicepath == '/':
-                    stmt = stmt + " WHERE {} = '/'" \
-                        .format(FIWARE_SERVICEPATH)
-                elif fiware_servicepath:
-                    stmt = stmt + " WHERE {} = '{}'" \
+                if fiware_servicepath:
+                    stmt = stmt + " WHERE {} ~* '{}'" \
                         .format(FIWARE_SERVICEPATH, fiware_servicepath)
                 self.cursor.execute(stmt)
                 types = [t[0] for t in self.cursor.fetchall()]
