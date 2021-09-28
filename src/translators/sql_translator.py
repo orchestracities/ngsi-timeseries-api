@@ -821,11 +821,11 @@ class SQLTranslator(base_translator.BaseTranslator):
             # Match prefix of fiware service path
             if fiware_sp == '/':
                 clauses.append(
-                    " " + prefix + FIWARE_SERVICEPATH + " = '/'")
+                    " " + prefix + FIWARE_SERVICEPATH + " ~* '/.*'")
             else:
                 clauses.append(
-                    " " + prefix + FIWARE_SERVICEPATH + " = '"
-                    + fiware_sp + "'")
+                    " " + prefix + FIWARE_SERVICEPATH + " ~* '"
+                    + fiware_sp + "($|/.*)'")
         else:
             # Match prefix of fiware service path
             clauses.append(" " + prefix + FIWARE_SERVICEPATH + " = ''")
@@ -1550,8 +1550,11 @@ class SQLTranslator(base_translator.BaseTranslator):
 
             for et in all_types:
                 stmt = "select distinct(entity_type) from {}".format(et)
-                if fiware_servicepath:
-                    stmt = stmt + " WHERE {} ~* '{}'" \
+                if fiware_servicepath == '/':
+                    stmt = stmt + " WHERE {} ~* '/.*'" \
+                        .format(FIWARE_SERVICEPATH)
+                elif fiware_servicepath:
+                    stmt = stmt + " WHERE {} ~* '{}($|/.*)'" \
                         .format(FIWARE_SERVICEPATH, fiware_servicepath)
                 self.cursor.execute(stmt)
                 types = [t[0] for t in self.cursor.fetchall()]
