@@ -6,8 +6,8 @@ import requests
 import dateutil.parser
 import time
 
-entity_type = "Room"
-entity_id = "Room1"
+entity_type = "TestRoom"
+entity_id = "TestRoom1"
 n_days = 4
 
 services = ['t1', 't2']
@@ -87,11 +87,11 @@ def test_aggregation_different_types_timescale(reporter_dataset_different_types,
             [{
                 'entities':
                 [{
-                    'entityId': 'Room1',
+                    'entityId': entity_id,
                     'index': ['',''],
                     'values': [4]
                 }],
-                'entityType': 'Room'
+                'entityType': entity_type
             }]
         },
         {
@@ -100,11 +100,11 @@ def test_aggregation_different_types_timescale(reporter_dataset_different_types,
             [{
                 'entities':
                 [{
-                    'entityId': 'Room1',
+                    'entityId': entity_id,
                     'index': ['',''],
                     'values': [4]
                 }],
-                'entityType': 'Room'
+                'entityType': entity_type
             }]
         },
         {
@@ -113,11 +113,11 @@ def test_aggregation_different_types_timescale(reporter_dataset_different_types,
             [{
                 'entities':
                 [{
-                    'entityId': 'Room1',
+                    'entityId': entity_id,
                     'index': ['',''],
                     'values': [4]
                 }],
-                'entityType': 'Room'
+                'entityType': entity_type
             }]
         },
     ]
@@ -161,7 +161,7 @@ def test_aggregation_different_types_crate( reporter_dataset_different_types, se
     query_params = {
         'attrs': attrs,
         'aggrMethod': 'min',
-        'type': 'Room'
+        'type': entity_type
     }
     # crate supports min on boolean
     r = query(params=query_params, service=service)
@@ -177,11 +177,11 @@ def test_aggregation_different_types_crate( reporter_dataset_different_types, se
             [{
                 'entities':
                 [{
-                    'entityId': 'Room1',
+                    'entityId': entity_id,
                     'index': ['',''],
                     'values': [False]
                 }],
-                'entityType': 'Room'
+                'entityType': entity_type
             }]
         },
         {
@@ -190,11 +190,11 @@ def test_aggregation_different_types_crate( reporter_dataset_different_types, se
             [{
                 'entities':
                 [{
-                    'entityId': 'Room1',
+                    'entityId': entity_id,
                     'index': ['',''],
                     'values': ['str1']
                 }],
-                'entityType': 'Room'
+                'entityType': entity_type
             }]
         },
         {
@@ -203,11 +203,11 @@ def test_aggregation_different_types_crate( reporter_dataset_different_types, se
             [{
                 'entities':
                 [{
-                    'entityId': 'Room1',
+                    'entityId': entity_id,
                     'index': ['',''],
                     'values': [0.0]
                 }],
-                'entityType': 'Room'
+                'entityType': entity_type
             }]
         },
     ]
@@ -236,11 +236,11 @@ def test_aggregation_different_types_crate( reporter_dataset_different_types, se
             [{
                 'entities':
                 [{
-                    'entityId': 'Room1',
+                    'entityId': entity_id,
                     'index': ['',''],
                     'values': [True]
                 }],
-                'entityType': 'Room'
+                'entityType': entity_type
             }]
         },
         {
@@ -249,11 +249,11 @@ def test_aggregation_different_types_crate( reporter_dataset_different_types, se
             [{
                 'entities':
                 [{
-                    'entityId': 'Room1',
+                    'entityId': entity_id,
                     'index': ['',''],
                     'values': ['str1']
                 }],
-                'entityType': 'Room'
+                'entityType': entity_type
             }]
         },
         {
@@ -262,11 +262,11 @@ def test_aggregation_different_types_crate( reporter_dataset_different_types, se
             [{
                 'entities':
                 [{
-                    'entityId': 'Room1',
+                    'entityId': entity_id,
                     'index': ['',''],
                     'values': [3.0]
                 }],
-                'entityType': 'Room'
+                'entityType': entity_type
             }]
         },
     ]
@@ -295,11 +295,11 @@ def test_aggregation_different_types_crate( reporter_dataset_different_types, se
             [{
                 'entities':
                 [{
-                    'entityId': 'Room1',
+                    'entityId': entity_id,
                     'index': ['',''],
                     'values': [4]
                 }],
-                'entityType': 'Room'
+                'entityType': entity_type
             }]
         },
         {
@@ -308,11 +308,11 @@ def test_aggregation_different_types_crate( reporter_dataset_different_types, se
             [{
                 'entities':
                 [{
-                    'entityId': 'Room1',
+                    'entityId': entity_id,
                     'index': ['',''],
                     'values': [4]
                 }],
-                'entityType': 'Room'
+                'entityType': entity_type
             }]
         },
         {
@@ -321,11 +321,11 @@ def test_aggregation_different_types_crate( reporter_dataset_different_types, se
             [{
                 'entities':
                 [{
-                    'entityId': 'Room1',
+                    'entityId': entity_id,
                     'index': ['',''],
                     'values': [4]
                 }],
-                'entityType': 'Room'
+                'entityType': entity_type
             }]
         },
     ]
