@@ -35,8 +35,6 @@ def reporter_dataset():
 
 @pytest.mark.parametrize("service", services)
 def test_instanceId(service, reporter_dataset):
-    import pdb
-    pdb.set_trace()
     h = {'Fiware-Service': service}
     r = requests.get(query_url(), headers=h)
     assert r.status_code == 200, r.text
