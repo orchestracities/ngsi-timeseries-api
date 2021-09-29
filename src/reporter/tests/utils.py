@@ -42,18 +42,21 @@ def get_notification(et, ei, attr_value, mod_value):
     }
 
 
-def send_notifications(service, notifications):
+def send_notifications(service, notifications, service_path=None):
     assert isinstance(notifications, list)
     h = {'Content-Type': 'application/json'}
     if service:
         h['Fiware-Service'] = service
+    if service_path:
+        h['Fiware-ServicePath'] = service_path
     for n in notifications:
         r = requests.post(notify_url(), data=json.dumps(n), headers=h)
         assert r.ok
 
 
 def insert_test_data(service, entity_types, n_entities=1, index_size=30,
-                     entity_id=None, index_base=None, index_period="day"):
+                     entity_id=None, index_base=None, index_period="day",
+                     service_path=None):
     assert isinstance(entity_types, list)
     index_base = index_base or datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc)
 
@@ -80,9 +83,10 @@ def insert_test_data(service, entity_types, n_entities=1, index_size=30,
 
                 eid = entity_id or '{}{}'.format(et, ei)
                 n = get_notification(et, eid, attr_value=i, mod_value=dt)
-                send_notifications(service, [n])
-
-    time.sleep(1)
+                send_notifications(service, [n], service_path)
+    # NOTE. CRATEDB consolidation requires some time.
+    # time.sleep(min(1.0, len(entity_types) * n_entities * index_size * 0.3))
+    time.sleep(0.9)
 
 
 def delete_entity_type(service, entity_type, service_path=None):
@@ -101,11 +105,11 @@ def delete_entity_type(service, entity_type, service_path=None):
 #    assert r.status_code == 204
 
 
-def delete_test_data(service, entity_types):
+def delete_test_data(service, entity_types, service_path=None):
     assert isinstance(entity_types, list)
 
     for et in entity_types:
-        delete_entity_type(service, et)
+        delete_entity_type(service, et, service_path)
 
 
 def enum(lo: int, hi: int) -> List[int]:

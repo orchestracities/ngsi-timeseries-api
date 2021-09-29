@@ -89,7 +89,7 @@ Alternatively, if you only need to run QuantumLeap to complete your setup, you
 can simply run
 
 ```bash
-docker run -d -p 8668:8668 -e "CRATE_HOST=http://your_crate_location" smartsdk/quantumleap
+docker run -d -p 8668:8668 -e "CRATE_HOST=http://your_crate_location" orchestracities/quantumleap
 ```
 
 The environment variable `CRATE_HOST` will tell QuantumLeap where to reach

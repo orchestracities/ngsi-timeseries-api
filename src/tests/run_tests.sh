@@ -25,7 +25,7 @@ docker run -ti --rm --network tests_default \
            -e QL_URL="http://$QL_BC_HOST:8668" \
            --entrypoint "" \
            -e USE_FLASK=TRUE \
-           smartsdk/quantumleap:0.8.0 python tests/common.py
+           orchestracities/quantumleap:0.8.0 python tests/common.py
 
 # Restart QL on development version and CRATE on current version
 docker-compose stop quantumleap

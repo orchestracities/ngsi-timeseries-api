@@ -7,6 +7,8 @@ import pytest
 
 services = ['t1', 't2']
 
+SLEEP_TIME = 1
+
 
 def check_time_index(service, input_index, expected_index=None):
     expected_index = expected_index or input_index
@@ -16,7 +18,7 @@ def check_time_index(service, input_index, expected_index=None):
     n2 = get_notification('Room', 'Room0', 2, input_index[2])
 
     send_notifications(service='', notifications=[n0, n1, n2])
-    time.sleep(1)
+    time.sleep(SLEEP_TIME)
 
     # Query
     r = requests.get(query_1T1E1A(), params={'type': 'Room'})

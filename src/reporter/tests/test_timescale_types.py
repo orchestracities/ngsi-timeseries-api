@@ -4,6 +4,7 @@ import pytest
 import random
 import requests
 from requests import Response
+import time
 from typing import List, Union
 
 from geocoding.slf.geotypes import SlfBox, SlfLine, SlfPoint, SlfPolygon
@@ -17,6 +18,8 @@ from .utils import notify_url
 
 
 ENTITY_TYPE = 'device'
+
+SLEEP_TIME = 1
 
 #
 # NOTE. Each test scenario gets a (sort of) unique tenant so that we won't
@@ -213,6 +216,9 @@ def test_entity_with_all_supported_types():
                               '40.63881265804603, -8.653149604797363'])
 
     insert_entities(e, service=service)
+
+    time.sleep(SLEEP_TIME)
+
     result_set = query_entity_by_id(e['id'], service)
 
     actual = query_result_name_value_pairs(result_set)

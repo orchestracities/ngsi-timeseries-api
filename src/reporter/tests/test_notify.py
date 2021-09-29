@@ -200,7 +200,7 @@ def test_valid_data_for_type(
                       data=json.dumps(notification),
                       headers=notify_header(service))
     assert r.status_code == 200
-    time.sleep(SLEEP_TIME)
+    time.sleep(2 * SLEEP_TIME)
     r = requests.get(
         query_url(
             attr_name=e_type.lower(),
@@ -581,6 +581,40 @@ def test_no_value_with_type_for_attributes(service, notification):
     res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 200
     assert res_get.json()['values'][0] is None
+    delete_entity_type(service, notification['data'][0]['type'])
+
+
+@pytest.mark.parametrize("service", services)
+def test_issue_537(service, notification):
+    # entity with one Null value and no type
+    notification['data'][0] = {
+        "id": "six",
+        "type": "Thing",
+        "serialNumber": {
+            "type": "Text",
+            "value": "type as Moosbllord, new value name doesthismatter2 and random values in an array",
+            "metadata": {}},
+        "doesthismatter2": {
+            "type": "Moosbllord",
+            "value": [
+                "oglera8978sdfasd",
+                "fdasfa6786sdf"],
+            "metadata": {}}}
+    url = '{}'.format(notify_url)
+    get_url = "{}/entities/six/attrs/doesthismatter2/value".format(
+        QL_URL)
+    url_new = '{}'.format(get_url)
+    r = requests.post(url, data=json.dumps(notification),
+                      headers=notify_header(service))
+    assert r.status_code == 200
+    # Give time for notification to be processed
+    time.sleep(SLEEP_TIME)
+    res_get = requests.get(url_new, headers=query_header(service))
+    assert res_get.status_code == 200
+    assert res_get.json()['values'][0] == [
+        "oglera8978sdfasd",
+        "fdasfa6786sdf"
+    ]
     delete_entity_type(service, notification['data'][0]['type'])
 
 

@@ -18,6 +18,7 @@ entity1_id = 'd1'
 entity2_id = 'd2'
 
 services = ['t1', 't2']
+SLEEP_TIME = 1
 
 
 def mk_entity(eid):
@@ -45,14 +46,13 @@ def mk_entities():
 def insert_entities(service):
     notification_data = [{'data': mk_entities()}]
     send_notifications(service, notification_data)
-    time.sleep(1)
 
 
 @pytest.fixture(scope='module')
 def manage_db_entities():
     for service in services:
         insert_entities(service)
-    time.sleep(2)
+    time.sleep(2 * SLEEP_TIME)
 
     yield
 
