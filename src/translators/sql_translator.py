@@ -12,6 +12,7 @@ from geocoding.slf import SlfQuery
 import dateutil.parser
 from typing import Any, List, Optional, Sequence
 from uuid import uuid4
+from reporter.timex import select_time_index_attr
 
 from cache.factory import get_cache, is_cache_available
 from translators.insert_splitter import to_insert_batches
@@ -35,6 +36,7 @@ FIWARE_SERVICEPATH = 'fiware_servicepath'
 TENANT_PREFIX = 'mt'
 TYPE_PREFIX = 'et'
 TIME_INDEX = 'timeindex'
+TIME_INDEX_ATTRIBUTE = 'time_index_attribute'
 VALID_AGGR_METHODS = ['count', 'sum', 'avg', 'min', 'max']
 VALID_AGGR_PERIODS = ['year', 'month', 'day', 'hour', 'minute', 'second']
 # The name of the column where we store the original JSON entity received
@@ -63,7 +65,8 @@ NGSI_TO_SQL = {
     NGSI_TEXT: 'text',
     # NOT all databases supports JSON objects
     NGSI_STRUCTURED_VALUE: 'text',
-    TIME_INDEX: 'timestamp WITH TIME ZONE NOT NULL'
+    TIME_INDEX: 'timestamp WITH TIME ZONE NOT NULL',
+    TIME_INDEX_ATTRIBUTE: 'array(string)'
 }
 
 
@@ -269,18 +272,17 @@ class SQLTranslator(base_translator.BaseTranslator):
                       "It should have been inserted by the 'Reporter'. {}"
                 warnings.warn(msg.format(e))
                 e[self.TIME_INDEX_NAME] = current_timex()
-
             if ORIGINAL_ENTITY_COL in e:
                 raise ValueError(
                     f"Entity {e[NGSI_ID]} has a reserved attribute name: " +
                     "'{ORIGINAL_ENTITY_COL_NAME}'")
-
         # Define column types
         # {column_name -> crate_column_type}
         table = {
             'entity_id': self.NGSI_TO_SQL['Text'],
             'entity_type': self.NGSI_TO_SQL['Text'],
             self.TIME_INDEX_NAME: self.NGSI_TO_SQL[TIME_INDEX],
+            self.TIME_INDEX_ATTRIBUTE_NAME: self.NGSI_TO_SQL[TIME_INDEX_ATTRIBUTE],
             FIWARE_SERVICEPATH: self.NGSI_TO_SQL['Text'],
             ORIGINAL_ENTITY_COL: self.NGSI_TO_SQL[NGSI_STRUCTURED_VALUE]
         }
@@ -292,13 +294,13 @@ class SQLTranslator(base_translator.BaseTranslator):
             'entity_id': (NGSI_ID, NGSI_TEXT),
             self.TIME_INDEX_NAME: (self.TIME_INDEX_NAME, NGSI_DATETIME),
         }
-
         for e in entities:
             entity_id = e.get('id')
             for attr in iter_entity_attrs(e):
                 if attr == self.TIME_INDEX_NAME:
                     continue
-
+                if attr == self.TIME_INDEX_ATTRIBUTE_NAME:
+                    continue
                 if isinstance(e[attr], dict) and 'type' in e[attr] \
                         and e[attr]['type'] != 'Property':
                     attr_t = e[attr]['type']
@@ -480,6 +482,8 @@ class SQLTranslator(base_translator.BaseTranslator):
                 values.append(e['id'])
             elif cn == self.TIME_INDEX_NAME:
                 values.append(e[self.TIME_INDEX_NAME])
+            elif cn == self.TIME_INDEX_ATTRIBUTE_NAME:
+                values.append(e[self.TIME_INDEX_ATTRIBUTE_NAME])
             elif cn == FIWARE_SERVICEPATH:
                 values.append(fiware_servicepath or '')
             else:
@@ -802,11 +806,10 @@ class SQLTranslator(base_translator.BaseTranslator):
                 f"last_n should be >=1 and <= {default_limit}.")
         return min(last_n, limit)
 
-    def _get_where_clause(self, entity_ids, from_date, to_date, fiware_sp=None,
+    def _get_where_clause(self, attr_names, entity_ids, from_date, to_date, fiware_sp=None,
                           geo_query=None, prefix=''):
         clauses = []
         where_clause = ""
-
         if entity_ids:
             ids = ",".join("'{}'".format(e) for e in entity_ids)
             clauses.append(" {}entity_id in ({}) ".format(prefix, ids))
@@ -816,7 +819,6 @@ class SQLTranslator(base_translator.BaseTranslator):
         if to_date:
             clauses.append(" {}{} <= '{}'".format(prefix, self.TIME_INDEX_NAME,
                                                   self._parse_date(to_date)))
-
         if fiware_sp:
             # Match prefix of fiware service path
             if fiware_sp == '/':
@@ -829,13 +831,22 @@ class SQLTranslator(base_translator.BaseTranslator):
         else:
             # Match prefix of fiware service path
             clauses.append(" " + prefix + FIWARE_SERVICEPATH + " = ''")
-        # TODO implement prefix also for geo_clause
         geo_clause = self._get_geo_clause(geo_query)
+        attrs = ''
+        attrs_clauses = []
+        if attr_names:
+            attrs_clauses.append(" and ")
+            for a in attr_names:
+                attrs = '\'' + a + '\''
+                attrs_clauses.append(" " + attrs + " = any(time_index_attribute) or")
+            attrs_clauses.append(" time_index_attribute = NULL")
+        # TODO implement prefix also for geo_clause
         if geo_clause:
             clauses.append(geo_clause)
 
         if len(clauses) > 0:
-            where_clause = "where" + " and ".join(clauses)
+            where_clause =  "where" + " and ".join(clauses)
+            where_clause = where_clause + "".join(attrs_clauses)
         return where_clause
 
     @staticmethod
@@ -1072,7 +1083,8 @@ class SQLTranslator(base_translator.BaseTranslator):
                                                 aggr_method,
                                                 aggr_period)
         if not where_clause:
-            where_clause = self._get_where_clause(entity_ids,
+            where_clause = self._get_where_clause(lower_attr_names,
+                                                  entity_ids,
                                                   from_date,
                                                   to_date,
                                                   fiware_servicepath,

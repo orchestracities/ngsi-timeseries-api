@@ -32,7 +32,7 @@ from geocoding import geocoding
 from geocoding.factory import get_geo_cache, is_geo_coding_available
 from requests import RequestException
 from translators.sql_translator import SQLTranslator
-from utils.common import iter_entity_attrs, TIME_INDEX_NAME
+from utils.common import iter_entity_attrs, TIME_INDEX_NAME, TIME_INDEX_ATTRIBUTE_NAME
 import json
 import logging
 import requests
@@ -43,7 +43,7 @@ from geocoding.location import normalize_location, LOCATION_ATTR_NAME
 from exceptions.exceptions import NGSIUsageError, InvalidParameterValue, InvalidHeaderValue
 from wq.ql.notify import InsertAction
 from reporter.httputil import fiware_correlator, fiware_s, fiware_sp
-
+from reporter.timex import select_time_index_attr
 
 def log():
     logger = logging.getLogger(__name__)
@@ -134,6 +134,7 @@ def _filter_empty_entities(payload):
 def _filter_no_type_no_value_entities(payload):
     attrs = list(iter_entity_attrs(payload))
     attrs.remove('time_index')
+    attrs.remove('time_index_attribute')
     for i in attrs:
         attr = payload.get(i, {})
         try:
@@ -144,7 +145,6 @@ def _filter_no_type_no_value_entities(payload):
         # remove attributes without value or type
         except Exception as e:
             del payload[i]
-
     return payload
 
 
@@ -171,6 +171,10 @@ def notify():
         custom_index = request.headers.get(TIME_INDEX_HEADER_NAME, None)
         entity[TIME_INDEX_NAME] = \
             select_time_index_value_as_iso(custom_index, entity)
+        # Add TIME_INDEX_ATTRIBUTE_NAME
+        attr_name = iter_entity_attrs(entity)
+        entity[TIME_INDEX_ATTRIBUTE_NAME] = \
+            select_time_index_attr(attr_name, entity)
         # Add GEO-DATE if enabled
         if not entity.get(LOCATION_ATTR_NAME, None):
             add_geodata(entity)

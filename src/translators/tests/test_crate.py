@@ -1,9 +1,8 @@
 from translators.sql_translator import METADATA_TABLE_NAME, TYPE_PREFIX
 from conftest import crate_translator as translator, entity
-from utils.common import TIME_INDEX_NAME
+from utils.common import TIME_INDEX_NAME, TIME_INDEX_ATTRIBUTE_NAME
 from utils.tests.common import *
 from datetime import datetime, timezone
-
 
 def test_db_version(translator):
     version = translator.get_db_version()
@@ -17,6 +16,7 @@ def test_geo_point(translator):
         'id': 'Room1',
         'type': 'Room',
         TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
+        TIME_INDEX_ATTRIBUTE_NAME: ['temperature','pressure'],
         'location': {
             'type': 'geo:point',
             'value': "19.6389474, -98.9109537"  # lat, long
@@ -47,6 +47,7 @@ def test_geo_point_null_values(translator):
         'id': 'Room1',
         'type': 'Room',
         TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
+        TIME_INDEX_ATTRIBUTE_NAME: ['temperature','pressure'],
         'location': {
             'type': 'geo:point',
             'value': "19.6389474, -98.9109537"  # lat, long
@@ -63,6 +64,7 @@ def test_geo_point_null_values(translator):
         TIME_INDEX_NAME: datetime.now(
             timezone.utc).isoformat(
             timespec='milliseconds'),
+        TIME_INDEX_ATTRIBUTE_NAME: ['temperature','pressure'],
         'temperature': {
             'type': 'Number',
             'value': 19}}
