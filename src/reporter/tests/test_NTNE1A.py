@@ -6,7 +6,6 @@ import requests
 import dateutil.parser
 from statistics import mean
 
-
 entity_id_1 = "Room1"
 entity_id_2 = "Room2"
 result_gen = AttrQueryResultGen(time_index_size=4,

@@ -79,20 +79,12 @@ class InsertAction(Tasklet):
     def run(self):
         data = self.task_input()
         svc = data.fiware_service
-        svc_path = data.fiware_service_path if svc else None    # (*)
+        svc_path = data.fiware_service_path
         try:
             with translator_for(svc) as trans:
                 trans.insert(data.payload, svc, svc_path)
         except Exception as e:
             self._handle_exception(svc, e)
-# NOTE. Service path.
-# Not 100% if we still need this, but I've reimplemented the logic as it was
-# originally in `reporter.notify` to be on the safe side. Here's the comment
-# that was there to explain why we've got to do this:
-#   "It seems orion always sends a 'Fiware-Servicepath' header with value '/'
-#    But this is not correctly documented in the API, so in order not to
-#    depend on this, QL will not treat servicepath if there's no service
-#    specified."
 
     @staticmethod
     def _handle_exception(fiware_service: str, e: Exception):

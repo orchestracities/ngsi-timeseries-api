@@ -39,7 +39,6 @@ def reporter_dataset():
                          entity_id=entity_id_1)
         insert_test_data(service, [entity_type_1], entity_id=entity_id_1_1,
                          index_size=3)
-
     yield
     for service in services:
         delete_test_data(service, [entity_type, entity_type_1])

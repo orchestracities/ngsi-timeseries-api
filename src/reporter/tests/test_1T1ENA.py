@@ -165,7 +165,6 @@ def test_1T1ENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
                          index_size=3,
                          index_base=base,
                          index_period=ins_period)
-
     # aggrPeriod needs aggrMethod
     query_params = {
         'type': etype,
