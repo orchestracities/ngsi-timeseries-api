@@ -17,11 +17,11 @@ from utils.connection_manager import ConnectionManager
 
 # CRATE TYPES
 # https://crate.io/docs/crate/reference/en/latest/general/ddl/data-types.html
-CRATE_ARRAY_STR = 'array(string)'
+CRATE_ARRAY_OBJ = 'array(object(ignored))'
 
 # Translation
 NGSI_TO_SQL = {
-    "Array": CRATE_ARRAY_STR,  # TODO #36: Support numeric arrays
+    "Array": CRATE_ARRAY_OBJ,  # TODO #36: Support numeric arrays
     "Boolean": 'boolean',
     NGSI_ISO8601: 'timestamptz',
     NGSI_DATETIME: 'timestamptz',
