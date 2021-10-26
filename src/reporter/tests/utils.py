@@ -89,6 +89,43 @@ def insert_test_data(service, entity_types, n_entities=1, index_size=30,
     time.sleep(0.9)
 
 
+def has_entities(entity_type: str, service: str, service_path: str) -> bool:
+    url = f"{QL_URL}/entities"
+    query_params = {
+        'type': entity_type
+    }
+    headers = {
+        'Fiware-Service': service,
+        'Fiware-ServicePath': service_path
+    }
+
+    r = requests.get(url, params=query_params, headers=headers)
+    if r.status_code == 404:
+        return True
+    r.raise_for_status()
+
+    entity_summary_list = r.json()
+    return len(entity_summary_list) > 0
+
+
+def wait_for(action: Callable[[], bool], max_wait: float = 20.0,
+             sleep_interval: float = 2.0):
+    time_left_to_wait = max_wait
+    while time_left_to_wait > 0:
+        try:
+            go_on = action()
+            if not go_on:
+                return
+        except BaseException:
+            time_left_to_wait -= sleep_interval
+            time.sleep(sleep_interval)
+    assert False, f"waited longer than {max_wait} secs for {action}!"
+
+
+def wait_for_delete(entity_type: str, service: str, service_path: str):
+    wait_for(lambda: not has_entities(entity_type, service, service_path))
+
+
 def delete_entity_type(service, entity_type, service_path=None):
     h = {}
     if service:
@@ -103,6 +140,8 @@ def delete_entity_type(service, entity_type, service_path=None):
 
     r = requests.delete(url, headers=h, params=query_params)
 #    assert r.status_code == 204
+
+    wait_for_delete(entity_type, service, service_path)
 
 
 def delete_test_data(service, entity_types, service_path=None):
