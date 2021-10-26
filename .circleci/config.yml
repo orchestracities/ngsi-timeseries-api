@@ -49,6 +49,7 @@ jobs:
   test_reporter:
     machine:
       image: ubuntu-2004:202008-01
+      resource_class: medium
     steps:
       - checkout
       - run:
