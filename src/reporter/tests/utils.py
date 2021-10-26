@@ -117,8 +117,11 @@ def wait_for(action: Callable[[], bool], max_wait: float = 20.0,
             if not go_on:
                 return
         except BaseException:
-            time_left_to_wait -= sleep_interval
-            time.sleep(sleep_interval)
+            pass
+
+        time_left_to_wait -= sleep_interval
+        time.sleep(sleep_interval)
+
     assert False, f"waited longer than {max_wait} secs for {action}!"
 
 
