@@ -3,10 +3,9 @@ version: 2.1
 jobs: 
   build:
     machine: 
-      image: ubuntu-2004:202008-01
+      image: ubuntu-2004:202107-02
     steps:
       - checkout
-      - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
       - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib 
       - restore_cache:  # ensure this step occurs *before* installing dependencies
@@ -20,7 +19,6 @@ jobs:
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
           paths:
             - "~/.venv"
-            - "/usr/local/bin"
             - "/usr/local/lib/python3.8"
             - "/opt/circleci/.pyenv/versions/3.8.5/lib"
       - run: docker build -t orchestracities/quantumleap .
@@ -48,7 +46,6 @@ jobs:
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
           paths:
             - "~/.venv"
-            - "/usr/local/bin"
             - "/usr/local/lib/python3.8"
             - "/opt/circleci/.pyenv/versions/3.8.5/lib"
       - run:
@@ -89,7 +86,6 @@ jobs:
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
           paths:
             - "~/.venv"
-            - "/usr/local/bin"
             - "/usr/local/lib/python3.8"
             - "/opt/circleci/.pyenv/versions/3.8.5/lib"
       - run:
@@ -131,7 +127,6 @@ jobs:
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
           paths:
             - "~/.venv"
-            - "/usr/local/bin"
             - "/usr/local/lib/python3.8"
             - "/opt/circleci/.pyenv/versions/3.8.5/lib"
       - run:
@@ -157,7 +152,6 @@ jobs:
       image: ubuntu-2004:202008-01
     steps:
       - checkout
-      - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
       - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib 
       - restore_cache:  # ensure this step occurs *before* installing dependencies
@@ -171,7 +165,6 @@ jobs:
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
           paths:
             - "~/.venv"
-            - "/usr/local/bin"
             - "/usr/local/lib/python3.8"
             - "/opt/circleci/.pyenv/versions/3.8.5/lib"
       - run:
