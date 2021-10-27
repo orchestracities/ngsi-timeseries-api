@@ -81,7 +81,6 @@ def test_1T1E1A_defaults(service, reporter_dataset):
     ("max", 29),
 ])
 @pytest.mark.parametrize("service", services)
-@pytest.mark.skip(reason="circleci debugging")
 def test_1T1E1A_aggrMethod(service, reporter_dataset, aggr_method, aggr_value):
     # Query
     query_params = {
