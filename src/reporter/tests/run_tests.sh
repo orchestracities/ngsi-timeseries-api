@@ -17,5 +17,7 @@ pytest src/reporter/tests/test_1T1E1A.py \
 r=$?
 cd -
 
+docker-compose logs crate
+
 docker-compose down -v
 exit $r
