@@ -115,7 +115,7 @@ def test_1T1E1A_aggrMethod(service, reporter_dataset, aggr_method, aggr_value):
 ])
 @pytest.mark.parametrize("service", services)
 def test_1T1E1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
-    etype = 'test_1T1E1A_aggrPeriod'
+    etype = f"test_1T1E1A_aggrPeriod_{aggr_period}"
     # The reporter_dataset fixture is still in the DB cos it has a scope of
     # module. We use a different entity type to store this test's rows in a
     # different table to avoid messing up global state---see also delete down
