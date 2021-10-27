@@ -47,7 +47,6 @@ def assert_1T1E1A_response(obtained, expected):
 
 
 @pytest.mark.parametrize("service", services)
-@pytest.mark.skip(reason="circleci debugging")
 def test_1T1E1A_defaults(service, reporter_dataset):
     # Query
     query_params = {
