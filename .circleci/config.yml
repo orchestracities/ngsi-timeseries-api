@@ -22,7 +22,7 @@ jobs:
               export PIPENV_SHELL=no
               source setup_dev_env.sh
               export tests=reporter
-              pipenv run sh run_tests.sh
+              pipenv run sh -c 'printenv'
 
 workflows:
   main:
