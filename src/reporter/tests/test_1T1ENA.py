@@ -149,7 +149,7 @@ def test_1T1ENA_aggrMethod(
 def test_1T1ENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
     # Custom index to test aggrPeriod
 
-    etype = 'test_1T1ENA_aggrPeriod'
+    etype = f"test_1T1ENA_aggrPeriod_{aggr_period}"
     # The reporter_dataset fixture is still in the DB cos it has a scope of
     # module. We use a different entity type to store this test's rows in a
     # different table to avoid messing up global state---see also delete down
