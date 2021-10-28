@@ -233,7 +233,6 @@ def test_1T1E1A_fromDate_toDate_with_quotes(service, reporter_dataset):
 
 
 @pytest.mark.parametrize("service", services)
-@pytest.mark.skip(reason="circleci debugging")
 def test_1T1E1A_lastN(service, reporter_dataset):
     # Query
     query_params = {
@@ -266,7 +265,6 @@ def test_1T1E1A_lastN(service, reporter_dataset):
 
 
 @pytest.mark.parametrize("service", services)
-@pytest.mark.skip(reason="circleci debugging")
 def test_1T1E1A_lastN_with_limit(service, reporter_dataset):
     """
     See GitHub issue #249.
@@ -302,7 +300,6 @@ def test_1T1E1A_lastN_with_limit(service, reporter_dataset):
 
 
 @pytest.mark.parametrize("service", services)
-@pytest.mark.skip(reason="circleci debugging")
 def test_1T1E1A_limit(service, reporter_dataset):
     # Query
     query_params = {
@@ -335,7 +332,6 @@ def test_1T1E1A_limit(service, reporter_dataset):
 
 
 @pytest.mark.parametrize("service", services)
-@pytest.mark.skip(reason="circleci debugging")
 def test_1T1E1A_offset(service, reporter_dataset):
     # Query
     query_params = {
@@ -369,7 +365,6 @@ def test_1T1E1A_offset(service, reporter_dataset):
 
 
 @pytest.mark.parametrize("service", services)
-@pytest.mark.skip(reason="circleci debugging")
 def test_1T1E1A_combined(service, reporter_dataset):
     # Query
     query_params = {
@@ -406,7 +401,6 @@ def test_1T1E1A_combined(service, reporter_dataset):
 
 
 @pytest.mark.parametrize("service", services)
-@pytest.mark.skip(reason="circleci debugging")
 def test_1T1E1A_values_defaults(service, reporter_dataset):
     # Query
     query_params = {
@@ -432,7 +426,6 @@ def test_1T1E1A_values_defaults(service, reporter_dataset):
 
 
 @pytest.mark.parametrize("service", services)
-@pytest.mark.skip(reason="circleci debugging")
 def test_not_found(service):
     query_params = {
         'type': 'NotThere',
