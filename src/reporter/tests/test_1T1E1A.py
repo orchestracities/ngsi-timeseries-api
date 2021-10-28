@@ -200,7 +200,6 @@ def test_1T1E1A_fromDate_toDate(service, reporter_dataset):
 
 
 @pytest.mark.parametrize("service", services)
-@pytest.mark.skip(reason="circleci debugging")
 def test_1T1E1A_fromDate_toDate_with_quotes(service, reporter_dataset):
     # Query
     query_params = {
