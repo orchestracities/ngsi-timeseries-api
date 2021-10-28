@@ -442,13 +442,12 @@ def test_not_found(service):
 
 
 @pytest.mark.parametrize("service", services)
-@pytest.mark.skip(reason="circleci debugging")
 def test_no_type(service):
     """
     Specifying entity type is optional, provided that id is unique.
     """
 
-    etype_1, etype_2 = 'RoomDevice', 'Car'
+    etype_1, etype_2 = 'test_no_type_RoomDevice', 'test_no_type_Car'
     etypes = [etype_1, etype_2]
     eid = "{}1".format(etype_1)
     # The reporter_dataset fixture is still in the DB cos it has a scope of
@@ -474,11 +473,11 @@ def test_no_type(service):
 
 
 @pytest.mark.parametrize("service", services)
-@pytest.mark.skip(reason="circleci debugging")
 def test_no_type_not_unique(service):
     # If id is not unique across types, you must specify type.
 
-    etype_1, etype_2 = 'RoomDevice', 'Car'
+    etype_1, etype_2 = 'test_no_type_not_unique_RoomDevice', \
+                       'test_no_type_not_unique_Car'
     etypes = [etype_1, etype_2]
     # The reporter_dataset fixture is still in the DB cos it has a scope of
     # module. We use different entity types to store this test's rows in
