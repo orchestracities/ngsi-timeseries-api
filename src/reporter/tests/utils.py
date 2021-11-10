@@ -5,6 +5,9 @@ import requests
 import time
 from typing import Callable, Iterable, List, Tuple, Union
 
+from translators.factory import translator_for
+from translators.sql_translator import TENANT_PREFIX, TYPE_PREFIX
+
 
 def notify_url():
     return "{}/notify".format(QL_URL)
@@ -89,35 +92,47 @@ def insert_test_data(service, entity_types, n_entities=1, index_size=30,
     time.sleep(0.9)
 
 
-def has_entities(entity_type: str, service: str, service_path: str) -> bool:
-    url = f"{QL_URL}/entities"
-    query_params = {
-        'type': entity_type
-    }
-    headers = {
-        'Fiware-Service': service,
-        'Fiware-ServicePath': service_path
-    }
+def has_entities(entity_type: str, service: str) -> bool:
+    try:
+        entity_count = count_entities(entity_type, service)
+        return entity_count > 0
+    except Exception as e:
+        print(e)
+        return False
+        # Most likely the table is not there. Example exceptions:
+        # - pg8000.exceptions.ProgrammingError:
+        #    {'C': '42P01', 'M': 'relation mtt2.et... does not exist', ...}
+        # - crate.client.exceptions.ProgrammingError:
+        #     RelationUnknown[Relation 'mtt1.et... unknown...']
+        #
+        # TODO. See if there's a better way of doing this, e.g. catching a
+        # specific exception and error code to make sure the table isn't
+        # actually there.
 
-    r = requests.get(url, params=query_params, headers=headers)
-    if r.status_code == 404:
-        return True
-    r.raise_for_status()
 
-    entity_summary_list = r.json()
-    return len(entity_summary_list) > 0
+def count_entities(entity_type: str, service: str) -> int:
+    table = full_table_name(service, entity_type)
+    stmt = f"SELECT count(*) FROM {table}"
+
+    with translator_for(service) as trans:
+        trans.cursor.execute(stmt)
+        cnt = trans.cursor.fetchall()[0]
+        return cnt[0]
 
 
-def wait_for(action: Callable[[], bool], max_wait: float = 20.0,
-             sleep_interval: float = 2.0):
+def full_table_name(service: str, entity_type: str) -> str:
+    tenant = service.lower()
+    et = entity_type.lower()
+    return f'"{TENANT_PREFIX}{tenant}"."{TYPE_PREFIX}{et}"'
+
+
+def wait_until(action: Callable[[], bool], max_wait: float = 20.0,
+               sleep_interval: float = 1.0):
     time_left_to_wait = max_wait
     while time_left_to_wait > 0:
-        try:
-            go_on = action()
-            if not go_on:
-                return
-        except BaseException:
-            pass
+        stop = action()
+        if stop:
+            return
 
         time_left_to_wait -= sleep_interval
         time.sleep(sleep_interval)
@@ -125,8 +140,13 @@ def wait_for(action: Callable[[], bool], max_wait: float = 20.0,
     assert False, f"waited longer than {max_wait} secs for {action}!"
 
 
-def wait_for_delete(entity_type: str, service: str, service_path: str):
-    wait_for(lambda: not has_entities(entity_type, service, service_path))
+def wait_for_insert(entity_types: [str], service: str, row_count: int):
+    for et in entity_types:
+        wait_until(lambda: count_entities(et, service) >= row_count)
+
+
+def wait_for_delete(entity_type: str, service: str):
+    wait_until(lambda: not has_entities(entity_type, service))
 
 
 def delete_entity_type(service, entity_type, service_path=None):
@@ -144,7 +164,7 @@ def delete_entity_type(service, entity_type, service_path=None):
     r = requests.delete(url, headers=h, params=query_params)
 #    assert r.status_code == 204
 
-    wait_for_delete(entity_type, service, service_path)
+    wait_for_delete(entity_type, service)
 
 
 def delete_test_data(service, entity_types, service_path=None):

@@ -1,5 +1,6 @@
 from conftest import QL_URL
-from reporter.tests.utils import insert_test_data, delete_test_data
+from reporter.tests.utils import insert_test_data, delete_test_data, \
+    wait_for_insert
 import pytest
 import requests
 from utils.tests.common import assert_equal_time_index_arrays
@@ -163,6 +164,9 @@ def test_1T1ENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
                          index_size=3,
                          index_base=base,
                          index_period=ins_period)
+
+    wait_for_insert([etype], service, 3 * len(exp_index))
+
     # aggrPeriod needs aggrMethod
     query_params = {
         'type': etype,
