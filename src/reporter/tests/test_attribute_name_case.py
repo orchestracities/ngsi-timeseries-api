@@ -3,7 +3,8 @@ import pytest
 import requests
 import time
 import urllib
-from reporter.tests.utils import send_notifications, delete_test_data
+from reporter.tests.utils import send_notifications, delete_test_data, \
+    wait_for_insert
 
 
 entity_type = 'TestDevice'
@@ -18,7 +19,6 @@ entity1_id = 'd1'
 entity2_id = 'd2'
 
 services = ['t1', 't2']
-SLEEP_TIME = 1
 
 
 def mk_entity(eid):
@@ -44,15 +44,16 @@ def mk_entities():
 
 
 def insert_entities(service):
-    notification_data = [{'data': mk_entities()}]
+    entities = mk_entities()
+    notification_data = [{'data': entities}]
     send_notifications(service, notification_data)
+    wait_for_insert([entity_type], service, len(entities))
 
 
 @pytest.fixture(scope='module')
 def manage_db_entities():
     for service in services:
         insert_entities(service)
-    time.sleep(2 * SLEEP_TIME)
 
     yield
 
