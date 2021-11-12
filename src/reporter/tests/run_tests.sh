@@ -17,6 +17,7 @@ pytest src/reporter/tests/test_1T1E1A.py \
        src/reporter/tests/test_1TNENA.py \
        src/reporter/tests/test_api.py \
        src/reporter/tests/test_attribute_name_case.py \
+       src/reporter/tests/test_delete.py \
        --cov-report= --cov-config=.coveragerc --cov-append --cov=src/ \
        --junitxml=test-results/junit-reporter.xml
 r=$?
