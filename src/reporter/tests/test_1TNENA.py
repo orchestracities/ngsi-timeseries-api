@@ -1,6 +1,7 @@
 from conftest import QL_URL
 from datetime import datetime
-from reporter.tests.utils import insert_test_data, delete_test_data
+from reporter.tests.utils import insert_test_data, delete_test_data, \
+    wait_for_insert
 from utils.tests.common import assert_equal_time_index_arrays
 import pytest
 import requests
@@ -417,11 +418,10 @@ def test_aggregation_is_per_instance(service, reporter_dataset):
 def test_1TNENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
     # Custom index to test aggrPeriod
 
-    etype = 'test_1TNENA_aggrPeriod'
+    etype = f"test_1TNENA_aggrPeriod_{aggr_period}"
     # The reporter_dataset fixture is still in the DB cos it has a scope of
     # module. We use a different entity type to store this test's rows in a
-    # different table to avoid messing up global state---see also delete down
-    # below.
+    # different table to avoid messing up global state.
     eid = '{}0'.format(etype)
     for i in exp_index:
         base = dateutil.parser.isoparse(i)
@@ -430,6 +430,7 @@ def test_1TNENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
                          index_size=5,
                          index_base=base,
                          index_period=ins_period)
+    wait_for_insert([etype], service, 5 * len(exp_index))
 
     # aggrPeriod needs aggrMethod
     query_params = {
@@ -474,7 +475,6 @@ def test_1TNENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
     obtained = r.json()
     assert isinstance(obtained, dict)
     assert_1TNENA_response(obtained, expected, etype=etype)
-    delete_test_data(service, [etype])
 
 
 @pytest.mark.parametrize("service", services)
