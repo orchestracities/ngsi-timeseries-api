@@ -286,6 +286,8 @@ def test_different_time_indexes(service):
     insert_test_data(service, [etype], entity_id='Room3', index_size=4)
     insert_test_data(service, [etype], entity_id='Room2', index_size=3)
 
+    wait_for_insert([etype], service, 2+4+3)
+
     query_params = {
         'type': etype,
         'id': 'Room3,Room1,Room2',
