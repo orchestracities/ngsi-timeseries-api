@@ -3,10 +3,11 @@ from datetime import datetime, timedelta, timezone
 import json
 import requests
 import time
-from typing import Callable, Iterable, List, Tuple, Union
+from typing import Callable, Iterable, List, Optional, Tuple, Union
 
 from translators.factory import translator_for
-from translators.sql_translator import TENANT_PREFIX, TYPE_PREFIX
+from translators.sql_translator import ENTITY_ID_COL, TENANT_PREFIX, \
+    TYPE_PREFIX
 
 
 def notify_url():
@@ -92,9 +93,10 @@ def insert_test_data(service, entity_types, n_entities=1, index_size=30,
     time.sleep(0.9)
 
 
-def has_entities(entity_type: str, service: str) -> bool:
+def has_entities(entity_type: str, service: str,
+                 entity_id: Optional[str] = None) -> bool:
     try:
-        entity_count = count_entities(entity_type, service)
+        entity_count = count_entities(entity_type, service, entity_id)
         return entity_count > 0
     except Exception as e:
         print(e)
@@ -110,9 +112,12 @@ def has_entities(entity_type: str, service: str) -> bool:
         # actually there.
 
 
-def count_entities(entity_type: str, service: str) -> int:
+def count_entities(entity_type: str, service: str,
+                   entity_id: Optional[str] = None) -> int:
     table = full_table_name(service, entity_type)
     stmt = f"SELECT count(*) FROM {table}"
+    if entity_id:
+        stmt += f" WHERE {ENTITY_ID_COL} = '{entity_id}'"
 
     with translator_for(service) as trans:
         trans.cursor.execute(stmt)
@@ -145,8 +150,9 @@ def wait_for_insert(entity_types: [str], service: str, row_count: int):
         wait_until(lambda: count_entities(et, service) >= row_count)
 
 
-def wait_for_delete(entity_type: str, service: str):
-    wait_until(lambda: not has_entities(entity_type, service))
+def wait_for_delete(entity_type: str, service: str,
+                    entity_id: Optional[str] = None):
+    wait_until(lambda: not has_entities(entity_type, service, entity_id))
 
 
 def delete_entity_type(service, entity_type, service_path=None):

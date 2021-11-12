@@ -1,7 +1,6 @@
 from conftest import QL_URL
 import pytest
 import requests
-import time
 import urllib
 from reporter.tests.utils import send_notifications, delete_test_data, \
     wait_for_insert
