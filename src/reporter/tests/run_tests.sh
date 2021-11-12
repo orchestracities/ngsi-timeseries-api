@@ -21,6 +21,7 @@ pytest src/reporter/tests/test_1T1E1A.py \
        src/reporter/tests/test_entities_with_odd_chars.py \
        src/reporter/tests/test_geo_queries_1t1e.py \
        src/reporter/tests/test_geo_query_1tne1a.py \
+       src/reporter/tests/test_Headers.py \
        --cov-report= --cov-config=.coveragerc --cov-append --cov=src/ \
        --junitxml=test-results/junit-reporter.xml
 r=$?
