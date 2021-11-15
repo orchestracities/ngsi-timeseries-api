@@ -11,22 +11,17 @@ sleep 20
 export QL_CONFIG='src/reporter/tests/ql-config.yml'
 
 cd ../../../
-pytest src/reporter/tests/test_1T1E1A.py \
-       src/reporter/tests/test_1T1ENA.py \
-       src/reporter/tests/test_1TNE1A.py \
-       src/reporter/tests/test_1TNENA.py \
-       src/reporter/tests/test_api.py \
-       src/reporter/tests/test_attribute_name_case.py \
-       src/reporter/tests/test_delete.py \
-       src/reporter/tests/test_entities_with_odd_chars.py \
-       src/reporter/tests/test_geo_queries_1t1e.py \
-       src/reporter/tests/test_geo_query_1tne1a.py \
-       src/reporter/tests/test_Headers.py \
-       src/reporter/tests/test_health.py \
-       src/reporter/tests/test_notify.py \
+pytest src/reporter/ \
+       --ignore=src/reporter/tests/test_incomplete_entities.py \
+       --ignore=src/reporter/tests/test_NTNE.py \
+       --ignore=src/reporter/tests/test_NTNE1A.py \
+       --ignore=src/reporter/tests/test_NTNENA.py \
+       --ignore=src/reporter/tests/test_NTNE.py \
+       --ignore=src/reporter/tests/test_op.py \
+       --ignore=src/reporter/tests/test_sql_injection.py \
+       --ignore=src/reporter/tests/test_time_format.py \
        --cov-report= --cov-config=.coveragerc --cov-append --cov=src/ \
        --junitxml=test-results/junit-reporter.xml
-# src/reporter/tests/test_incomplete_entities.py \
 
 r=$?
 cd -
