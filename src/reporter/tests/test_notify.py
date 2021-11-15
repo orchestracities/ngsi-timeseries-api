@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from conftest import QL_URL
 from utils.tests.common import assert_equal_time_index_arrays
+from reporter.conftest import create_notification
 from reporter.tests.utils import delete_entity_type, wait_for_insert
 from translators.sql_translator import entity_type as type_of
 import copy
@@ -60,6 +61,68 @@ def insert_data(notification: dict, http_headers: dict, service: str):
     assert res_post.json().startswith('Notification successfully processed')
 
     wait_for_insert([etype], service, len(notification['data']))
+
+
+def entities_with_different_attrs(etype: str) -> [dict]:
+    entities = [
+        {
+            'id': 'Room1',
+            'type': etype,
+            'temperature': {
+                'value': 24.2,
+                'type': 'Number',
+                'metadata': {
+                    'dateModified': {
+                        'type': 'DateTime',
+                        'value': '2019-05-09T15:28:30.000Z'
+                    }
+                }
+            },
+            'pressure': {
+                'value': 720,
+                'type': 'Number',
+                'metadata': {
+                    'dateModified': {
+                        'type': 'DateTime',
+                        'value': '2019-05-09T15:28:30.000Z'
+                    }
+                }
+            }
+        },
+        {
+            'id': 'Room2',
+            'type': etype,
+            'temperature': {
+                'value': 25.2,
+                'type': 'Number',
+                'metadata': {
+                    'dateModified': {
+                        'type': 'DateTime',
+                        'value': '2019-05-09T15:28:30.000Z'
+                    }
+                }
+            }
+        },
+        {
+            'id': 'Room3',
+            'type': etype,
+            'temperature': {
+                'value': 25.2,
+                'type': 'Number',
+                'metadata': {
+                    'dateModified': {
+                        'type': 'DateTime',
+                        'value': '2019-05-09T15:28:30.000Z'
+                    }
+                }
+            }
+        }
+    ]
+    return entities
+
+
+def find_by_type(etype: str, entities: [dict]) -> [dict]:
+    return [e for e in entities if e['entityType'] == etype]
 
 
 @pytest.mark.parametrize("service", services)
@@ -252,24 +315,27 @@ def test_geocoding(service, notification):
 
 
 @pytest.mark.parametrize("service", services)
-def test_multiple_data_elements(service, notification,
-                                diffEntityWithDifferentAttrs):
+def test_multiple_data_elements(service, notification):
     """
     Test that the notify API can process notifications containing multiple elements in the data array.
     """
-    notification['data'] = diffEntityWithDifferentAttrs
+    etype = 'test_multiple_data_elements'  # avoid interfering w/ other tests
+    notification['data'] = entities_with_different_attrs(etype)
     insert_data(notification, notify_header(service), service)
 
     entities_url = "{}/entities".format(QL_URL)
     r = requests.get(entities_url, params=None, headers=query_header(service))
-    entities = r.json()
+    entities = find_by_type(etype, r.json())
+    #          ^ i.e. don't assume there's no other data in the DB!
+    # some tests don't delete their data to speed up the test run.
     assert len(entities) == 3
-    delete_entity_type(service, diffEntityWithDifferentAttrs[0]['type'])
+
+    delete_entity_type(service, etype)
 
 
 @pytest.mark.parametrize("service", services)
 def test_multiple_data_elements_invalid_different_servicepath(
-        service, notification, diffEntityWithDifferentAttrs):
+        service, notification):
     """
     Test that the notify API can process notifications containing multiple elements in the data array
     and different fiwareServicePath.
@@ -280,7 +346,9 @@ def test_multiple_data_elements_invalid_different_servicepath(
     notify_headers[
         'Fiware-ServicePath'] = '/Test/Path1, /Test/Path1, /Test/Path2, /Test/Path3'
 
-    notification['data'] = diffEntityWithDifferentAttrs
+    etype = 'test_multiple_data_elements_invalid_different_servicepath'
+    # ^ avoid interfering w/ other tests
+    notification['data'] = entities_with_different_attrs(etype)
 
     r = requests.post('{}'.format(notify_url), data=json.dumps(notification),
                       headers=notify_headers)
@@ -290,7 +358,7 @@ def test_multiple_data_elements_invalid_different_servicepath(
 
 @pytest.mark.parametrize("service", services)
 def test_multiple_data_elements_different_servicepath(
-        service, notification, diffEntityWithDifferentAttrs):
+        service, notification):
     """
     Test that the notify API can process notifications containing multiple elements in the data array
     and different fiwareServicePath.
@@ -305,19 +373,27 @@ def test_multiple_data_elements_different_servicepath(
 
     query_headers['Fiware-ServicePath'] = '/Test'
 
-    notification['data'] = diffEntityWithDifferentAttrs
+    etype = 'test_multiple_data_elements_different_servicepath'
+    # ^ avoid interfering w/ other tests
+    notification['data'] = entities_with_different_attrs(etype)
 
     insert_data(notification, notify_headers, service)
 
     entities_url = "{}/entities".format(QL_URL)
     r = requests.get(entities_url, params=None, headers=query_headers)
-    entities = r.json()
+    entities = find_by_type(etype, r.json())
+    #          ^ i.e. don't assume there's no other data in the DB!
+    # some tests don't delete their data to speed up the test run.
     assert len(entities) == 3
-    delete_entity_type(service, diffEntityWithDifferentAttrs[0]['type'])
+
+    delete_entity_type(service, etype)
 
 
 @pytest.mark.parametrize("service", services)
-def test_time_index(service, notification):
+def test_time_index(service):
+    etype = 'test_time_index'  # avoid interfering w/ other tests
+    notification = create_notification(entity_type=etype)
+
     # If present, use entity-level dateModified as time_index
     global_modified = datetime(2000, 1, 2, 0, 0, 0, 0,
                                timezone.utc).isoformat()
@@ -330,7 +406,9 @@ def test_time_index(service, notification):
 
     entities_url = "{}/entities".format(QL_URL)
     r = requests.get(entities_url, params=None, headers=query_header(service))
-    entities = r.json()
+    entities = find_by_type(etype, r.json())
+    #          ^ i.e. don't assume there's no other data in the DB!
+    # some tests don't delete their data to speed up the test run.
     assert len(entities) == 1
     assert_equal_time_index_arrays([entities[0]['index']], [global_modified])
 
@@ -349,7 +427,7 @@ def test_time_index(service, notification):
     time.sleep(SLEEP_TIME)  # still needed b/c of entity update w/ new attr
 
     r = requests.get(entities_url, params=None, headers=query_header(service))
-    entities = r.json()
+    entities = find_by_type(etype, r.json())
     assert len(entities) == 1
     obtained = [entities[0]['index']]
     assert_equal_time_index_arrays(obtained, [global_modified, newer])
@@ -362,11 +440,12 @@ def test_time_index(service, notification):
     time.sleep(SLEEP_TIME)  # still needed b/c of entity update w/ new attr
 
     r = requests.get(entities_url, params=None, headers=query_header(service))
-    entities = r.json()
+    entities = find_by_type(etype, r.json())
     assert len(entities) == 1
     obtained = [entities[0]['index']]
     assert obtained[-1].startswith("{}".format(current.year))
-    delete_entity_type(service, notification['data'][0]['type'])
+
+    delete_entity_type(service, etype)
 
 
 @pytest.mark.parametrize("service", services)
