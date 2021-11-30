@@ -8,6 +8,7 @@
 - Increase test coverage (#524)
 - Add sql query to retrieve only last values of entities (#500)
 - Support configuration of back off factor for CrateDB (#503)
+- Support CrateDB authentication (#474)
 
 ### Bug fixes
 
