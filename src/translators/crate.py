@@ -58,10 +58,14 @@ class CrateTranslator(sql_translator.SQLTranslator):
         # consecutive retries
         backoff_factor = EnvReader(log=logging.getLogger(__name__).debug) \
             .read(FloatVar('CRATE_BACKOFF_FACTOR', 0.0))
+        username = EnvReader(log=logging.getLogger(__name__).debug) \
+            .read(StrVar('CRATE_USERNAME', None))
+        password = EnvReader(log=logging.getLogger(__name__).debug) \
+            .read(StrVar('CRATE_PASSWORD', None))
         if self.connection is None:
             try:
                 self.connection = client.connect(
-                    [url], error_trace=True, backoff_factor=backoff_factor)
+                    [url], error_trace=True, backoff_factor=backoff_factor, username=username, password=password)
                 self.ccm.set_connection('crate', self.connection)
             except Exception as e:
                 self.logger.warning(str(e), exc_info=True)
