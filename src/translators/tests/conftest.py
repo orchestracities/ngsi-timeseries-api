@@ -3,7 +3,7 @@ import os
 from six.moves.urllib.error import HTTPError
 from six.moves.urllib.request import urlopen
 
-
+ 
 def check_crate(docker_ip, public_port):
     """Check if a crate is reachable.
 
@@ -26,6 +26,7 @@ def check_crate(docker_ip, public_port):
 def docker_stack(docker_services):
     os.environ['PATH'] += os.pathsep + "/usr/local/bin"
     docker_services.start('crate')
+    docker_services.start('crate-auth')
     docker_services.start('timescale')
     docker_services.start('redis')
     docker_services.start('quantumleap-db-setup')
@@ -34,6 +35,18 @@ def docker_stack(docker_services):
         4200,
         check_server=check_crate,
     )
+    docker_services.wait_for_service(
+        "crate-auth",
+        4200,
+        check_server=check_crate,
+    )
+    # even though the http api is available, cratedb does not allow
+    # connections immediately. so sleep a little.
+    from time import sleep
+    sleep(5)
+    docker_services.execute('crate-auth', "bash", "-c",
+    "crash -c \"CREATE USER quantumleap WITH (password = 'a_secret_password');\" && \
+    crash -c \"GRANT DML,DDL,DQL TO quantumleap;\"")
 
 
 @pytest.fixture(scope='session')
