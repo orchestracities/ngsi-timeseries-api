@@ -42,13 +42,15 @@ CRATE_TO_NGSI['string_array'] = 'Array'
 class CrateTranslator(sql_translator.SQLTranslator):
     NGSI_TO_SQL = NGSI_TO_SQL
 
-    def __init__(self, host, port=4200, db_name="ngsi-tsdb"):
+    def __init__(self, host, port=4200, db_name="ngsi-tsdb", username=None, password=None):
         super(CrateTranslator, self).__init__(host, port, db_name)
         self.logger = logging.getLogger(__name__)
         self.dbCacheName = 'crate'
         self.ccm = None
         self.connection = None
         self.cursor = None
+        self.username = username
+        self.password = password
 
     def setup(self):
         url = "{}:{}".format(self.host, self.port)
@@ -58,14 +60,10 @@ class CrateTranslator(sql_translator.SQLTranslator):
         # consecutive retries
         backoff_factor = EnvReader(log=logging.getLogger(__name__).debug) \
             .read(FloatVar('CRATE_BACKOFF_FACTOR', 0.0))
-        username = EnvReader(log=logging.getLogger(__name__).debug) \
-            .read(StrVar('CRATE_USERNAME', None))
-        password = EnvReader(log=logging.getLogger(__name__).debug) \
-            .read(StrVar('CRATE_PASSWORD', None))
         if self.connection is None:
             try:
                 self.connection = client.connect(
-                    [url], error_trace=True, backoff_factor=backoff_factor, username=username, password=password)
+                    [url], error_trace=True, backoff_factor=backoff_factor, username=self.username, password=self.password)
                 self.ccm.set_connection('crate', self.connection)
             except Exception as e:
                 self.logger.warning(str(e), exc_info=True)
@@ -275,6 +273,10 @@ def CrateTranslatorInstance():
     db_host = r.read(StrVar('CRATE_HOST', 'crate'))
     db_port = r.read(IntVar('CRATE_PORT', 4200))
     db_name = "ngsi-tsdb"
+    db_username = EnvReader(log=logging.getLogger(__name__).debug) \
+            .read(StrVar('CRATE_USERNAME', None))
+    db_password = EnvReader(log=logging.getLogger(__name__).debug) \
+            .read(StrVar('CRATE_PASSWORD', None))
 
-    with CrateTranslator(db_host, db_port, db_name) as trans:
+    with CrateTranslator(db_host, db_port, db_name, db_username, db_password) as trans:
         yield trans
