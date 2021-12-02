@@ -119,7 +119,8 @@ def test_1T1E1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
     etype = f"test_1T1E1A_aggrPeriod_{aggr_period}"
     # The reporter_dataset fixture is still in the DB cos it has a scope of
     # module. We use a different entity type to store this test's rows in a
-    # different table to avoid messing up global state.
+    # different table to avoid messing up global state---see also delete down
+    # below.
     eid = "{}0".format(etype)
 
     # Custom index to test aggrPeriod
@@ -150,6 +151,8 @@ def test_1T1E1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
         'aggrPeriod': aggr_period,
     }
     r = requests.get(query_url(eid=eid), params=query_params, headers=h)
+
+    delete_test_data(service, [etype])
 
     assert r.status_code == 200, r.text
 

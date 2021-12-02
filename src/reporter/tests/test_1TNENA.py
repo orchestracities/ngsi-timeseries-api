@@ -421,7 +421,8 @@ def test_1TNENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
     etype = f"test_1TNENA_aggrPeriod_{aggr_period}"
     # The reporter_dataset fixture is still in the DB cos it has a scope of
     # module. We use a different entity type to store this test's rows in a
-    # different table to avoid messing up global state.
+    # different table to avoid messing up global state---see also delete down
+    # below.
     eid = '{}0'.format(etype)
     for i in exp_index:
         base = dateutil.parser.isoparse(i)
@@ -475,6 +476,7 @@ def test_1TNENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
     obtained = r.json()
     assert isinstance(obtained, dict)
     assert_1TNENA_response(obtained, expected, etype=etype)
+    delete_test_data(service, [etype])
 
 
 @pytest.mark.parametrize("service", services)

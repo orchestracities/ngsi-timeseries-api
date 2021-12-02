@@ -413,7 +413,8 @@ def test_1TNE1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
     etype = f"test_1TNE1A_aggrPeriod_{aggr_period}"
     # The reporter_dataset fixture is still in the DB cos it has a scope of
     # module. We use a different entity type to store this test's rows in a
-    # different table to avoid messing up global state.
+    # different table to avoid messing up global state---see also delete down
+    # below.
     eid = '{}0'.format(etype)
 
     for i in exp_index:
@@ -460,6 +461,7 @@ def test_1TNE1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
     assert obtained_data['entityType'] == etype
     assert obtained_data['attrName'] == attr_name
     assert obtained_data['entities'] == expected_entities
+    delete_test_data(service, [etype])
 
 
 @pytest.mark.parametrize("service", services)
