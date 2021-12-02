@@ -12,7 +12,6 @@ export QL_CONFIG='src/reporter/tests/ql-config.yml'
 
 cd ../../../
 pytest src/reporter/ \
-       --ignore=src/reporter/tests/test_incomplete_entities.py \
        --ignore=src/reporter/tests/test_NTNE.py \
        --ignore=src/reporter/tests/test_NTNE1A.py \
        --ignore=src/reporter/tests/test_NTNENA.py \

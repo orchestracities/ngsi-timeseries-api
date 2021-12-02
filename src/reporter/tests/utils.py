@@ -145,6 +145,17 @@ def wait_until(action: Callable[[], bool], max_wait: float = 20.0,
     assert False, f"waited longer than {max_wait} secs for {action}!"
 
 
+def wait_for_assert(action: Callable[[], None]):
+    def success():
+        try:
+            action()
+            return True
+        except AssertionError:
+            return False
+
+    wait_until(success)
+
+
 def wait_for_insert(entity_types: [str], service: str, row_count: int):
     for et in entity_types:
         wait_until(lambda: count_entities(et, service) >= row_count)
