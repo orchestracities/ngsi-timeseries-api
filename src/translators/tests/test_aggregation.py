@@ -2,7 +2,7 @@
 # timescale or crate.
 # See https://docs.pytest.org/en/stable/example/parametrize.html
 
-from conftest import crate_translator, timescale_translator
+from conftest import crate_translator, crate_auth_translator, timescale_translator
 from utils.common import TIME_INDEX_NAME
 from utils.tests.common import create_random_entities, add_attr
 import datetime
@@ -14,11 +14,12 @@ import pytest
 
 translators = [
     pytest.lazy_fixture('crate_translator'),
+    pytest.lazy_fixture('crate_auth_translator'),
     pytest.lazy_fixture('timescale_translator')
 ]
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
 def test_aggr_per_second(translator):
     entities = create_random_entities(num_ids_per_type=2, num_updates=17)
     assert len(entities) == 34

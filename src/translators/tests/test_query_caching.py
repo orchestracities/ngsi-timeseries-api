@@ -8,7 +8,7 @@ from translators.sql_translator import NGSI_TEXT, METADATA_TABLE_NAME
 from utils.common import *
 from utils.tests.common import *
 from datetime import datetime, timezone
-from conftest import crate_translator, timescale_translator, entity
+from conftest import crate_translator, crate_auth_translator, timescale_translator, entity
 import pytest
 import os
 
@@ -32,8 +32,9 @@ def check_cache_operations(translator, fiware_service, entity_table):
 
 @pytest.mark.parametrize("translator", [
     pytest.lazy_fixture('crate_translator'),
+    pytest.lazy_fixture('crate_auth_translator'),
     pytest.lazy_fixture('timescale_translator')
-], ids=["crate", "timescale"])
+], ids=["crate", "crate-auth", "timescale"])
 def test_cache_insert_no_tenant(enable_caching, translator):
     entities = create_random_entities(1, 2, 3, use_time=True, use_geo=True)
     result = translator.insert(entities)
@@ -46,8 +47,9 @@ def test_cache_insert_no_tenant(enable_caching, translator):
 
 @pytest.mark.parametrize("translator", [
     pytest.lazy_fixture('crate_translator'),
+    pytest.lazy_fixture('crate_auth_translator'),
     pytest.lazy_fixture('timescale_translator')
-], ids=["crate", "timescale"])
+], ids=["crate", "crate-auth", "timescale"])
 def test_cache_insert_with_tenant(enable_caching, translator):
     fiware_service = "Test"
     entities = create_random_entities(1, 2, 3, use_time=True, use_geo=True)
@@ -61,8 +63,9 @@ def test_cache_insert_with_tenant(enable_caching, translator):
 
 @pytest.mark.parametrize("translator", [
     pytest.lazy_fixture('crate_translator'),
+    pytest.lazy_fixture('crate_auth_translator'),
     pytest.lazy_fixture('timescale_translator')
-], ids=["crate", "timescale"])
+], ids=["crate", "crate-auth", "timescale"])
 def test_cache_failure(docker_services, enable_caching, translator):
     fiware_service = "Test"
     docker_services._docker_compose.execute('stop', 'redis')
