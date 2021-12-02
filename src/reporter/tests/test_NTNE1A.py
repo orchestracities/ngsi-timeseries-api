@@ -1,6 +1,6 @@
 from conftest import QL_URL
 from reporter.tests.utils import AttrQueryResultGen, insert_test_data,\
-    delete_test_data, temperatures
+    delete_test_data, temperatures, wait_for_insert
 import pytest
 import requests
 import dateutil.parser
@@ -42,6 +42,7 @@ def reporter_dataset():
                          index_size=sz, entity_id=entity_id_1)
         insert_test_data(service, [entity_type], n_entities=1,
                          index_size=sz, entity_id=entity_id_2)
+        wait_for_insert([entity_type], service, sz * 2)
     yield
     for service in services:
         delete_test_data(service, [entity_type])
@@ -217,6 +218,8 @@ def test_NTNE1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
                          index_size=5,
                          index_base=base,
                          index_period=ins_period)
+
+    wait_for_insert([entity_type], service, 5 * len(exp_index))
 
     # aggrPeriod needs aggrMethod
     query_params = {
