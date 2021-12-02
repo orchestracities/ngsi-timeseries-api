@@ -30,6 +30,7 @@ services:
       - mongo
       - orion
       - crate
+      - crate-auth
     environment:
       - CRATE_HOST=${CRATE_HOST:-crate}
       - USE_GEOCODING=False
