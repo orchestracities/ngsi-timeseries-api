@@ -9,7 +9,7 @@ from statistics import mean
 entity_id_1 = "Room1"
 entity_id_2 = "Room2"
 result_gen = AttrQueryResultGen(time_index_size=4,
-                                entity_type='Room',
+                                entity_type='test_NTNE1A_Room',
                                 attr_name='temperature',
                                 value_generator=temperatures)
 index = result_gen.time_index()
@@ -24,13 +24,10 @@ def ix_intervals():
 
 
 def query_url(values=False):
-    url = "{qlUrl}/attrs/{attrName}"
-    if values:
-        url += '/value'
-    return url.format(
-        qlUrl=QL_URL,
-        attrName=result_gen.attr_name()
-    )
+    etype = result_gen.entity_type()
+    attr_name = result_gen.attr_name()
+    value = '/value' if values else ''
+    return f"{QL_URL}/attrs/{attr_name}{value}?type={etype}"
 
 
 @pytest.fixture(scope='module')
