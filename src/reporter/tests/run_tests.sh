@@ -12,7 +12,6 @@ export QL_CONFIG='src/reporter/tests/ql-config.yml'
 
 cd ../../../
 pytest src/reporter/ \
-       --ignore=src/reporter/tests/test_op.py \
        --ignore=src/reporter/tests/test_sql_injection.py \
        --ignore=src/reporter/tests/test_time_format.py \
        --cov-report= --cov-config=.coveragerc --cov-append --cov=src/ \
