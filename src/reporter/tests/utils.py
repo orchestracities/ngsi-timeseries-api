@@ -93,7 +93,7 @@ def insert_test_data(service, entity_types, n_entities=1, index_size=30,
     time.sleep(0.9)
 
 
-def has_entities(entity_type: str, service: str,
+def has_entities(entity_type: str, service: Optional[str],
                  entity_id: Optional[str] = None) -> bool:
     try:
         entity_count = count_entities(entity_type, service, entity_id)
@@ -112,7 +112,7 @@ def has_entities(entity_type: str, service: str,
         # actually there.
 
 
-def count_entities(entity_type: str, service: str,
+def count_entities(entity_type: str, service: Optional[str],
                    entity_id: Optional[str] = None) -> int:
     table = full_table_name(service, entity_type)
     stmt = f"SELECT count(*) FROM {table}"
@@ -125,10 +125,13 @@ def count_entities(entity_type: str, service: str,
         return cnt[0]
 
 
-def full_table_name(service: str, entity_type: str) -> str:
-    tenant = service.lower()
+def full_table_name(service: Optional[str], entity_type: str) -> str:
     et = entity_type.lower()
-    return f'"{TENANT_PREFIX}{tenant}"."{TYPE_PREFIX}{et}"'
+    table_name = f'"{TYPE_PREFIX}{et}"'
+    if service:
+        tenant = service.lower()
+        return f'"{TENANT_PREFIX}{tenant}".{table_name}'
+    return table_name
 
 
 def wait_until(action: Callable[[], bool], max_wait: float = 20.0,
@@ -156,12 +159,13 @@ def wait_for_assert(action: Callable[[], None]):
     wait_until(success)
 
 
-def wait_for_insert(entity_types: [str], service: str, row_count: int):
+def wait_for_insert(entity_types: [str], service: Optional[str],
+                    row_count: int):
     for et in entity_types:
         wait_until(lambda: count_entities(et, service) >= row_count)
 
 
-def wait_for_delete(entity_type: str, service: str,
+def wait_for_delete(entity_type: str, service: Optional[str],
                     entity_id: Optional[str] = None):
     wait_until(lambda: not has_entities(entity_type, service, entity_id))
 
