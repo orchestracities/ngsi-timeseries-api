@@ -14,7 +14,6 @@ cd ../../../
 pytest src/reporter/ \
        --cov-report= --cov-config=.coveragerc --cov-append --cov=src/ \
        --junitxml=test-results/junit-reporter.xml
-
 r=$?
 cd -
 
