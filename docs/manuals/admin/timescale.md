@@ -2,7 +2,7 @@
 
 [Timescale][timescale] is one of the time series databases that can be
 used with QuantumLeap as a back end to store NGSI entity time series.
-As documented in the [Database Selection section][admin.db], it is
+As documented in the [Configuration section][admin.db], it is
 possible to dynamically select, at runtime, which storage back end to
 use (Crate or Timescale) depending on the tenant who owns the entity
 being persisted. Moreover, QuantumLeap ships with tools to automate the
@@ -80,11 +80,10 @@ are:
 * `QL_CONFIG`: absolute pathname of the QuantumLeap YAML configuration
   file. If not set, the default configuration will be used where only
   the Crate back end is available. For details about how to select a
-  back end and YAML configuration, refer to the [Database Selection
-  section][admin.db].
+  back end and YAML configuration, refer to the [QuantumLeap Configuration][admin.db].
 
-[admin.db]: ./db-selection.md
-    "QuantumLeap Database Selection"
+[admin.db]: ./configuration.md
+    "QuantumLeap Configuration"
 [admin.dm]: ./dataMigration.md
     "QuantumLeap Data Migration"
 [postgres]: https://www.postgresql.org

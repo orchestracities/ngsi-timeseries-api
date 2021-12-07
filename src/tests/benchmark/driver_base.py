@@ -8,13 +8,13 @@ QL_BASE_URL = 'http://localhost:8668'
 VERSION_TEST = 'version'
 NOTIFY_TEST = 'notify'
 
-monitoring_dir = '_monitoring'
+MONITORING_DIR = '_monitoring'
 # NOTE. Shared monitoring dir. Out of convenience, we use the same dir as
 # QuantumLeap so the analysis script can import both client and server
 # data in the same Pandas frame.
 
 
-def setup_monitor():
+def setup_monitor(monitoring_dir: str):
     monitor.start(monitoring_dir=monitoring_dir,
                   with_runtime=False,  # (*)
                   with_profiler=False)
@@ -79,11 +79,14 @@ def print_test_results(rs: TestRunResults):
 
 class Driver:
 
+    def __init__(self, monitoring_dir: str = MONITORING_DIR):
+        self._mon_dir = monitoring_dir
+
     def _do_run(self, test_id: str) -> TestRunResults:
         pass
 
     def run(self, test_id: str):
-        setup_monitor()
+        setup_monitor(self._mon_dir)
 
         sample_id = monitor.start_duration_sample()
         rs = self._do_run(test_id)

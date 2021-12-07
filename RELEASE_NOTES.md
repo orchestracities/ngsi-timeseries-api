@@ -1,13 +1,40 @@
 # QuantumLeap Release Notes
 
-## 0.8.2-dev
+## 0.8.3-dev
+
+### New features
+
+- Added support for NGSI-LD temporal property 'modifiedAt' and 'observedAt' (#433)
+- Increase test coverage (#524)
+- Add sql query to retrieve only last values of entities (#500)
+- Support configuration of back off factor for CrateDB (#503)
+
+### Bug fixes
+
+- Fix automated docker builds are broken (#557)
+- Fix arbitrary type arrays cause errors when inserting (#537)
+- Fix OpenAPI spec for /wq/management (#544)
+- Fix attributes names in /v2/entities query (#478)
+- Fix index ordering in /v2/entities query (#521)
+
+### Documentation
+
+- Improve contributing docuemntation (#557)
+- Introduce reference about `options=sysAttrs` for ngsi-ld time indexing (#546)
+- Document API pagination (#511)
+
+### Technical debt
+
+## 0.8.2
 
 ### New features
 
 - Support for CRATE 4.5 (#430)
-- Fix "None" Tenant query caching (required for no multi-tenant orion deployment)
+- Introduced queue workflow support & upgraded gunicorn (#501)
 
 ### Bug fixes
+
+- Fix "None" Tenant query caching (required for no multi-tenant orion deployment)
 
 ### Documentation
 

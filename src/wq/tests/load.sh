@@ -1,0 +1,1 @@
+vegeta attack -targets=vegeta.test -rate=200 -duration=30s | tee results.bin | vegeta report

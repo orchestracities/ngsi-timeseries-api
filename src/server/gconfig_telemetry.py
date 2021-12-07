@@ -5,9 +5,9 @@ import server.telemetry.monitor as monitor
 
 
 bind = f"{server.DEFAULT_HOST}:{server.DEFAULT_PORT}"
-workers = multiprocessing.cpu_count() * 4 + 1
+workers = os.getenv('WORKERS', 2)
 worker_class = 'gthread'
-threads = 1
+threads = os.getenv('THREADS', 1)
 loglevel = 'error'
 
 

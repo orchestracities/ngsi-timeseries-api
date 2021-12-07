@@ -213,6 +213,7 @@ def test_entity_with_all_supported_types():
                               '40.63881265804603, -8.653149604797363'])
 
     insert_entities(e, service=service)
+
     result_set = query_entity_by_id(e['id'], service)
 
     actual = query_result_name_value_pairs(result_set)

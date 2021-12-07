@@ -1,9 +1,9 @@
 from conftest import QL_URL
 import pytest
 import requests
-import time
 import urllib
-from reporter.tests.utils import send_notifications, delete_test_data
+from reporter.tests.utils import send_notifications, delete_test_data, \
+    wait_for_insert
 
 
 entity_type = 'TestDevice'
@@ -43,16 +43,16 @@ def mk_entities():
 
 
 def insert_entities(service):
-    notification_data = [{'data': mk_entities()}]
+    entities = mk_entities()
+    notification_data = [{'data': entities}]
     send_notifications(service, notification_data)
-    time.sleep(1)
+    wait_for_insert([entity_type], service, len(entities))
 
 
 @pytest.fixture(scope='module')
 def manage_db_entities():
     for service in services:
         insert_entities(service)
-    time.sleep(2)
 
     yield
 
@@ -100,6 +100,7 @@ def test_1t1e1a(service, attr_name, manage_db_entities):
     assert query_result == {
         'attrName': attr_name,
         'entityId': entity1_id,
+        'entityType': entity_type,
         'values': [attr1_value, attr1_value]
     }
 
@@ -139,6 +140,7 @@ def test_1t1ena(service, attr1_name, attr2_name, manage_db_entities):
 
     assert query_result == {
         'entityId': entity2_id,
+        'entityType': entity_type,
         'attributes': [
             {
                 'attrName': attr1,

@@ -20,10 +20,22 @@ def _attribute(notification: dict, attr_name: str) -> MaybeString:
     return maybe_value(notification, attr_name, 'value')
 
 
+def _attribute_key_values(notification: dict, attr_name: str) -> MaybeString:
+    return maybe_value(notification, attr_name)
+
+
 def _meta_attribute(notification: dict, attr_name: str, meta_name: str) \
         -> MaybeString:
     return maybe_value(notification,
                        attr_name, 'metadata', meta_name, 'value')
+
+
+def _json_ld_meta_attribute(
+        notification: dict,
+        attr_name: str,
+        meta_name: str) -> MaybeString:
+    return maybe_value(notification,
+                       attr_name, meta_name)
 
 
 def _iter_metadata(
@@ -31,6 +43,13 @@ def _iter_metadata(
         meta_name: str) -> Iterable[MaybeString]:
     for attr_name in iter_entity_attrs(notification):
         yield _meta_attribute(notification, attr_name, meta_name)
+
+
+def _iter_json_ld_metadata(
+        notification: dict,
+        meta_name: str) -> Iterable[MaybeString]:
+    for attr_name in iter_entity_attrs(notification):
+        yield _json_ld_meta_attribute(notification, attr_name, meta_name)
 
 
 def time_index_priority_list(
@@ -57,6 +76,18 @@ def time_index_priority_list(
 
     # The most recent timestamp metadata
     yield latest_from_str_rep(_iter_metadata(notification, "timestamp"))
+
+    # The most recent observedAt json-ld metadata
+    yield latest_from_str_rep(_iter_json_ld_metadata(notification, "observedAt"))
+
+    # The most recent modifiedAt json-ld metadata
+    yield latest_from_str_rep(_iter_json_ld_metadata(notification, "modifiedAt"))
+
+    # observedAt attribute
+    yield to_datetime(_attribute_key_values(notification, "observedAt"))
+
+    # modifiedAt attribute
+    yield to_datetime(_attribute_key_values(notification, "modifiedAt"))
 
     # dateModified attribute
     yield to_datetime(_attribute(notification, "dateModified"))

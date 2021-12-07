@@ -1,0 +1,23 @@
+@startuml
+
+!theme cerulean-outline
+
+state Pending {
+  Queued --> Running: fetch[ now = σ(r) ]
+  Running --> Scheduled: fail[ r < M ]
+  Scheduled --> Running: fetch[ now = σ(r+1) ] / ++r
+}
+Running --> Failed: fail[ r = M ]
+Running --> Succeded: succeed
+[*] --> Queued: enqueue / r = 0
+Succeded --> [*]: when[success TTL] / delete
+Failed --> [*]: when[failure TTL] / delete
+
+note right of Pending
+  r = current retries
+  M = max retries
+  σ(0) = time of 1st fetch
+  σ(n+1) = σ(n) + 20*2^n
+end note
+
+@enduml

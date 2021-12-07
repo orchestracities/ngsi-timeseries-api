@@ -25,14 +25,14 @@ subscription? I.e, will Orion trigger notifications for that insert/update?
 
 - Is the location of QuantumLeap expressed in the *notify_url* field of the
 subscription a resolvable url for the containerised Orion? Review the
-[Usage Section](./index.md) for more details.
+[Usage Section](./using.md) for more details.
 
 - Are you running the different components behind firewalls? If so, did you
 open the corresponding ports? (See the [Ports](../admin/ports.md) section.)
 
 ### Cannot retrieve data
 
-- Are you using the correct FIWARE headers for the tenant? Refer to the [Multi-tenancy](index.md#multi-tenancy)
+- Are you using the correct FIWARE headers for the tenant? Refer to the [Multi-tenancy](using.md#multi-tenancy)
 part of the docs.
 
 - Is the endpoint you are using implemented? Note for now some of them are not.
@@ -57,6 +57,23 @@ crate.client.exceptions.ProgrammingError: SQLActionException[ColumnValidationExc
 
 This related to the fact that CrateDB does not support 3D coordinates,
 as documented in [admin documentation](../admin/crate.md).
+
+### Crate(3.x and 4.x) does not support nested arrays
+
+When a table is created with two columns `x` and `y` of type object
+and array(object).
+Inserting an object in x and y gives a below exception message:
+
+```#!/bin/bash
+create table t (x object, y array(object));
+insert into t (x) values ('{ "x": [1] }');
+  - ok
+insert into t (x) values ('{ "x": [[1, 2], [3, 4]] }');
+  - SQLActionException[ColumnValidationException: Validation failed for x:
+  -Cannot cast '{ "x": [[1, 2], [3, 4]] }' to type object]
+insert into t (y) values (['{ "x": [[1, 2], [3, 4]] }']);
+  -SQLActionException[ElasticsearchParseException:nested arrays not supported]
+```
 
 ### Sometimes it takes more than 500 msec to read the data sent to Orion in QuantumLeap
 

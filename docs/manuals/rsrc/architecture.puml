@@ -5,36 +5,37 @@ skinparam componentStyle uml2
 !define ICONURL https://raw.githubusercontent.com/smartsdk/architecture-diagrams/master/dist
 !includeurl ICONURL/common.puml
 !includeurl ICONURL/fiware.puml
-!includeurl ICONURL/smartsdk.puml
-
-interface NGSI
 
 FIWARE(cb,"Orion \nContext Broker",component)
 
 package "IoT Layer" {
     FIWARE(iota,"IoT Agent",component)
 }
-iota -up- NGSI
-NGSI -up- cb
+
 iota -up-> "2" cb
-[Client] - NGSI
+[Client] "1" -up-> cb
+[Cache]
+
 package "QuantumLeap" {
-	SMARTSDK(api,"API",component)
-	SMARTSDK(reporter,"Reporter",component)
-	SMARTSDK(translator,"Translator",component)
-	SMARTSDK(geocoder,"Geocoder",component)
-	api -up- NGSI
+	FIWARE(api,"API",component)
+	FIWARE(reporter,"Reporter",component)
+	FIWARE(translator,"Translator",component)
+	FIWARE(geocoder,"Geocoder",component)
+	FIWARE(worker,"Worker",component)
 	api <-down-> reporter
+  worker <-up-> translator
 	reporter <-right-> translator
 	reporter <-down-> geocoder
-
-    [Client] "1" -down-> api
-    cb "3" -down-> api
-    [Client] "4" <-down-> api
+	reporter <-down-> [Cache]
 }
-[OSM] <-down-> geocoder
-[DB Cluster] <-left-> translator
-[Grafana] <-down-> [DB Cluster]
-[Client] "5" <-> [Grafana]
+cb "3" -down-> api
+[Client] "4" <-down-> api
+worker <-down-> [Cache]
+geocoder <-down-> [Cache]
+[OSM] <-down- geocoder
+[DB Cluster] <-left- translator
+[Cache] <-left- translator
+[Dashboard] "5" -down-> [DB Cluster]
+api <-right- [Dashboard]
 
 @enduml

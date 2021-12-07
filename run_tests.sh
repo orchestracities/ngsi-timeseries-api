@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 
 rep=$(curl -s --unix-socket /var/run/docker.sock http://ping > /dev/null)
 status=$?
 
-if [ "$status" == "7" ]; then
+if [ $status -eq 7 ]; then
     echo 'docker is not running - test will not be executed'
     exit 1
 fi
@@ -44,9 +44,29 @@ if [ -z $tests ] || [ $tests = "reporter" ]; then
   cd -
 fi
 
+if [ -z $tests ] || [ $tests = "integration" ]; then
+  cd src/tests/
+  test_suite_header "BACKWARD COMPAT & INTEGRATION"
+  sh run_tests.sh
+  loc=$?
+  if [ "$tot" -eq 0 ]; then
+    tot=$loc
+  fi
+  cd -
+fi
+
 if [ -z $tests ] || [ $tests = "others" ]; then
   cd src/geocoding/tests
   test_suite_header "GEO-CODING"
+  sh run_tests.sh
+  loc=$?
+  if [ "$tot" -eq 0 ]; then
+    tot=$loc
+  fi
+  cd -
+
+  cd src/cache/tests
+  test_suite_header "CACHE"
   sh run_tests.sh
   loc=$?
   if [ "$tot" -eq 0 ]; then
@@ -72,8 +92,8 @@ if [ -z $tests ] || [ $tests = "others" ]; then
   fi
   cd -
 
-  cd src/tests/
-  test_suite_header "BACKWARD COMPAT & INTEGRATION"
+  cd src/wq/tests
+  test_suite_header "WORK QUEUE"
   sh run_tests.sh
   loc=$?
   if [ "$tot" -eq 0 ]; then

@@ -1,9 +1,11 @@
 from conftest import QL_URL
 import pytest
 import requests
-import time
 import urllib
-from reporter.tests.utils import send_notifications, delete_entity_type
+from reporter.tests.utils import send_notifications, delete_entity_type, \
+    wait_for_insert
+
+SLEEP_TIME = 1
 
 
 def mk_entity(eid, entity_type, attr_name):
@@ -20,7 +22,6 @@ def mk_entity(eid, entity_type, attr_name):
 def insert_entity(service, entity):
     notification_data = [{'data': [entity]}]
     send_notifications(service, notification_data)
-    time.sleep(1)
 
 
 def query_entity(service, entity_id, attr_name):
@@ -37,16 +38,18 @@ def run_test(service, entity_type, attr_name):
     entity = mk_entity('d1', entity_type, attr_name)
 
     insert_entity(service, entity)
+    wait_for_insert([entity_type], service, 1)
 
     query_result = query_entity(service, entity['id'], attr_name)
     query_result.pop('index', None)
     assert query_result == {
         'attrName': attr_name,
         'entityId': entity['id'],
+        'entityType': entity_type,
         'values': [entity[attr_name]['value']]
     }
 
-    delete_entity_type(service, entity['type'])
+    delete_entity_type(service, entity_type)
 
 
 odd_chars = ['-', '+', '@', ':']

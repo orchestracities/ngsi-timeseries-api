@@ -1,5 +1,6 @@
 from conftest import QL_URL
-from reporter.tests.utils import insert_test_data, delete_test_data
+from reporter.tests.utils import insert_test_data, delete_test_data, \
+    wait_for_insert
 import pytest
 import requests
 from utils.tests.common import assert_equal_time_index_arrays
@@ -64,6 +65,7 @@ def test_1T1ENA_defaults(service, reporter_dataset):
     ]
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -116,6 +118,7 @@ def test_1T1ENA_aggrMethod(
     # Assert
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': [],
         'attributes': [
             {
@@ -147,7 +150,7 @@ def test_1T1ENA_aggrMethod(
 def test_1T1ENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
     # Custom index to test aggrPeriod
 
-    etype = 'test_1T1ENA_aggrPeriod'
+    etype = f"test_1T1ENA_aggrPeriod_{aggr_period}"
     # The reporter_dataset fixture is still in the DB cos it has a scope of
     # module. We use a different entity type to store this test's rows in a
     # different table to avoid messing up global state---see also delete down
@@ -162,6 +165,8 @@ def test_1T1ENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
                          index_size=3,
                          index_base=base,
                          index_period=ins_period)
+
+    wait_for_insert([etype], service, 3 * len(exp_index))
 
     # aggrPeriod needs aggrMethod
     query_params = {
@@ -187,6 +192,7 @@ def test_1T1ENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
     # Assert Results
     expected = {
         'entityId': eid,
+        'entityType': etype,
         'index': exp_index,
         'attributes': [
             {
@@ -230,6 +236,7 @@ def test_1T1ENA_fromDate_toDate(service, reporter_dataset):
     # Assert
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -271,6 +278,7 @@ def test_1T1ENA_fromDate(service, reporter_dataset):
     # Assert
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -317,6 +325,7 @@ def test_1T1ENA_fromDate_and_last(service, last, reporter_dataset):
     # Assert
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -359,6 +368,7 @@ def test_1T1ENA_fromDate_toDate_with_quotes(service, reporter_dataset):
     # Assert
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -400,6 +410,7 @@ def test_1T1ENA_lastN(service, reporter_dataset):
     # Assert
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -442,6 +453,7 @@ def test_1T1E1A_lastN_with_limit(service, reporter_dataset):
     ]
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -485,6 +497,7 @@ def test_1T1ENA_limit(service, reporter_dataset):
     # Assert
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -526,6 +539,7 @@ def test_1T1ENA_offset(service, reporter_dataset):
     # Assert
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -569,6 +583,7 @@ def test_1T1ENA_combined(service, reporter_dataset):
     # Assert
     expected = {
         'entityId': entity_id,
+        'entityType': entity_type,
         'index': expected_index,
         'attributes': [
             {

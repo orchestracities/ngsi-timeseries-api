@@ -25,7 +25,7 @@ docker run -ti --rm --network tests_default \
            -e QL_URL="http://$QL_BC_HOST:8668" \
            --entrypoint "" \
            -e USE_FLASK=TRUE \
-           smartsdk/quantumleap:0.8.0 python tests/common.py
+           orchestracities/quantumleap:0.8.0 python tests/common.py
 
 # Restart QL on development version and CRATE on current version
 docker-compose stop quantumleap
@@ -43,7 +43,7 @@ tot=$?
 # Integration Test
 echo "\n"
 echo "Integration Test"
-pytest src/tests/test_integration.py --cov-report= --cov-config=.coveragerc --cov-append --cov=src/ \
+pytest -s src/tests/test_integration.py --cov-report= --cov-config=.coveragerc --cov-append --cov=src/ \
     --junitxml=test-results/junit-it.xml
 loc=$?
 if [ "$tot" -eq 0 ]; then

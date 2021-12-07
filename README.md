@@ -67,15 +67,16 @@ Refer to the
 [Installation Guide](https://quantumleap.readthedocs.io/en/latest/admin/).
 
 QuantumLeap supports both Crate DB and Timescale as time-series DB
-backends. The following versions have been tested:
+backends. The following versions are currently covered in tests
+(see [.circleci/config.yml](https://github.com/orchestracities/ngsi-timeseries-api/blob/master/.circleci/config.yml#L204)):
 
-- Crate backend: Crate DB version `4.2.*` up to `4.5`
-- Timescale backend: Postgres version `10.*` up to `12` +
-  Timescale extension `1.3.*` up to `1.7.5` + Postgis extension `2.5.*`.
+- Crate backend: Crate DB version `4.2.7` up to `4.5`
+- Timescale backend: Postgres version `12` up to `13` +
+  Timescale extension `1.7.5` up to `2.3.0` + Postgis extension `2.5.*`.
 
 As regards caching feature, QuantumLeap has been tested with Redis `4.*` up
 to `6.2.3`.
-Integration with Orion Context Broker is tested from version `2.2.0`
+Integration with Orion Context Broker is tested from version `2.4.2`
 up to `2.6.1`.
 
 Automated tests, to avoid too long testing time, are not combining all possible
@@ -88,9 +89,22 @@ introduced basic support for NGSI-LD. In short this means that using
 the current endpoint you are able to store NGSI-LD payloads with few caveats
 (see [#398](https://github.com/orchestracities/ngsi-timeseries-api/issue/398))
 
+## Docker Images
+
+Docker images are available on
+[docker hub](https://hub.docker.com/r/orchestracities/quantumleap/):
+
+- `latest` refers to the last release. This behaviour will be introduced
+    since `0.8.3` release.
+- `edge` refers to the version in master, this behaviour is introduced
+    since `0.8.3-dev` activities.
+- `*.*.*` refers to specific releases.
+- additionally (usage is not recommended), we release images
+  for each branch.
+
 ## Usage
 
-Refer to the [User Manual](https://quantumleap.readthedocs.io/en/latest/user/).
+Refer to the [User Manual](https://quantumleap.readthedocs.io/en/latest/user/using/).
 
 ## Troubleshooting
 

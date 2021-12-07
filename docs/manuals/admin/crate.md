@@ -18,7 +18,7 @@ and other entities. These can be queried for distance, containment, intersection
 and so on.
 Currently, CrateDB supports 2D coordinates but it does [not supports 3D coordinate](https://tools.ietf.org/html/rfc7946#section-3.1)
 
-If you followed the [Installation Guide](./index.md), you have a ready-to-use
+If you followed the [Installation Guide](./installing.md), you have a ready-to-use
 CrateDB instance running in a Docker container. The easiest way to interact with
 it is using its admin interface, as documented [here](https://crate.io/docs/clients/admin-ui/en/latest/).
 Alternatively, you can use its [HTTP api](https://crate.io/docs/crate/getting-started/en/latest/first-use/query.html#the-cratedb-http-endpoint),

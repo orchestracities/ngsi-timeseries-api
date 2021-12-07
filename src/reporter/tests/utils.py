@@ -3,7 +3,11 @@ from datetime import datetime, timedelta, timezone
 import json
 import requests
 import time
-from typing import Callable, Iterable, List, Tuple, Union
+from typing import Callable, Iterable, List, Optional, Tuple, Union
+
+from translators.factory import translator_for
+from translators.sql_translator import ENTITY_ID_COL, TENANT_PREFIX, \
+    TYPE_PREFIX
 
 
 def notify_url():
@@ -42,18 +46,21 @@ def get_notification(et, ei, attr_value, mod_value):
     }
 
 
-def send_notifications(service, notifications):
+def send_notifications(service, notifications, service_path=None):
     assert isinstance(notifications, list)
     h = {'Content-Type': 'application/json'}
     if service:
         h['Fiware-Service'] = service
+    if service_path:
+        h['Fiware-ServicePath'] = service_path
     for n in notifications:
         r = requests.post(notify_url(), data=json.dumps(n), headers=h)
         assert r.ok
 
 
 def insert_test_data(service, entity_types, n_entities=1, index_size=30,
-                     entity_id=None, index_base=None, index_period="day"):
+                     entity_id=None, index_base=None, index_period="day",
+                     service_path=None):
     assert isinstance(entity_types, list)
     index_base = index_base or datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc)
 
@@ -80,9 +87,87 @@ def insert_test_data(service, entity_types, n_entities=1, index_size=30,
 
                 eid = entity_id or '{}{}'.format(et, ei)
                 n = get_notification(et, eid, attr_value=i, mod_value=dt)
-                send_notifications(service, [n])
+                send_notifications(service, [n], service_path)
+    # NOTE. CRATEDB consolidation requires some time.
+    # time.sleep(min(1.0, len(entity_types) * n_entities * index_size * 0.3))
+    time.sleep(0.9)
 
-    time.sleep(1)
+
+def has_entities(entity_type: str, service: Optional[str],
+                 entity_id: Optional[str] = None) -> bool:
+    try:
+        entity_count = count_entities(entity_type, service, entity_id)
+        return entity_count > 0
+    except Exception as e:
+        print(e)
+        return False
+        # Most likely the table is not there. Example exceptions:
+        # - pg8000.exceptions.ProgrammingError:
+        #    {'C': '42P01', 'M': 'relation mtt2.et... does not exist', ...}
+        # - crate.client.exceptions.ProgrammingError:
+        #     RelationUnknown[Relation 'mtt1.et... unknown...']
+        #
+        # TODO. See if there's a better way of doing this, e.g. catching a
+        # specific exception and error code to make sure the table isn't
+        # actually there.
+
+
+def count_entities(entity_type: str, service: Optional[str],
+                   entity_id: Optional[str] = None) -> int:
+    table = full_table_name(service, entity_type)
+    stmt = f"SELECT count(*) FROM {table}"
+    if entity_id:
+        stmt += f" WHERE {ENTITY_ID_COL} = '{entity_id}'"
+
+    with translator_for(service) as trans:
+        trans.cursor.execute(stmt)
+        cnt = trans.cursor.fetchall()[0]
+        return cnt[0]
+
+
+def full_table_name(service: Optional[str], entity_type: str) -> str:
+    et = entity_type.lower()
+    table_name = f'"{TYPE_PREFIX}{et}"'
+    if service:
+        tenant = service.lower()
+        return f'"{TENANT_PREFIX}{tenant}".{table_name}'
+    return table_name
+
+
+def wait_until(action: Callable[[], bool], max_wait: float = 20.0,
+               sleep_interval: float = 1.0):
+    time_left_to_wait = max_wait
+    while time_left_to_wait > 0:
+        stop = action()
+        if stop:
+            return
+
+        time_left_to_wait -= sleep_interval
+        time.sleep(sleep_interval)
+
+    assert False, f"waited longer than {max_wait} secs for {action}!"
+
+
+def wait_for_assert(action: Callable[[], None]):
+    def success():
+        try:
+            action()
+            return True
+        except AssertionError:
+            return False
+
+    wait_until(success)
+
+
+def wait_for_insert(entity_types: [str], service: Optional[str],
+                    row_count: int):
+    for et in entity_types:
+        wait_until(lambda: count_entities(et, service) >= row_count)
+
+
+def wait_for_delete(entity_type: str, service: Optional[str],
+                    entity_id: Optional[str] = None):
+    wait_until(lambda: not has_entities(entity_type, service, entity_id))
 
 
 def delete_entity_type(service, entity_type, service_path=None):
@@ -100,12 +185,14 @@ def delete_entity_type(service, entity_type, service_path=None):
     r = requests.delete(url, headers=h, params=query_params)
 #    assert r.status_code == 204
 
+    wait_for_delete(entity_type, service)
 
-def delete_test_data(service, entity_types):
+
+def delete_test_data(service, entity_types, service_path=None):
     assert isinstance(entity_types, list)
 
     for et in entity_types:
-        delete_entity_type(service, et)
+        delete_entity_type(service, et, service_path)
 
 
 def enum(lo: int, hi: int) -> List[int]:

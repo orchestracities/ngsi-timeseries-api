@@ -1,19 +1,14 @@
 version: 2.1
 
-jobs: 
+jobs:
   build:
-    machine: true
-    steps:
-      - checkout
-      - run: docker build -t orchestracities/quantumleap .
-  test_translator:
     machine:
       image: ubuntu-2004:202008-01
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
-      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib 
+      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib
       - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
@@ -24,18 +19,48 @@ jobs:
       - save_cache:
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
           paths:
-            - ".venv"
+            - "~/.venv"
+            - "/usr/local/bin"
+            - "/usr/local/lib/python3.8"
+            - "/opt/circleci/.pyenv/versions/3.8.5/lib"
+      - run: docker build -t orchestracities/quantumleap .
+  test_translator:
+    parameters:
+      crate-version:
+        type: string
+      timescale-version:
+        type: string
+    machine:
+      image: ubuntu-2004:202008-01
+    steps:
+      - checkout
+      - run: sudo chown -R circleci:circleci /usr/local/bin
+      - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
+      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib
+      - restore_cache:  # ensure this step occurs *before* installing dependencies
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+      - run:
+          command: |
+            export WORKON_HOME=~/.venv
+            pip install pipenv
+            pipenv install --dev
+      - save_cache:
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          paths:
+            - "~/.venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.8"
             - "/opt/circleci/.pyenv/versions/3.8.5/lib"
       - run:
           command: |
-              export SHELL=no
-              export WORKON_HOME=~/.venv
-              sudo sysctl -w vm.max_map_count=262144
-              source setup_dev_env.sh
-              export tests=translator
-              pipenv run sh run_tests.sh
+            export PIPENV_SHELL=no
+            export WORKON_HOME=~/.venv
+            sudo sysctl -w vm.max_map_count=262144
+            source setup_dev_env.sh
+            export CRATE_VERSION=<< parameters.crate-version >>
+            export TIMESCALE_VERSION=<< parameters.timescale-version >>
+            export tests=translator
+            pipenv run sh run_tests.sh
       - store_test_results:
           path: test-results
       - store_artifacts:
@@ -43,8 +68,8 @@ jobs:
       - run:
           name: Upload coverage data to coveralls.io
           command: |
-              pip3 install --upgrade coveralls
-              coveralls
+            pip3 install --upgrade pyyaml coveralls
+            coveralls
   test_reporter:
     machine:
       image: ubuntu-2004:202008-01
@@ -52,7 +77,7 @@ jobs:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
-      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib 
+      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib
       - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
@@ -63,18 +88,18 @@ jobs:
       - save_cache:
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
           paths:
-            - ".venv"
+            - "~/.venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.8"
             - "/opt/circleci/.pyenv/versions/3.8.5/lib"
       - run:
           command: |
-              export SHELL=no
-              export WORKON_HOME=~/.venv
-              sudo sysctl -w vm.max_map_count=262144
-              source setup_dev_env.sh
-              export tests=reporter
-              pipenv run sh run_tests.sh
+            export PIPENV_SHELL=no
+            export WORKON_HOME=~/.venv
+            sudo sysctl -w vm.max_map_count=262144
+            source setup_dev_env.sh
+            export tests=reporter
+            pipenv run sh run_tests.sh
       - store_test_results:
           path: test-results
       - store_artifacts:
@@ -82,8 +107,51 @@ jobs:
       - run:
           name: Upload coverage data to coveralls.io
           command: |
-              pip3 install --upgrade coveralls
-              coveralls
+            pip3 install --upgrade pyyaml coveralls
+            coveralls
+  test_integration:
+    machine:
+      image: ubuntu-2004:202008-01
+    parameters:
+      orion-version:
+        type: string
+    steps:
+      - checkout
+      - run: sudo chown -R circleci:circleci /usr/local/bin
+      - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
+      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib
+      - restore_cache:  # ensure this step occurs *before* installing dependencies
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+      - run:
+          command: |
+            export WORKON_HOME=~/.venv
+            pip install pipenv
+            pipenv install --dev
+      - save_cache:
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          paths:
+            - "~/.venv"
+            - "/usr/local/bin"
+            - "/usr/local/lib/python3.8"
+            - "/opt/circleci/.pyenv/versions/3.8.5/lib"
+      - run:
+          command: |
+            export PIPENV_SHELL=no
+            export WORKON_HOME=~/.venv
+            sudo sysctl -w vm.max_map_count=262144
+            source setup_dev_env.sh
+            export ORION_VERSION=<< parameters.orion-version >>
+            export tests=integration
+            pipenv run sh run_tests.sh
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+      - run:
+          name: Upload coverage data to coveralls.io
+          command: |
+            pip3 install --upgrade pyyaml coveralls
+            coveralls
   test_others:
     machine:
       image: ubuntu-2004:202008-01
@@ -91,7 +159,7 @@ jobs:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
-      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib 
+      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib
       - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
@@ -102,18 +170,18 @@ jobs:
       - save_cache:
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
           paths:
-            - ".venv"
+            - "~/.venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.8"
             - "/opt/circleci/.pyenv/versions/3.8.5/lib"
       - run:
           command: |
-              export SHELL=no
-              export WORKON_HOME=~/.venv
-              sudo sysctl -w vm.max_map_count=262144
-              source setup_dev_env.sh
-              export tests=others
-              pipenv run sh run_tests.sh
+            export PIPENV_SHELL=no
+            export WORKON_HOME=~/.venv
+            sudo sysctl -w vm.max_map_count=262144
+            source setup_dev_env.sh
+            export tests=others
+            pipenv run sh run_tests.sh
       - store_test_results:
           path: test-results
       - store_artifacts:
@@ -121,17 +189,18 @@ jobs:
       - run:
           name: Upload coverage data to coveralls.io
           command: |
-              pip3 install --upgrade coveralls
-              coveralls
+            pip3 install --upgrade pyyaml coveralls
+            coveralls
   coveralls:
     machine:
       image: ubuntu-2004:202008-01
     steps:
+      - checkout
       - run:
           name: Upload coverage data to coveralls.io
           command: |
-              pip3 install --upgrade coveralls
-              coveralls --finish
+            pip3 install --upgrade pyyaml coveralls
+            coveralls --finish
 workflows:
   main:
     jobs:
@@ -139,9 +208,19 @@ workflows:
       - test_translator:
           requires:
             - build
+          matrix:
+            parameters:
+              crate-version: ["4.5.1", "4.2.7"]
+              timescale-version: ["2.3.0-pg13", "1.7.5-pg12"]
       - test_reporter:
           requires:
             - build
+      - test_integration:
+          requires:
+            - build
+          matrix:
+            parameters:
+              orion-version: ["2.6.1", "2.4.2"]
       - test_others:
           requires:
             - build
@@ -149,4 +228,5 @@ workflows:
           requires:
             - test_translator
             - test_reporter
+            - test_integration
             - test_others
