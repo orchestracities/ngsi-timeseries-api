@@ -1,9 +1,9 @@
 from conftest import QL_URL
-from reporter.tests.utils import insert_test_data, delete_test_data
+from reporter.tests.utils import insert_test_data, delete_test_data, \
+    wait_for_insert, wait_for_assert
 import pytest
 import requests
 import json
-import time
 
 entity_type = 'Room'
 entity_id = 'Room0'
@@ -14,15 +14,16 @@ services = ['t1', 't2']
 
 query_url = "{}/op/query".format(QL_URL)
 
-SLEEP_TIME = 1
-
 
 @pytest.fixture(scope='module')
 def reporter_dataset():
     for service in services:
         insert_test_data(service, [entity_type], n_entities=1, index_size=30)
-    time.sleep(SLEEP_TIME)
+    for service in services:
+        wait_for_insert([entity_type], service, 30)
+
     yield
+
     for service in services:
         delete_test_data(service, [entity_type])
 
@@ -279,7 +280,7 @@ def test_default_service_path(service):
         index_size=15,
         service_path=alt_service_path)
 
-    time.sleep(SLEEP_TIME)
+    wait_for_insert([entity_type], service, 30 + 15)
 
     body = {
         'entities': [
@@ -306,8 +307,7 @@ def test_default_service_path(service):
     assert r.status_code == 200, r.text
     assert len(r.json()) == 1
     assert r.json()[0]['temperature']['value'] == 14
-    delete_test_data(service, [entity_type], service_path=service_path)
-    delete_test_data(service, [entity_type], service_path=alt_service_path)
+    delete_test_data(service, [entity_type])
 
 
 @pytest.mark.parametrize("service", services)
@@ -327,7 +327,7 @@ def test_none_service_path(service):
         index_size=15,
         service_path=alt_service_path)
 
-    time.sleep(SLEEP_TIME)
+    wait_for_insert([entity_type], service, 30 + 15)
 
     body = {
         'entities': [
@@ -375,7 +375,7 @@ def test_none_service():
         index_size=15,
         service_path=alt_service_path)
 
-    time.sleep(SLEEP_TIME)
+    wait_for_insert([entity_type], service, 30 + 15)
 
     body = {
         'entities': [

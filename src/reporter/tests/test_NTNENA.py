@@ -1,6 +1,7 @@
 from conftest import QL_URL
 from datetime import datetime
-from reporter.tests.utils import delete_test_data, insert_test_data
+from reporter.tests.utils import delete_test_data, insert_test_data, \
+    wait_for_insert
 import pytest
 import requests
 import dateutil.parser
@@ -39,6 +40,8 @@ def reporter_dataset():
                          entity_id=entity_id_1)
         insert_test_data(service, [entity_type_1], entity_id=entity_id_1_1,
                          index_size=3)
+        wait_for_insert([entity_type], service, 4 * 2)
+        wait_for_insert([entity_type_1], service, 3)
     yield
     for service in services:
         delete_test_data(service, [entity_type, entity_type_1])
@@ -833,6 +836,8 @@ def test_NTNENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
                          index_size=5,
                          index_base=base,
                          index_period=ins_period)
+
+    wait_for_insert([etype], service, 5 * len(exp_index))
 
     # aggrPeriod needs aggrMethod
     query_params = {
