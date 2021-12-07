@@ -1,6 +1,7 @@
 from conftest import QL_URL
 from exceptions.exceptions import AmbiguousNGSIIdError
-from reporter.tests.utils import insert_test_data, delete_test_data
+from reporter.tests.utils import insert_test_data, delete_test_data, \
+    wait_for_insert
 from utils.tests.common import assert_equal_time_index_arrays
 import dateutil.parser
 import pytest
@@ -115,7 +116,7 @@ def test_1T1E1A_aggrMethod(service, reporter_dataset, aggr_method, aggr_value):
 ])
 @pytest.mark.parametrize("service", services)
 def test_1T1E1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
-    etype = 'test_1T1E1A_aggrPeriod'
+    etype = f"test_1T1E1A_aggrPeriod_{aggr_period}"
     # The reporter_dataset fixture is still in the DB cos it has a scope of
     # module. We use a different entity type to store this test's rows in a
     # different table to avoid messing up global state---see also delete down
@@ -131,6 +132,8 @@ def test_1T1E1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
                          index_size=4,
                          index_base=base,
                          index_period=ins_period)
+
+    wait_for_insert([etype], service, 4 * len(exp_index))
 
     # aggrPeriod needs aggrMethod
     query_params = {
@@ -447,7 +450,7 @@ def test_no_type(service):
     Specifying entity type is optional, provided that id is unique.
     """
 
-    etype_1, etype_2 = 'RoomDevice', 'Car'
+    etype_1, etype_2 = 'test_no_type_RoomDevice', 'test_no_type_Car'
     etypes = [etype_1, etype_2]
     eid = "{}1".format(etype_1)
     # The reporter_dataset fixture is still in the DB cos it has a scope of
@@ -455,6 +458,7 @@ def test_no_type(service):
     # different tables to avoid messing up global state---see also delete
     # down below.
     insert_test_data(service, etypes, n_entities=2, index_size=2)
+    wait_for_insert(etypes, service, 2 * 2)
 
     h = {'Fiware-Service': service}
 
@@ -476,7 +480,8 @@ def test_no_type(service):
 def test_no_type_not_unique(service):
     # If id is not unique across types, you must specify type.
 
-    etype_1, etype_2 = 'RoomDevice', 'Car'
+    etype_1, etype_2 = 'test_no_type_not_unique_RoomDevice', \
+                       'test_no_type_not_unique_Car'
     etypes = [etype_1, etype_2]
     # The reporter_dataset fixture is still in the DB cos it has a scope of
     # module. We use different entity types to store this test's rows in
@@ -489,6 +494,7 @@ def test_no_type_not_unique(service):
                      n_entities=2,
                      index_size=2,
                      entity_id=shared_entity_id)
+    wait_for_insert(etypes, service, 2 * 2)
 
     url = "{qlUrl}/entities/{entityId}/attrs/temperature".format(
         qlUrl=QL_URL,
