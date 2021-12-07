@@ -1,8 +1,8 @@
 from conftest import QL_URL
 import pytest
 import requests
-import time
-from reporter.tests.utils import send_notifications, delete_entity_type
+from reporter.tests.utils import send_notifications, delete_entity_type, \
+    wait_for_insert
 
 
 entity_type = 'TestDevice'
@@ -33,8 +33,8 @@ def setup_entities():
     notification_data = [{'data': [e]} for e in [entity_1, entity_2]]
     for service in services:
         send_notifications(service, notification_data)
+        wait_for_insert([entity_type], service, 2)
 
-    time.sleep(2)
     yield {}
 
     for service in services:
