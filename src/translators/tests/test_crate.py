@@ -33,7 +33,7 @@ def test_geo_point(translator):
     assert len(res) == 1
     assert res[0] == [19.6389474, -98.9109537]
 
-    entities = translator.query()
+    entities, err = translator.query()
     assert len(entities) == 1
 
     # Check entity is retrieved as it was inserted
@@ -53,7 +53,7 @@ def test_geo_point_null_values(translator):
         }
     }
     translator.insert([entity])
-    entities = translator.query()
+    entities, err = translator.query()
     assert len(entities) == 1
     check_notifications_record([entity], entities)
 
@@ -67,7 +67,7 @@ def test_geo_point_null_values(translator):
             'type': 'Number',
             'value': 19}}
     translator.insert([entity_new])
-    entities = translator.query()
+    entities, err = translator.query()
     assert len(entities) == 1
 
     # Check location's None is saved as a geo_point column in crate

@@ -36,7 +36,7 @@ def test_aggr_per_second(translator):
     translator.insert(entities)
 
     # Query avg attr_float per second.
-    res = translator.query(attr_names=['attr_float'],
+    res, err = translator.query(attr_names=['attr_float'],
                            aggr_method='avg',
                            aggr_period='second')
     assert len(res) == 2

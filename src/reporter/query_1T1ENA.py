@@ -42,7 +42,7 @@ def query_1T1ENA(entity_id,   # In Path
     entities = None
     try:
         with translator_for(fiware_s) as trans:
-            entities = trans.query(attr_names=attrs,
+            entities, err = trans.query(attr_names=attrs,
                                    entity_type=type_,
                                    entity_id=entity_id,
                                    aggr_method=aggr_method,
@@ -76,6 +76,14 @@ def query_1T1ENA(entity_id,   # In Path
         msg = "Something went wrong with QL. Error: {}".format(e)
         logging.getLogger(__name__).error(msg, exc_info=True)
         return msg, 500
+
+    if err == "AggrMethod cannot be applied":
+        r = {
+            "error": "AggrMethod cannot be applied",
+            "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
+        }
+        logging.getLogger(__name__).info("AggrMethod cannot be applied")
+        return r, 404
 
     if entities:
         if len(entities) > 1:

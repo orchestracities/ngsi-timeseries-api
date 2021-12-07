@@ -52,7 +52,7 @@ including contacting the maintainers directly.
 Keeping communication public means everybody can benefit and learn from
 the conversation.
 
-[cla]: https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/individual-cla.pdf
+[cla]: https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/individual_cla.pdf
     "Martel Open Source Software Individual Contributor License Agreement"
 [conduct]: ./CODE_OF_CONDUCT.md
     "Contributor Covenant Code of Conduct"

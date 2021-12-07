@@ -34,7 +34,7 @@ def test_query_multiple_ids(translator):
                                       num_updates=num_updates)
     translator.insert(entities)
 
-    loaded_entities = translator.query(entity_type='0',
+    loaded_entities, err = translator.query(entity_type='0',
                                        entity_ids=['0-0', '0-2'])
     assert len(loaded_entities) == 2
 
@@ -55,7 +55,7 @@ def test_query_multiple_ids_bak(translator):
                                       num_updates=num_updates)
     translator.insert(entities)
 
-    records = translator.query(entity_type='0', entity_ids=['0-1'])
+    records, err = translator.query(entity_type='0', entity_ids=['0-1'])
     assert len(records) == 1
     assert records[0]['id'] == '0-1'
     translator.clean()
@@ -70,11 +70,11 @@ def test_query_multiple_ids_with_invalids(translator):
                                       num_updates=num_updates)
     translator.insert(entities)
 
-    loaded_entities = translator.query(entity_type='0',
+    loaded_entities, err = translator.query(entity_type='0',
                                        entity_ids=['nonexistent'])
     assert len(loaded_entities) == 0
 
-    loaded_entities = translator.query(entity_type='0',
+    loaded_entities, err = translator.query(entity_type='0',
                                        entity_ids=['0-1', 'nonexistent'])
     assert len(loaded_entities) == 1
     translator.clean()
