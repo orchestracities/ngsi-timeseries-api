@@ -51,11 +51,11 @@ def test_fiware_tenant(translator):
     translator.insert([e], fiware_service=fs, fiware_servicepath=fsp)
 
     # Query NO tenant -> No results
-    entities = translator.query()
+    entities, err = translator.query()
     assert len(entities) == 0
 
     # Query WITH tenant -> Result
-    entities = translator.query(fiware_service=fs, fiware_servicepath=fsp)
+    entities, err = translator.query(fiware_service=fs, fiware_servicepath=fsp)
     assert len(entities) == 1
     translator.clean(fs)
 
@@ -71,12 +71,12 @@ def test_fiware_tenant_services(translator):
     translator.insert([e], fiware_service="B", fiware_servicepath="/")
 
     # Query tenant A
-    entities = translator.query(fiware_service="A", fiware_servicepath="/")
+    entities, err = translator.query(fiware_service="A", fiware_servicepath="/")
     assert len(entities) == 1
     assert entities[0]['id'] == "X"
 
     # Query tenant B
-    entities = translator.query(fiware_service="B", fiware_servicepath="/")
+    entities, err = translator.query(fiware_service="B", fiware_servicepath="/")
     assert len(entities) == 1
     assert entities[0]['id'] == "Y"
     translator.clean("A")
@@ -94,24 +94,24 @@ def test_fiware_tenant_servicepath(translator):
     insert_with_tenant(entity("Athens"), "/eu/greece/athens")
     insert_with_tenant(entity("Patras"), "/eu/greece/patras")
 
-    entities = translator.query(fiware_service="EU",
+    entities, err = translator.query(fiware_service="EU",
                                 fiware_servicepath="/eu")
     assert len(entities) == 4
 
-    entities = translator.query(fiware_service="EU",
+    entities, err = translator.query(fiware_service="EU",
                                 fiware_servicepath="/eu/germany")
     assert len(entities) == 1
 
-    entities = translator.query(fiware_service="EU",
+    entities, err = translator.query(fiware_service="EU",
                                 fiware_servicepath="/eu/greece")
     assert len(entities) == 2
     assert set([e['id'] for e in entities]) == set(["Athens", "Patras"])
 
-    entities = translator.query(fiware_service="EU",
+    entities, err = translator.query(fiware_service="EU",
                                 fiware_servicepath="/eu/g")
     assert len(entities) == 0
 
-    entities = translator.query(fiware_service="EU",
+    entities, err = translator.query(fiware_service="EU",
                                 fiware_servicepath="/eu/greece/athens")
     assert len(entities) == 1
     translator.clean("EU")
@@ -126,7 +126,7 @@ def test_fiware_empty_tenant_is_no_tenant(translator):
     translator.insert([e], fiware_service=fs, fiware_servicepath=fsp)
 
     # Query WITHOUT tenant -> get results
-    entities = translator.query()
+    entities, err = translator.query()
     assert len(entities) == 1
 
     # Insert WITHOUT tenant
@@ -134,7 +134,7 @@ def test_fiware_empty_tenant_is_no_tenant(translator):
     translator.insert([e])
 
     # Query with EMPTY tenant -> get results
-    entities = translator.query()
+    entities, err = translator.query()
     assert len(entities) == 2
     translator.clean()
 
@@ -146,6 +146,6 @@ def test_fiware_tenant_reserved_word(translator):
     fsp = "/"
     translator.insert([e], fiware_service=fs, fiware_servicepath=fsp)
 
-    entities = translator.query(fiware_service=fs, fiware_servicepath=fsp)
+    entities, err = translator.query(fiware_service=fs, fiware_servicepath=fsp)
     assert len(entities) == 1
     translator.clean(fs)
