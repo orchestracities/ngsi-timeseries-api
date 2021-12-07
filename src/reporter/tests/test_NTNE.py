@@ -1,5 +1,6 @@
 from conftest import QL_URL
-from reporter.tests.utils import insert_test_data, delete_test_data
+from reporter.tests.utils import insert_test_data, delete_test_data, \
+    wait_for_insert
 import pytest
 import requests
 
@@ -25,6 +26,7 @@ def reporter_dataset():
                          entity_id=entity_id)
         insert_test_data(service, [entity_type_1], n_entities=1, index_size=30,
                          entity_id=entity_id_1)
+        wait_for_insert([entity_type, entity_type_1], service, 30)
     yield
     for service in services:
         delete_test_data(service, [entity_type, entity_type_1])

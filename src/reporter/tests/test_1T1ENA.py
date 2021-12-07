@@ -1,5 +1,6 @@
 from conftest import QL_URL
-from reporter.tests.utils import insert_test_data, delete_test_data, send_notifications_different_types
+from reporter.tests.utils import insert_test_data, delete_test_data, \
+    wait_for_insert, send_notifications_different_types
 import pytest
 import requests
 from utils.tests.common import assert_equal_time_index_arrays
@@ -150,7 +151,7 @@ def test_1T1ENA_aggrMethod(
 def test_1T1ENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
     # Custom index to test aggrPeriod
 
-    etype = 'test_1T1ENA_aggrPeriod'
+    etype = f"test_1T1ENA_aggrPeriod_{aggr_period}"
     # The reporter_dataset fixture is still in the DB cos it has a scope of
     # module. We use a different entity type to store this test's rows in a
     # different table to avoid messing up global state---see also delete down
@@ -165,6 +166,9 @@ def test_1T1ENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
                          index_size=3,
                          index_base=base,
                          index_period=ins_period)
+
+    wait_for_insert([etype], service, 3 * len(exp_index))
+
     # aggrPeriod needs aggrMethod
     query_params = {
         'type': etype,

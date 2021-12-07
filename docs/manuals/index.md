@@ -275,6 +275,67 @@ As of today, the query caching stores:
   for a specific entityType are removed only if a entityType is dropped, not
   in case all its values are removed.
 
+**Work Queue Cache**
+QL uses the work queue for NGSI notifications. When an entity payload
+comes through the notify endpoint, the Web app turns the payload
+into a task to save it to the DB, adds the task to the queue and returns
+a `200` to the client immediately. A separate instance of QL, configured as
+a queue worker, fetches the task from the queue and runs it to actually insert
+the NGSI entities into the DB, possibly retrying the insert at a later time
+if it fails. Clients connect to the Web app to manage notify tasks
+in the queue.
+When using a work queue, there are two sets of QuantumLeap processes-
+set of Web servers that add tasks to a queue and a pool of queue worker
+processes that fetch tasks from the queue and run them asynchronously.
+The Web servers are QuantumLeap Web app instances configured to offload
+tasks to the work queue through the various `WQ_*` environment variables
+available for the Web app. A worker processes is a Python interpreter loaded
+with the same code as the Web app but started with a different entry point.
+To configure you can use the following environment variables-
+
+- `WQ_OFFLOAD_WORK` - `Whether to offload insert tasks to a work queue
+default: False`
+- `WQ_RECOVER_FROM_ENQUEUEING_FAILURE` - `Whether to run tasks immediately
+if a work queue is not available. Default: False`
+- `WQ_MAX_RETRIES` - `How many times work queue processors should retry failed
+tasks. Default: 0 (no retries).`
+- `WQ_FAILURE_TTL` - `How long, in seconds, before removing failed tasks from
+the work queue. Default: 604800 (a week).`
+- `WQ_SUCCESS_TTL` - `How long, in seconds, before removing successfully run
+tasks from the work queue.Default: 86400 (a day)`
+- `WQ_WORKERS` - `How many worker queue processors to spawn`
+
+Further info about those variables in the following
+[link](orchestracities/ngsi-timeseries-api/blob/master/docs/manuals/admin/configuration.md)
+
+**Geocoding cache**
+This module is designed to complement QuantumLeap in the treatment of NGSI
+entities containing geo-data attributes.
+The main usage: call method `'add_location'` passing your entity. If the entity
+has an attribute called `'address'` and does not have an attribute called
+`'location'`, this function will add a `'location'` attribute with a geo-json
+attribute generated out of the information found in the `'address'` attribute.
+QuantumLeap interprets this as an address field.
+
+It adds to the entity an attribute called location of the corresponding
+geo-type. If the address is a complete address with city, street
+name and postal number, it maps that to a point and hence the generated
+attribute will be of type geo:point. Without a postal number, the address
+will represent the street or the city boundaries or even the country boundaries.
+
+QuantumLeap uses Open Street Maps (OSM) to find the geo-location corresponding
+to the entity's address. This is usually a rather expensive call, thus a Redis
+cache is used to avoid looking up the same address over and over again over a
+short period of time---e.g. think a batch entity update containing several
+entities sharing the same address. To enable caching of geo-location data,
+you need to use the following environment variable:
+
+To enable this, need to pass:
+  `CACHE_GEOCODING`: `True or False enable or disable caching for geocoding`
+
+Also the environment variables `REDIS_HOST` and `REDIS_PORT`
+respectively set to the location of REDIS instance and its access port.
+
 ## Further Readings
 
 - The [Admin Guide][ql-man.admin] explains how to install and run

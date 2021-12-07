@@ -19,7 +19,7 @@ jobs:
           PERSONAL_ACCESS_TOKEN : ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         with:
           path-to-signatures: 'signatures/version1/cla.json'
-          path-to-cla-document: 'https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/individual-cla.pdf' # e.g. a CLA or a DCO document
+          path-to-cla-document: 'https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/individual_cla.pdf' # e.g. a CLA or a DCO document
           # branch should not be protected
           branch: 'cla-signature'
           allowlist: user1,bot*
