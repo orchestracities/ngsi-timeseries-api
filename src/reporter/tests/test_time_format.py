@@ -1,24 +1,23 @@
 from reporter.tests.test_1T1E1A import query_url as query_1T1E1A, \
     assert_1T1E1A_response
-from reporter.tests.utils import get_notification, send_notifications, delete_entity_type
+from reporter.tests.utils import get_notification, send_notifications, \
+    delete_entity_type, wait_for_insert
 import requests
-import time
 import pytest
 
 services = ['t1', 't2']
-
-SLEEP_TIME = 1
 
 
 def check_time_index(service, input_index, expected_index=None):
     expected_index = expected_index or input_index
 
-    n0 = get_notification('Room', 'Room0', 0, input_index[0])
-    n1 = get_notification('Room', 'Room0', 1, input_index[1])
-    n2 = get_notification('Room', 'Room0', 2, input_index[2])
+    entity_type, entity_id = 'Room', 'Room0'
+    n0 = get_notification(entity_type, entity_id, 0, input_index[0])
+    n1 = get_notification(entity_type, entity_id, 1, input_index[1])
+    n2 = get_notification(entity_type, entity_id, 2, input_index[2])
 
     send_notifications(service='', notifications=[n0, n1, n2])
-    time.sleep(SLEEP_TIME)
+    wait_for_insert([entity_type], None, 3)
 
     # Query
     r = requests.get(query_1T1E1A(), params={'type': 'Room'})
