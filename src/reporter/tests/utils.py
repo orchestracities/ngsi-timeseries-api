@@ -4,6 +4,8 @@ import json
 import requests
 import time
 from typing import Callable, Iterable, List, Optional, Tuple, Union
+import re
+import random
 
 from translators.factory import translator_for
 from translators.sql_translator import ENTITY_ID_COL, TENANT_PREFIX, \
