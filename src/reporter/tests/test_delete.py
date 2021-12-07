@@ -1,7 +1,8 @@
 from conftest import QL_URL
 from exceptions.exceptions import AmbiguousNGSIIdError
 from reporter.conftest import create_notification
-from reporter.tests.utils import delete_test_data
+from reporter.tests.utils import delete_test_data, wait_for_delete, \
+    wait_for_insert
 import json
 import pytest
 import requests
@@ -13,8 +14,9 @@ SLEEP_TIME = 1
 
 
 def insert_test_data(service, service_path='/', entity_id=None):
+    etypes = ['AirQualityObserved', 'Room', 'TrafficFlowObserved']
     # 3 entity types, 2 entities for each, 10 updates for each entity.
-    for t in ("AirQualityObserved", "Room", "TrafficFlowObserved"):
+    for t in etypes:
         for e in range(2):
             for u in range(10):
                 ei = entity_id or '{}{}'.format(t, e)
@@ -30,7 +32,8 @@ def insert_test_data(service, service_path='/', entity_id=None):
                                   data=data,
                                   headers=h)
                 assert r.status_code == 200, r.text
-    time.sleep(SLEEP_TIME)
+
+    wait_for_insert(etypes, service, 2 * 10)
 
 
 @pytest.mark.parametrize("service", [
@@ -43,13 +46,14 @@ def test_delete_entity(service):
     insert_test_data(service)
 
     entity_type = "AirQualityObserved"
+    entity_id = entity_type + '0'
     params = {
         'type': entity_type,
     }
     h = {
         'Fiware-Service': service
     }
-    url = '{}/entities/{}'.format(QL_URL, entity_type + '0')
+    url = '{}/entities/{}'.format(QL_URL, entity_id)
 
     # Values are there
     r = requests.get(url, params=params, headers=h)
@@ -59,9 +63,9 @@ def test_delete_entity(service):
     # Delete them
     r = requests.delete(url, params=params, headers=h)
     assert r.status_code == 204, r.text
+    wait_for_delete(entity_type, service, entity_id)
 
     # Values are gone
-    time.sleep(SLEEP_TIME)
     r = requests.get(url, params=params, headers=h)
     assert r.status_code == 404, r.text
 
@@ -101,9 +105,9 @@ def test_delete_entities(service):
     url = '{}/types/{}'.format(QL_URL, entity_type)
     r = requests.delete(url, params=params, headers=h)
     assert r.status_code == 204, r.text
+    wait_for_delete(entity_type, service)
 
     # Values are gone for both entities
-    time.sleep(SLEEP_TIME)
     for e in range(2):
         url = '{}/entities/{}'.format(QL_URL, '{}{}'.format(entity_type, e))
         r = requests.get(url, params=params, headers=h)
@@ -151,7 +155,6 @@ def test_no_type_not_unique(service):
         'Fiware-Service': service
     }
     # Without type
-    time.sleep(SLEEP_TIME)
     r = requests.delete(url, params={}, headers=h)
     assert r.status_code == 409, r.text
     assert r.json() == {

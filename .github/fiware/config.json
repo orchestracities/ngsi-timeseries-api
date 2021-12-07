@@ -1,0 +1,19 @@
+{
+    "enabler": "QuantumLeap",
+    "chapter": "core",
+    "academy": "core/quantum-leap",
+    "readthedocs": "quantumleap",
+    "helpdesk": "",
+    "coveralls": "https://coveralls.io/github/orchestracities/ngsi-timeseries-api",
+    "github": ["orchestracities/ngsi-timeseries-api"],
+    "dockerregistry": ["hub.docker.com"],
+    "docker": ["orchestracities/quantumleap"],
+    "email": "",
+    "status": "full",
+    "compose": "https://github.com/orchestracities/ngsi-timeseries-api/blob/master/docker/docker-compose.yml",
+    "exclude": [""],
+    "stackexchange": [""],
+    "unit-test": "",
+    "smoke-test": "",
+    "dockerfile": "https://github.com/orchestracities/ngsi-timeseries-api/blob/master/Dockerfile"
+}
