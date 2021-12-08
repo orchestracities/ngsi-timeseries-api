@@ -257,7 +257,7 @@ def test_insert_entity(translator, entity):
     result = translator.insert([entity])
     assert result.rowcount != 0
 
-    loaded_entities = translator.query()
+    loaded_entities, err = translator.query()
     assert len(loaded_entities) == 1
 
     check_notifications_record([entity], loaded_entities)
@@ -278,7 +278,7 @@ def test_insert_same_entity_with_different_attrs(
     result = translator.insert(sameEntityWithDifferentAttrs)
     assert result.rowcount != 0
 
-    loaded_entities = translator.query()
+    loaded_entities, err = translator.query()
     assert len(loaded_entities) == 1
 
     check_notifications_record(sameEntityWithDifferentAttrs, loaded_entities)
@@ -308,17 +308,17 @@ def test_insert_multiple_types(translator):
 @pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_query_all_before_insert(translator):
     # Query all
-    loaded_entities = translator.query()
+    loaded_entities, err = translator.query()
     assert len(loaded_entities) == 0
 
     # Query Some
-    loaded_entities = translator.query(entity_type="Lamp",
+    loaded_entities, err = translator.query(entity_type="Lamp",
                                        fiware_service="openiot",
                                        fiware_servicepath="/")
     assert len(loaded_entities) == 0
 
     # Query one
-    loaded_entities = translator.query(entity_id="Lamp:001",
+    loaded_entities, err = translator.query(entity_id="Lamp:001",
                                        fiware_service="openiot",
                                        fiware_servicepath="/")
     assert len(loaded_entities) == 0
@@ -341,7 +341,7 @@ def test_query_all(translator):
     result = translator.insert(entities)
     assert result.rowcount > 0
 
-    loaded_entities = translator.query()
+    loaded_entities, err = translator.query()
     assert len(loaded_entities) == 2 * 2
 
     for i in ['0-0', '0-1', '1-0', '1-1']:
@@ -357,10 +357,10 @@ def test_limit_0(translator):
     result = translator.insert(entities)
     assert result.rowcount > 0
 
-    loaded_entities = translator.query(last_n=0)
+    loaded_entities, err = translator.query(last_n=0)
     assert loaded_entities == []
 
-    loaded_entities = translator.query(limit=0)
+    loaded_entities, err = translator.query(limit=0)
     assert loaded_entities == []
     translator.clean()
 
@@ -371,7 +371,7 @@ def test_limit_overrides_lastN(translator):
     result = translator.insert(entities)
     assert result.rowcount > 0
 
-    loaded_entities = translator.query(last_n=5, limit=3)
+    loaded_entities, err = translator.query(last_n=5, limit=3)
     assert len(loaded_entities[0]['index']) == 3
     translator.clean()
 
@@ -382,7 +382,7 @@ def test_lastN_ordering(translator):
     result = translator.insert(entities)
     assert result.rowcount > 0
 
-    loaded_entities = translator.query(last_n=3)
+    loaded_entities, err = translator.query(last_n=3)
     index = loaded_entities[0]['index']
     assert len(index) == 3
     assert index[-1] > index[0]
@@ -402,20 +402,20 @@ def test_attrs_by_entity_id(translator):
 
     # Now query by entity id
     entity_id = '0-1'
-    loaded_entities = translator.query(entity_type='0', entity_id=entity_id)
+    loaded_entities, err = translator.query(entity_type='0', entity_id=entity_id)
     notifications = [e for e in entities
                      if e['type'] == '0' and e['id'] == '0-1']
     check_notifications_record(notifications, loaded_entities)
 
     # entity_type should be optional
     entity_id = '1-1'
-    loaded_entities = translator.query(entity_id=entity_id)
+    loaded_entities, err = translator.query(entity_id=entity_id)
     notifications = [e for e in entities
                      if e['type'] == '1' and e['id'] == '1-1']
     check_notifications_record(notifications, loaded_entities)
 
     # nonexistent id should return no data
-    loaded_entities = translator.query(entity_id='some_nonexistent_id')
+    loaded_entities, err = translator.query(entity_id='some_nonexistent_id')
     assert len(loaded_entities) == 0
     translator.clean()
 
@@ -431,7 +431,7 @@ def test_attrs_by_id_ambiguity(translator):
     translator.insert(entities)
 
     # OK if specifying type
-    loaded_entities = translator.query(
+    loaded_entities, err = translator.query(
         entity_type='0', entity_id='repeated_id')
     assert len(loaded_entities[0]['index']) == 3
     assert len(loaded_entities) == 1
@@ -474,7 +474,7 @@ def test_query_per_attribute(translator, attr_name, clause, tester):
     translator.insert(entities)
 
     where_clause = "where {} {}".format(attr_name, clause)
-    entities = translator.query(entity_type='0', where_clause=where_clause)
+    entities, err = translator.query(entity_type='0', where_clause=where_clause)
 
     total = num_types * num_ids_per_type * num_updates
 
@@ -501,7 +501,7 @@ def test_unsupported_ngsi_type(translator):
         },
     }
     translator.insert([e])
-    entities = translator.query()
+    entities, err = translator.query()
     check_notifications_record([e], entities)
     translator.clean()
 
@@ -529,7 +529,7 @@ def test_accept_unknown_ngsi_type(translator):
         },
     }
     translator.insert([e])
-    entities = translator.query()
+    entities, err = translator.query()
     check_notifications_record([e], entities)
     translator.clean()
 
@@ -557,7 +557,7 @@ def test_accept_special_chars(translator):
         },
     }
     translator.insert([e])
-    entities = translator.query()
+    entities, err = translator.query()
     check_notifications_record([e], entities)
     translator.clean()
 
@@ -575,7 +575,7 @@ def test_missing_type_defaults_to_string(translator):
         },
     }
     translator.insert([e])
-    entities = translator.query()
+    entities, err = translator.query()
     assert len(entities) == 1
 
     # Response will include the type
@@ -594,7 +594,7 @@ def test_capitals(translator):
                 "type": "Text", "value": "FoO", }, "bAr": {
             "type": "Text", "value": "bAr", }, }
     translator.insert([e1])
-    entities = translator.query()
+    entities, err = translator.query()
     assert len(entities) == 1
     check_notifications_record([e1], entities)
 
@@ -606,7 +606,7 @@ def test_capitals(translator):
         timezone.utc).isoformat(timespec='milliseconds')
 
     translator.insert([e2])
-    entities = translator.query()
+    entities, err = translator.query()
     assert len(entities) == 2
 
     assert entities[0]['id'] == e2['id']
@@ -632,7 +632,7 @@ def test_no_time_index(translator):
         'foo': {'type': 'Text', 'value': "SomeText"}
     }
     translator.insert([e])
-    records = translator.query()
+    records, err = translator.query()
     assert len(records) == 1
     assert len(records[0]['index']) == 1
     translator.clean()
@@ -653,7 +653,7 @@ def test_long_json(translator):
             2000}}
     translator.insert([big_entity])
 
-    r = translator.query()
+    r, err = translator.query()
     assert len(r) == 1
     check_notifications_record([big_entity], r)
     translator.clean()
@@ -684,7 +684,7 @@ def test_structured_value_to_array(translator):
     }
     translator.insert([entity])
 
-    r = translator.query()
+    r, err = translator.query()
     check_notifications_record([entity], r)
     translator.clean()
 
@@ -707,7 +707,7 @@ def test_ISO8601(translator):
     }
     translator.insert([e])
 
-    loaded = translator.query()
+    loaded, err = translator.query()
     assert len(loaded) > 0
     check_notifications_record([e], loaded)
     translator.clean()
@@ -739,7 +739,7 @@ def test_air_quality_observed(translator, air_quality_observed):
     air_quality_observed[TIME_INDEX_NAME] = now
 
     translator.insert([air_quality_observed])
-    loaded = translator.query()
+    loaded, err = translator.query()
     check_notifications_record([air_quality_observed], loaded)
     translator.clean()
 
@@ -751,7 +751,7 @@ def test_traffic_flow_observed(translator, traffic_flow_observed):
     traffic_flow_observed[TIME_INDEX_NAME] = now
 
     translator.insert([traffic_flow_observed])
-    loaded = translator.query()
+    loaded, err = translator.query()
     check_notifications_record([traffic_flow_observed], loaded)
     translator.clean()
 
@@ -765,7 +765,7 @@ def test_ngsi_ld(translator, ngsi_ld):
     ngsi_ld.pop('@context')
 
     translator.insert([ngsi_ld])
-    loaded = translator.query()
+    loaded, err = translator.query()
 
     assert ngsi_ld['id'] == loaded[0]['id']
     assert ngsi_ld['refStreetlightModel']['object'] == loaded[0]['refStreetlightModel']['values'][0]

@@ -1,18 +1,17 @@
 import requests
-import time
 from conftest import QL_URL
-from .utils import send_notifications, delete_entity_type
+from translators.sql_translator import entity_type
+from .utils import send_notifications, delete_entity_type, wait_for_insert, \
+    wait_for_assert
 import pytest
 
 services = ['t1', 't2']
-
-SLEEP_TIME = 1
 
 
 def notify(service, entity):
     notification_data = [{'data': [entity]}]
     send_notifications(service, notification_data)
-    time.sleep(SLEEP_TIME)
+    wait_for_insert([entity_type(entity)], service, 1)
 
 
 def get_all_stored_attributes(service, entity_id):
@@ -76,10 +75,13 @@ def test_can_add_new_attribute(service):
     }
     notify(service, entity)
 
-    attr_values_map = get_all_stored_attributes(service, entity['id'])
-    assert len(attr_values_map) == 2
-    assert attr_values_map['a1'] == [a1_value, a1_value]
-    assert attr_values_map['a2'] == [None, a2_value]
+    def add_test():
+        attr_values_map = get_all_stored_attributes(service, entity['id'])
+        assert len(attr_values_map) == 2
+        assert attr_values_map['a1'] == [a1_value, a1_value]
+        assert attr_values_map['a2'] == [None, a2_value]
+    wait_for_assert(add_test)
+
     delete_entity_type(service, 't1')
 
 
@@ -107,10 +109,13 @@ def test_can_add_new_attribute_even_without_specifying_old_ones(service):
     }
     notify(service, entity_2)
 
-    attr_values_map = get_all_stored_attributes(service, entity_1['id'])
-    assert len(attr_values_map) == 2
-    assert attr_values_map['a1'] == [a1_value, None]
-    assert attr_values_map['a2'] == [None, a2_value]
+    def add_test():
+        attr_values_map = get_all_stored_attributes(service, entity_1['id'])
+        assert len(attr_values_map) == 2
+        assert attr_values_map['a1'] == [a1_value, None]
+        assert attr_values_map['a2'] == [None, a2_value]
+    wait_for_assert(add_test)
+
     delete_entity_type(service, 'u1')
 
 
@@ -143,11 +148,14 @@ def test_can_add_2_new_attribute_even_without_specifying_old_ones(service):
     }
     notify(service, entity_2)
 
-    attr_values_map = get_all_stored_attributes(service, entity_1['id'])
-    assert len(attr_values_map) == 3
-    assert attr_values_map['a1'] == [a1_value, None]
-    assert attr_values_map['a2'] == [None, a2_value]
-    assert attr_values_map['a3'] == [None, a3_value]
+    def add_test():
+        attr_values_map = get_all_stored_attributes(service, entity_1['id'])
+        assert len(attr_values_map) == 3
+        assert attr_values_map['a1'] == [a1_value, None]
+        assert attr_values_map['a2'] == [None, a2_value]
+        assert attr_values_map['a3'] == [None, a3_value]
+    wait_for_assert(add_test)
+
     delete_entity_type(service, 'u1')
 
 
@@ -190,9 +198,12 @@ def test_store_missing_text_value_as_null_then_as_empty(service):
     entity['x']['value'] = ''
     notify(service, entity)
 
-    attr_values_map = get_all_stored_attributes(service, entity['id'])
-    assert len(attr_values_map) == 2
-    assert attr_values_map['x'] == [None, '']
+    def add_test():
+        attr_values_map = get_all_stored_attributes(service, entity['id'])
+        assert len(attr_values_map) == 2
+        assert attr_values_map['x'] == [None, '']
+    wait_for_assert(add_test)
+
     delete_entity_type(service, 't3')
 
 

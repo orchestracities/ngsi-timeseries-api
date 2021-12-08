@@ -104,7 +104,7 @@ Docker images are available on
 
 ## Usage
 
-Refer to the [User Manual](https://quantumleap.readthedocs.io/en/latest/user/).
+Refer to the [User Manual](https://quantumleap.readthedocs.io/en/latest/user/using/).
 
 ## Troubleshooting
 

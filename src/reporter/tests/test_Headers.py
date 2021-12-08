@@ -1,24 +1,35 @@
-from datetime import datetime
 from conftest import QL_URL
-from utils.tests.common import assert_equal_time_index_arrays
-from reporter.tests.utils import delete_entity_type
-import copy
+from reporter.tests.utils import delete_entity_type, wait_for_insert
 import json
-import pytest
 import requests
-import time
+
+
 notify_url = "{}/notify".format(QL_URL)
 
+SERVICE = 'test'
+ENTITY_TYPE = 'Room'
 HEADERS_VALID = {'Content-Type': 'application/json',
-                 'fiware-Service': 'test', 'fiware-ServicePath': '/t1'}
+                 'fiware-Service': SERVICE, 'fiware-ServicePath': '/t1'}
 HEADERS_INVALID = {'Content-Type': 'application/json',
-                   'fiwareService': 'test', 'fiwareServicePath': '/t1'}
+                   'fiwareService': SERVICE, 'fiwareServicePath': '/t1'}
+
+
+def insert_data(notification: dict, headers: dict):
+    res_post = requests.post(
+        '{}'.format(notify_url),
+        data=json.dumps(notification),
+        headers=headers)
+
+    wait_for_insert([ENTITY_TYPE], SERVICE, len(notification['data']))
+
+    assert res_post.status_code == 200
+    assert res_post.json().startswith('Notification successfully processed')
 
 
 def test_for_valid_headers(notification):
     notification['data'][0] = {
         'id': 'Room0',
-        'type': 'Room',
+        'type': ENTITY_TYPE,
         'temperature': {
             'type': 'Number',
             'value': '100',
@@ -35,13 +46,7 @@ def test_for_valid_headers(notification):
                             'value': '1980-01-30T00:00:00.000+00:00'}}},
     }
 
-    res_post = requests.post(
-        '{}'.format(notify_url),
-        data=json.dumps(notification),
-        headers=HEADERS_VALID)
-    time.sleep(1)
-    assert res_post.status_code == 200
-    assert res_post.json().startswith('Notification successfully processed')
+    insert_data(notification, HEADERS_VALID)
 
     get_url = "{}/entities/Room0".format(QL_URL)
     res_get = requests.get(get_url, headers=HEADERS_VALID)
@@ -62,18 +67,12 @@ def test_for_valid_headers(notification):
 def test_for_invalid_headers(notification):
     notification['data'][0] = {
         'id': 'Room0',
-        'type': 'Room',
+        'type': ENTITY_TYPE,
         'temperature': {'type': 'Number', 'value': '200', 'metadata': {}},
         'pressure': {'type': 'Number', 'value': '20', 'metadata': {}},
     }
 
-    res_post = requests.post(
-        '{}'.format(notify_url),
-        data=json.dumps(notification),
-        headers=HEADERS_VALID)
-
-    assert res_post.status_code == 200
-    assert res_post.json().startswith('Notification successfully processed')
+    insert_data(notification, HEADERS_VALID)
 
     get_url = "{}/entities/Room0".format(QL_URL)
     res_get = requests.get(get_url, headers=HEADERS_INVALID)
