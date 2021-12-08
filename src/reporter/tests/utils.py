@@ -47,7 +47,14 @@ def get_notification(et, ei, attr_value, mod_value):
         ]
     }
 
-def get_notification_different_types(et, ei, attr_value_num, attr_value_text, attr_value_bool, mod_value):
+
+def get_notification_different_types(
+        et,
+        ei,
+        attr_value_num,
+        attr_value_text,
+        attr_value_bool,
+        mod_value):
     return {
         'subscriptionId': '5947d174793fe6f7eb5e39621',
         'data': [
@@ -100,6 +107,7 @@ def send_notifications(service, notifications, service_path=None):
         r = requests.post(notify_url(), data=json.dumps(n), headers=h)
         assert r.ok
 
+
 def send_notifications_different_types(service, notifications):
     assert isinstance(notifications, list)
     h = {'Content-Type': 'application/json'}
@@ -108,6 +116,7 @@ def send_notifications_different_types(service, notifications):
     for n in notifications:
         r = requests.post(notify_url(), data=json.dumps(n), headers=h)
         assert r.ok
+
 
 def insert_test_data(service, entity_types, n_entities=1, index_size=30,
                      entity_id=None, index_base=None, index_period="day",
@@ -143,8 +152,15 @@ def insert_test_data(service, entity_types, n_entities=1, index_size=30,
     # time.sleep(min(1.0, len(entity_types) * n_entities * index_size * 0.3))
     time.sleep(0.9)
 
-def insert_test_data_different_types(service, entity_types, n_entities=1, index_size=30,
-                     entity_id=None, index_base=None, index_period="day"):
+
+def insert_test_data_different_types(
+        service,
+        entity_types,
+        n_entities=1,
+        index_size=30,
+        entity_id=None,
+        index_base=None,
+        index_period="day"):
     assert isinstance(entity_types, list)
     index_base = index_base or datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc)
 
@@ -175,10 +191,12 @@ def insert_test_data_different_types(service, entity_types, n_entities=1, index_
 
                 j = random.getrandbits(1)
 
-                k = re.sub(r'[0-9]+$',
-                            lambda x: f"{str(int(x.group())+1).zfill(len(x.group()))}",
-                            test_str)
-                n = get_notification_different_types(et, eid, attr_value_num=i, attr_value_text=k, attr_value_bool=j, mod_value=dt)
+                k = re.sub(
+                    r'[0-9]+$',
+                    lambda x: f"{str(int(x.group())+1).zfill(len(x.group()))}",
+                    test_str)
+                n = get_notification_different_types(
+                    et, eid, attr_value_num=i, attr_value_text=k, attr_value_bool=j, mod_value=dt)
                 send_notifications_different_types(service, [n])
 
     time.sleep(1)

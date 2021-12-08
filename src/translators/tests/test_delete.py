@@ -30,7 +30,8 @@ def test_delete_entity_defaults(translator):
     total, err = translator.query()
     assert len(total) == num_types * num_ids_per_type
 
-    selected, err = translator.query(entity_type=deleted_type, entity_id=deleted_id)
+    selected, err = translator.query(
+        entity_type=deleted_type, entity_id=deleted_id)
     assert len(selected[0]['index']) == num_updates
 
     n_deleted = translator.delete_entity(deleted_id, entity_type=deleted_type)
@@ -65,7 +66,8 @@ def test_delete_entity_customs(translator):
                                    to_date=datetime(2018, 1, 16).isoformat())
     assert res == 5
 
-    affected, err = translator.query(entity_id=deleted_id, entity_type=deleted_type)
+    affected, err = translator.query(
+        entity_id=deleted_id, entity_type=deleted_type)
     assert len(affected) == 1
     affected = affected[0]
     assert affected['id'] == deleted_id
