@@ -27,19 +27,20 @@ def test_delete_entity_defaults(translator):
     deleted_type = entities[0]['type']
     deleted_id = entities[0]['id']
 
-    total = translator.query()
+    total, err = translator.query()
     assert len(total) == num_types * num_ids_per_type
 
-    selected = translator.query(entity_type=deleted_type, entity_id=deleted_id)
+    selected, err = translator.query(
+        entity_type=deleted_type, entity_id=deleted_id)
     assert len(selected[0]['index']) == num_updates
 
     n_deleted = translator.delete_entity(deleted_id, entity_type=deleted_type)
     assert n_deleted == num_updates
 
-    remaining = translator.query()
+    remaining, err = translator.query()
     assert len(remaining) == (len(total) - 1)
 
-    survivors = translator.query(
+    survivors, err = translator.query(
         entity_type=deleted_type, entity_id=deleted_id)
     assert len(survivors) == 0
     translator.clean()
@@ -65,14 +66,15 @@ def test_delete_entity_customs(translator):
                                    to_date=datetime(2018, 1, 16).isoformat())
     assert res == 5
 
-    affected = translator.query(entity_id=deleted_id, entity_type=deleted_type)
+    affected, err = translator.query(
+        entity_id=deleted_id, entity_type=deleted_type)
     assert len(affected) == 1
     affected = affected[0]
     assert affected['id'] == deleted_id
     assert affected['type'] == deleted_type
     assert len(affected['index']) == 10 - 5
 
-    res = translator.query(entity_type=deleted_type)
+    res, err = translator.query(entity_type=deleted_type)
     assert len(res) == 2
 
     unaffected = res[0] if res[0]['id'] != deleted_id else res[1]
@@ -125,7 +127,7 @@ def test_delete_entities_defaults(translator):
     res = translator.delete_entities(type_to_delete)
     assert res == 20 * 2
 
-    remaining = translator.query()
+    remaining, err = translator.query()
     assert len(remaining) == (3 - 1) * 2
     assert all([r['type'] != type_to_delete for r in remaining])
     translator.clean()
@@ -149,7 +151,7 @@ def test_delete_entities_customs(translator):
                                      to_date=datetime(2018, 1, 12).isoformat())
     assert res == 3
 
-    remaining = translator.query()
+    remaining, err = translator.query()
     assert sum([len(r['index']) for r in remaining]) == ((4 * 4) - 3)
     translator.clean()
 
