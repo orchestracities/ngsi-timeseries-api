@@ -34,7 +34,7 @@ def test_query_multiple_ids(translator):
     translator.insert(entities)
 
     loaded_entities, err = translator.query(entity_type='0',
-                                       entity_ids=['0-0', '0-2'])
+                                            entity_ids=['0-0', '0-2'])
     assert len(loaded_entities) == 2
 
     # All results are of type 0 and cannot be of a non-requested id.
@@ -70,10 +70,10 @@ def test_query_multiple_ids_with_invalids(translator):
     translator.insert(entities)
 
     loaded_entities, err = translator.query(entity_type='0',
-                                       entity_ids=['nonexistent'])
+                                            entity_ids=['nonexistent'])
     assert len(loaded_entities) == 0
 
     loaded_entities, err = translator.query(entity_type='0',
-                                       entity_ids=['0-1', 'nonexistent'])
+                                            entity_ids=['0-1', 'nonexistent'])
     assert len(loaded_entities) == 1
     translator.clean()
