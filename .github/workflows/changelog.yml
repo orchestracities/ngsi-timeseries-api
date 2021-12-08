@@ -1,9 +1,8 @@
 name: changelog
 on:
   pull_request:
-    types: [assigned, opened, synchronize, reopened, labeled, unlabeled]
     branches:
-      - main
+      - 'master'
 jobs:
   build:
     name: Check Actions
