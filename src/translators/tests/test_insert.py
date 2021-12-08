@@ -313,14 +313,14 @@ def test_query_all_before_insert(translator):
 
     # Query Some
     loaded_entities, err = translator.query(entity_type="Lamp",
-                                       fiware_service="openiot",
-                                       fiware_servicepath="/")
+                                            fiware_service="openiot",
+                                            fiware_servicepath="/")
     assert len(loaded_entities) == 0
 
     # Query one
     loaded_entities, err = translator.query(entity_id="Lamp:001",
-                                       fiware_service="openiot",
-                                       fiware_servicepath="/")
+                                            fiware_service="openiot",
+                                            fiware_servicepath="/")
     assert len(loaded_entities) == 0
     translator.clean()
 
@@ -402,7 +402,8 @@ def test_attrs_by_entity_id(translator):
 
     # Now query by entity id
     entity_id = '0-1'
-    loaded_entities, err = translator.query(entity_type='0', entity_id=entity_id)
+    loaded_entities, err = translator.query(
+        entity_type='0', entity_id=entity_id)
     notifications = [e for e in entities
                      if e['type'] == '0' and e['id'] == '0-1']
     check_notifications_record(notifications, loaded_entities)
@@ -474,7 +475,8 @@ def test_query_per_attribute(translator, attr_name, clause, tester):
     translator.insert(entities)
 
     where_clause = "where {} {}".format(attr_name, clause)
-    entities, err = translator.query(entity_type='0', where_clause=where_clause)
+    entities, err = translator.query(
+        entity_type='0', where_clause=where_clause)
 
     total = num_types * num_ids_per_type * num_updates
 
