@@ -3,6 +3,7 @@ from flask import request
 from reporter.reporter import _validate_query_params
 from translators.factory import translator_for
 import logging
+import warnings
 from .geo_query_handler import handle_geo_query
 from utils.jsondict import lookup_string_match
 
@@ -56,6 +57,7 @@ def query_1T1E1A(attr_name,   # In Path
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)
         logging.getLogger(__name__).error(msg, exc_info=True)
+        logging.warn("usage of  id and type rather than entityId and entityType from version 0.9")
         return {
             "error": "{}".format(type(e)),
             "description": str(e)
@@ -106,4 +108,5 @@ def query_1T1E1A_value(*args, **kwargs):
         res.pop('entityId', None)
         res.pop('entityType', None)
         res.pop('attrName', None)
+    logging.warn("usage of  id and type rather than entityId and entityType from version 0.9")    
     return res

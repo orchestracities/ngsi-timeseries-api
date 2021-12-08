@@ -1,4 +1,5 @@
 import logging
+import warnings
 from utils.jsondict import lookup_string_match
 from flask import request
 from .geo_query_handler import handle_geo_query
@@ -139,6 +140,7 @@ def query_NTNE1A(attr_name,  # In Path
             'types': entity_type
         }
         logging.getLogger(__name__).info("Query processed successfully")
+        logging.warn("usage of  id and type rather than entityId and entityType from version 0.9")
         return res
     r = {
         "error": "Not Found",
@@ -154,4 +156,5 @@ def query_NTNE1A_value(*args, **kwargs):
         res['values'] = res['types']
         res.pop('attrName', None)
         res.pop('types', None)
+    logging.warn("usage of  id and type rather than entityId and entityType from version 0.9")
     return res

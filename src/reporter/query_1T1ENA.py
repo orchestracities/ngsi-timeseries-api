@@ -3,6 +3,7 @@ from flask import request
 from reporter.reporter import _validate_query_params
 from translators.factory import translator_for
 import logging
+import warnings
 from .geo_query_handler import handle_geo_query
 
 
@@ -107,6 +108,7 @@ def query_1T1ENA(entity_id,   # In Path
             'attributes': attributes
         }
         logging.getLogger(__name__).info("Query processed successfully")
+        logging.warn("usage of  id and type rather than entityId and entityType from version 0.9")
         return res
 
     r = {
@@ -122,4 +124,5 @@ def query_1T1ENA_value(*args, **kwargs):
     if isinstance(res, dict):
         res.pop('entityId', None)
         res.pop('entityType', None)
+    logging.warn("usage of  id and type rather than entityId and entityType from version 0.9")
     return res
