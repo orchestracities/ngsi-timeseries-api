@@ -1,4 +1,5 @@
 import json
+import logging
 from contextlib import contextmanager
 from crate import client
 from crate.client import exceptions
@@ -59,6 +60,9 @@ class CrateTranslator(sql_translator.SQLTranslator):
         # consecutive retries
         backoff_factor = EnvReader(log=logging.getLogger(__name__).debug) \
             .read(FloatVar('CRATE_BACKOFF_FACTOR', 0.0))
+        import warnings
+        if backoff_factor > 120:
+            logging.warn("backoff_factor value should be less than 120")
         if self.connection is None:
             try:
                 self.connection = client.connect(
