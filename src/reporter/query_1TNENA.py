@@ -52,7 +52,7 @@ def query_1TNENA(entity_type=None,  # In Path
         entity_ids = [s.strip() for s in id_.split(',') if s]
     try:
         with translator_for(fiware_s) as trans:
-            entities = trans.query(attr_names=attrs,
+            entities, err = trans.query(attr_names=attrs,
                                    entity_type=entity_type,
                                    entity_ids=entity_ids,
                                    aggr_method=aggr_method,
@@ -86,6 +86,14 @@ def query_1TNENA(entity_type=None,  # In Path
         msg = "Something went wrong with QL. Error: {}".format(e)
         logging.getLogger(__name__).error(msg, exc_info=True)
         return msg, 500
+
+    if err == "AggrMethod cannot be applied":
+        r = {
+            "error": "AggrMethod cannot be applied",
+            "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
+        }
+        logging.getLogger(__name__).info("AggrMethod cannot be applied")
+        return r, 404
 
     if entities:
         res = _prepare_response(entities,
