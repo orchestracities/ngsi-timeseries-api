@@ -52,19 +52,19 @@ def query_NTNENA(id_=None,  # In Query
     try:
         with translator_for(fiware_s) as trans:
             entities, err = trans.query(attr_names=attrs,
-                                   entity_type=type_,
-                                   entity_ids=entity_ids,
-                                   aggr_method=aggr_method,
-                                   aggr_period=aggr_period,
-                                   aggr_scope=aggr_scope,
-                                   from_date=from_date,
-                                   to_date=to_date,
-                                   last_n=last_n,
-                                   limit=limit,
-                                   offset=offset,
-                                   fiware_service=fiware_s,
-                                   fiware_servicepath=fiware_sp,
-                                   geo_query=geo_query)
+                                        entity_type=type_,
+                                        entity_ids=entity_ids,
+                                        aggr_method=aggr_method,
+                                        aggr_period=aggr_period,
+                                        aggr_scope=aggr_scope,
+                                        from_date=from_date,
+                                        to_date=to_date,
+                                        last_n=last_n,
+                                        limit=limit,
+                                        offset=offset,
+                                        fiware_service=fiware_s,
+                                        fiware_servicepath=fiware_sp,
+                                        geo_query=geo_query)
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)
         logging.getLogger(__name__).error(msg, exc_info=True)
@@ -152,8 +152,7 @@ def query_NTNENA(id_=None,  # In Query
     if err == "AggrMethod cannot be applied":
         r = {
             "error": "AggrMethod cannot be applied",
-            "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
-        }
+            "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."}
         logging.getLogger(__name__).info("AggrMethod cannot be applied")
         return r, 404
 
