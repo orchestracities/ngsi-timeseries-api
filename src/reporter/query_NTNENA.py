@@ -50,7 +50,7 @@ def query_NTNENA(id_=None,  # In Query
 
     try:
         with translator_for(fiware_s) as trans:
-            entities = trans.query(attr_names=attrs,
+            entities, err = trans.query(attr_names=attrs,
                                    entity_type=type_,
                                    entity_ids=entity_ids,
                                    aggr_method=aggr_method,
@@ -146,6 +146,15 @@ def query_NTNENA(id_=None,  # In Query
         }
         logging.getLogger(__name__).info("Query processed successfully")
         return res
+
+    if err == "AggrMethod cannot be applied":
+        r = {
+            "error": "AggrMethod cannot be applied",
+            "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
+        }
+        logging.getLogger(__name__).info("AggrMethod cannot be applied")
+        return r, 404
+
     r = {
         "error": "Not Found",
         "description": "No records were found for such query."
