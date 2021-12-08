@@ -36,8 +36,8 @@ def test_aggr_per_second(translator):
 
     # Query avg attr_float per second.
     res, err = translator.query(attr_names=['attr_float'],
-                           aggr_method='avg',
-                           aggr_period='second')
+                                aggr_method='avg',
+                                aggr_period='second')
     assert len(res) == 2
 
     # 34 values span across 4 seconds
