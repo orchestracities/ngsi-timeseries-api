@@ -1,6 +1,7 @@
 from conftest import QL_URL
 from datetime import datetime, timezone
-from reporter.tests.utils import insert_test_data, delete_test_data
+from reporter.tests.utils import insert_test_data, delete_test_data, \
+    wait_for_insert
 from utils.tests.common import assert_equal_time_index_arrays
 import pytest
 import requests
@@ -285,6 +286,8 @@ def test_different_time_indexes(service):
     insert_test_data(service, [etype], entity_id='Room3', index_size=4)
     insert_test_data(service, [etype], entity_id='Room2', index_size=3)
 
+    wait_for_insert([etype], service, 2 + 4 + 3)
+
     query_params = {
         'type': etype,
         'id': 'Room3,Room1,Room2',
@@ -407,7 +410,7 @@ def test_aggregation_is_per_instance(service):
 @pytest.mark.parametrize("service", services)
 def test_1TNE1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
     # Custom index to test aggrPeriod
-    etype = 'test_1TNE1A_aggrPeriod'
+    etype = f"test_1TNE1A_aggrPeriod_{aggr_period}"
     # The reporter_dataset fixture is still in the DB cos it has a scope of
     # module. We use a different entity type to store this test's rows in a
     # different table to avoid messing up global state---see also delete down
@@ -422,6 +425,8 @@ def test_1TNE1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
                          index_size=5,
                          index_base=base,
                          index_period=ins_period)
+
+    wait_for_insert([etype], service, 5 * len(exp_index))
 
     # aggrPeriod needs aggrMethod
     query_params = {

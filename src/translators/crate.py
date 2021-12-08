@@ -7,6 +7,7 @@ from typing import Any, Optional, Sequence
 
 from geocoding.slf.querytypes import SlfQuery
 from translators import sql_translator
+from translators.errors import CrateErrorAnalyzer
 from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
     NGSI_GEOJSON, NGSI_GEOPOINT, NGSI_TEXT, NGSI_STRUCTURED_VALUE, \
     NGSI_LD_GEOMETRY, TIME_INDEX, TIME_INDEX_ATTRIBUTE, METADATA_TABLE_NAME, FIWARE_SERVICEPATH
@@ -87,7 +88,12 @@ class CrateTranslator(sql_translator.SQLTranslator):
         self.cursor.close()
 
     def sql_error_handler(self, exception):
-        return
+        analyzer = CrateErrorAnalyzer(exception)
+        if analyzer.is_aggregation_error():
+            return "AggrMethod cannot be applied"
+        if analyzer.is_transient_error():
+            self.ccm.reset_connection('crate')
+            self.setup()
 
     def get_db_version(self):
         stmt = "select version['number'] from sys.nodes"

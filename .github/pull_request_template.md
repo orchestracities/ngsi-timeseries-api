@@ -39,7 +39,7 @@ you considered, etc...
 
 
 
-[cla]: https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/individual-cla.pdf
+[cla]: https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/individual_cla.pdf
     "Martel Open Source Software Individual Contributor License Agreement"
 [contrib]: https://github.com/smartsdk/ngsi-timeseries-api/blob/master/CONTRIBUTING.md
     "Contributing to QuantumLeap"
