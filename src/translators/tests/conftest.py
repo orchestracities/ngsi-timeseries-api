@@ -26,7 +26,6 @@ def check_crate(docker_ip, public_port):
 def docker_stack(docker_services):
     os.environ['PATH'] += os.pathsep + "/usr/local/bin"
     docker_services.start('crate')
-    docker_services.start('crate-auth')
     docker_services.start('timescale')
     docker_services.start('redis')
     docker_services.start('quantumleap-db-setup')
@@ -35,16 +34,12 @@ def docker_stack(docker_services):
         4200,
         check_server=check_crate,
     )
-    docker_services.wait_for_service(
-        "crate-auth",
-        4200,
-        check_server=check_crate,
-    )
     # even though the http api is available, cratedb does not allow
-    # connections immediately. so sleep a little.
+    # connections immediately. so sleep a little before creating a user
+    # to test crate authentication
     from time import sleep
     sleep(5)
-    docker_services.execute('crate-auth', "bash", "-c",
+    docker_services.execute('crate', "bash", "-c",
     "crash -c \"CREATE USER quantumleap WITH (password = 'a_secret_password');\" && \
     crash -c \"GRANT DML,DDL,DQL TO quantumleap;\"")
 

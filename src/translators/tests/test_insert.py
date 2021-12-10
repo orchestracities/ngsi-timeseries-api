@@ -9,19 +9,18 @@ from utils.common import *
 from utils.tests.common import *
 from datetime import datetime, timezone
 
-from conftest import crate_translator, crate_auth_translator, timescale_translator, entity
+from conftest import crate_translator, timescale_translator, entity
 import pytest
 
 from exceptions.exceptions import InvalidParameterValue
 
 translators = [
     pytest.lazy_fixture('crate_translator'),
-    pytest.lazy_fixture('crate_auth_translator'),
     pytest.lazy_fixture('timescale_translator')
 ]
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_parameters_validation(translator):
     limit_valid = 100
     limit_none = None
@@ -72,7 +71,7 @@ def test_parameters_validation(translator):
         assert isinstance(e, InvalidParameterValue)
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_ngsi_attr_to_db(translator):
     boolean = {
         'value': True
@@ -164,7 +163,7 @@ def test_ngsi_attr_to_db(translator):
         ngsi_ld_datetime) == "2018-03-20T13:26:38.722Z"
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_compute_type(translator):
     boolean = {
         'value': True
@@ -230,7 +229,7 @@ def test_compute_type(translator):
         ngsi_ld_datetime) == translator.NGSI_TO_SQL[NGSI_DATETIME]
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_insert_empty_dict(translator):
     from time import sleep
     #sleep(1000000)
@@ -243,7 +242,7 @@ def test_insert_empty_dict(translator):
         translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_insert(translator):
     entities = create_random_entities(1, 2, 3, use_time=True, use_geo=True)
     result = translator.insert(entities)
@@ -251,7 +250,7 @@ def test_insert(translator):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_insert_entity(translator, entity):
     now = datetime.now(timezone.utc)
     now_iso = now.isoformat(timespec='milliseconds')
@@ -267,7 +266,7 @@ def test_insert_entity(translator, entity):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_insert_same_entity_with_different_attrs(
         translator, sameEntityWithDifferentAttrs):
     """
@@ -288,7 +287,7 @@ def test_insert_same_entity_with_different_attrs(
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_insert_multiple_types(translator):
     args = {
         'num_types': 3,
@@ -308,7 +307,7 @@ def test_insert_multiple_types(translator):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_query_all_before_insert(translator):
     # Query all
     loaded_entities, err = translator.query()
@@ -328,7 +327,7 @@ def test_query_all_before_insert(translator):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_query_all(translator):
     num_types = 2
     num_ids = 2
@@ -354,7 +353,7 @@ def test_query_all(translator):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_limit_0(translator):
     entities = create_random_entities(num_updates=2)
     result = translator.insert(entities)
@@ -368,7 +367,7 @@ def test_limit_0(translator):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_limit_overrides_lastN(translator):
     entities = create_random_entities(num_updates=7)
     result = translator.insert(entities)
@@ -379,7 +378,7 @@ def test_limit_overrides_lastN(translator):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_lastN_ordering(translator):
     entities = create_random_entities(num_updates=5)
     result = translator.insert(entities)
@@ -392,7 +391,7 @@ def test_lastN_ordering(translator):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_attrs_by_entity_id(translator):
     # First insert some data
     num_updates = 10
@@ -423,7 +422,7 @@ def test_attrs_by_entity_id(translator):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_attrs_by_id_ambiguity(translator):
     entities = create_random_entities(num_types=2,
                                       num_ids_per_type=1,
@@ -459,7 +458,7 @@ def beyond_mid_epoch(e):
     return e["attr_time"]["values"][0] > mid_epoch
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 @pytest.mark.parametrize("attr_name, clause, tester", [
     ("attr_bool", "= True", lambda e: e["attr_bool"]["values"][0]),
     ("attr_str", "> 'M'", lambda e: e["attr_str"]["values"][0] > "M"),
@@ -490,7 +489,7 @@ def test_query_per_attribute(translator, attr_name, clause, tester):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_unsupported_ngsi_type(translator):
     e = {
         "type": "SoMeWeIrDtYpE",
@@ -509,7 +508,7 @@ def test_unsupported_ngsi_type(translator):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_accept_unknown_ngsi_type(translator):
     """
     test to validate issue #129
@@ -537,7 +536,7 @@ def test_accept_unknown_ngsi_type(translator):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_accept_special_chars(translator):
     """
     test to validate issue #128
@@ -565,7 +564,7 @@ def test_accept_special_chars(translator):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_missing_type_defaults_to_string(translator):
     e = {
         "type": "SoMeWeIrDtYpE",
@@ -587,7 +586,7 @@ def test_missing_type_defaults_to_string(translator):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_capitals(translator):
     entity_type = "SoMeWeIrDtYpE"
     e1 = {
@@ -622,7 +621,7 @@ def test_capitals(translator):
 
 
 @pytest.mark.filterwarnings("ignore")
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_no_time_index(translator):
     """
     The Reporter is responsible for injecting the 'time_index' attribute to the
@@ -641,7 +640,7 @@ def test_no_time_index(translator):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_long_json(translator):
     # Github issue 44
     big_entity = {
@@ -662,7 +661,7 @@ def test_long_json(translator):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_structured_value_to_array(translator):
     entity = {
         'id': '8906',
@@ -692,7 +691,7 @@ def test_structured_value_to_array(translator):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_ISO8601(translator):
     """
     ISO8601 should be a valid type, equivalent to DateTime.
@@ -716,7 +715,7 @@ def test_ISO8601(translator):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_query_last_value(translator):
     entities = create_random_entities(1, 2, 3, use_time=True, use_geo=True)
     result = translator.insert(entities)
@@ -735,7 +734,7 @@ def test_query_last_value(translator):
 ##########################################################################
 # FIWARE DATA MODELS
 ##########################################################################
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_air_quality_observed(translator, air_quality_observed):
     # Add TIME_INDEX as Reporter would
     now = datetime.now(timezone.utc).isoformat(timespec='milliseconds')
@@ -747,7 +746,7 @@ def test_air_quality_observed(translator, air_quality_observed):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_traffic_flow_observed(translator, traffic_flow_observed):
     # Add TIME_INDEX as Reporter would
     now = datetime.now(timezone.utc).isoformat(timespec='milliseconds')
@@ -759,7 +758,7 @@ def test_traffic_flow_observed(translator, traffic_flow_observed):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_ngsi_ld(translator, ngsi_ld):
     # Add TIME_INDEX as Reporter would
     now = datetime.now(timezone.utc).isoformat(timespec='milliseconds')

@@ -13,9 +13,6 @@ QL_DEFAULT_DB = os.environ.get('QL_DEFAULT_DB', 'crate')
 
 CRATE_HOST = os.environ.get('CRATE_HOST', 'crate')
 CRATE_PORT = 4200
-
-CRATE_AUTH_HOST = os.environ.get('CRATE_AUTH_HOST', 'crate-auth')
-CRATE_AUTH_PORT = 4201
 CRATE_AUTH_USERNAME = "quantumleap"
 CRATE_AUTH_PASSWORD = "a_secret_password"
 
@@ -196,14 +193,14 @@ def crate_translator(clean_crate):
 @pytest.fixture()
 def clean_crate_auth():
     yield
-    do_clean_crate(crate_host=CRATE_AUTH_HOST,
-                   crate_port=CRATE_AUTH_PORT,
+    do_clean_crate(crate_host=CRATE_HOST,
+                   crate_port=CRATE_PORT,
                    crate_username=CRATE_AUTH_USERNAME,
                    crate_password=CRATE_AUTH_PASSWORD)
 
 @pytest.fixture()
 def crate_auth_translator(clean_crate_auth):
-    with crateTranslator(host=CRATE_AUTH_HOST, port=CRATE_AUTH_PORT, username=CRATE_AUTH_USERNAME, password=CRATE_AUTH_PASSWORD) as trans:
+    with crateTranslator(host=CRATE_HOST, port=CRATE_PORT, username=CRATE_AUTH_USERNAME, password=CRATE_AUTH_PASSWORD) as trans:
         yield trans
 
 

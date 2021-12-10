@@ -13,19 +13,18 @@ timescale or crate.
 See https://docs.pytest.org/en/stable/example/parametrize.html
 """
 from utils.tests.common import create_random_entities
-from conftest import crate_translator, crate_auth_translator, timescale_translator
+from conftest import crate_translator, timescale_translator
 
 import pytest
 
 
 translators = [
     pytest.lazy_fixture('crate_translator'),
-    pytest.lazy_fixture('crate_auth_translator'),
     pytest.lazy_fixture('timescale_translator')
 ]
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_query_multiple_ids(translator):
     # First insert some data
     num_updates = 3
@@ -46,7 +45,7 @@ def test_query_multiple_ids(translator):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_query_multiple_ids_bak(translator):
     # Should not break old usage of one single entity_id
     num_updates = 3
@@ -61,7 +60,7 @@ def test_query_multiple_ids_bak(translator):
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate", "crate-auth", "timescale"])
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_query_multiple_ids_with_invalids(translator):
     # Nonexistent ids should be ignored
     num_updates = 3

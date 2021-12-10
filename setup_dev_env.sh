@@ -28,7 +28,6 @@ export MONGO_HOST=$LH
 
 export QL_HOST=$LH
 export CRATE_HOST=$LH
-export CRATE_AUTH_HOST=$LH
 export POSTGRES_HOST=$LH
 
 export REDIS_HOST=$LH
