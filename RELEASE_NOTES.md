@@ -17,6 +17,7 @@
 - Support CrateDB authentication (#474)
 - Updated PG8000 to 1.23.0 (#586)
 - Added request to update release notes to the pull request template (#585)
+- Added codeql-analysis workflow (#588)
 
 ### Bug fixes
 
