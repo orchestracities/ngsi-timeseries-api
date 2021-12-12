@@ -57,8 +57,8 @@ def query_1T1E1A(attr_name,   # In Path
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)
         logging.getLogger(__name__).error(msg, exc_info=True)
-        logging.warn(
-            "usage of  id and type rather than entityId and entityType from version 0.9")
+        logging.warning(
+            "usage of id and type rather than entityId and entityType from version 0.9")
         return {
             "error": "{}".format(type(e)),
             "description": str(e)
@@ -108,6 +108,6 @@ def query_1T1E1A_value(*args, **kwargs):
         res.pop('entityId', None)
         res.pop('entityType', None)
         res.pop('attrName', None)
-    logging.warn(
-        "usage of  id and type rather than entityId and entityType from version 0.9")
+    logging.warning(
+        "usage of id and type rather than entityId and entityType from version 0.9")
     return res

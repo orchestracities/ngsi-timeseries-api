@@ -146,8 +146,8 @@ def query_NTNENA(id_=None,  # In Query
             'attrs': attrs_values
         }
         logging.getLogger(__name__).info("Query processed successfully")
-        logging.warn(
-            "usage of  id and type rather than entityId and entityType from version 0.9")
+        logging.warning(
+            "usage of id and type rather than entityId and entityType from version 0.9")
         return res
 
     if err == "AggrMethod cannot be applied":
@@ -170,6 +170,6 @@ def query_NTNENA_value(*args, **kwargs):
     if isinstance(res, dict):
         res['values'] = res['attrs']
         res.pop('attrs', None)
-    logging.warn(
-        "usage of  id and type rather than entityId and entityType from version 0.9")
+    logging.warning(
+        "usage of id and type rather than entityId and entityType from version 0.9")
     return res
