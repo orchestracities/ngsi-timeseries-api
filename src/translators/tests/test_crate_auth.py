@@ -1,19 +1,18 @@
-# To test a single translator use the -k parameter followed by either
-# timescale or crate.
-# See https://docs.pytest.org/en/stable/example/parametrize.html
-
 from utils.tests.common import *
+import os
+from conftest import crate_translator as translator
 
-from conftest import crate_auth_translator
 
-import pytest
+@pytest.fixture
+def set_env_vars():
+    os.environ['CRATE_DB_USER'] = 'quantumleap'
+    os.environ['CRATE_DB_PASS'] = 'a_secret_password'
+    yield
+    os.environ['CRATE_DB_USER'] = 'crate'
+    del os.environ['CRATE_DB_PASS']
 
-translators = [
-    pytest.lazy_fixture('crate_auth_translator'),
-]
 
 # TODO: https://github.com/orchestracities/ngsi-timeseries-api/pull/579#issuecomment-990943040
-@pytest.mark.parametrize("translator", [pytest.lazy_fixture('crate_translator')], ids=["crate"])
 def test_auth_is_superuser(translator):
     stmt = "select current_user"
     translator.cursor.execute(stmt)
@@ -21,24 +20,23 @@ def test_auth_is_superuser(translator):
     current_user = res[0][0]
     assert current_user == 'crate'
 
-@pytest.mark.parametrize("translator", [pytest.lazy_fixture('crate_auth_translator')], ids=["crate-auth"])
-def test_auth_is_not_superuser(translator):
+
+def test_auth_is_not_superuser(set_env_vars, translator):
     stmt = "select current_user"
     translator.cursor.execute(stmt)
     res = translator.cursor.fetchall()
     current_user = res[0][0]
     assert current_user == 'quantumleap'
 
-@pytest.mark.parametrize("translator", translators, ids=["crate-auth"])
-def test_auth_insert(translator):
+
+def test_auth_insert(set_env_vars, translator):
     entities = create_random_entities(1, 2, 3, use_time=True, use_geo=True)
     result = translator.insert(entities)
     assert result.rowcount > 0
     translator.clean()
 
 
-@pytest.mark.parametrize("translator", translators, ids=["crate-auth"])
-def test_auth_delete_entity_defaults(translator):
+def test_auth_delete_entity_defaults(set_env_vars, translator):
     num_types = 2
     num_ids_per_type = 2
     num_updates = 5
@@ -52,7 +50,8 @@ def test_auth_delete_entity_defaults(translator):
     total, err = translator.query()
     assert len(total) == num_types * num_ids_per_type
 
-    selected, err = translator.query(entity_type=deleted_type, entity_id=deleted_id)
+    selected, err = translator.query(entity_type=deleted_type,
+                                     entity_id=deleted_id)
     assert len(selected[0]['index']) == num_updates
 
     n_deleted = translator.delete_entity(deleted_id, entity_type=deleted_type)
