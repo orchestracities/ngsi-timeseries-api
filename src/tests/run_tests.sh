@@ -3,14 +3,14 @@
 # Prepare Docker Images
 docker pull ${QL_PREV_IMAGE}
 docker build -t orchestracities/quantumleap ../../
-CRATE_VERSION=${PREV_CRATE} docker-compose pull --ignore-pull-failures
+CRATE_VERSION=${PREV_CRATE} docker compose -f docker-compose-bc.yml pull --ignore-pull-failures
 
 tot=0
 
 # Launch services with previous CRATE and QL version
 echo "\n"
 echo "Launch services with previous CRATE and QL version"
-CRATE_VERSION=${PREV_CRATE} QL_IMAGE=${QL_PREV_IMAGE} docker-compose up -d
+CRATE_VERSION=${PREV_CRATE} QL_IMAGE=${QL_PREV_IMAGE} docker compose -f docker-compose-bc.yml up -d
 sleep 20
 
 
@@ -28,8 +28,8 @@ docker run -ti --rm --network tests_default \
            orchestracities/quantumleap:0.8.0 python tests/common.py
 
 # Restart QL on development version and CRATE on current version
-docker-compose stop quantumleap
-CRATE_VERSION=${CRATE_VERSION} QL_IMAGE=orchestracities/quantumleap docker-compose up -d
+docker compose stop quantumleap
+CRATE_VERSION=${CRATE_VERSION} QL_IMAGE=orchestracities/quantumleap docker compose -f docker-compose-bc.yml up -d
 sleep 40
 
 # Backwards Compatibility Test
@@ -51,5 +51,5 @@ if [ "$tot" -eq 0 ]; then
 fi
 cd -
 
-docker-compose down -v
+docker compose -f docker-compose-bc.yml down -v
 exit ${tot}
