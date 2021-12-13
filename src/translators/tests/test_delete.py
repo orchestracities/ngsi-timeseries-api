@@ -3,7 +3,7 @@
 # See https://docs.pytest.org/en/stable/example/parametrize.html
 
 from datetime import datetime
-from conftest import crate_translator, crate_auth_translator, timescale_translator
+from conftest import crate_translator, timescale_translator
 from utils.common import TIME_INDEX_NAME
 from utils.tests.common import create_random_entities
 import pytest

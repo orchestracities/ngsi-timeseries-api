@@ -231,8 +231,6 @@ def test_compute_type(translator):
 
 @pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_insert_empty_dict(translator):
-    from time import sleep
-    #sleep(1000000)
     entities = dict()
     try:
         translator.insert(entities)
