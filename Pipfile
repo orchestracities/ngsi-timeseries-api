@@ -25,6 +25,10 @@ redis = "~=3.5"
 requests = ">=2.20"
 rq = "~=1.8"
 # run `pipenv install --dev` to get the packages below in your env
+pyld = "*"
+rdflib = "*"
+aiohttp-client-cache = "*"
+aiosqlite = "*"
 
 [dev-packages]
 aiohttp = ">=3.7.4"
