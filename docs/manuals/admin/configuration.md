@@ -8,8 +8,8 @@ To configure QuantumLeap you can use the following environment variables:
 | -------------------|-------------------------|
 | `CRATE_HOST`       | CrateDB Host            |
 | `CRATE_PORT`       | CrateDB Port            |
-| `CRATE_USERNAME`   | CrateDB Username        |
-| `CRATE_PASSWORD`   | CrateDB Password        |
+| `CRATE_DB_USERNAME`| CrateDB Username        |
+| `CRATE_DB_PASSWORD`| CrateDB Password        |
 | `CRATE_BACKOFF_FACTOR`   | The time between the retries to connect crate is controlled by `CRATE_BACKOFF_FACTOR`. Default value is `0.0` |
 | `DEFAULT_LIMIT`    | Max number of rows a query can retrieve |
 | `KEEP_RAW_ENTITY`  | Whether to store original entity data |
@@ -175,13 +175,13 @@ To configure QuantumLeap you can use the following environment variables:
   defined by `CRATE_BACKOFF_FACTOR`. The Maximum value of `CRATE_BACKOFF_FACTOR`
   is: `120`. The default value is `0.0`.
 
-- `CRATE_USERNAME`. Only needed if password authentication is used at the Crate
-  database. Please ensure the specified user has clusterwide `DML`, `DDL` and
-`DQL` permissions. Example user creation in CrateDB: `CREATE USER quantumleap
-WITH (password = 'a_secret_password'); GRANT DML,DDL,DQL TO quantumleap;`. For
-details please refer to to corresponding Crate documentation ([Authentication
-methods](https://crate.io/docs/crate/reference/en/4.6/admin/auth/methods.html)
-and [Privileges](https://crate.io/docs/crate/reference/en/4.6/admin/privileges.html)).
+- `CRATE_DB_USERNAME`. Only needed if password authentication is used at the Crate
+  database. Please ensure the specified user has cluster wide `DML`, `DDL` and
+  `DQL` permissions. Example user creation in CrateDB: `CREATE USER quantumleap
+  WITH (password = 'a_secret_password'); GRANT DML,DDL,DQL TO quantumleap;`. For
+  details please refer to to corresponding Crate documentation ([Authentication
+  methods](https://crate.io/docs/crate/reference/en/4.6/admin/auth/methods.html)
+  and [Privileges](https://crate.io/docs/crate/reference/en/4.6/admin/privileges.html)).
 
 ## Database selection per different tenant
 

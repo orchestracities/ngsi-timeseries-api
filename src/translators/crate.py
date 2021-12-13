@@ -280,9 +280,9 @@ def CrateTranslatorInstance():
     db_port = r.read(IntVar('CRATE_PORT', 4200))
     db_name = "ngsi-tsdb"
     db_username = EnvReader(log=logging.getLogger(__name__).debug) \
-            .read(StrVar('CRATE_USERNAME', None))
+            .read(StrVar('CRATE_DB_USERNAME', None))
     db_password = EnvReader(log=logging.getLogger(__name__).debug) \
-            .read(StrVar('CRATE_PASSWORD', None))
+            .read(StrVar('CRATE_DB_PASSWORD', None))
 
     with CrateTranslator(db_host, db_port, db_name, db_username, db_password) as trans:
         yield trans
