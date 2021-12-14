@@ -206,7 +206,7 @@ if a_type not in NGSI
 
 ### Data Casting
 
-QuantumLeap uses DB schemas to store data in a flat way. This decision design decision,
+QuantumLeap uses DB schemas to store data in a flat way. This design decision,
 while not being space efficient given that often many values do not change between
 sequential inserts and enforcing attribute to have a consistent type overtime,
 increase the speed of retrieval of full entities removing need for joins that
@@ -347,14 +347,14 @@ attribute names of a given entity. I.e, attributes `hotSpot` and `hotspot`
 will be treated as the same. These are rare corner-cases, but it is worth
 keeping in mind this. Ultimately, the correct naming of types and attributes
 should respect the naming guidelines explained
-[here](http://fiware-datamodels.readthedocs.io/en/latest/guidelines/index.html).
+[here](https://github.com/smart-data-models/data-models/blob/master/guidelines.md).
 
 - Attributes metadata are still not being persisted. See [Issue 12](https://github.com/orchestracities/ngsi-timeseries-api/issues/12)
 
-- While support for multiple data in a single notification as been recently introduced
+- While support for multiple data in a single notification as been introduced
   (See [PR 191](https://github.com/orchestracities/ngsi-timeseries-api/pull/191)),
   The following limitations still apply: a error in a single data entity will invalidate
-  the all set. There is not optimisation for large message size.
+  the all set. Optimisation for large message size is done using batches.
 
 - Data are assumed to be consistent. I.e., if the first data notification for
   an entity type use a given set of data types for the attributes, the following

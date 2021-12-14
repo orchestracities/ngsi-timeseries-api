@@ -111,7 +111,7 @@ entry point.
 
 There are several options to start worker processes. The QuantumLeap
 Docker image can start queue workers too, but the Docker entry point
-needs to be overridden—the default command starts the QuantumLeap Web
+needs to be overridden - the default command starts the QuantumLeap Web
 app.
 
 - To start a Supervisor-managed pool of workers, set the `WQ_WORKERS`
@@ -120,10 +120,12 @@ app.
 - To start a single worker without Supervisor, just override the Docker
   entry point with: `python wq up`.
 
+You can find an example docker compose [here](https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/docker/docker-compose.wq.yml).
+
 ## Deploy QuantumLeap in Kubernetes
 
 To deploy QuantumLeap services in Kubernetes,
-you can leverage the Helm Charts in [this repository](https://smartsdk-recipes.readthedocs.io/en/latest/data-management/quantumleap/readme/).
+you can leverage the Helm Charts in [this repository](https://github.com/orchestracities/charts).
 
 In particular you will need to deploy:
 
@@ -137,7 +139,7 @@ In particular you will need to deploy:
 ## FIWARE Releases Compatibility
 
 The current version of QuantumLeap is compatible with any FIWARE release
-greater than `6.3.1`. More info of FIWARE releases can be seen [here](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Releases_and_Sprints_numbering,_with_mapping_to_calendar_dates).
+greater than `6.3.1`. More info of FIWARE releases can be seen [here](https://github.com/FIWARE/catalogue/releases).
 
 To check which versions of the Generic Enablers and external dependencies QL is
 used and tested, checkout the
