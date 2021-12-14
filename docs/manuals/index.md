@@ -256,6 +256,7 @@ The cache backend is also used in case of queue workflow centric deployment,
 to store pending tasks to be processed.
 
 ### Query cache
+
 As of today, the query caching stores:
 
 - Version of CrateDB. Different version of CrateDB supports different SQL
@@ -281,8 +282,8 @@ As of today, the query caching stores:
 
 Query caching can be configured with the following variables:
 
-* `CACHE_QUERIES`: `True` or `False` enable or disable caching for queries
-* `DEFAULT_CACHE_TTL`: Time to live of metadata cache, default: `60` (seconds) 
+- `CACHE_QUERIES`: `True` or `False` enable or disable caching for queries
+- `DEFAULT_CACHE_TTL`: Time to live of metadata cache, default: `60` (seconds)
 
 ### Geocoding cache
 
@@ -301,13 +302,14 @@ short period of time --- e.g. think a batch entity update containing several
 entities sharing the same address. To enable caching of geo-location data,
 you need to use the following environment variable:
 
-* `CACHE_GEOCODING`: `True` or `False`
+- `CACHE_GEOCODING`: `True` or `False`
 
 Also the environment variables `REDIS_HOST` and `REDIS_PORT`
 respectively set to the location of REDIS instance and its access port.
 
 ### Work Queue cache
-QL may be configured to use a work queue for NGSI notifications. 
+
+QL may be configured to use a work queue for NGSI notifications.
 In this case, when an entity payload
 comes through the notify endpoint, the API queue the payload
 as a task in the cache and returns
