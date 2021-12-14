@@ -4,6 +4,7 @@ from reporter.reporter import _validate_query_params
 from translators.factory import translator_for
 import logging
 from .httputil import fiware_s, fiware_sp
+import warnings
 
 
 def query_NTNE(limit=10000,
@@ -52,6 +53,7 @@ def query_NTNE(limit=10000,
             del entity['id']
             del entity['type']
             res.append(entity)
+        logging.warn("usage of  id and type rather than entityId and entityType from version 0.9")
         logging.getLogger(__name__).info("Query processed successfully")
         return res
 

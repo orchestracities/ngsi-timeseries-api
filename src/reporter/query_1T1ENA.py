@@ -3,6 +3,7 @@ from flask import request
 from reporter.reporter import _validate_query_params
 from translators.factory import translator_for
 import logging
+import warnings
 from .geo_query_handler import handle_geo_query
 from .httputil import fiware_s, fiware_sp
 
@@ -75,6 +76,13 @@ def query_1T1ENA(entity_id,   # In Path
         logging.getLogger(__name__).error(msg, exc_info=True)
         return msg, 500
 
+    if err == "AggrMethod cannot be applied":
+        r = {
+            "error": "AggrMethod cannot be applied",
+            "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."}
+        logging.getLogger(__name__).info("AggrMethod cannot be applied")
+        return r, 404
+
     if entities:
         if len(entities) > 1:
             import warnings
@@ -97,6 +105,7 @@ def query_1T1ENA(entity_id,   # In Path
             'attributes': attributes
         }
         logging.getLogger(__name__).info("Query processed successfully")
+        logging.warn("usage of  id and type rather than entityId and entityType from version 0.9")
         return res
 
     r = {
@@ -112,4 +121,5 @@ def query_1T1ENA_value(*args, **kwargs):
     if isinstance(res, dict):
         res.pop('entityId', None)
         res.pop('entityType', None)
+    logging.warn("usage of  id and type rather than entityId and entityType from version 0.9")
     return res

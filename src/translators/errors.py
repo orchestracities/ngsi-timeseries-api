@@ -29,6 +29,16 @@ class ErrorAnalyzer(ABC):
         """
         pass
 
+    @abstractmethod
+    def is_aggregation_error(self) -> bool:
+        """
+        Is aggregation error? e.g. Aggregation method sum
+        cannot be applied on bool.
+
+        :return: ``True`` for yes, ``False`` for no.
+        """
+        pass
+
     def can_retry_insert(self) -> bool:
         """
         Take an error raised by the ``insert`` method and decide if you
@@ -50,6 +60,12 @@ class PostgresErrorAnalyzer(ErrorAnalyzer):
 
     def error(self) -> Exception:
         return self._error
+
+    def is_aggregation_error(self) -> bool:
+        e = self._error
+        if isinstance(e, pg8000.ProgrammingError):
+            return len(e.args) > 0 and isinstance(e.args[0], dict) \
+                and e.args[0].get('C', '') == '42883'
 
     def is_transient_error(self) -> bool:
         e = self._error
@@ -92,6 +108,11 @@ class CrateErrorAnalyzer(ErrorAnalyzer):
 
     def error(self) -> Exception:
         return self._error
+
+    def is_aggregation_error(self) -> bool:
+        e = self._error
+        if isinstance(e, crate.client.exceptions.ProgrammingError):
+            return 'Cannot cast' in e.message or 'UnsupportedFeatureException' in e.message
 
     def is_transient_error(self) -> bool:
         return isinstance(self._error,

@@ -4,6 +4,8 @@ import json
 import requests
 import time
 from typing import Callable, Iterable, List, Optional, Tuple, Union
+import re
+import random
 
 from translators.factory import translator_for
 from translators.sql_translator import ENTITY_ID_COL, TENANT_PREFIX, \
@@ -46,13 +48,71 @@ def get_notification(et, ei, attr_value, mod_value):
     }
 
 
-def send_notifications(service, notifications, service_path='/'):
+def get_notification_different_types(
+        et,
+        ei,
+        attr_value_num,
+        attr_value_text,
+        attr_value_bool,
+        mod_value):
+    return {
+        'subscriptionId': '5947d174793fe6f7eb5e39621',
+        'data': [
+            {
+                'id': ei,
+                'type': et,
+                'temperature': {
+                    'type': 'Number',
+                    'value': attr_value_num,
+                    'metadata': {
+                        'dateModified': {
+                            'type': 'DateTime',
+                            'value': mod_value
+                        }
+                    }
+                },
+                'intensity': {
+                    'type': 'Text',
+                    'value': attr_value_text,
+                    'metadata': {
+                        'dateModified': {
+                            'type': 'DateTime',
+                            'value': mod_value
+                        }
+                    }
+                },
+                'boolean': {
+                    'type': 'Boolean',
+                    'value': attr_value_bool,
+                    'metadata': {
+                        'dateModified': {
+                            'type': 'DateTime',
+                            'value': mod_value
+                        }
+                    }
+                }
+            }
+        ]
+    }
+
+
+def send_notifications(service, notifications, service_path=None):
     assert isinstance(notifications, list)
     h = {'Content-Type': 'application/json'}
     if service:
         h['Fiware-Service'] = service
     if service_path:
         h['Fiware-ServicePath'] = service_path
+    for n in notifications:
+        r = requests.post(notify_url(), data=json.dumps(n), headers=h)
+        assert r.ok
+
+
+def send_notifications_different_types(service, notifications):
+    assert isinstance(notifications, list)
+    h = {'Content-Type': 'application/json'}
+    if service:
+        h['Fiware-Service'] = service
     for n in notifications:
         r = requests.post(notify_url(), data=json.dumps(n), headers=h)
         assert r.ok
@@ -91,6 +151,55 @@ def insert_test_data(service, entity_types, n_entities=1, index_size=30,
     # NOTE. CRATEDB consolidation requires some time.
     # time.sleep(min(1.0, len(entity_types) * n_entities * index_size * 0.3))
     time.sleep(0.9)
+
+
+def insert_test_data_different_types(
+        service,
+        entity_types,
+        n_entities=1,
+        index_size=30,
+        entity_id=None,
+        index_base=None,
+        index_period="day"):
+    assert isinstance(entity_types, list)
+    index_base = index_base or datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc)
+
+    test_str = "str0"
+
+    for et in entity_types:
+        for ei in range(n_entities):
+            for i in range(index_size):
+                if index_period == "year":
+                    d = timedelta(days=365 * i)
+                elif index_period == "month":
+                    d = timedelta(days=31 * i)
+                elif index_period == "day":
+                    d = timedelta(days=i)
+                elif index_period == "hour":
+                    d = timedelta(hours=i)
+                elif index_period == "minute":
+                    d = timedelta(minutes=i)
+                elif index_period == "second":
+                    d = timedelta(seconds=i)
+                else:
+                    assert index_period == "milli"
+                    d = timedelta(milliseconds=i)
+                dt = index_base + d
+                dt = dt.isoformat(timespec='milliseconds')
+
+                eid = entity_id or '{}{}'.format(et, ei)
+
+                j = random.getrandbits(1)
+
+                k = re.sub(
+                    r'[0-9]+$',
+                    lambda x: f"{str(int(x.group())+1).zfill(len(x.group()))}",
+                    test_str)
+                n = get_notification_different_types(
+                    et, eid, attr_value_num=i, attr_value_text=k, attr_value_bool=j, mod_value=dt)
+                send_notifications_different_types(service, [n])
+
+    time.sleep(1)
 
 
 def has_entities(entity_type: str, service: Optional[str],

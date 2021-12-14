@@ -3,6 +3,7 @@ from flask import request
 from reporter.reporter import _validate_query_params
 from translators.factory import translator_for
 import logging
+import warnings
 from .geo_query_handler import handle_geo_query
 from utils.jsondict import lookup_string_match
 from .httputil import fiware_s, fiware_sp
@@ -54,6 +55,7 @@ def query_1T1E1A(attr_name,   # In Path
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)
         logging.getLogger(__name__).error(msg, exc_info=True)
+        logging.warn("usage of  id and type rather than entityId and entityType from version 0.9")
         return {
             "error": "{}".format(type(e)),
             "description": str(e)
@@ -64,6 +66,13 @@ def query_1T1E1A(attr_name,   # In Path
         msg = "Something went wrong with QL. Error: {}".format(e)
         logging.getLogger(__name__).error(msg, exc_info=True)
         return msg, 500
+
+    if err == "AggrMethod cannot be applied":
+        r = {
+            "error": "AggrMethod cannot be applied",
+            "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."}
+        logging.getLogger(__name__).info("AggrMethod cannot be applied")
+        return r, 404
 
     if entities:
         if len(entities) > 1:
@@ -96,4 +105,5 @@ def query_1T1E1A_value(*args, **kwargs):
         res.pop('entityId', None)
         res.pop('entityType', None)
         res.pop('attrName', None)
+    logging.warn("usage of  id and type rather than entityId and entityType from version 0.9")    
     return res
