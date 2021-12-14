@@ -17,7 +17,7 @@ class BaseTranslator(object):
         self.port = port
         self.db_name = db_name
 
-    def __enter__(self):
+    def __enter__(self, connection, query):
         self.setup()
         return self
 
