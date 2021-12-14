@@ -3,7 +3,7 @@ version: '3'
 services:
 
   orion:
-    image: fiware/orion:${ORION_VERSION:-2.0.0}
+    image: fiware/orion:${ORION_VERSION:-2.6.1}
     ports:
       - "1026:1026"
     command: -logLevel DEBUG -noCache -dbhost mongo
@@ -23,7 +23,7 @@ services:
       - mongodata:/data/db
 
   crate:
-    image: crate:${CRATE_VERSION:-4.1.4}
+    image: crate:${CRATE_VERSION:-4.6.5}
     command: crate -Cauth.host_based.enabled=false
       -Ccluster.name=democluster -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*"
     ports:
@@ -80,7 +80,7 @@ services:
 
   quantumleap-db-setup:
     build: ../timescale-container/
-    image: quantumleap-db-setup
+    image: orchestracities/quantumleap-pg-init
     depends_on:
       - timescale
     environment:

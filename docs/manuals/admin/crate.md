@@ -13,7 +13,7 @@ CrateDB can be used to store and query geographical information of many kinds
 using the [geo_point](https://crate.io/docs/crate/reference/en/latest/general/ddl/data-types.html#geo-point-data-type)
 and [geo_shape](https://crate.io/docs/crate/reference/en/latest/general/ddl/data-types.html#geo-shape-data-type)
 types.
-With these it is possible to store geographical locations,ways, shapes, areas
+With these it is possible to store geographical locations, ways, shapes, areas
 and other entities. These can be queried for distance, containment, intersection
 and so on.
 Currently, CrateDB supports 2D coordinates but it does [not supports 3D coordinate](https://tools.ietf.org/html/rfc7946#section-3.1)
