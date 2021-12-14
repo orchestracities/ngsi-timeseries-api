@@ -70,7 +70,7 @@ QuantumLeap supports both Crate DB and Timescale as time-series DB
 backends. The following versions are currently covered in tests
 (see [.circleci/config.yml](https://github.com/orchestracities/ngsi-timeseries-api/blob/master/.circleci/config.yml#L204)):
 
-- Crate backend: Crate DB version `4.2.7` up to `4.5`
+- Crate backend: Crate DB version `4.2.7` up to `4.6.5`
 - Timescale backend: Postgres version `12` up to `13` +
   Timescale extension `1.7.5` up to `2.3.0` + Postgis extension `2.5.*`.
 
