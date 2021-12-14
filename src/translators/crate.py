@@ -43,15 +43,15 @@ CRATE_TO_NGSI['string_array'] = 'Array'
 class CrateTranslator(sql_translator.SQLTranslator):
     NGSI_TO_SQL = NGSI_TO_SQL
 
-    def __init__(self, host, port=4200, db_name="ngsi-tsdb"):
-        super(CrateTranslator, self).__init__(host, port, db_name)
+    def __init__(self, connection, query , host, port=4200, db_name="ngsi-tsdb"):
+        super(CrateTranslator, self).__init__(host, connection, query , port, db_name)
         self.logger = logging.getLogger(__name__)
         self.dbCacheName = 'crate'
         self.ccm = None
         self.connection = None
         self.cursor = None
 
-    def setup(self):
+    def setup(self, connection, query):
         url = "{}:{}".format(self.host, self.port)
         self.ccm = ConnectionManager()
         self.connection = self.ccm.get_connection('crate')
