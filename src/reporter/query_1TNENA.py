@@ -51,20 +51,20 @@ def query_1TNENA(entity_type=None,  # In Path
         entity_ids = [s.strip() for s in id_.split(',') if s]
     try:
         with translator_for(fiware_s) as trans:
-            entities = trans.query(attr_names=attrs,
-                                   entity_type=entity_type,
-                                   entity_ids=entity_ids,
-                                   aggr_method=aggr_method,
-                                   aggr_period=aggr_period,
-                                   aggr_scope=aggr_scope,
-                                   from_date=from_date,
-                                   to_date=to_date,
-                                   last_n=last_n,
-                                   limit=limit,
-                                   offset=offset,
-                                   fiware_service=fiware_s(),
-                                   fiware_servicepath=fiware_sp(),
-                                   geo_query=geo_query)
+            entities, err = trans.query(attr_names=attrs,
+                                        entity_type=entity_type,
+                                        entity_ids=entity_ids,
+                                        aggr_method=aggr_method,
+                                        aggr_period=aggr_period,
+                                        aggr_scope=aggr_scope,
+                                        from_date=from_date,
+                                        to_date=to_date,
+                                        last_n=last_n,
+                                        limit=limit,
+                                        offset=offset,
+                                        fiware_service=fiware_s(),
+                                        fiware_servicepath=fiware_sp(),
+                                        geo_query=geo_query)
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)
         logging.getLogger(__name__).error(msg, exc_info=True)

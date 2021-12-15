@@ -37,7 +37,7 @@ def clean_mongo():
     do_clean_mongo()
 
 
-def headers(service, service_path='/', content_type=True):
+def headers(service, service_path, content_type=True):
     h = {}
     if content_type:
         h['Content-Type'] = 'application/json'
@@ -55,31 +55,31 @@ class OrionClient(object):
     def __init__(self, host, port):
         self.url = 'http://{}:{}'.format(host, port)
 
-    def subscribe(self, subscription, service=None, service_path='/'):
+    def subscribe(self, subscription, service=None, service_path=None):
         r = requests.post('{}/v2/subscriptions'.format(self.url),
                           data=json.dumps(subscription),
                           headers=headers(service, service_path))
         return r
 
-    def insert(self, entity, service=None, service_path='/'):
+    def insert(self, entity, service=None, service_path=None):
         r = requests.post('{}/v2/entities'.format(self.url),
                           data=json.dumps(entity),
                           headers=headers(service, service_path))
         return r
 
-    def update_attr(self, entity_id, attrs, service=None, service_path='/'):
+    def update_attr(self, entity_id, attrs, service=None, service_path=None):
         r = requests.patch('{}/v2/entities/{}/attrs'.format(self.url, entity_id),
                            data=json.dumps(attrs),
                            headers=headers(service, service_path))
         return r
 
-    def delete(self, entity_id, service=None, service_path='/'):
+    def delete(self, entity_id, service=None, service_path=None):
         r = requests.delete('{}/v2/entities/{}'.format(self.url, entity_id),
                             headers=headers(service, service_path))
         return r
 
     def delete_subscription(self, subscription_id, service=None,
-                            service_path='/'):
+                            service_path=None):
         r = requests.delete(
             '{}/v2/subscriptions/{}'.format(self.url, subscription_id),
             headers=headers(service, service_path))
@@ -146,50 +146,62 @@ def crate_translator(clean_crate):
             r = CrateTranslator.insert(self, entities,
                                        fiware_service, fiware_servicepath)
             self._refresh(set([e['type'] for e in entities]),
-                          fiware_service=fiware_service)
+                          fiware_service=fiware_service,
+                          fiware_servicepath=fiware_servicepath)
             return r
 
         def delete_entity(self, entity_id, entity_type=None,
-                          fiware_service=None, **kwargs):
+                          fiware_service=None,
+                          fiware_servicepath='/', **kwargs):
             r = CrateTranslator.delete_entity(self, entity_id, entity_type,
                                               fiware_service=fiware_service,
+                                              fiware_servicepath=fiware_servicepath,
                                               **kwargs)
             try:
-                self._refresh([entity_type], fiware_service=fiware_service)
+                self._refresh([entity_type], fiware_service=fiware_service,
+                                fiware_servicepath=fiware_servicepath)
             except exceptions.ProgrammingError:
                 pass
             return r
 
         def delete_entities(self, entity_type=None, fiware_service=None,
+                            fiware_servicepath='/',
                             **kwargs):
             r = CrateTranslator.delete_entities(self, entity_type,
                                                 fiware_service=fiware_service,
+                                                fiware_servicepath=fiware_servicepath,
                                                 **kwargs)
             try:
-                self._refresh([entity_type], fiware_service=fiware_service)
+                self._refresh([entity_type], fiware_service=fiware_service,
+                                fiware_servicepath=fiware_servicepath)
             except exceptions.ProgrammingError:
                 pass
             return r
 
-        def entity_types(self, fiware_service=None, **kwargs):
+        def entity_types(self, fiware_service=None, fiware_servicepath='/', **kwargs):
             r = CrateTranslator.query_entity_types(
-                self, entity_type=None, fiware_service=fiware_service, **kwargs)
+                self, entity_type=None, fiware_service=fiware_service,
+                fiware_servicepath=fiware_servicepath, **kwargs)
             try:
-                self._refresh(r, fiware_service=fiware_service)
+                self._refresh(r, fiware_service=fiware_service,
+                                fiware_servicepath=fiware_servicepath)
             except exceptions.ProgrammingError:
                 pass
             return r
 
-        def clean(self, fiware_service=None, **kwargs):
+        def clean(self, fiware_service=None, fiware_servicepath='/', **kwargs):
             types = CrateTranslator.query_entity_types(
-                self, fiware_service=fiware_service, **kwargs)
+                self, fiware_service=fiware_service,
+                fiware_servicepath=fiware_servicepath, **kwargs)
             if types:
                 for t in types:
                     CrateTranslator.drop_table(self, t,
                                                fiware_service=fiware_service,
+                                               fiware_servicepath=fiware_servicepath,
                                                **kwargs)
                 try:
-                    self._refresh(types, fiware_service=fiware_service)
+                    self._refresh(types, fiware_service=fiware_service,
+                                    fiware_servicepath=fiware_servicepath)
                 except exceptions.ProgrammingError:
                     pass
 
@@ -215,27 +227,32 @@ def timescale_translator():
                           fiware_service=None, **kwargs):
             r = PostgresTranslator.delete_entity(self, entity_id, entity_type,
                                                  fiware_service=fiware_service,
+                                                 fiware_servicepath=fiware_servicepath,
                                                  **kwargs)
             return r
 
         def delete_entities(self, entity_type=None, fiware_service=None,
-                            **kwargs):
+                            fiware_servicepath='/', **kwargs):
             r = PostgresTranslator.delete_entities(
-                self, entity_type, fiware_service=fiware_service, **kwargs)
+                self, entity_type, fiware_service=fiware_service,
+                fiware_servicepath=fiware_servicepath, **kwargs)
             return r
 
-        def entity_types(self, fiware_service=None, **kwargs):
+        def entity_types(self, fiware_service=None, fiware_servicepath='/', **kwargs):
             r = PostgresTranslator.query_entity_types(
-                self, entity_type=None, fiware_service=fiware_service, **kwargs)
+                self, entity_type=None, fiware_service=fiware_service,
+                fiware_servicepath=fiware_servicepath, **kwargs)
             return r
 
-        def clean(self, fiware_service=None, **kwargs):
+        def clean(self, fiware_service=None, fiware_servicepath='/', **kwargs):
             types = PostgresTranslator.query_entity_types(
-                self, fiware_service=fiware_service, **kwargs)
+                self, fiware_service=fiware_service,
+                fiware_servicepath=fiware_servicepath, **kwargs)
             if types:
                 for t in types:
                     PostgresTranslator.drop_table(
-                        self, t, fiware_service=fiware_service, **kwargs)
+                        self, t, fiware_service=fiware_service,
+                        fiware_servicepath=fiware_servicepath, **kwargs)
 
     with Translator(PostgresConnectionData(host=POSTGRES_HOST,
                                            port=POSTGRES_PORT)) as trans:

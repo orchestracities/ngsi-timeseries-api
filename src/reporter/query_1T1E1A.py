@@ -39,19 +39,19 @@ def query_1T1E1A(attr_name,   # In Path
     entities = None
     try:
         with translator_for(fiware_s) as trans:
-            entities = trans.query(attr_names=[attr_name],
-                                   entity_type=type_,
-                                   entity_id=entity_id,
-                                   aggr_method=aggr_method,
-                                   aggr_period=aggr_period,
-                                   from_date=from_date,
-                                   to_date=to_date,
-                                   last_n=last_n,
-                                   limit=limit,
-                                   offset=offset,
-                                   fiware_service=fiware_s(),
-                                   fiware_servicepath=fiware_sp(),
-                                   geo_query=geo_query)
+            entities, err = trans.query(attr_names=[attr_name],
+                                        entity_type=type_,
+                                        entity_id=entity_id,
+                                        aggr_method=aggr_method,
+                                        aggr_period=aggr_period,
+                                        from_date=from_date,
+                                        to_date=to_date,
+                                        last_n=last_n,
+                                        limit=limit,
+                                        offset=offset,
+                                        fiware_service=fiware_s(),
+                                        fiware_servicepath=fiware_sp(),
+                                        geo_query=geo_query)
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)
         logging.getLogger(__name__).error(msg, exc_info=True)
