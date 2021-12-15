@@ -5,12 +5,10 @@
 ### New features
 
 - Added support for NGSI-LD temporal property 'modifiedAt' and 'observedAt' (#433)
-- Increase test coverage (#524)
-- Add sql query to retrieve only last values of entities (#500)
+- Added sql query to retrieve only last values of entities (#500)
 - Support configuration of back off factor for CrateDB (#503)
 - Added exception handling and updated response where
   'AggrMethod cannot be applied' (#498)
-- Add workflow to check that `RELEASE_NOTES.md` is updated (#582)
 - Added a warning to use 'id' and 'type' from version 0.9 in all
    query responses (#584)
 - Added instanceId for each entry received (#565)
@@ -23,6 +21,12 @@
 - Fix OpenAPI spec for /wq/management (#544)
 - Fix attributes names in /v2/entities query (#478)
 - Fix index ordering in /v2/entities query (#521)
+
+### Continuous Integration
+
+- Increase test coverage (#524)
+- Added workflow to check that `RELEASE_NOTES.md` is updated (#582)
+- Added autopep8 workflow also to external pull requests (#601)
 
 ### Documentation
 
