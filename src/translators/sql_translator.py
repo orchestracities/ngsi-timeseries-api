@@ -267,7 +267,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                 import warnings
                 msg = "Translating entity without TIME_INDEX. " \
                       "It should have been inserted by the 'Reporter'. {}"
-                warnings.warning(msg.format(e))
+                logging.warning(msg.format(e))
                 e[self.TIME_INDEX_NAME] = current_timex()
 
             if ORIGINAL_ENTITY_COL in e:
