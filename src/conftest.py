@@ -146,8 +146,7 @@ def crate_translator(clean_crate):
             r = CrateTranslator.insert(self, entities,
                                        fiware_service, fiware_servicepath)
             self._refresh(set([e['type'] for e in entities]),
-                          fiware_service=fiware_service,
-                          fiware_servicepath=fiware_servicepath)
+                          fiware_service=fiware_service)
             return r
 
         def delete_entity(self, entity_id, entity_type=None,
@@ -158,8 +157,7 @@ def crate_translator(clean_crate):
                                               fiware_servicepath=fiware_servicepath,
                                               **kwargs)
             try:
-                self._refresh([entity_type], fiware_service=fiware_service,
-                                fiware_servicepath=fiware_servicepath)
+                self._refresh([entity_type], fiware_service=fiware_service)
             except exceptions.ProgrammingError:
                 pass
             return r
@@ -172,8 +170,7 @@ def crate_translator(clean_crate):
                                                 fiware_servicepath=fiware_servicepath,
                                                 **kwargs)
             try:
-                self._refresh([entity_type], fiware_service=fiware_service,
-                                fiware_servicepath=fiware_servicepath)
+                self._refresh([entity_type], fiware_service=fiware_service)
             except exceptions.ProgrammingError:
                 pass
             return r
@@ -183,8 +180,7 @@ def crate_translator(clean_crate):
                 self, entity_type=None, fiware_service=fiware_service,
                 fiware_servicepath=fiware_servicepath, **kwargs)
             try:
-                self._refresh(r, fiware_service=fiware_service,
-                                fiware_servicepath=fiware_servicepath)
+                self._refresh(r, fiware_service=fiware_service)
             except exceptions.ProgrammingError:
                 pass
             return r
@@ -192,16 +188,14 @@ def crate_translator(clean_crate):
         def clean(self, fiware_service=None, fiware_servicepath='/', **kwargs):
             types = CrateTranslator.query_entity_types(
                 self, fiware_service=fiware_service,
-                fiware_servicepath=fiware_servicepath, **kwargs)
+                **kwargs)
             if types:
                 for t in types:
                     CrateTranslator.drop_table(self, t,
                                                fiware_service=fiware_service,
-                                               fiware_servicepath=fiware_servicepath,
                                                **kwargs)
                 try:
-                    self._refresh(types, fiware_service=fiware_service,
-                                    fiware_servicepath=fiware_servicepath)
+                    self._refresh(types, fiware_service=fiware_service)
                 except exceptions.ProgrammingError:
                     pass
 
@@ -247,12 +241,12 @@ def timescale_translator():
         def clean(self, fiware_service=None, fiware_servicepath='/', **kwargs):
             types = PostgresTranslator.query_entity_types(
                 self, fiware_service=fiware_service,
-                fiware_servicepath=fiware_servicepath, **kwargs)
+                **kwargs)
             if types:
                 for t in types:
                     PostgresTranslator.drop_table(
                         self, t, fiware_service=fiware_service,
-                        fiware_servicepath=fiware_servicepath, **kwargs)
+                        **kwargs)
 
     with Translator(PostgresConnectionData(host=POSTGRES_HOST,
                                            port=POSTGRES_PORT)) as trans:
