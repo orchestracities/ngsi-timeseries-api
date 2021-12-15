@@ -46,6 +46,7 @@ CRATE_DB_NAME_ENV_VAR = 'CRATE_DB_NAME'
 CRATE_DB_USER_ENV_VAR = 'CRATE_DB_USER'
 CRATE_DB_PASS_ENV_VAR = 'CRATE_DB_PASS'
 
+
 class CrateConnectionData:
 
     def __init__(self, host='0.0.0.0', port=4200,
@@ -68,7 +69,7 @@ class CrateConnectionData:
         # Added backoff_factor for retry interval between attempt of
         # consecutive retries
         self.backoff_factor = r.read(FloatVar('CRATE_BACKOFF_FACTOR', 0.0))
-        self.active_shards =  r.read(StrVar('CRATE_WAIT_ACTIVE_SHARDS', '1'))
+        self.active_shards = r.read(StrVar('CRATE_WAIT_ACTIVE_SHARDS', '1'))
 
 
 class CrateTranslator(sql_translator.SQLTranslator):
@@ -94,7 +95,11 @@ class CrateTranslator(sql_translator.SQLTranslator):
         if self.connection is None:
             try:
                 self.connection = client.connect(
-                    [url], error_trace=True, backoff_factor=self.backoff_factor, username=self.username, password=self.password)
+                    [url],
+                    error_trace=True,
+                    backoff_factor=self.backoff_factor,
+                    username=self.username,
+                    password=self.password)
                 self.ccm.set_connection('crate', self.connection)
             except Exception as e:
                 self.logger.warning(str(e), exc_info=True)
