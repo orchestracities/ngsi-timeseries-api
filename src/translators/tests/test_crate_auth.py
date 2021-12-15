@@ -12,7 +12,6 @@ def set_env_vars():
     del os.environ['CRATE_DB_PASS']
 
 
-# TODO: https://github.com/orchestracities/ngsi-timeseries-api/pull/579#issuecomment-990943040
 def test_auth_is_superuser(translator):
     stmt = "select current_user"
     translator.cursor.execute(stmt)
