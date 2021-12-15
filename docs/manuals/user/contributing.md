@@ -40,10 +40,11 @@ contributions"
 - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 
 [pytest](https://docs.pytest.org/en/latest/) is used as the testing framework,
-but since most of QL's functionality is integration of components, you'll find
-`docker-compose.yml` files in the test folders to be run as a setup for tests.
-If you see `.circleci/config.yml` file you'll see how they are running today, but
-probably at some point it's worth exploring *pytest-docker* plugins.
+but since most of QuantumLeap's functionality is integration of components,
+you'll find `docker-compose.yml` files in the test folders to be run as
+a setup for tests.
+If you see `.circleci/config.yml` file you'll see how they are running today,
+but probably at some point it's worth exploring *pytest-docker* plugins.
 
 ## Development Setup
 
@@ -67,7 +68,7 @@ sh run_tests.sh
 
 ## Using Gunicorn & fine tuning it
 
-Details on how to use Quantum Leap WSGI app in Gunicorn:
+Details on how to use QuantumLeap WSGI app in Gunicorn:
 
 ```bash
 cd ngsi-timeseries-api/src
@@ -113,7 +114,7 @@ In the current project tree structure you can find:
   - `docs`: Holds documentation files.
   - `docker`: To hold docker-related files for the scope of the project.
   - `timescale-container`: Contains the code for setting up timescale db.
-  - `specification`: Contains the OpenAPI definition that QL implements.
+  - `specification`: Contains the OpenAPI definition that QuantumLeap implements.
   - `src`: Source code folder.
     - `cache`: Holds the code for managing the metadata cache.
     - `geocoding`: Holds the code for interacting with OSM and doing geo-related

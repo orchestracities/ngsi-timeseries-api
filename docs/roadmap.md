@@ -18,14 +18,12 @@ about the overall Roadmap of FIWARE, please check section "Roadmap" on the
 The following list of features are planned to be addressed in the short term,
 and incorporated in the next release of the product.
 
-- [Enhance missing data policy](https://github.com/orchestracities/ngsi-timeseries-api/issues/141)
 - [Support SSL for Timescale](https://github.com/orchestracities/ngsi-timeseries-api/issues/393)
 - [Improve health endpoints](https://github.com/orchestracities/ngsi-timeseries-api/issues/377)
-- [Rethink how to store original data](https://github.com/orchestracities/ngsi-timeseries-api/issues/344)
-- [Fix Union ALL issue from CrateDB](https://github.com/orchestracities/ngsi-timeseries-api/issues/306)
-- [Deprecate CrateDB 3.x support](https://github.com/orchestracities/ngsi-timeseries-api/issues/423)
 - [Deprecate subscription API](https://github.com/orchestracities/ngsi-timeseries-api/issues/424)
-- [Deprecate ThinkDB and InfluxDB experimental support](https://github.com/orchestracities/ngsi-timeseries-api/issues/425)
+- [Improve arrays support](https://github.com/orchestracities/ngsi-timeseries-api/issues/147)
+- [NGSI-LD Context Support](https://github.com/orchestracities/ngsi-timeseries-api/issues/468)
+- [FIX pg-init](https://github.com/orchestracities/ngsi-timeseries-api/issues/448)
 
 ## Medium term
 
@@ -35,7 +33,6 @@ next planned release.
 
 - [Batch processing of notifications](https://github.com/orchestracities/ngsi-timeseries-api/issues/193)
 - [Complete NGSI-LD backward and forward support](https://github.com/orchestracities/ngsi-timeseries-api/issues/398)
-- [Improve arrays support](https://github.com/orchestracities/ngsi-timeseries-api/issues/147)
 - [CORS support](https://github.com/orchestracities/ngsi-timeseries-api/issues/135)
 
 ## Long term
@@ -49,7 +46,6 @@ implementation or influence the roadmap.
 - [Statics API](https://github.com/orchestracities/ngsi-timeseries-api/issues/262)
 - [Support retention policy](https://github.com/orchestracities/ngsi-timeseries-api/issues/15)
 - [Advanced configuration API](https://github.com/orchestracities/ngsi-timeseries-api/issues/10)
-- [Enable QL as a context broker datasource](https://github.com/orchestracities/ngsi-timeseries-api/issues/102)
 - [Support virtual entities](https://github.com/orchestracitiesk/ngsi-timeseries-api/issues/101)
 - [Support efficient data download](https://github.com/orchestracities/ngsi-timeseries-api/issues/155)
 - [SLF responses for geo-queries](https://github.com/orchestracities/ngsi-timeseries-api/issues/149)
