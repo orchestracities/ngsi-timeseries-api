@@ -25,6 +25,7 @@
 - Fixed OpenAPI spec for /wq/management (#544)
 - Fixed attributes names in /v2/entities query (#478)
 - Fixed index ordering in /v2/entities query (#521)
+- Fixed Deprecated warning for "warn" (#605)
 
 ### Documentation
 
