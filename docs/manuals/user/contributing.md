@@ -65,7 +65,7 @@ sh run_tests.sh
 
 ## Using Gunicorn & fine tuning it
 
-Details on how to use Quantum Leap WSGI app in Gunicorn:
+Details on how to use QuantumLeap WSGI app in Gunicorn:
 
 ```bash
 cd ngsi-timeseries-api/src
