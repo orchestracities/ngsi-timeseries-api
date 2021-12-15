@@ -14,6 +14,7 @@
 - Added a warning to use 'id' and 'type' from version 0.9 in all
    query responses (#584)
 - Added instanceId for each entry received (#565)
+- Support CrateDB authentication (#474)
 - Updated PG8000 to 1.23.0 (#586)
 
 ### Bug fixes

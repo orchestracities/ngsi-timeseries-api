@@ -3,7 +3,7 @@ from crate import client
 
 from translators.timescale import postgres_translator_instance, \
     PostgresConnectionData
-from translators.crate import CrateTranslatorInstance
+from translators.crate import crate_translator_instance
 from utils.cfgreader import *
 
 from .original_data_scenarios import *
@@ -40,7 +40,7 @@ def with_crate():
     conn = client.connect([f"{host}:{port}"], error_trace=True)
     cursor = conn.cursor()
 
-    yield OriginalDataScenarios(CrateTranslatorInstance, cursor,
+    yield OriginalDataScenarios(crate_translator_instance, cursor,
                                 delay_query_by=1)
 
     cursor.close()
@@ -81,7 +81,7 @@ def test_success_scenario_with_keep_raw_on(translator):
 @pytest.mark.parametrize("translator", translators, ids=["timescale", "crate"])
 def test_query_failed_entities_scenario(translator):
     clause = f"({ORIGINAL_ENTITY_COL} ->> 'failedBatchID')"
-    if translator.get_translator() == CrateTranslatorInstance:
+    if translator.get_translator() == crate_translator_instance:
         clause = f"{ORIGINAL_ENTITY_COL}['failedBatchID']"
 
     translator.run_query_failed_entities_scenario(
