@@ -1,11 +1,11 @@
 # CrateDB
 
 [**CrateDB**](https://crate.io) is QuantumLeap's default backend where NGSI data
-will be persisted. In addition to using QL's API, if you want to by-pass QL, you
-can also interact directly with CrateDB to query all the data QuantumLeap has
-stored from the received notifications. This of course is not recommended as
-your implementation will depend on QL implementation details that may change in
-future.
+will be persisted. In addition to using QuantumLeap's API, if you want to
+by-pass QuantumLeap, you can also interact directly with CrateDB to query all
+the data QuantumLeap has stored from the received notifications.
+This of course is not recommended as your implementation will depend
+on QuantumLeap implementation details that may change in future.
 
 CrateDB is a simple to use database backend for many applications. Nowadays a
 huge percentage of data is geo-tagged already.

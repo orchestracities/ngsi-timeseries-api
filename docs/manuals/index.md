@@ -33,7 +33,7 @@ presently QuantumLeap supports both [CrateDB][crate] and
 
 PR [#373](https://github.com/orchestracities/ngsi-timeseries-api/pulls/373)
 introduced basic support for basic [NGSI-LD][ngsi-ld-spec] relying on v2 API.
-In short this means that using the current endpoint QL can
+In short this means that using the current endpoint QuantumLeap can
 store NGSI-LD payloads with few caveats (see
 [#398](https://github.com/orchestracities/ngsi-timeseries-api/issues/398)):
 
@@ -52,11 +52,11 @@ store NGSI-LD payloads with few caveats (see
 
 NGSI-LD temporal queries seem to have a semantic that implies that
 only numeric values are tracked in time series. This was never the case
-for QL that trace over time any attribute (also not numeric ones),
+for QuantumLeap that trace over time any attribute (also not numeric ones),
 since they may change as well.
 
 NGSI-LD semantics also seem to track values over time
-of single attributes. QL to enable to retrieve full entity values in a given
+of single attributes. QuantumLeap to enable to retrieve full entity values in a given
 point in time stores the whole entity in a single table (this avoids the need
 for JOINs that are notoriously time consuming - but on the other hand generates
 more sparse data). In doing so, we create for the entity a single time index,
@@ -66,9 +66,9 @@ all modern timeseries DB (to achieve performance).
 This imply that we have a policy to compute such time index (either custom
 and referring to an attribute of the entity, or using the "latest" time
 metadata linked to the entity or to an attribute).
-The issue is that if the notification payload sent to QL includes all
-attributes, also not update ones, QL will "timestamp" all values (also old ones)
-with that timestamp.
+The issue is that if the notification payload sent to QuantumLeap includes all
+attributes, also not update ones, QuantumLeap will "timestamp" all values
+(also old ones) with that timestamp.
 
 This means that the ability to track a specific value
 of an attribute in a point in time depends on the actual notification.
@@ -106,7 +106,7 @@ that QuantumLeap stores in the database. The below diagram illustrates
 relationships and interactions among these systems in a typical
 QuantumLeap deployment scenario.
 
-![QL Architecture](rsrc/architecture.png)
+![QuantumLeap Architecture](rsrc/architecture.png)
 
 In order for QuantumLeap to receive data from Orion, a client creates
 a subscription in Orion specifying which entities should be notified
@@ -263,7 +263,7 @@ As of today, the query caching stores:
   dialects, so at each request we check which version of CrateDB
   we are using. By caching this information, each thread will ask
   this information only once. Of course this could be passed as variable,
-  but then live updates would require QL down time. Currently, you can
+  but then live updates would require QuantumLeap down time. Currently, you can
   update from a Crate version to another with almost zero down time (except
   the one caused by Crate not being in ready state), you would need
   only to clear the key `crate` from redis cache. TTL in this case is
@@ -309,18 +309,17 @@ respectively set to the location of REDIS instance and its access port.
 
 ### Work Queue cache
 
-QL may be configured to use a work queue for NGSI notifications.
-In this case, when an entity payload
-comes through the notify endpoint, the API queue the payload
-as a task in the cache and returns
-a `200` to the client immediately. A separate instance of QL, configured as
+QuantumLeap may be configured to use a work queue for NGSI notifications.
+In this case, when an entity payload comes through the notify endpoint,
+the API queues the payload as a task in the cache and returns a `200`
+to the client immediately. A separate instance of QuantumLeap, configured as
 a queue worker, fetches the task from the queue and runs it to actually insert
 the NGSI entities into the DB, possibly retrying the insert at a later time
 if it fails.
 
 When using a work queue, you will have two type of QuantumLeap processes:
 a type to expose the API and store payloads in the queue;
-and a type execute the queue worker that asynchronously fetch tasks from
+and a type to execute the queue worker that asynchronously fetches tasks from
 the queue.
 The work queue set-up is enabled and configured through the `WQ_*` environment
 variables:

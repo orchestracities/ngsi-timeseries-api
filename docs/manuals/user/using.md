@@ -73,30 +73,30 @@ in Orion to establish the link Orion-QuantumLeap.
     }
 ```
 
-Important things to notice from the subscription.
+Important things to notice about the subscriptions:
 
 - Notifications must come in complete [NGSI JSON Entity Representation](http://docs.orioncontextbroker.apiary.io/#introduction/specification/json-attribute-representation)
- form. Other forms, such as the [simplified entity representation](http://docs.orioncontextbroker.apiary.io/#introduction/specification/simplified-entity-representation)
- are **NOT** supported by QL because they lack information on attribute types,
- required by QL to make proper translations. This means, *DO NOT* use options
- like `"attrsFormat": "keyValues"`
+  form. Other forms, such as the [simplified entity representation](http://docs.orioncontextbroker.apiary.io/#introduction/specification/simplified-entity-representation)
+  are **NOT** supported by QuantumLeap because they lack information on
+  attribute types, required by QuantumLeap to make proper translations.
+  This means, *DO NOT* use options like `"attrsFormat": "keyValues"`.
 
 - The `"url"` field of the subscription specifies where Orion will send the
-notifications. I.e, this must be QuantumLeap's `/v2/notify` endpoint.
-By default, QuantumLeap listens at port `8668`. This url must be resolvable
-from Orion's container, so avoid using *localhost* or something that will not
-translate either by Docker, your `/etc/hosts` or DNS to the endpoint where
-QuantumLeap is running.
+  notifications. I.e, this must be QuantumLeap's `/v2/notify` endpoint.
+  By default, QuantumLeap listens at port `8668`. This url must be resolvable
+  from Orion's container, so avoid using *localhost* or something that will not
+  translate either by Docker, your `/etc/hosts` or DNS to the endpoint where
+  QuantumLeap is running.
 
 - Though not compulsory, it is highly recommended to include the
-`"metadata": ["dateCreated", "dateModified"]` part in the `notification`
-part of the subscription. This instructs Orion to include the modification time
-of the attributes in the notification. This timestamp will be used as the
-**time index** in the database if possible. See the *Time Index* section for
-more details.
+  `"metadata": ["dateCreated", "dateModified"]` part in the `notification`
+  part of the subscription. This instructs Orion to include the modification
+  time of the attributes in the notification. This timestamp will be used as the
+  **time index** in the database if possible. See the *Time Index* section for
+  more details.
 
 - You can create any valid NGSI subscription for your entities respecting the
-previous rules.
+  previous rules.
 
 ## Data Insertion
 
@@ -236,11 +236,11 @@ sequential inserts and enforcing attribute to have a consistent type overtime,
 increase the speed of retrieval of full entities removing need for joins that
 would be otherwise requested.
 
-This means that if an entity attribute was in origin received as a `Number`, following
-insert changing the same attribute to `Text` would fail. To mitigate this failures,
-QL attempts data casting, if casting is not possible, values are replaced with `None`,
-to ensure that the insert in the database its not failing totally for the received
-entity.
+This means that if an entity attribute was in origin received as a `Number`,
+following insert changing the same attribute to `Text` would fail. To mitigate
+this failures, QuantumLeap attempts data casting, if casting is not possible,
+values are replaced with `None`, to ensure that the insert in the database its
+not failing totally for the received entity.
 
 The following table shows how the casting works through examples:
 
@@ -300,7 +300,7 @@ header. Note that for a notification to contain such header, the corresponding
 subscription has to be created with an `httpCustom` block, as
 detailed in the *Subscriptions and Custom Notifications* section
 of the [NGSI spec](http://fiware.github.io/specifications/ngsiv2/stable/).
-This is the way you can instruct QL to use custom attributes of the
+This is the way you can instruct QuantumLeap to use custom attributes of the
 notification payload to be taken as *time index* indicators.
 
 1. Custom **time index** metadata. The most recent custom time index
@@ -359,7 +359,7 @@ value notified by Orion.
 1. **dateModified** metadata. The most recent dateModified attribute value
 found in any of the attribute metadata sections in the notification.
 
-1. Finally, QL will use the **Current Time** (the time of notification
+1. Finally, QuantumLeap will use the **Current Time** (the time of notification
 reception) if none of the above options is present or none of the values found
 can actually be converted to a `datetime`.
 

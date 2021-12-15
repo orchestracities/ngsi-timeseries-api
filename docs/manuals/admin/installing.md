@@ -82,8 +82,8 @@ references to them in the `depends_on:` section of the other services.
 
 Similarly, if you don't want to use some of the complementary services, like
 **grafana**, you can remove such services definition as well. Ultimately, the
-only required services for a minimal functioning QL are `quantumleap` and the
-time-series database (`crate` in the common case).
+only required services for a minimal functioning QuantumLeap are `quantumleap`
+and the time-series database (`crate` in the common case).
 
 Alternatively, if you only need to run QuantumLeap to complete your setup, you
 can simply run
@@ -94,33 +94,9 @@ docker run -d -p 8668:8668 -e "CRATE_HOST=http://your_crate_location" orchestrac
 
 The environment variable `CRATE_HOST` will tell QuantumLeap where to reach
 *CrateDB*, so you need to provide a reachable hostname where CrateDB is running.
-By default QL will append the port `4200` to the hostname. You can of course
+By default QuantumLeap will append the port `4200` to the hostname. You can of course
 add your required environment variables with `-e`. For more options see
 [docker run reference](https://docs.docker.com/engine/reference/run/).
-
-## Deploy QuantumLeap with the work queue
-
-When using a work queue, there are two sets of QuantumLeap processes:
-a set of Web servers that add tasks to a queue and a pool of queue worker
-processes that fetch tasks from the queue and run them asynchronously.
-The Web servers are QuantumLeap Web app instances configured to offload
-tasks to the work queue through the various `WQ_*` environment variables
-available for the Web app. A worker processes is a Python interpreter
-loaded with the same code as the Web app but started with a different
-entry point.
-
-There are several options to start worker processes. The QuantumLeap
-Docker image can start queue workers too, but the Docker entry point
-needs to be overridden - the default command starts the QuantumLeap Web
-app.
-
-- To start a Supervisor-managed pool of workers, set the `WQ_WORKERS`
-  environment variable to specify the pool size and override the Docker
-  entry point with: `supervisord -n -c ./wq/supervisord.conf`.
-- To start a single worker without Supervisor, just override the Docker
-  entry point with: `python wq up`.
-
-You can find an example docker compose [here](https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/docker/docker-compose.wq.yml).
 
 ## Deploy QuantumLeap in Kubernetes
 
@@ -136,12 +112,33 @@ In particular you will need to deploy:
   [Dandy Developer's chart](https://github.com/DandyDeveloper/charts/tree/master/charts/redis-ha)
 - [QuantumLeap](https://github.com/orchestracities/charts/tree/master/charts/quantumleap)
 
+## Configuring work queue
+
+If you use the work queue based configuration, you will need to active two types
+of QuantumLeap processes:
+
+- The process that spawns the QuantumLeap API and injects entities on the
+  queue.
+- The process that fetch entities from the queue and injects them asynchronously
+  in the database.
+
+There are two options to start worker processes inside the QuantumLeap
+Docker container:
+
+- To start a Supervisor-managed pool of workers, set the `WQ_WORKERS`
+  environment variable to specify the pool size and override the Docker
+  entry point with: `supervisord -n -c ./wq/supervisord.conf`.
+- To start a single worker without Supervisor, just override the Docker
+  entry point with: `python wq up`.
+
+You can find an example docker compose [here](https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/docker/docker-compose.wq.yml).
+
 ## FIWARE Releases Compatibility
 
 The current version of QuantumLeap is compatible with any FIWARE release
 greater than `6.3.1`. More info of FIWARE releases can be seen [here](https://github.com/FIWARE/catalogue/releases).
 
-To check which versions of the Generic Enablers and external dependencies QL is
-used and tested, checkout the
+To check which versions of the Generic Enablers and external dependencies
+QuantumLeap is used and tested, checkout the
 [docker-compose-dev.yml](https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
 file used for the deployment.
