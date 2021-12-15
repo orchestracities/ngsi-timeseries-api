@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 import pg8000
 from typing import Any, Callable, Sequence
-
+import os
 from translators import sql_translator
 from translators.errors import PostgresErrorAnalyzer
 from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
@@ -84,7 +84,6 @@ class PostgresTranslator(sql_translator.SQLTranslator):
         self.ccm = None
         self.connection = None
         self.cursor = None
-        self.logger = logging.getLogger(__name__)
         self.dbCacheName = 'timescale'
 
     def setup(self):
