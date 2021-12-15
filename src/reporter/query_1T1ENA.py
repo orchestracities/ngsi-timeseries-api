@@ -87,8 +87,7 @@ def query_1T1ENA(entity_id,   # In Path
 
     if entities:
         if len(entities) > 1:
-            import warnings
-            warnings.warn("Not expecting more than one result for a 1T1ENA.")
+            warnings.warning("Not expecting more than one result for a 1T1ENA.")
 
         attributes = []
         ignore = ('type', 'id', 'index')
