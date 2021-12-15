@@ -177,5 +177,5 @@ def test_delete_entities_with_tenancy(translator):
     res = translator.delete_entities(type_to_delete,
                                      fiware_service=fs,
                                      fiware_servicepath=fsp)
-    assert res == 10
+    assert res == 15
     translator.clean(fs)
