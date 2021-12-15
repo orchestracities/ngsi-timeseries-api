@@ -1,7 +1,8 @@
 from exceptions.exceptions import NGSIUsageError, InvalidParameterValue
 from conftest import QL_URL
 from datetime import datetime
-from reporter.tests.utils import insert_test_data, delete_test_data
+from reporter.tests.utils import insert_test_data, delete_test_data, \
+    wait_for_insert
 from utils.tests.common import assert_equal_time_index_arrays
 from translators.factory import translator_for
 import pytest
@@ -29,6 +30,7 @@ def reporter_dataset():
     for service in services:
         insert_test_data(service, [entity_type], n_entities=3,
                          entity_id=entity_id, index_size=n_days)
+        wait_for_insert([entity_type], service, 3)
     yield
     for service in services:
         delete_test_data(service, [entity_type])

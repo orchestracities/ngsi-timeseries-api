@@ -41,8 +41,9 @@ Tests shows that:
   the same impact as in memory
 
 - the number of queries linked to metadata is not the only element affecting
-  insert performance, due to the nature of http request, up to QL v0.7.6, we
-  created a db connection for each insert, opening the connection takes time.
+  insert performance, due to the nature of http request, up to QuantumLeap
+  v0.7.6, we created a db connection for each insert, opening the connection
+  takes time.
   From v0.8 we reuse existing connections. This proved to increase throughput
   of 100% compared just to just redis caching.
 

@@ -89,7 +89,7 @@ introduced basic support for NGSI-LD. In short this means that using
 the current endpoint you are able to store NGSI-LD payloads with few caveats
 (see [#398](https://github.com/orchestracities/ngsi-timeseries-api/issue/398))
 
-## Docker Images
+### Docker Images
 
 Docker images are available on
 [docker hub](https://hub.docker.com/r/orchestracities/quantumleap/):
@@ -101,6 +101,14 @@ Docker images are available on
 - `*.*.*` refers to specific releases.
 - additionally (usage is not recommended), we release images
   for each branch.
+
+### Security note
+
+CrateDB versions > 4.6 is affected by [log4 security issue](https://www.lunasec.io/docs/blog/log4j-zero-day/).
+We recommend to update your deployments to CrateDB 4.6.5.
+For CrateDB versions >= 3.2.0 it is possible to [mitigate](https://www.lunasec.io/docs/blog/log4j-zero-day-mitigation-guide/#option-2-enable-formatmsgnolookups)
+the issue setting  `-Dlog4j2.formatMsgNoLookups=true` via `CRATE_JAVA_OPTS`
+or by setting the environment variable `LOG4J_FORMAT_MSG_NO_LOOKUPS=true`.
 
 ## Usage
 
