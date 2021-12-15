@@ -264,7 +264,6 @@ class SQLTranslator(base_translator.BaseTranslator):
                 raise ValueError(msg.format(e[NGSI_ID], entity_type))
 
             if self.TIME_INDEX_NAME not in e:
-                import warnings
                 msg = "Translating entity without TIME_INDEX. " \
                       "It should have been inserted by the 'Reporter'. {}"
                 logging.warning(msg.format(e))

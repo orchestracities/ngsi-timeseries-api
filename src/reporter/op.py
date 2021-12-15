@@ -64,7 +64,6 @@ def query():
 
         if entities:
             if len(entities) > 1:
-                import warnings
                 logging.warning(
                     "Not expecting more than one result for a 1T1ENA.")
 
