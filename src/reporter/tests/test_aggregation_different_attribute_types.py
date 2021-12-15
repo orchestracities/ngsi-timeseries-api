@@ -1,12 +1,13 @@
 from conftest import QL_URL
 from datetime import datetime
-from reporter.tests.utils import delete_test_data, insert_test_data_different_types
+from reporter.tests.utils import delete_test_data, \
+    insert_test_data_different_types, wait_for_insert
 import pytest
 import requests
 import dateutil.parser
 import time
 
-entity_type = "TestRoom"
+entity_type = "TestRoomAggregationDifferentTypes"
 entity_id = "TestRoom1"
 n_days = 4
 
@@ -28,7 +29,7 @@ def query(values=False, params=None, service=None):
 
 
 @pytest.fixture(scope='module')
-def reporter_dataset_different_types():
+def reporter_dataset_different_attribute_types():
     for service in services:
         insert_test_data_different_types(
             service,
@@ -36,14 +37,15 @@ def reporter_dataset_different_types():
             n_entities=1,
             index_size=4,
             entity_id=entity_id)
+        wait_for_insert([entity_type], service, 4)
 
     yield
     for service in services:
         delete_test_data(service, [entity_type])
 
 
-def test_aggregation_different_types_timescale(
-        reporter_dataset_different_types, service='t2'):
+def test_aggregation_on_different_attribute_types_timescale(
+        reporter_dataset_different_attribute_types, service='t2'):
     attrs = 'temperature,intensity,boolean'
     query_params = {
         'attrs': attrs,
@@ -165,8 +167,8 @@ def test_aggregation_different_types_timescale(
     }
 
 
-def test_aggregation_different_types_crate(
-        reporter_dataset_different_types, service='t1'):
+def test_aggregation_on_different_data_types_crate(
+        reporter_dataset_different_attribute_types, service='t1'):
     attrs = 'temperature,intensity,boolean'
     query_params = {
         'attrs': attrs,
