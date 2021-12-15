@@ -21,6 +21,8 @@ contributions"
 1. Recall to update docs. Markdown documents, need to follow best practises.
   To help you in linting your markdown before pushing changes, use the script
   `lint.md.sh`.
+1. Recall to lint your code before pushing changes, use the script
+  `lint.py.sh`.
 1. Update `RELEASE_NOTES.md`
 1. When done, verify that all tests are passing.
 1. If so, create a pull request against our repository (we will not review pull
