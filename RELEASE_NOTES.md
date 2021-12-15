@@ -30,6 +30,7 @@
 - Added autopep8 workflow also to external pull requests (#601)
 - Added request to update release notes to the pull request template (#585)
 - Added codeql-analysis workflow (#588)
+- Added wait for insert in instanceId and aggregation tests (#588)
 
 ### Documentation
 
