@@ -169,7 +169,7 @@ The data will be inserted into QuantumLeap successfully.
 
 Generally speaking QuantumLeap assumes that the attributes of injected entities
 uses valid NGSI attribute types, which are documented in the *Specification*
-section of the 
+section of the
 [NGSI API](http://telefonicaid.github.io/fiware-orion/api/v2/latest/).
 
 The tables below show which attribute types will be translated to which
