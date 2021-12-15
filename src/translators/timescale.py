@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 from datetime import datetime, timezone
 import pg8000
+import json
 from typing import Any, Callable, Sequence
 import os
 from translators import sql_translator
@@ -71,6 +72,10 @@ class PostgresConnectionData:
                                      mask_value=True))
 
 
+def _encode_to_json_string(data: dict or list) -> str:
+    return json.dumps(data)
+
+
 class PostgresTranslator(sql_translator.SQLTranslator):
     NGSI_TO_SQL = NGSI_TO_SQL
 
@@ -124,7 +129,7 @@ class PostgresTranslator(sql_translator.SQLTranslator):
             db_action()
         except Exception as e:
             self.sql_error_handler(e)
-            logging.debug(str(e), exc_info=True)
+            logging.error(str(e), exc_info=True)
 
     def get_health(self):
         health = {}
@@ -209,7 +214,7 @@ class PostgresTranslator(sql_translator.SQLTranslator):
     def _ngsi_structured_to_db(attr):
         attr_v = attr.get('value', None)
         if isinstance(attr_v, dict):
-            return pg8000.PGJsonb(attr_v)
+            return _encode_to_json_string(attr_v)
         logging.warning('{} cannot be cast to {} replaced with None'.format(
             attr.get('value', None), attr.get('type', None)))
         return None
@@ -218,7 +223,7 @@ class PostgresTranslator(sql_translator.SQLTranslator):
     def _ngsi_array_to_db(attr):
         attr_v = attr.get('value', None)
         if isinstance(attr_v, list):
-            return pg8000.PGJsonb(attr_v)
+            return _encode_to_json_string(attr_v)
         logging.warning('{} cannot be cast to {} replaced with None'.format(
             attr.get('value', None), attr.get('type', None)))
         return None
@@ -253,11 +258,9 @@ class PostgresTranslator(sql_translator.SQLTranslator):
     # 2. Basic types (int, float, boolean and text). They also get converted
     # back to their corresponding Python types.
 
-    # TODO with the new pg8000 PGJsonb is removed...
-    # it simply replace with json dumps()
     @staticmethod
-    def _to_db_ngsi_structured_value(data: dict) -> pg8000.PGJsonb:
-        return pg8000.PGJsonb(data)
+    def _to_db_ngsi_structured_value(data: dict) -> str:
+        return _encode_to_json_string(data)
 
     def _should_insert_original_entities(self,
                                          insert_error: Exception) -> bool:
@@ -278,7 +281,7 @@ class PostgresTranslator(sql_translator.SQLTranslator):
                    " on conflict (table_name)" \
                    " do update set entity_attrs = ?"
             stmt = stmt.format(METADATA_TABLE_NAME)
-            entity_attrs_value = pg8000.PGJsonb(persisted_metadata)
+            entity_attrs_value = _encode_to_json_string(persisted_metadata)
             self.cursor.execute(stmt, (table_name, entity_attrs_value,
                                        entity_attrs_value))
 

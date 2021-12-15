@@ -55,7 +55,8 @@ def query_NTNE(limit=10000,
             del entity['id']
             del entity['type']
             res.append(entity)
-        logging.warn("usage of  id and type rather than entityId and entityType from version 0.9")
+        logging.warning(
+            "usage of id and type rather than entityId and entityType from version 0.9")
         logging.getLogger(__name__).info("Query processed successfully")
         return res
 
