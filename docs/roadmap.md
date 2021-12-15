@@ -25,7 +25,6 @@ and incorporated in the next release of the product.
 - [NGSI-LD Context Support](https://github.com/orchestracities/ngsi-timeseries-api/issues/468)
 - [FIX pg-init](https://github.com/orchestracities/ngsi-timeseries-api/issues/448)
 
-
 ## Medium term
 
 The following list of features are planned to be addressed in the medium term,

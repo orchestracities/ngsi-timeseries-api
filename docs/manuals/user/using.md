@@ -167,7 +167,9 @@ The data will be inserted into QuantumLeap successfully.
 
 ### Attributes DataType Translation
 
-Generally speaking QuantumLeap assumes that the attributes of injected entities uses valid NGSI attribute types, which are documented in the *Specification* section of the
+Generally speaking QuantumLeap assumes that the attributes of injected entities
+uses valid NGSI attribute types, which are documented in the *Specification*
+section of the 
 [NGSI API](http://telefonicaid.github.io/fiware-orion/api/v2/latest/).
 
 The tables below show which attribute types will be translated to which
@@ -408,7 +410,7 @@ should respect the naming guidelines explained
 - While support for multiple data in a single notification as been introduced
   (See [PR 191](https://github.com/orchestracities/ngsi-timeseries-api/pull/191)),
   The following limitation still apply: a error in a single data entity will invalidate
-  the all set (or batch, optimisation for large message size is done using batches).  
+  the all set (or batch, optimisation for large message size is done using batches).
 
 - Data are assumed to be consistent. I.e., if the first data notification for
   an entity type use a given set of data types for the attributes, the following

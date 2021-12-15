@@ -10,7 +10,7 @@ operations in the API:
 
 Leveraging them it is possible to paginate results:
 
-```
+```json
 ...?offset=0&limit=10000        # fetch the first 10000 query results
 ...?offset=10001&limit=20000    # fetch the next 10000
 ...
