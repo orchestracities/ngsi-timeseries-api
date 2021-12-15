@@ -26,6 +26,7 @@ to look for before merging your code._
 - [ ] I have signed the [CLA][cla]
 - [ ] I have added tests that prove my fix is effective or that my
       feature works
+- [ ] I have updated the [RELEASE_NOTES][RELEASE_NOTES.md]
 - [ ] I have added necessary documentation (if appropriate)
 - [ ] Any dependent changes have been merged and published in
       downstream modules

@@ -3,7 +3,7 @@ import os
 from six.moves.urllib.error import HTTPError
 from six.moves.urllib.request import urlopen
 
- 
+
 def check_crate(docker_ip, public_port):
     """Check if a crate is reachable.
 
@@ -39,8 +39,11 @@ def docker_stack(docker_services):
     # to test crate authentication
     from time import sleep
     sleep(5)
-    docker_services.execute('crate', "bash", "-c",
-    "crash -c \"CREATE USER quantumleap WITH (password = 'a_secret_password');\" && \
+    docker_services.execute(
+        'crate',
+        "bash",
+        "-c",
+        "crash -c \"CREATE USER quantumleap WITH (password = 'a_secret_password');\" && \
     crash -c \"GRANT DML,DDL,DQL TO quantumleap;\"")
 
 

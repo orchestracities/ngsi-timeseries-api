@@ -5,30 +5,33 @@
 ### New features
 
 - Added support for NGSI-LD temporal property 'modifiedAt' and 'observedAt' (#433)
-- Increase test coverage (#524)
-- Add sql query to retrieve only last values of entities (#500)
+- Increased test coverage (#524)
+- Added sql query to retrieve only last values of entities (#500)
 - Support configuration of back off factor for CrateDB (#503)
 - Added exception handling and updated response where
   'AggrMethod cannot be applied' (#498)
-- Add workflow to check that `RELEASE_NOTES.md` is updated (#582)
+- Added workflow to check that `RELEASE_NOTES.md` is updated (#582)
 - Added a warning to use 'id' and 'type' from version 0.9 in all
    query responses (#584)
 - Added instanceId for each entry received (#565)
 - Support CrateDB authentication (#474)
+- Updated PG8000 to 1.23.0 (#586)
+- Added request to update release notes to the pull request template (#585)
+- Added codeql-analysis workflow (#588)
 
 ### Bug fixes
 
-- Fix automated docker builds are broken (#557)
-- Fix arbitrary type arrays cause errors when inserting (#537)
-- Fix OpenAPI spec for /wq/management (#544)
-- Fix attributes names in /v2/entities query (#478)
-- Fix index ordering in /v2/entities query (#521)
+- Fixed automated docker builds are broken (#557)
+- Fixed arbitrary type arrays cause errors when inserting (#537)
+- Fixed OpenAPI spec for /wq/management (#544)
+- Fixed attributes names in /v2/entities query (#478)
+- Fixed index ordering in /v2/entities query (#521)
 
 ### Documentation
 
-- Improve contributing docuemntation (#557)
-- Introduce reference about `options=sysAttrs` for ngsi-ld time indexing (#546)
-- Document API pagination (#511)
+- Improved contributing docuemntation (#557)
+- Introduced reference about `options=sysAttrs` for ngsi-ld time indexing (#546)
+- Documented API pagination (#511)
 
 ### Technical debt
 

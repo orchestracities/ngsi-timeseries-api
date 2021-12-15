@@ -99,8 +99,11 @@ def do_clean_crate():
     crate_db_password = os.environ.get('CRATE_DB_PASS', None)
 
     from crate import client
-    conn = client.connect(["{}:{}".format(crate_host, crate_port)],
-                          error_trace=True, username=crate_db_username, password=crate_db_password)
+    conn = client.connect(["{}:{}".format(crate_host,
+                                          crate_port)],
+                          error_trace=True,
+                          username=crate_db_username,
+                          password=crate_db_password)
     cursor = conn.cursor()
 
     try:
@@ -141,16 +144,16 @@ def crate_translator(clean_crate):
         def insert(self, entities,
                    fiware_service=None, fiware_servicepath='/'):
             r = CrateTranslator.insert(self, entities,
-                                        fiware_service, fiware_servicepath)
+                                       fiware_service, fiware_servicepath)
             self._refresh(set([e['type'] for e in entities]),
-                            fiware_service=fiware_service)
+                          fiware_service=fiware_service)
             return r
 
         def delete_entity(self, entity_id, entity_type=None,
-                            fiware_service=None, **kwargs):
+                          fiware_service=None, **kwargs):
             r = CrateTranslator.delete_entity(self, entity_id, entity_type,
-                                                fiware_service=fiware_service,
-                                                **kwargs)
+                                              fiware_service=fiware_service,
+                                              **kwargs)
             try:
                 self._refresh([entity_type], fiware_service=fiware_service)
             except exceptions.ProgrammingError:
@@ -183,8 +186,8 @@ def crate_translator(clean_crate):
             if types:
                 for t in types:
                     CrateTranslator.drop_table(self, t,
-                                                fiware_service=fiware_service,
-                                                **kwargs)
+                                               fiware_service=fiware_service,
+                                               **kwargs)
                 try:
                     self._refresh(types, fiware_service=fiware_service)
                 except exceptions.ProgrammingError:

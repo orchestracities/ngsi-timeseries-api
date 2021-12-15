@@ -484,7 +484,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             elif cn == FIWARE_SERVICEPATH:
                 values.append(fiware_servicepath or '/')
             elif cn == 'instanceId':
-                values.append("urn:ngsi-ld:"+str(uuid4()))
+                values.append("urn:ngsi-ld:" + str(uuid4()))
             else:
                 # Normal attributes
                 try:
@@ -1302,14 +1302,14 @@ class SQLTranslator(base_translator.BaseTranslator):
         return result
 
     def query_instanceId(self,
-                        entity_id=None,
-                        entity_type=None,
-                        from_date=None,
-                        to_date=None,
-                        limit=10000,
-                        offset=0,
-                        fiware_service=None,
-                        fiware_servicepath=None):
+                         entity_id=None,
+                         entity_type=None,
+                         from_date=None,
+                         to_date=None,
+                         limit=10000,
+                         offset=0,
+                         fiware_service=None,
+                         fiware_servicepath=None):
         if limit == 0:
             return []
 
@@ -1334,7 +1334,6 @@ class SQLTranslator(base_translator.BaseTranslator):
                                               from_date,
                                               to_date,
                                               fiware_servicepath)
-
 
         limit = min(10000, limit)
         offset = max(0, offset)
