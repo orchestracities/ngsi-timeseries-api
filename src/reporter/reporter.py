@@ -164,8 +164,8 @@ def notify():
         # Validate entity update
         error = _validate_payload(entity)
         if error:
-            # TODO in this way we return error for even if only one entity
-            #  is wrong
+            # TODO in this way we return error even if only one entity
+            #   is wrong
             return error, 400
         # Add TIME_INDEX attribute
         custom_index = request.headers.get(TIME_INDEX_HEADER_NAME, None)
