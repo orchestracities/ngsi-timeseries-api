@@ -154,7 +154,6 @@ def crate_translator(clean_crate):
                           fiware_servicepath='/', **kwargs):
             r = CrateTranslator.delete_entity(self, entity_id, entity_type,
                                               fiware_service=fiware_service,
-                                              fiware_servicepath=fiware_servicepath,
                                               **kwargs)
             try:
                 self._refresh([entity_type], fiware_service=fiware_service)
@@ -167,7 +166,6 @@ def crate_translator(clean_crate):
                             **kwargs):
             r = CrateTranslator.delete_entities(self, entity_type,
                                                 fiware_service=fiware_service,
-                                                fiware_servicepath=fiware_servicepath,
                                                 **kwargs)
             try:
                 self._refresh([entity_type], fiware_service=fiware_service)
@@ -178,7 +176,7 @@ def crate_translator(clean_crate):
         def entity_types(self, fiware_service=None, fiware_servicepath='/', **kwargs):
             r = CrateTranslator.query_entity_types(
                 self, entity_type=None, fiware_service=fiware_service,
-                fiware_servicepath=fiware_servicepath, **kwargs)
+                **kwargs)
             try:
                 self._refresh(r, fiware_service=fiware_service)
             except exceptions.ProgrammingError:
@@ -214,14 +212,13 @@ def timescale_translator():
         def insert(self, entities,
                    fiware_service=None, fiware_servicepath='/'):
             r = PostgresTranslator.insert(self, entities,
-                                          fiware_service, fiware_servicepath)
+                                          fiware_service)
             return r
 
         def delete_entity(self, entity_id, entity_type=None,
                           fiware_service=None, **kwargs):
             r = PostgresTranslator.delete_entity(self, entity_id, entity_type,
                                                  fiware_service=fiware_service,
-                                                 fiware_servicepath=fiware_servicepath,
                                                  **kwargs)
             return r
 
@@ -229,13 +226,13 @@ def timescale_translator():
                             fiware_servicepath='/', **kwargs):
             r = PostgresTranslator.delete_entities(
                 self, entity_type, fiware_service=fiware_service,
-                fiware_servicepath=fiware_servicepath, **kwargs)
+                **kwargs)
             return r
 
         def entity_types(self, fiware_service=None, fiware_servicepath='/', **kwargs):
             r = PostgresTranslator.query_entity_types(
                 self, entity_type=None, fiware_service=fiware_service,
-                fiware_servicepath=fiware_servicepath, **kwargs)
+                **kwargs)
             return r
 
         def clean(self, fiware_service=None, fiware_servicepath='/', **kwargs):
