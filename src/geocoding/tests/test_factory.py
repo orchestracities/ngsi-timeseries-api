@@ -1,7 +1,7 @@
 import pytest
 
 from conftest import REDIS_HOST, REDIS_PORT
-from geocoding import factory
+from cache import factory
 import os
 
 
@@ -22,7 +22,7 @@ def disable_redis():
 
 
 def test_env_variables_default():
-    env = factory.GeoCodingEnvReader()
+    env = factory.CacheEnvReader()
 
     assert env.use_geocoding() is False
     assert env.cache_geocoding() is False
@@ -31,7 +31,7 @@ def test_env_variables_default():
 
 
 def test_env_variables_geo_caching_enabled(enable_geo_caching):
-    env = factory.GeoCodingEnvReader()
+    env = factory.CacheEnvReader()
 
     assert env.use_geocoding() is True
     assert env.cache_geocoding() is True

@@ -188,7 +188,7 @@ def test_caching(docker_redis, air_quality_observed, monkeypatch):
         "addressCountry": "BE",
     }
 
-    from geocoding.geocache import temp_geo_cache
+    from cache.geocache import temp_geo_cache
     cache = next(temp_geo_cache(REDIS_HOST, REDIS_PORT))
     assert len(cache.redis.keys('*')) == 0
 

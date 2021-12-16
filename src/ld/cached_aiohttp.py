@@ -1,6 +1,6 @@
 import string
 import urllib.parse as urllib_parse
-from aiohttp_client_cache import CachedSession, SQLiteBackend
+from aiohttp_client_cache import CachedSession, RedisBackend
 from pyld import jsonld
 import re
 from pyld.jsonld import JsonLdError, parse_link_header, LINK_HEADER_REL
@@ -44,7 +44,7 @@ def cached_aiohttp_document_loader(loop=None, secure=False, **kwargs):
                     'the URL\'s scheme is not "https".',
                     'jsonld.InvalidUrl', {'url': url},
                     code='loading document failed')
-            async with CachedSession(cache=SQLiteBackend('demo_cache'),loop=loop) as session:
+            async with CachedSession(cache=RedisBackend('context-cache', address='redis://localhost', expire_after=600), loop=loop) as session:
                 async with session.get(url,
                                        headers=headers,
                                        **kwargs) as response:
