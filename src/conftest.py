@@ -68,9 +68,10 @@ class OrionClient(object):
         return r
 
     def update_attr(self, entity_id, attrs, service=None, service_path=None):
-        r = requests.patch('{}/v2/entities/{}/attrs'.format(self.url, entity_id),
-                           data=json.dumps(attrs),
-                           headers=headers(service, service_path))
+        r = requests.patch(
+            '{}/v2/entities/{}/attrs'.format(self.url, entity_id),
+            data=json.dumps(attrs),
+            headers=headers(service, service_path))
         return r
 
     def delete(self, entity_id, service=None, service_path=None):
@@ -173,7 +174,8 @@ def crate_translator(clean_crate):
 
         def entity_types(self, fiware_service=None, **kwargs):
             r = CrateTranslator.query_entity_types(
-                self, entity_type=None, fiware_service=fiware_service, **kwargs)
+                self, entity_type=None, fiware_service=fiware_service,
+                **kwargs)
             try:
                 self._refresh(r, fiware_service=fiware_service)
             except exceptions.ProgrammingError:
@@ -193,7 +195,9 @@ def crate_translator(clean_crate):
                 except exceptions.ProgrammingError:
                     pass
 
-    with Translator(CrateConnectionData(host=crate_host, port=crate_port, db_user=crate_db_username, db_pass=crate_db_password)) as trans:
+    with Translator(CrateConnectionData(host=crate_host, port=crate_port,
+                                        db_user=crate_db_username,
+                                        db_pass=crate_db_password)) as trans:
         yield trans
         trans.dispose_connection()
 
@@ -226,7 +230,8 @@ def timescale_translator():
 
         def entity_types(self, fiware_service=None, **kwargs):
             r = PostgresTranslator.query_entity_types(
-                self, entity_type=None, fiware_service=fiware_service, **kwargs)
+                self, entity_type=None, fiware_service=fiware_service,
+                **kwargs)
             return r
 
         def clean(self, fiware_service=None, **kwargs):
@@ -527,7 +532,10 @@ def ngsi_ld():
             "type": "GeoProperty",
             "value": {
                 "type": "Point",
-                "coordinates": [-3.164485591715449, 40.62785133667262]
+                "coordinates": [
+                    -3.164485591715449,
+                    40.62785133667262
+                ]
             }
         },
         "areaServed": {
@@ -574,9 +582,52 @@ def ngsi_ld():
             }
         },
         "@context": [
-            "https://schema.lab.fiware.org/ld/context",
+            "https://smartdatamodels.org/context.jsonld",
             "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
         ]
+    }
+
+    return entity
+
+
+@pytest.fixture
+def ngsi_ld_partially_expanded():
+    """
+    :return: dict
+        The NGSI LD model as received within an Orion notification.
+    """
+    entity = {
+        "@context": "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.3.jsonld",
+        "id": "urn:ngsi-ld:Building:farm001",
+        "type": "https://uri.fiware.org/ns/data-models#Building",
+        "https://schema.org/address": {
+            "type": "Property",
+            "value": {
+                "streetAddress": "Großer Stern 1",
+                "addressRegion": "Berlin",
+                "addressLocality": "Tiergarten",
+                "postalCode": "10557"
+            },
+            "verified": {
+                "type": "Property",
+                "value": True
+            }
+        },
+        "name": {
+            "type": "Property",
+            "value": "Victory Farm"
+        },
+        "https://uri.fiware.org/ns/data-models#category": {
+            "type": "Property",
+            "value": "farm"
+        },
+        "location": {
+            "type": "GeoProperty",
+            "value": {
+                "type": "Point",
+                "coordinates": [13.3505, 52.5144]
+            }
+        }
     }
 
     return entity
