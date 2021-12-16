@@ -1,5 +1,5 @@
 from geocoding import geocoding
-from cache.factory import get_cache, is_cache_available, is_geo_coding_available
+from cache.factory import get_cache, is_cache_available, is_geocoding_enabled
 from translators.factory import CRATE_BACKEND, TIMESCALE_BACKEND, \
     default_backend
 
@@ -36,7 +36,7 @@ def check_geocoder():
     """
     Geocoder is relevant only when geocoding usage is enabled.
     """
-    if not is_geo_coding_available():
+    if not is_geocoding_enabled():
         return {'status': 'pass'}
 
     return geocoding.get_health()

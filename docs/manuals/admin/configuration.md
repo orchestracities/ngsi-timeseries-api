@@ -25,6 +25,7 @@ To configure QuantumLeap you can use the following environment variables:
 | `USE_GEOCODING`    | `True` or `False` enable or disable geocoding |
 | `CACHE_GEOCODING`  | `True` or `False` enable or disable caching for geocoding |
 | `CACHE_QUERIES`    | `True` or `False` enable or disable caching for queries |
+| `CACHE_REMOTE_CONTEXT`    | `True` or `False` enable or disable caching for ngsi-ld remote context |
 | `DEFAULT_CACHE_TTL`| Time to live of metadata cache, default: 60 (seconds) |                              |
 | `QL_CONFIG`        | Pathname for tenant  configuration  |
 | `QL_DEFAULT_DB`    | Default backend: `timescale` or `crate`  |

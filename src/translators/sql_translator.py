@@ -13,7 +13,7 @@ import dateutil.parser
 from typing import Any, List, Optional, Sequence
 from uuid import uuid4
 
-from cache.factory import get_cache, is_cache_available
+from cache.factory import get_query_cache, is_query_cache_available
 from translators.insert_splitter import to_insert_batches
 from utils.connection_manager import Borg
 # NGSI TYPES
@@ -1785,9 +1785,9 @@ class QueryCacheManager(Borg):
 
     def __init__(self):
         super(QueryCacheManager, self).__init__()
-        if is_cache_available() and self.cache is None:
+        if is_query_cache_available() and self.cache is None:
             try:
-                self.cache = get_cache()
+                self.cache = get_query_cache()
             except Exception as e:
                 self.logger.warning("Caching not available:" + str(e),
                                     exc_info=True)

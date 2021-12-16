@@ -1,9 +1,10 @@
 import string
 import urllib.parse as urllib_parse
-from aiohttp_client_cache import CachedSession, RedisBackend
+from aiohttp_client_cache import CachedSession
 from pyld import jsonld
 import re
 from pyld.jsonld import JsonLdError, parse_link_header, LINK_HEADER_REL
+from cache.factory import get_remote_context_cache
 
 
 def cached_aiohttp_document_loader(loop=None, secure=False, **kwargs):
@@ -44,7 +45,7 @@ def cached_aiohttp_document_loader(loop=None, secure=False, **kwargs):
                     'the URL\'s scheme is not "https".',
                     'jsonld.InvalidUrl', {'url': url},
                     code='loading document failed')
-            async with CachedSession(cache=RedisBackend('context-cache', address='redis://localhost', expire_after=600), loop=loop) as session:
+            async with CachedSession(cache=get_remote_context_cache(), loop=loop) as session:
                 async with session.get(url,
                                        headers=headers,
                                        **kwargs) as response:
