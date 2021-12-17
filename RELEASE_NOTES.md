@@ -4,6 +4,8 @@
 
 ### New features
 
+- Removed subscription API (#493)
+
 ### Bug fixes
 
 ### Continuous Integration
@@ -12,17 +14,45 @@
 
 ### Technical debt
 
-## 0.9.0-dev
+## 0.8.3
 
 ### New features
 
-- Removed subscription API (#493)
+- Added support for NGSI-LD temporal property 'modifiedAt' and 'observedAt' (#433)
+- Added sql query to retrieve only last values of entities (#500)
+- Support configuration of back off factor for CrateDB (#503)
+- Added exception handling and updated response where
+  'AggrMethod cannot be applied' (#498)
+- Added a warning to use 'id' and 'type' from version 0.9 in all
+   query responses (#584)
+- Added instanceId for each entry received (#565)
+- Support CrateDB authentication (#474)
+- Updated PG8000 to 1.23.0 (#586)
 
 ### Bug fixes
 
+- Fixed automated docker builds are broken (#557)
+- Fixed arbitrary type arrays cause errors when inserting (#537)
+- Fixed OpenAPI spec for /wq/management (#544)
+- Fixed attributes names in /v2/entities query (#478)
+- Fixed index ordering in /v2/entities query (#521)
+
 ### Continuous Integration
 
+- Increase test coverage (#524)
+- Added workflow to check that `RELEASE_NOTES.md` is updated (#582)
+- Added autopep8 workflow also to external pull requests (#601)
+- Added request to update release notes to the pull request template (#585)
+- Added codeql-analysis workflow (#588)
+- Added wait for insert in instanceId and aggregation tests (#588)
+- Added ci support for Crate 4.6.x (#594)
+
 ### Documentation
+
+- Improved contributing docuemntation (#557)
+- Introduced reference about `options=sysAttrs` for ngsi-ld time indexing (#546)
+- Documented API pagination (#511)
+- Revised documentation (#596)
 
 ### Technical debt
 
