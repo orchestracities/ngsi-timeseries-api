@@ -1,6 +1,20 @@
 # QuantumLeap Release Notes
 
-## 0.8.3-dev
+## 0.9.0-dev
+
+### New features
+
+- Removed subscription API (#493)
+
+### Bug fixes
+
+### Continuous Integration
+
+### Documentation
+
+### Technical debt
+
+## 0.8.3
 
 ### New features
 
@@ -32,6 +46,7 @@
 - Added request to update release notes to the pull request template (#585)
 - Added codeql-analysis workflow (#588)
 - Added wait for insert in instanceId and aggregation tests (#588)
+- Added ci support for Crate 4.6.x (#594)
 
 ### Documentation
 
