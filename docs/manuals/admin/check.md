@@ -146,7 +146,7 @@ If you don't use Postman, you can use the equivalent curl commands bellow.
 
 1. Finally, to tidy things up, you can delete all created records.
 
-    Delete records from QL
+    Delete records from QuantumLeap
 
     ```bash
     $ curl -X DELETE http://0.0.0.0:8668/v2/types/AirQualityObserved
@@ -185,9 +185,10 @@ By default, it assumes all services run in a local docker-based deployment.
 
 You can quickly execute the test in a container as shown below. You will have to
 adjust, of course, the urls so that they point to your deployed services. In
-the following example, ORION and QL are reachable by the test container at
-`192.0.0.1` and then, by default, ORION and QL find each other at `orion` and
-`quantumleap` endpoints because both were deployed in the same docker network.
+the following example, Orion and QuantumLeap are reachable by the test container
+at `192.0.0.1` and then, by default, Orion and QuantumLeap find each other at
+`orion` and `quantumleap` endpoints because both were deployed in the same
+docker network.
 
 ```bash
 $ docker run -ti --rm -e ORION_URL="http://192.0.0.1:1026" -e QL_URL="http://192.0.0.1:8668" quantumleap pytest tests/test_integration.py

@@ -1,6 +1,6 @@
 import logging
 
-from translators.crate import CrateTranslatorInstance
+from translators.crate import crate_translator_instance
 from translators.errors import ErrorAnalyzer, CrateErrorAnalyzer, \
     PostgresErrorAnalyzer
 from translators.timescale import postgres_translator_instance
@@ -54,13 +54,13 @@ def translator_for(fiware_service: str):
     backend = backend_id_for(fiware_service)
 
     if backend == CRATE_BACKEND:
-        translator = CrateTranslatorInstance()
+        translator = crate_translator_instance()
         selected = CRATE_BACKEND
     elif backend == TIMESCALE_BACKEND:
         translator = postgres_translator_instance()
         selected = TIMESCALE_BACKEND
     else:
-        translator = CrateTranslatorInstance()
+        translator = crate_translator_instance()
         selected = CRATE_BACKEND
 
     log().debug(

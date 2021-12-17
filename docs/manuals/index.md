@@ -33,7 +33,7 @@ presently QuantumLeap supports both [CrateDB][crate] and
 
 PR [#373](https://github.com/orchestracities/ngsi-timeseries-api/pulls/373)
 introduced basic support for basic [NGSI-LD][ngsi-ld-spec] relying on v2 API.
-In short this means that using the current endpoint QL can
+In short this means that using the current endpoint QuantumLeap can
 store NGSI-LD payloads with few caveats (see
 [#398](https://github.com/orchestracities/ngsi-timeseries-api/issues/398)):
 
@@ -52,11 +52,11 @@ store NGSI-LD payloads with few caveats (see
 
 NGSI-LD temporal queries seem to have a semantic that implies that
 only numeric values are tracked in time series. This was never the case
-for QL that trace over time any attribute (also not numeric ones),
+for QuantumLeap that trace over time any attribute (also not numeric ones),
 since they may change as well.
 
 NGSI-LD semantics also seem to track values over time
-of single attributes. QL to enable to retrieve full entity values in a given
+of single attributes. QuantumLeap to enable to retrieve full entity values in a given
 point in time stores the whole entity in a single table (this avoids the need
 for JOINs that are notoriously time consuming - but on the other hand generates
 more sparse data). In doing so, we create for the entity a single time index,
@@ -66,9 +66,9 @@ all modern timeseries DB (to achieve performance).
 This imply that we have a policy to compute such time index (either custom
 and referring to an attribute of the entity, or using the "latest" time
 metadata linked to the entity or to an attribute).
-The issue is that if the notification payload sent to QL includes all
-attributes, also not update ones, QL will "timestamp" all values (also old ones)
-with that timestamp.
+The issue is that if the notification payload sent to QuantumLeap includes all
+attributes, also not update ones, QuantumLeap will "timestamp" all values
+(also old ones) with that timestamp.
 
 This means that the ability to track a specific value
 of an attribute in a point in time depends on the actual notification.
@@ -90,7 +90,7 @@ QuantumLeap started out as an exploration of an alternative way
 to make historical data available to the FIWARE ecosystem without
 committing to a specific database back end.
 
-## Operation
+## Architecture
 
 Typically QuantumLeap acquires IoT data, in the form of NGSI entities,
 from a FIWARE IoT Agent layer indirectly through NGSI notifications
@@ -106,7 +106,7 @@ that QuantumLeap stores in the database. The below diagram illustrates
 relationships and interactions among these systems in a typical
 QuantumLeap deployment scenario.
 
-![QL Architecture](rsrc/architecture.png)
+![QuantumLeap Architecture](rsrc/architecture.png)
 
 In order for QuantumLeap to receive data from Orion, a client creates
 a subscription in Orion specifying which entities should be notified
@@ -252,13 +252,18 @@ Caching support for queries to databases is *experimental*.
                                   |    Redis    |
                                   ---------------                                        
 
+The cache backend is also used in case of queue workflow centric deployment,
+to store pending tasks to be processed.
+
+### Query cache
+
 As of today, the query caching stores:
 
 - Version of CrateDB. Different version of CrateDB supports different SQL
   dialects, so at each request we check which version of CrateDB
   we are using. By caching this information, each thread will ask
   this information only once. Of course this could be passed as variable,
-  but then live updates would require QL down time. Currently, you can
+  but then live updates would require QuantumLeap down time. Currently, you can
   update from a Crate version to another with almost zero down time (except
   the one caused by Crate not being in ready state), you would need
   only to clear the key `crate` from redis cache. TTL in this case is
@@ -275,66 +280,64 @@ As of today, the query caching stores:
   for a specific entityType are removed only if a entityType is dropped, not
   in case all its values are removed.
 
-**Work Queue Cache**
-QL uses the work queue for NGSI notifications. When an entity payload
-comes through the notify endpoint, the Web app turns the payload
-into a task to save it to the DB, adds the task to the queue and returns
-a `200` to the client immediately. A separate instance of QL, configured as
-a queue worker, fetches the task from the queue and runs it to actually insert
-the NGSI entities into the DB, possibly retrying the insert at a later time
-if it fails. Clients connect to the Web app to manage notify tasks
-in the queue.
-When using a work queue, there are two sets of QuantumLeap processes-
-set of Web servers that add tasks to a queue and a pool of queue worker
-processes that fetch tasks from the queue and run them asynchronously.
-The Web servers are QuantumLeap Web app instances configured to offload
-tasks to the work queue through the various `WQ_*` environment variables
-available for the Web app. A worker processes is a Python interpreter loaded
-with the same code as the Web app but started with a different entry point.
-To configure you can use the following environment variables-
+Query caching can be configured with the following variables:
 
-- `WQ_OFFLOAD_WORK` - `Whether to offload insert tasks to a work queue
-default: False`
-- `WQ_RECOVER_FROM_ENQUEUEING_FAILURE` - `Whether to run tasks immediately
-if a work queue is not available. Default: False`
-- `WQ_MAX_RETRIES` - `How many times work queue processors should retry failed
-tasks. Default: 0 (no retries).`
-- `WQ_FAILURE_TTL` - `How long, in seconds, before removing failed tasks from
-the work queue. Default: 604800 (a week).`
-- `WQ_SUCCESS_TTL` - `How long, in seconds, before removing successfully run
-tasks from the work queue.Default: 86400 (a day)`
-- `WQ_WORKERS` - `How many worker queue processors to spawn`
+- `CACHE_QUERIES`: `True` or `False` enable or disable caching for queries
+- `DEFAULT_CACHE_TTL`: Time to live of metadata cache, default: `60` (seconds)
 
-Further info about those variables in the following
-[link](orchestracities/ngsi-timeseries-api/blob/master/docs/manuals/admin/configuration.md)
+### Geocoding cache
 
-**Geocoding cache**
-This module is designed to complement QuantumLeap in the treatment of NGSI
-entities containing geo-data attributes.
-The main usage: call method `'add_location'` passing your entity. If the entity
-has an attribute called `'address'` and does not have an attribute called
-`'location'`, this function will add a `'location'` attribute with a geo-json
-attribute generated out of the information found in the `'address'` attribute.
-QuantumLeap interprets this as an address field.
+This feature allows to support QuantumLeap in the geocoding of NGSI
+entities that have a location expressed as an address and not as GeoJSON.
+The geocoding feature adds a GeoJSON location to the entity leveraging
+the address contained in the entity: from the country, city, street
+name and postal number, a request to the geocoding service is generated.
+The response, depending of the available information and the geocoder capacity
+may be a point, a line or a polygon.
 
-It adds to the entity an attribute called location of the corresponding
-geo-type. If the address is a complete address with city, street
-name and postal number, it maps that to a point and hence the generated
-attribute will be of type geo:point. Without a postal number, the address
-will represent the street or the city boundaries or even the country boundaries.
-
-QuantumLeap uses Open Street Maps (OSM) to find the geo-location corresponding
-to the entity's address. This is usually a rather expensive call, thus a Redis
+QuantumLeap uses Open Street Maps (OSM) to geocode the entity's address.
+This is usually a rather expensive call, thus a Redis
 cache is used to avoid looking up the same address over and over again over a
-short period of time---e.g. think a batch entity update containing several
+short period of time --- e.g. think a batch entity update containing several
 entities sharing the same address. To enable caching of geo-location data,
 you need to use the following environment variable:
 
-To enable this, need to pass:
-  `CACHE_GEOCODING`: `True or False enable or disable caching for geocoding`
+- `CACHE_GEOCODING`: `True` or `False`
 
 Also the environment variables `REDIS_HOST` and `REDIS_PORT`
 respectively set to the location of REDIS instance and its access port.
+
+### Work Queue cache
+
+QuantumLeap may be configured to use a work queue for NGSI notifications.
+In this case, when an entity payload comes through the notify endpoint,
+the API queues the payload as a task in the cache and returns a `200`
+to the client immediately. A separate instance of QuantumLeap, configured as
+a queue worker, fetches the task from the queue and runs it to actually insert
+the NGSI entities into the DB, possibly retrying the insert at a later time
+if it fails.
+
+When using a work queue, you will have two type of QuantumLeap processes:
+a type to expose the API and store payloads in the queue;
+and a type to execute the queue worker that asynchronously fetches tasks from
+the queue.
+The work queue set-up is enabled and configured through the `WQ_*` environment
+variables:
+
+- `WQ_OFFLOAD_WORK` - Whether to offload insert tasks to a work queue
+default: `False`
+- `WQ_RECOVER_FROM_ENQUEUEING_FAILURE` - Whether to run tasks immediately
+if a work queue is not available. Default: `False`
+- `WQ_MAX_RETRIES` - How many times work queue processors should retry failed
+tasks. Default: `0` (no retries).
+- `WQ_FAILURE_TTL` - How long, in seconds, before removing failed tasks from
+the work queue. Default: `604800` (a week).
+- `WQ_SUCCESS_TTL` - How long, in seconds, before removing successfully run
+tasks from the work queue. Default: `86400` (a day)
+- `WQ_WORKERS` - How many worker queue processors to spawn
+
+Further info about these variables is available
+[here](./admin/configuration.md).
 
 ## Further Readings
 
