@@ -15,7 +15,7 @@ from uuid import uuid4
 
 from cache.factory import get_cache, is_cache_available
 from translators.insert_splitter import to_insert_batches
-from utils.connection_manager import ConnectionManager
+from utils.connection_manager import Borg
 
 # NGSI TYPES
 # Based on Orion output because official docs don't say much about these :(
@@ -118,9 +118,9 @@ class SQLTranslator(base_translator.BaseTranslator):
 
     start_time = None
 
-    def __init__(self, host, port, db_name, connection, query):
+    def __init__(self, host, port, db_name):
         super(SQLTranslator, self).__init__(host, port, db_name)
-        qcm = QueryCacheManager(connection, query)
+        qcm = QueryCacheManager()
         self.cache = qcm.get_query_cache()
         self.default_ttl = None
         if self.cache:
@@ -1782,11 +1782,11 @@ class SQLTranslator(base_translator.BaseTranslator):
                                     exc_info=True)
 
 
-class QueryCacheManager(ConnectionManager):
+class QueryCacheManager(Borg):
     cache = None
 
-    def __init__(self, connection, query):
-        super(QueryCacheManager, self ).__init__( connection, query)
+    def __init__(self):
+        super(QueryCacheManager, self ).__init__()
         if is_cache_available() and self.cache is None:
             try:
                 self.cache = get_cache()

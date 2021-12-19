@@ -15,6 +15,7 @@ import geocoding.slf.jsoncodec
 from geocoding.slf.querytypes import SlfQuery
 import geocoding.slf.wktcodec
 from utils.cfgreader import *
+from sqlalchemy import create_engine
 from utils.connection_manager import ConnectionManager
 
 # POSTGRES TYPES
@@ -88,8 +89,9 @@ class PostgresTranslator(sql_translator.SQLTranslator):
         self.dbCacheName = 'timescale'
 
     def setup(self):
-        self.ccm = ConnectionManager()
-        self.connection = self.ccm.get_connection('timescale')
+        url = "timescale://{}:{}".format(self.host, self.port)
+        self.engine = sa.create_engine(url, connect_args={"pool_size": 10})
+        self.connection = self.engine.connect()
         if self.connection is None:
             try:
                 pg8000.paramstyle = "qmark"

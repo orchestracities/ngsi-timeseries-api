@@ -12,6 +12,7 @@ from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
     NGSI_GEOJSON, NGSI_GEOPOINT, NGSI_TEXT, NGSI_STRUCTURED_VALUE, \
     NGSI_LD_GEOMETRY, TIME_INDEX, METADATA_TABLE_NAME, FIWARE_SERVICEPATH
 import logging
+from sqlalchemy import create_engine
 from .crate_geo_query import from_ngsi_query
 from utils.cfgreader import EnvReader, StrVar, IntVar, FloatVar
 from utils.connection_manager import ConnectionManager
@@ -43,18 +44,18 @@ CRATE_TO_NGSI['string_array'] = 'Array'
 class CrateTranslator(sql_translator.SQLTranslator):
     NGSI_TO_SQL = NGSI_TO_SQL
 
-    def __init__(self, connection, query , host, port=4200, db_name="ngsi-tsdb"):
-        super(CrateTranslator, self).__init__(host, connection, query , port, db_name)
+    def __init__(self, host, port=4200, db_name="ngsi-tsdb"):
+        super(CrateTranslator, self).__init__(host, port, db_name)
         self.logger = logging.getLogger(__name__)
         self.dbCacheName = 'crate'
         self.ccm = None
         self.connection = None
         self.cursor = None
 
-    def setup(self, connection, query):
-        url = "{}:{}".format(self.host, self.port)
-        self.ccm = ConnectionManager()
-        self.connection = self.ccm.get_connection('crate')
+    def setup(self):
+        url = "crate://{}:{}".format(self.host, self.port)
+        self.engine = sa.create_engine(url, connect_args={"pool_size": 10})
+        self.connection = self.engine.connect()
         # Added backoff_factor for retry interval between attempt of
         # consecutive retries
         backoff_factor = EnvReader(log=logging.getLogger(__name__).debug) \
