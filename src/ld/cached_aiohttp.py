@@ -51,15 +51,23 @@ def cached_aiohttp_document_loader(loop=None, secure=False, **kwargs):
                                        **kwargs) as response:
                     # Allow any content_type in trying to parse json
                     # similar to requests library
-                    json_body = await response.json(content_type=None)
                     content_type = response.headers.get('content-type')
+                    body = None
+                    if content_type == 'application/ld+json' or content_type == 'application/json':
+                        body = await response.json(content_type=None)
+                    else:
+                        body = await response.text()
                     if not content_type:
                         content_type = 'application/octet-stream'
+                    if 'text/html' in content_type:
+                        content_type = 'text/html'
+                    if 'application/xhtml+xml' in content_type:
+                        content_type = 'application/xhtml+xml'
                     doc = {
                         'contentType': content_type,
                         'contextUrl': None,
                         'documentUrl': response.url.human_repr(),
-                        'document': json_body
+                        'document': body
                     }
                     link_header = response.headers.get('link')
                     if link_header:
@@ -67,23 +75,24 @@ def cached_aiohttp_document_loader(loop=None, secure=False, **kwargs):
                             LINK_HEADER_REL)
                         # only 1 related link header permitted
                         if linked_context and content_type != 'application/ld+json':
-                          if isinstance(linked_context, list):
-                              raise JsonLdError(
-                                  'URL could not be dereferenced, '
-                                  'it has more than one '
-                                  'associated HTTP Link Header.',
-                                  'jsonld.LoadDocumentError',
-                                  {'url': url},
-                                  code='multiple context link headers')
-                          doc['contextUrl'] = linked_context['target']
-                        linked_alternate = parse_link_header(link_header).get('alternate')
+                            if isinstance(linked_context, list):
+                                raise JsonLdError(
+                                    'URL could not be dereferenced, '
+                                    'it has more than one '
+                                    'associated HTTP Link Header.',
+                                    'jsonld.LoadDocumentError',
+                                    {'url': url},
+                                    code='multiple context link headers')
+                            doc['contextUrl'] = linked_context['target']
+                        linked_alternate = parse_link_header(
+                            link_header).get('alternate')
                         # if not JSON-LD, alternate may point there
                         if (linked_alternate and
                                 linked_alternate.get('type') == 'application/ld+json' and
                                 not re.match(r'^application\/(\w*\+)?json$', content_type)):
                             doc['contentType'] = 'application/ld+json'
-                            doc['documentUrl'] = jsonld.prepend_base(url, linked_alternate['target'])
-
+                            doc['documentUrl'] = jsonld.prepend_base(
+                                url, linked_alternate['target'])
                     return doc
         except JsonLdError as e:
             raise e
@@ -99,8 +108,14 @@ def cached_aiohttp_document_loader(loop=None, secure=False, **kwargs):
         :param url: the URL to retrieve.
         :return: the RemoteDocument.
         """
-        return loop.run_until_complete(
-            async_loader(url,
-                options.get('headers', {'Accept': 'application/ld+json, application/json'})))
+        document = loop.run_until_complete(
+            async_loader(
+                url, {'Accept': 'application/ld+json, application/json'}))
+        if document['documentUrl'] != url:
+            document = loop.run_until_complete(
+                async_loader(
+                    document['documentUrl'], {
+                        'Accept': 'application/ld+json, application/json'}))
+        return document
 
     return loader

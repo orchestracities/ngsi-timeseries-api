@@ -73,6 +73,7 @@ def test_query_caching_disabled(disable_redis):
     assert factory.is_query_cache_enabled() is False
     assert factory.is_query_cache_available() is False
 
+
 def test_get_query_cache(enable_query_caching):
     assert factory.get_query_cache() is not None
 

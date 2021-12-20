@@ -19,6 +19,7 @@ translators = [
     pytest.lazy_fixture('timescale_translator')
 ]
 
+
 @pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_ngsi_ld(translator, ngsi_ld):
     # Add TIME_INDEX as Reporter would

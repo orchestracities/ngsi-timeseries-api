@@ -188,8 +188,11 @@ def get_remote_context_cache() -> MaybeContextCache:
     """
     env = CacheEnvReader()
     if is_remote_context_cache_enabled():
-        #TODO do we need custom ttl for different caches?
-        return ContextCache('context-cache', address='redis://' + env.redis_host() + ':' + str(env.redis_port()), expire_after=env.default_ttl())
+        # TODO do we need custom ttl for different caches?
+        return ContextCache('context-cache', address='redis://' +
+                            env.redis_host() +
+                            ':' +
+                            str(env.redis_port()), expire_after=env.default_ttl())
 
     log().warning("Cache for remote NGSI-LD context is not enabled.")
     return None

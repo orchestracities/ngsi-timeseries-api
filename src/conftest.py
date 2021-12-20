@@ -606,38 +606,64 @@ def ngsi_ld_partially_expanded():
                 "streetAddress": "Großer Stern 1",
                 "addressRegion": "Berlin",
                 "addressLocality": "Tiergarten",
-                "postalCode": "10557"
-            },
+                "postalCode": "10557"},
             "verified": {
                 "type": "Property",
-                "value": True
-            }
-        },
+                "value": True}},
         "name": {
             "type": "Property",
-            "value": "Victory Farm"
-        },
+                    "value": "Victory Farm"},
         "https://uri.fiware.org/ns/data-models#category": {
             "type": "Property",
-            "value": "farm"
-        },
+            "value": "farm"},
         "location": {
             "type": "GeoProperty",
             "value": {
                 "type": "Point",
-                "coordinates": [13.3505, 52.5144]
-            }
-        }
-    }
+                "coordinates": [
+                    13.3505,
+                    52.5144]}}}
 
     return entity
 
 
 @pytest.fixture
-def ngsi_ld_expanded():
+def ngsi_my_family_according_to_me():
     """
     :return: dict
         The NGSI LD model as received within an Orion notification.
     """
-    entity = {'https://schema.org/areaServed': [{'@type': ['https://uri.etsi.org/ngsi-ld/Property'], 'https://uri.etsi.org/ngsi-ld/hasValue': [{'@value': 'Roundabouts city entrance'}]}], 'https://smart-data-models.github.io/data-models/terms.jsonld#/definitions/circuit': [{'@type': ['https://uri.etsi.org/ngsi-ld/Property'], 'https://uri.etsi.org/ngsi-ld/hasValue': [{'@value': 'C-456-A467'}]}], 'https://smart-data-models.github.io/data-models/terms.jsonld#/definitions/controllingMethod': [{'@type': ['https://uri.etsi.org/ngsi-ld/Property'], 'https://uri.etsi.org/ngsi-ld/hasValue': [{'@value': 'individual'}]}], 'https://smart-data-models.github.io/data-models/terms.jsonld#/definitions/dateLastLampChange': [{'@type': ['https://uri.etsi.org/ngsi-ld/Property'], 'https://uri.etsi.org/ngsi-ld/hasValue': [{'@type': 'https://uri.etsi.org/ngsi-ld/DateTime', '@value': '2016-07-08T08:02:21.753Z'}]}], '@id': 'urn:ngsi-ld:Streetlight:streetlight:guadalajara:4567', 'https://uri.etsi.org/ngsi-ld/default-context/lanternHeight': [{'@type': ['https://uri.etsi.org/ngsi-ld/Property'], 'https://uri.etsi.org/ngsi-ld/hasValue': [{'@value': 10}]}], 'https://uri.etsi.org/ngsi-ld/location': [{'@type': ['https://uri.etsi.org/ngsi-ld/GeoProperty'], 'https://uri.etsi.org/ngsi-ld/hasValue': [{'https://uri.etsi.org/ngsi-ld/coordinates': [{'@value': -3.164485591715449}, {'@value': 40.62785133667262}], '@type': ['https://purl.org/geojson/vocab#Point']}]}], 'https://smart-data-models.github.io/data-models/terms.jsonld#/definitions/locationCategory': [{'@type': ['https://uri.etsi.org/ngsi-ld/Property'], 'https://uri.etsi.org/ngsi-ld/hasValue': [{'@value': 'centralIsland'}]}], 'https://smart-data-models.github.io/data-models/terms.jsonld#/definitions/powerState': [{'@type': ['https://uri.etsi.org/ngsi-ld/Property'], 'https://uri.etsi.org/ngsi-ld/hasValue': [{'@value': 'off'}]}], 'https://smart-data-models.github.io/data-models/terms.jsonld#/definitions/refStreetlightGroup': [{'https://uri.etsi.org/ngsi-ld/hasObject': [{'@id': 'urn:ngsi-ld:StreetlightGroup:streetlightgroup:G345'}], '@type': ['https://uri.etsi.org/ngsi-ld/Relationship']}], 'https://uri.fiware.org/ns/data-models#refStreetlightModel': [{'https://uri.etsi.org/ngsi-ld/hasObject': [{'@id': 'urn:ngsi-ld:StreetlightModel:streetlightmodel:STEEL_Tubular_10m'}], '@type': ['https://uri.etsi.org/ngsi-ld/Relationship']}], 'https://uri.etsi.org/ngsi-ld/status': [{'@type': ['https://uri.etsi.org/ngsi-ld/Property'], 'https://uri.etsi.org/ngsi-ld/hasValue': [{'@value': 'ok'}]}], '@type': ['https://uri.fiware.org/ns/data-models#Streetlight']}
+    entity = {
+        "@context": {
+            "federico": "http://example/family/federico",
+            "michela": "http://example/family/michela",
+            "me": "http://example/family/husband",
+            "spouse": "http://example/family/wife",
+        },
+        "id": "urn:ngsi-ld:Family:family-1",
+        "type": "http://example#Family",
+        "me": "federico",
+        "spouse": "michela"
+    }
+    return entity
+
+
+@pytest.fixture
+def ngsi_my_family_according_to_my_wife():
+    """
+    :return: dict
+        The NGSI LD model as received within an Orion notification.
+    """
+    entity = {
+        "@context": {
+            "federico": "http://example/family/federico",
+            "michela": "http://example/family/michela",
+            "spouse": "http://example/family/husband",
+            "me": "http://example/family/wife",
+        },
+        "id": "urn:ngsi-ld:Family:family-1",
+        "type": "http://example#Family",
+        "me": "michela",
+        "spouse": "federico"
+    }
     return entity
