@@ -32,7 +32,8 @@ from geocoding import geocoding
 from geocoding.factory import get_geo_cache, is_geo_coding_available
 from requests import RequestException
 from translators.sql_translator import SQLTranslator
-from utils.common import iter_entity_attrs, TIME_INDEX_NAME
+from utils.common import iter_entity_attrs
+from default import TIME_INDEX_NAME
 import json
 import logging
 import requests

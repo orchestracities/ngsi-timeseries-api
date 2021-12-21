@@ -24,8 +24,10 @@ objsize = "~=0.3"
 redis = "~=3.5"
 requests = ">=2.20"
 rq = "~=1.8"
-# run `pipenv install --dev` to get the packages below in your env
+fastapi = ">=0.70.1"
+uvicorn = {extras = ["standard"], version = "*"}
 
+# run `pipenv install --dev` to get the packages below in your env
 [dev-packages]
 aiohttp = ">=3.7.4"
 backoff = "~=1.1"

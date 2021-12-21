@@ -1,4 +1,4 @@
-from utils.common import TIME_INDEX_NAME
+from default import TIME_INDEX_NAME
 
 
 class BaseTranslator(object):

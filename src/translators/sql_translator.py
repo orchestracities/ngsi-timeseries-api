@@ -16,17 +16,7 @@ from uuid import uuid4
 from cache.factory import get_cache, is_cache_available
 from translators.insert_splitter import to_insert_batches
 from utils.connection_manager import Borg
-# NGSI TYPES
-# Based on Orion output because official docs don't say much about these :(
-NGSI_DATETIME = 'DateTime'
-NGSI_ID = 'id'
-NGSI_GEOJSON = 'geo:json'
-NGSI_LD_GEOMETRY = 'GeoProperty'
-NGSI_GEOPOINT = 'geo:point'
-NGSI_ISO8601 = 'ISO8601'
-NGSI_STRUCTURED_VALUE = 'StructuredValue'
-NGSI_TEXT = 'Text'
-NGSI_TYPE = 'type'
+from default import *
 
 # QUANTUMLEAP Internals
 # A table to store the configuration and metadata of each entity type.
