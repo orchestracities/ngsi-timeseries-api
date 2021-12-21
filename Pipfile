@@ -24,9 +24,10 @@ objsize = "~=0.3"
 redis = "~=3.5"
 requests = ">=2.20"
 rq = "~=1.8"
-# run `pipenv install --dev` to get the packages below in your env
+dependency-injector = ">=4.0,<5.0"
 
 [dev-packages]
+# run `pipenv install --dev` to get the packages below in your env
 aiohttp = ">=3.7.4"
 backoff = "~=1.1"
 matplotlib = "~=3.3"

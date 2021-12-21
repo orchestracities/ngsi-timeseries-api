@@ -1,4 +1,5 @@
 TIME_INDEX_NAME = 'time_index'
+QL_CONFIG_ENV_VAR = 'QL_CONFIG'
 
 
 def entity_pk(entity):

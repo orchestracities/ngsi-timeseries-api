@@ -5,13 +5,12 @@ from translators.errors import ErrorAnalyzer, CrateErrorAnalyzer, \
     PostgresErrorAnalyzer
 from translators.timescale import postgres_translator_instance
 from utils.cfgreader import EnvReader, YamlReader, StrVar, MaybeString
+from utils.common import QL_CONFIG_ENV_VAR
 from utils.jsondict import maybe_string_match
 
 
 CRATE_BACKEND = 'crate'
 TIMESCALE_BACKEND = 'timescale'
-
-QL_CONFIG_ENV_VAR = 'QL_CONFIG'
 
 QL_DEFAULT_DB_ENV_VAR = 'QL_DEFAULT_DB'
 
