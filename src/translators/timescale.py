@@ -14,6 +14,7 @@ from geocoding.slf.geotypes import *
 import geocoding.slf.jsoncodec
 from geocoding.slf.querytypes import SlfQuery
 import geocoding.slf.wktcodec
+import sqlalchemy as sa
 from utils.cfgreader import *
 from sqlalchemy import create_engine
 from utils.connection_manager import ConnectionManager

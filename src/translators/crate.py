@@ -12,6 +12,7 @@ from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
     NGSI_GEOJSON, NGSI_GEOPOINT, NGSI_TEXT, NGSI_STRUCTURED_VALUE, \
     NGSI_LD_GEOMETRY, TIME_INDEX, METADATA_TABLE_NAME, FIWARE_SERVICEPATH
 import logging
+import sqlalchemy as sa
 from sqlalchemy import create_engine
 from .crate_geo_query import from_ngsi_query
 from utils.cfgreader import EnvReader, StrVar, IntVar, FloatVar
@@ -48,7 +49,6 @@ class CrateTranslator(sql_translator.SQLTranslator):
         super(CrateTranslator, self).__init__(host, port, db_name)
         self.logger = logging.getLogger(__name__)
         self.dbCacheName = 'crate'
-        self.ccm = None
         self.connection = None
         self.cursor = None
 
@@ -64,11 +64,11 @@ class CrateTranslator(sql_translator.SQLTranslator):
             try:
                 self.connection = client.connect(
                     [url], error_trace=True, backoff_factor=backoff_factor)
-                self.ccm.set_connection('crate', self.connection)
+                self.engine.set_connection('crate', self.connection)
             except Exception as e:
                 self.logger.warning(str(e), exc_info=True)
                 raise e
-
+     
         self.cursor = self.connection.cursor()
         # TODO this reduce queries to crate,
         # but only within a single API call to QUANTUMLEAP
@@ -92,7 +92,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
         if analyzer.is_aggregation_error():
             return "AggrMethod cannot be applied"
         if analyzer.is_transient_error():
-            self.ccm.reset_connection('crate')
+            self.engine.reset_connection('crate')
             self.setup()
 
     def get_db_version(self):
