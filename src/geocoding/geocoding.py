@@ -299,8 +299,8 @@ def get_health():
     :return: dictionary with geocoder service health. ::see:: reporter.health.
     """
     try:
-        location = asyncio.run(geocode("New York city"))
-    except (requests.exceptions.RequestException, Exception) as e:
+        location = asyncio.run(geocode("New York City"))
+    except (Exception) as e:
         # geocoder docs say exception will be raised to the caller
         time = datetime.now().isoformat()
         output = "{}".format(e)
