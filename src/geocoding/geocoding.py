@@ -122,7 +122,6 @@ def add_location(entity, raise_error=False, cache=None):
     try:
         info = asyncio.run(geocode(key))
 
-
     except Exception as e:
         logging.error(repr(e))
         if raise_error:
@@ -179,7 +178,11 @@ def _extract_most_accurate_osm_result(osm_response, geom_type):
     if len(results_of_specified_type) > 0:
         return results_of_specified_type[0].geojson
     elif geom_type == 'Point' and len(results) > 0:
-        return {'type': 'geo:point', 'value': "{}, {}".format(results[0].latitude, results[0].longitude)}
+        return {
+            'type': 'geo:point',
+            'value': "{}, {}".format(
+                results[0].latitude,
+                results[0].longitude)}
     return None
 
 
