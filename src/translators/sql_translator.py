@@ -1741,8 +1741,8 @@ class SQLTranslator(base_translator.BaseTranslator):
                 self.logger.warning("Caching not available, metadata data may "
                                     "not be consistent: " + str(e),
                                     exc_info=True)
-        res = self.connection.execute(stmt, parameters).fetchall()
-        #res = self.cursor.fetchall()
+        self.cursor.execute(stmt, parameters)
+        res = self.cursor.fetchall()
         if res and self.cache:
             try:
                 self._cache(tenant_name, key, res, ex)

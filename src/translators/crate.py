@@ -55,7 +55,6 @@ class CrateTranslator(sql_translator.SQLTranslator):
     def setup(self):
         url = "crate://{}:{}".format(self.host, self.port)
         self.engine = sa.create_engine(url, connect_args={"pool_size": 10})
-        self.connection = self.engine.connect()
         # Added backoff_factor for retry interval between attempt of
         # consecutive retries
         backoff_factor = EnvReader(log=logging.getLogger(__name__).debug) \
@@ -64,12 +63,10 @@ class CrateTranslator(sql_translator.SQLTranslator):
             try:
                 self.connection = client.connect(
                     [url], error_trace=True, backoff_factor=backoff_factor)
-                self.engine.set_connection('crate', self.connection)
             except Exception as e:
                 self.logger.warning(str(e), exc_info=True)
                 raise e
-     
-        self.cursor = self.connection.cursor()
+        
         # TODO this reduce queries to crate,
         # but only within a single API call to QUANTUMLEAP
         # we need to think if we want to cache this information
