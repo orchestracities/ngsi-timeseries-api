@@ -41,12 +41,12 @@ RUN \
 WORKDIR /usr/local
 RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
 RUN pip install pipenv
-RUN mkdir -p /src/ngsi-timeseries-api
-COPY Pipfile /src/ngsi-timeseries-api/Pipfile
-COPY Pipfile.lock /src/ngsi-timeseries-api/Pipfile.lock
-RUN cd /src/ngsi-timeseries-api && { pipenv lock -r > /src/ngsi-timeseries-api/requirements.txt; }
-RUN pip install -t /src/ngsi-timeseries-api -r /src/ngsi-timeseries-api/requirements.txt
-RUN pip install supervisor
+#RUN mkdir -p /src/ngsi-timeseries-api
+COPY Pipfile /usr/local/Pipfile
+COPY Pipfile.lock /usr/local/Pipfile.lock
+RUN pipenv lock -r > /usr/local/requirements.txt;
+#RUN pip install -t /src/ngsi-timeseries-api -r /src/ngsi-timeseries-api/requirements.txt
+#RUN pip install supervisor
 
 
 ########################################################################################
@@ -76,10 +76,10 @@ RUN \
 	 	exit 1; \
 	fi
 COPY --from=builder /usr/local /usr/local
-COPY --from=builder /src/ngsi-timeseries-api/requirements.txt /src/ngsi-timeseries-api/requirements.txt
+#COPY --from=builder /src/ngsi-timeseries-api/requirements.txt /src/ngsi-timeseries-api/requirements.txt
 COPY . /src/ngsi-timeseries-api/
 WORKDIR /src/ngsi-timeseries-api/
-RUN pip install -r requirements.txt
+RUN pip install -r /usr/local/requirements.txt
 WORKDIR /src/ngsi-timeseries-api/src
 
 ENV PYTHONPATH=$PWD:$PYTHONPATH
