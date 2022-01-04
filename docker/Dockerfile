@@ -125,6 +125,7 @@ RUN \
 COPY --from=builder /opt/quantumleap /opt/quantumleap
 COPY --from=builder /opt/venv /opt/venv
 
+USER root
 RUN \
 	if [ "${PACKAGE_MANAGER}" = "apk"  ]; then \
 		adduser -D -H app-user; \
