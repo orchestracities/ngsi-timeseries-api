@@ -132,21 +132,21 @@ The
 [Dockerfile](https://github.com/orchestracities/ngsi-timeseries-api/blob/master/docker/Dockerfile)
 associated with this image can be used to build an image in several ways:
 
--   By default, the `Dockerfile` retrieves the **latest** version of the
+- By default, the `Dockerfile` retrieves the **latest** version of the
     codebase direct from GitHub (the `build-arg` is optional):
 
 ```console
 docker build -t quantumleap . --build-arg DOWNLOAD=latest
 ```
 
--   You can alter this to obtain the last **stable** release run this
+- You can alter this to obtain the last **stable** release run this
     `Dockerfile` with the build argument `DOWNLOAD=stable`
 
 ```console
 docker build -t quantumleap . --build-arg DOWNLOAD=stable
 ```
 
--   You can also download a specific release by running this `Dockerfile` with
+- You can also download a specific release by running this `Dockerfile` with
     the build argument `DOWNLOAD=<version>`
 
 ```console
