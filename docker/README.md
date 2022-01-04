@@ -110,18 +110,18 @@ Many settings can be configured using Docker environment variables. A typical
 QuantumLeap Docker container is driven by environment variables such as those
 shown below:
 
--   `CRATE_HOST` - CrateDB Host
--   `CRATE_PORT` - CrateDB Port
--   `CRATE_DB_USERNAME` - CrateDB Username
--   `CRATE_DB_PASSWORD` - CrateDB Password
--   `POSTGRES_HOST` - PostgreSQL Host
--   `POSTGRES_PORT` - PostgreSQL Port
--   `POSTGRES_DB_NAME` - PostgreSQL default db
--   `POSTGRES_DB_USER` - PostgreSQL user
--   `POSTGRES_DB_PASS` - PostgreSQL password
--   `POSTGRES_USE_SSL` - t or f enable SSL
--   `REDIS_HOST` - Redis Host
--   `REDIS_PORT` - Redis Port
+- `CRATE_HOST` - CrateDB Host
+- `CRATE_PORT` - CrateDB Port
+- `CRATE_DB_USERNAME` - CrateDB Username
+- `CRATE_DB_PASSWORD` - CrateDB Password
+- `POSTGRES_HOST` - PostgreSQL Host
+- `POSTGRES_PORT` - PostgreSQL Port
+- `POSTGRES_DB_NAME` - PostgreSQL default db
+- `POSTGRES_DB_USER` - PostgreSQL user
+- `POSTGRES_DB_PASS` - PostgreSQL password
+- `POSTGRES_USE_SSL` - t or f enable SSL
+- `REDIS_HOST` - Redis Host
+- `REDIS_PORT` - Redis Port
 
 A full list can be found in the
 [Quantum Leap Documentation](https://quantumleap.readthedocs.io/en/latest/admin/configuration/#environment-variables)
