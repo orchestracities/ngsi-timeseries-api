@@ -217,3 +217,25 @@ Currently, the following `--build-arg` parameters are supported:
 | `GITHUB_REPOSITORY` | The name of the GitHub repository to download the source files from, defaults to `ngsi-timeseries-api`                                      |
 | `PACKAGE_MANAGER`   | Package manager to use whilst creating the build, defaults to `apt`                                                                         |
 | `SOURCE_BRANCH`     | The GitHub repository branch to download the source files from, defaults to `master`                                                        |
+
+## Container Command Arguments
+
+You can also pass any valid Gunicorn option as container command arguments to
+add or override options in `server/gconfig.py` ---see `server.grunner` for the
+details. In particular, a convenient way to reconfigure Gunicorn is to mount a
+config file on the container and then run the container with the following
+option
+
+```console
+    --config /path/to/where/you/mounted/your/gunicorn.conf.py
+```
+
+as in the below example
+
+```console
+echo 'workers = 2' > gunicorn.conf.py
+docker run -it --rm \
+     -p 8668:8668 \
+     -v $(pwd)/gunicorn.conf.py:/gunicorn.conf.py
+     quantumleap --config /gunicorn.conf.py
+```
