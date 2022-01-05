@@ -6,7 +6,7 @@ ARG PACKAGE_MANAGER=apk
 
 ########################################################################################
 #
-# This build stage builds the sources
+# This build stage builds the sources locally for testing only.
 #
 # --target=builder
 #
@@ -48,11 +48,12 @@ WORKDIR /opt/quantumleap
 RUN ln -s /usr/include/locale.h /usr/include/xlocale.h; \
 	pip install pipenv; \
 	pipenv lock -r > requirements.txt; \
-	pip install -r requirements.txt;
+	pip install -r requirements.txt; \
+	pip install supervisor;
 
 ########################################################################################
 #
-# This build stage creates an image for testing.
+# This build stage creates an image for testing only.
 #
 ########################################################################################
 
@@ -105,27 +106,8 @@ ENV PYTHONPATH=$PWD:$PYTHONPATH
 
 WORKDIR /opt/quantumleap/src
 RUN \
-	pip install -r ../requirements.txt;
+	pip install -r ../requirements.txt; \
+	pip install supervisor;
+
 EXPOSE 8668
 ENTRYPOINT ["python", "app.py"]
-# NOTE.
-# The above is basically the same as running:
-#
-#     gunicorn server.wsgi --config server/gconfig.py
-#
-# You can also pass any valid Gunicorn option as container command arguments
-# to add or override options in server/gconfig.py---see `server.grunner` for
-# the details.
-# In particular, a convenient way to reconfigure Gunicorn is to mount a config
-# file on the container and then run the container with the following option
-#
-#     --config /path/to/where/you/mounted/your/gunicorn.conf.py
-#
-# as in the below example
-#
-#     $ echo 'workers = 2' > gunicorn.conf.py
-#     $ docker run -it --rm \
-#                  -p 8668:8668 \
-#                  -v $(pwd)/gunicorn.conf.py:/gunicorn.conf.py
-#                  orchestracities/quantumleap --config /gunicorn.conf.py
-#

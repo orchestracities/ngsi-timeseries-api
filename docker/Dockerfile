@@ -83,7 +83,8 @@ WORKDIR /opt/quantumleap
 RUN ln -s /usr/include/locale.h /usr/include/xlocale.h; \
 	pip install pipenv; \
 	pipenv lock -r > requirements.txt; \
-	pip install -r requirements.txt;
+	pip install -r requirements.txt; \
+	pip install supervisor;
 
 ########################################################################################
 #
@@ -143,7 +144,8 @@ ENV PYTHONPATH=$PWD:$PYTHONPATH
 
 WORKDIR /opt/quantumleap/src
 RUN \
-	pip install -r ../requirements.txt;
+	pip install -r ../requirements.txt; \
+	pip install supervisor;
 EXPOSE 8668
 ENTRYPOINT ["python", "app.py"]
 # NOTE.
