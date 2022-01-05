@@ -186,14 +186,13 @@ you wish. The base image defaults to using the `alpine` distro, but other base
 images can be injected using `--build-arg` parameters on the commmand line. For
 example, to create a container based on
 [Red Hat UBI (Universal Base Image) 8](https://developers.redhat.com/articles/2021/11/08/optimize-nodejs-images-ubi-8-nodejs-minimal-image)
-add `BUILDER`, `DISTRO`, `PACKAGE_MANAGER` and `USER` parameters as shown:
+add `BUILDER`, `DISTRO` and `PACKAGE_MANAGER` parameters as shown:
 
 ```console
 docker build -t quantumleap \
   --build-arg BUILDER=registry.access.redhat.com/ubi8/nodejs-14 \
   --build-arg DISTRO=registry.access.redhat.com/ubi8/nodejs-14-minimal \
-  --build-arg PACKAGE_MANAGER=yum \
-  --build-arg USER=1001 . --no-cache
+  --build-arg PACKAGE_MANAGER=yum . --no-cache
 ```
 
 To create a container based on [Debian Linux](https://alpinelinux.org/about/)
