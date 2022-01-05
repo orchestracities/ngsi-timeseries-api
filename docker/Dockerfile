@@ -29,7 +29,7 @@ USER root
 # hadolint ignore=SC2039
 RUN \
 	# Ensure that the chosen package manger is supported by this Dockerfile
-	# also ensure that unzip and git is installed prior to downloading sources
+	# also ensure that prerequisites are installed prior to downloading sources
 	if [ "${PACKAGE_MANAGER}" = "apt"  ]; then \
 		echo -e "\033[0;33mWARNING: Overriding default package manager. Using \"${PACKAGE_MANAGER}\" .\033[0m"; \
 		apt-get update; \
@@ -106,18 +106,14 @@ LABEL "org.opencontainers.image.description"=" FIWARE Generic Enabler to support
 LABEL "org.opencontainers.image.source"="https://github.com/${GITHUB_ACCOUNT}/${GITHUB_REPOSITORY}"
 
 RUN \
-	# Ensure that the chosen package manger is supported by this Dockerfile
-	# also ensure that unzip and git is installed prior to downloading sources
+	# Ensure that prerequisites are installed prior to downloading sources
 	if [ "${PACKAGE_MANAGER}" = "apt"  ]; then \
-		echo -e "\033[0;33mWARNING: Overriding default package manager. Using \"${PACKAGE_MANAGER}\" .\033[0m"; \
 		apt-get update; \
 		apt-get install -y --no-install-recommends curl; \
 	elif [ "${PACKAGE_MANAGER}" = "yum"  ]; then \
-		echo -e "\033[0;33mWARNING: Overriding default package manager. Using \"${PACKAGE_MANAGER}\" .\033[0m"; \
 		yum install -y curl; \
 		yum clean all; \
 	elif [ "${PACKAGE_MANAGER}" = "apk"  ]; then \
-		echo -e "\033[0;34mINFO: Using default \"${PACKAGE_MANAGER}\".\033[0m"; \
 		apk --no-cache --update-cache add curl; \
 	else \
 	 	echo -e "\033[0;31mERROR: Package Manager \"${PACKAGE_MANAGER}\" not supported.\033[0m"; \
