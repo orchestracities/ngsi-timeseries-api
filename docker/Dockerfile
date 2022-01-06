@@ -121,6 +121,7 @@ RUN \
 	fi
 COPY --from=builder /opt/quantumleap /opt/quantumleap
 COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder /opt/quantumleap/LICENSE /licenses/LICENSE
 
 USER root
 RUN \
