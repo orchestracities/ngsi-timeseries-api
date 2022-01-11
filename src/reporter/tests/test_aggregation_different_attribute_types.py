@@ -14,18 +14,17 @@ n_days = 4
 services = ['t1', 't2']
 
 
-def query_url(values=False):
-    url = "{qlUrl}/attrs"
-    if values:
-        url += '/value'
+def query_url(url_path):
+    url = "{qlUrl}/{url_path}"
     return url.format(
         qlUrl=QL_URL,
+        url_path=url_path
     )
 
 
-def query(values=False, params=None, service=None):
+def query(url_path, params=None, service=None):
     h = {'Fiware-Service': service}
-    return requests.get(query_url(values), params=params, headers=h)
+    return requests.get(query_url(url_path), params=params, headers=h)
 
 
 @pytest.fixture(scope='module')
@@ -52,7 +51,30 @@ def test_aggregation_on_different_attribute_types_timescale(
         'aggrMethod': 'min'
     }
     # timescale do not support min on boolean
-    r = query(params=query_params, service=service)
+    # /attrs
+    r = query(url_path="attrs", params=query_params, service=service)
+    assert r.status_code == 404, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+
+    expected = 'AggrMethod cannot be applied'
+
+    assert obtained['error'] == expected
+
+    # /entities/{eid}
+    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    assert r.status_code == 404, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+
+    expected = 'AggrMethod cannot be applied'
+
+    assert obtained['error'] == expected
+
+    # /types/{etype}
+    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
     assert r.status_code == 404, r.text
 
     obtained = r.json()
@@ -63,6 +85,7 @@ def test_aggregation_on_different_attribute_types_timescale(
     assert obtained['error'] == expected
 
     # 'aggrMethod': 'max'
+    # /attrs
 
     query_params = {
         'attrs': attrs,
@@ -70,7 +93,7 @@ def test_aggregation_on_different_attribute_types_timescale(
     }
 
     # timescale do not support max on boolean
-    r = query(params=query_params, service=service)
+    r = query(url_path="attrs", params=query_params, service=service)
     assert r.status_code == 404, r.text
 
     obtained = r.json()
@@ -80,13 +103,37 @@ def test_aggregation_on_different_attribute_types_timescale(
 
     assert obtained['error'] == expected
 
+    # /entities/{eid}
+    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    assert r.status_code == 404, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+
+    expected = 'AggrMethod cannot be applied'
+
+    assert obtained['error'] == expected
+
+    # /types/{etype}
+    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
+    assert r.status_code == 404, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+
+    expected = 'AggrMethod cannot be applied'
+
+    assert obtained['error'] == expected
+
+
     # 'aggrMethod': 'count'
+    # /attrs
 
     query_params = {
         'attrs': attrs,
         'aggrMethod': 'count',
     }
-    r = query(params=query_params, service=service)
+    r = query(url_path="attrs", params=query_params, service=service)
     assert r.status_code == 200, r.text
 
     obtained = r.json()
@@ -140,26 +187,122 @@ def test_aggregation_on_different_attribute_types_timescale(
     obtained = r.json()
     assert obtained == expected
 
-    # 'aggrMethod': 'avg'
+    # /entities/{eid}
+    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    assert r.status_code == 200, r.text
 
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+    expected_attrs = [
+        {
+            'attrName': 'boolean',
+            'values': [4]
+        },
+        {
+            'attrName': 'intensity',
+            'values': [4]
+        },
+        {
+            'attrName': 'temperature',
+            'values': [4]
+        }
+    ]
+
+    expected = {
+        'index': [],
+        'attributes': expected_attrs
+    }
+    obtained = r.json()
+    assert obtained == expected
+
+    # /types/{etype}
+    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
+    assert r.status_code == 200, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+    expected_values = [
+        {
+            'attributes': [
+                {
+                    'attrName': 'boolean',
+                    'values': [4]
+                },
+                {
+                    'attrName': 'intensity',
+                    'values': [4]
+                },
+                {
+                    'attrName': 'temperature',
+                    'values': [4]
+                }
+            ],
+            'entityId': 'TestRoom1',
+            'index': ['', '']
+        }
+    ]
+
+    expected = {
+        'values': expected_values
+    }
+
+    obtained = r.json()
+    assert obtained == expected
+
+
+    # 'aggrMethod': 'avg'
+    # /attrs
     query_params = {
         'attrs': attrs,
         'aggrMethod': 'avg'
     }
-    r = query(params=query_params, service=service)
+    r = query(url_path="attrs", params=query_params, service=service)
     assert r.status_code == 404, r.text
     assert r.json() == {
         "error": "AggrMethod cannot be applied",
         "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
     }
 
-    # 'aggrMethod': 'sum'
+    # /entities/{eid}
+    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "AggrMethod cannot be applied",
+        "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
+    }
 
+    # /types/{etype}
+    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "AggrMethod cannot be applied",
+        "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
+    }
+
+
+    # 'aggrMethod': 'sum'
+    # /attrs
     query_params = {
         'attrs': attrs,
         'aggrMethod': 'sum'
     }
-    r = query(params=query_params, service=service)
+    r = query(url_path="attrs", params=query_params, service=service)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "AggrMethod cannot be applied",
+        "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
+    }
+
+    # /entities/{eid}
+    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "AggrMethod cannot be applied",
+        "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
+    }
+
+    # /types/{etype}
+    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
     assert r.status_code == 404, r.text
     assert r.json() == {
         "error": "AggrMethod cannot be applied",
@@ -176,7 +319,8 @@ def test_aggregation_on_different_data_types_crate(
         'type': entity_type
     }
     # crate supports min on boolean
-    r = query(params=query_params, service=service)
+    # /attrs
+    r = query(url_path="attrs", params=query_params, service=service)
     assert r.status_code == 200, r.text
 
     obtained = r.json()
@@ -230,13 +374,77 @@ def test_aggregation_on_different_data_types_crate(
 
     assert obtained == expected
 
+    # /entities/{eid}
+    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    assert r.status_code == 200, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+
+    expected_attrs = [
+        {
+            'attrName': 'boolean',
+            'values': [False]
+        },
+        {
+            'attrName': 'intensity',
+            'values': ['str1']
+        },
+        {
+            'attrName': 'temperature',
+            'values': [0.0]
+        }
+    ]
+
+    expected = {
+        'index': [],
+        'attributes': expected_attrs
+    }
+
+    assert obtained == expected
+
+    # /types/{etype}
+    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
+    assert r.status_code == 200, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+    expected_values = [
+        {
+            'attributes': [
+                {
+                    'attrName': 'boolean',
+                    'values': [False]
+                },
+                {
+                    'attrName': 'intensity',
+                    'values': ['str1']
+                },
+                {
+                    'attrName': 'temperature',
+                    'values': [0.0]
+                }
+            ],
+            'entityId': 'TestRoom1',
+            'index': ['', '']
+        }
+    ]
+
+    expected = {
+        'values': expected_values
+
+    }
+
+    assert obtained == expected
+
     # 'aggrMethod': 'max'
+    # /attrs
 
     query_params = {
         'attrs': attrs,
         'aggrMethod': 'max',
     }
-    r = query(params=query_params, service=service)
+    r = query(url_path="attrs", params=query_params, service=service)
     assert r.status_code == 200, r.text
 
     obtained = r.json()
@@ -289,13 +497,80 @@ def test_aggregation_on_different_data_types_crate(
     obtained = r.json()
     assert obtained == expected
 
+    # /entities/{eid}
+    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    assert r.status_code == 200, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+
+    expected_attrs = [
+        {
+            'attrName': 'boolean',
+            'values': [True]
+        },
+        {
+            'attrName': 'intensity',
+            'values': ['str1']
+        },
+        {
+            'attrName': 'temperature',
+            'values': [3.0]
+        }
+    ]
+
+    expected = {
+        'index': [],
+        'attributes': expected_attrs
+    }
+
+    obtained = r.json()
+    assert obtained == expected
+
+    # /types/{etype}
+    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
+    assert r.status_code == 200, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+
+    expected_values = [
+        {
+            'attributes': [
+                {
+                    'attrName': 'boolean',
+                    'values': [True]
+                },
+                {
+                    'attrName': 'intensity',
+                    'values': ['str1']
+                },
+                {
+                    'attrName': 'temperature',
+                    'values': [3.0]
+                }
+            ],
+            'entityId': 'TestRoom1',
+            'index': ['', '']
+        }
+    ]
+
+    expected = {
+        'values': expected_values
+    }
+
+    obtained = r.json()
+    assert obtained == expected
+
+
     # 'aggrMethod': 'count'
+    # /attrs
 
     query_params = {
         'attrs': attrs,
         'aggrMethod': 'count',
     }
-    r = query(params=query_params, service=service)
+    r = query(url_path="attrs", params=query_params, service=service)
     assert r.status_code == 200, r.text
 
     obtained = r.json()
@@ -349,26 +624,126 @@ def test_aggregation_on_different_data_types_crate(
     obtained = r.json()
     assert obtained == expected
 
+    # /entities/{eid}
+    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    assert r.status_code == 200, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+
+    expected_attrs = [
+        {
+            'attrName': 'boolean',
+            'values': [4]
+        },
+        {
+            'attrName': 'intensity',
+            'values': [4]
+        },
+        {
+            'attrName': 'temperature',
+            'values': [4]
+        }
+    ]
+
+    expected = {
+        'index': [],
+        'attributes': expected_attrs
+    }
+
+    obtained = r.json()
+    assert obtained == expected
+
+    # /types/{etype}
+    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
+    assert r.status_code == 200, r.text
+
+    obtained = r.json()
+    assert isinstance(obtained, dict)
+
+    expected_values = [
+        {
+            'attributes': [
+                {
+                    'attrName': 'boolean',
+                    'values': [4]
+                },
+                {
+                    'attrName': 'intensity',
+                    'values': [4]
+                },
+                {
+                    'attrName': 'temperature',
+                    'values': [4]
+                }
+            ],
+            'entityId': 'TestRoom1',
+            'index': ['', '']
+        }
+    ]
+
+    expected = {
+        'values': expected_values
+    }
+
+    obtained = r.json()
+    assert obtained == expected
+
     # 'aggrMethod': 'avg'
+    # /attrs
 
     query_params = {
         'attrs': attrs,
         'aggrMethod': 'avg'
     }
-    r = query(params=query_params, service=service)
+    r = query(url_path="attrs", params=query_params, service=service)
     assert r.status_code == 404, r.text
     assert r.json() == {
         "error": "AggrMethod cannot be applied",
         "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
     }
 
+    # /entities/{eid}
+    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "AggrMethod cannot be applied",
+        "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
+    }
+
+    # /types/{etype}
+    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "AggrMethod cannot be applied",
+        "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
+    }
+
+
     # 'aggrMethod': 'sum'
+    # attrs
 
     query_params = {
         'attrs': attrs,
         'aggrMethod': 'sum'
     }
-    r = query(params=query_params, service=service)
+    r = query(url_path="attrs", params=query_params, service=service)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "AggrMethod cannot be applied",
+        "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
+    }
+
+    # /entities/{eid}
+    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "AggrMethod cannot be applied",
+        "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
+    }
+
+    # /types/{etype}
+    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
     assert r.status_code == 404, r.text
     assert r.json() == {
         "error": "AggrMethod cannot be applied",
