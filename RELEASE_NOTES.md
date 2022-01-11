@@ -5,6 +5,7 @@
 ### New features
 
 - Removed subscription API (#493)
+- Added more test cases for Aggregation (#499)
 
 ### Bug fixes
 
