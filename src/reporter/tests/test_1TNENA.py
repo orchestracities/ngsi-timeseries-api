@@ -6,7 +6,6 @@ from utils.tests.common import assert_equal_time_index_arrays
 import pytest
 import requests
 import dateutil.parser
-import time
 
 entity_type = 'Room'
 attr_name_1 = 'temperature'

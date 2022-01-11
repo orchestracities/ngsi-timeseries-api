@@ -5,7 +5,6 @@ import pytest
 import requests
 from utils.tests.common import assert_equal_time_index_arrays
 import dateutil.parser
-import time
 
 entity_type = 'Room'
 entity_id = 'Room0'
