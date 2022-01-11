@@ -35,6 +35,7 @@ FIWARE_SERVICEPATH = 'fiware_servicepath'
 TENANT_PREFIX = 'mt'
 TYPE_PREFIX = 'et'
 TIME_INDEX = 'timeindex'
+ql_version = "0.8.3"
 VALID_AGGR_METHODS = ['count', 'sum', 'avg', 'min', 'max']
 VALID_AGGR_PERIODS = ['year', 'month', 'day', 'hour', 'minute', 'second']
 # The name of the column where we store the original JSON entity received
