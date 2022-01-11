@@ -1,3 +1,4 @@
+#this file is needed since quantumleap 0.7.5 does not support authentication
 version: '3'
 
 services:
@@ -61,15 +62,10 @@ services:
 
   crate:
     image: crate:${CRATE_VERSION:-4.5.1}
-    command: crate -Cauth.host_based.enabled=true
-      -Cauth.host_based.config.0.user=crate
-      -Cauth.host_based.config.0.address=_local_
-      -Cauth.host_based.config.0.method=trust
-      -Cauth.host_based.config.1.user=crate
-      -Cauth.host_based.config.1.address=0.0.0.0/0
-      -Cauth.host_based.config.1.method=trust
-      -Cauth.host_based.config.99.method=password -Ccluster.name=democluster
-      -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*"
+    command: crate
+      -Ccluster.name=democluster
+      -Chttp.cors.enabled=true
+      -Chttp.cors.allow-origin="*"
     ports:
       # Admin UI
       - "4200:4200"

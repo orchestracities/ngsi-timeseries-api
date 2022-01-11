@@ -37,11 +37,8 @@ through a subscription you need to create. It is therefore important that you
 understand well how the NGSIv2 Subscription mechanism works. This is carefully
 explained in the corresponding section of [Orion docs](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions).
 
-To create the subscription, QuantumLeap offers an API endpoint documented
-[here at /subscribe](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
-
-Alternatively, you can directly talk to Orion and create the subscription as you
-prefer. Here's an example of the payload of the subscription you need to create
+You can directly talk to Orion and create the subscription.
+Here's an example of the payload of the subscription you need to create
 in Orion to establish the link Orion-QuantumLeap.
 
 ```json
@@ -73,30 +70,30 @@ in Orion to establish the link Orion-QuantumLeap.
     }
 ```
 
-Important things to notice from the subscription.
+Important things to notice about the subscriptions:
 
 - Notifications must come in complete [NGSI JSON Entity Representation](http://docs.orioncontextbroker.apiary.io/#introduction/specification/json-attribute-representation)
- form. Other forms, such as the [simplified entity representation](http://docs.orioncontextbroker.apiary.io/#introduction/specification/simplified-entity-representation)
- are **NOT** supported by QL because they lack information on attribute types,
- required by QL to make proper translations. This means, *DO NOT* use options
- like `"attrsFormat": "keyValues"`
+  form. Other forms, such as the [simplified entity representation](http://docs.orioncontextbroker.apiary.io/#introduction/specification/simplified-entity-representation)
+  are **NOT** supported by QuantumLeap because they lack information on
+  attribute types, required by QuantumLeap to make proper translations.
+  This means, *DO NOT* use options like `"attrsFormat": "keyValues"`.
 
 - The `"url"` field of the subscription specifies where Orion will send the
-notifications. I.e, this must be QuantumLeap's `/v2/notify` endpoint.
-By default, QuantumLeap listens at port `8668`. This url must be resolvable
-from Orion's container, so avoid using *localhost* or something that will not
-translate either by Docker, your `/etc/hosts` or DNS to the endpoint where
-QuantumLeap is running.
+  notifications. I.e, this must be QuantumLeap's `/v2/notify` endpoint.
+  By default, QuantumLeap listens at port `8668`. This url must be resolvable
+  from Orion's container, so avoid using *localhost* or something that will not
+  translate either by Docker, your `/etc/hosts` or DNS to the endpoint where
+  QuantumLeap is running.
 
 - Though not compulsory, it is highly recommended to include the
-`"metadata": ["dateCreated", "dateModified"]` part in the `notification`
-part of the subscription. This instructs Orion to include the modification time
-of the attributes in the notification. This timestamp will be used as the
-**time index** in the database if possible. See the *Time Index* section for
-more details.
+  `"metadata": ["dateCreated", "dateModified"]` part in the `notification`
+  part of the subscription. This instructs Orion to include the modification
+  time of the attributes in the notification. This timestamp will be used as the
+  **time index** in the database if possible. See the *Time Index* section for
+  more details.
 
 - You can create any valid NGSI subscription for your entities respecting the
-previous rules.
+  previous rules.
 
 ## Data Insertion
 
@@ -134,19 +131,43 @@ before.
 }
 ```
 
-If you have a custom scenario and still want to directly insert to QuantumLeap,
-it is not impossible. However, you will have to use the same payload Orion uses
-in the Notification. Also, you will need attention to some other details you
-will have to discover on your own. This is not fully documented because it's not
-considered a common workflow.
+### Inserting data into QuantumLeap directly
+
+To insert the data directly into QuantumLeap, you can use
+`http://localhost:8668/v2/notify` API, using the same payload
+Orion uses in the Notification. For example:
+
+```bash
+curl http://localhost:8668/v2/notify -s -S -H 'Content-Type: application/json' -d @- <<EOF
+{ 
+    "subscriptionId": "5ce3dbb331dfg9h71aad5deeaa", 
+    "data": [ 
+        { 
+            "id": "Room1", 
+            "temperature": 
+               { 
+                 "value": "10", 
+                 "type": "Number" 
+               }, 
+             "pressure": 
+               { 
+                 "value": "12", 
+                 "type": "Number" 
+               }, 
+            "type": "Room" 
+        } 
+    ] 
+}
+```
+
+The data will be inserted into QuantumLeap successfully.
 
 ### Attributes DataType Translation
 
-You need to make sure your NGSI entities are using the valid NGSI types for the
-attributes, which are documented in the *Specification* section of the
+Generally speaking QuantumLeap assumes that the attributes of injected entities
+uses valid NGSI attribute types, which are documented in the *Specification*
+section of the
 [NGSI API](http://telefonicaid.github.io/fiware-orion/api/v2/latest/).
-See the first column of the translation table below, and mind its
-capitalisation.
 
 The tables below show which attribute types will be translated to which
 [CrateDB](https://crate.io/docs/crate/reference/sql/data_types.html)
@@ -206,17 +227,17 @@ if a_type not in NGSI
 
 ### Data Casting
 
-QuantumLeap uses DB schemas to store data in a flat way. This decision design decision,
+QuantumLeap uses DB schemas to store data in a flat way. This design decision,
 while not being space efficient given that often many values do not change between
 sequential inserts and enforcing attribute to have a consistent type overtime,
 increase the speed of retrieval of full entities removing need for joins that
 would be otherwise requested.
 
-This means that if an entity attribute was in origin received as a `Number`, following
-insert changing the same attribute to `Text` would fail. To mitigate this failures,
-QL attempts data casting, if casting is not possible, values are replaced with `None`,
-to ensure that the insert in the database its not failing totally for the received
-entity.
+This means that if an entity attribute was in origin received as a `Number`,
+following insert changing the same attribute to `Text` would fail. To mitigate
+this failures, QuantumLeap attempts data casting, if casting is not possible,
+values are replaced with `None`, to ensure that the insert in the database its
+not failing totally for the received entity.
 
 The following table shows how the casting works through examples:
 
@@ -276,7 +297,7 @@ header. Note that for a notification to contain such header, the corresponding
 subscription has to be created with an `httpCustom` block, as
 detailed in the *Subscriptions and Custom Notifications* section
 of the [NGSI spec](http://fiware.github.io/specifications/ngsiv2/stable/).
-This is the way you can instruct QL to use custom attributes of the
+This is the way you can instruct QuantumLeap to use custom attributes of the
 notification payload to be taken as *time index* indicators.
 
 1. Custom **time index** metadata. The most recent custom time index
@@ -335,9 +356,41 @@ value notified by Orion.
 1. **dateModified** metadata. The most recent dateModified attribute value
 found in any of the attribute metadata sections in the notification.
 
-1. Finally, QL will use the **Current Time** (the time of notification
+1. Finally, QuantumLeap will use the **Current Time** (the time of notification
 reception) if none of the above options is present or none of the values found
 can actually be converted to a `datetime`.
+
+## GeoCoding
+
+This is an optional feature of QuantumLeap, which helps
+harmonising the way location information is stored in the historical records.
+
+The idea is that if entities arrive in QuantumLeap with an attribute of type
+`StructuredValue` and named `address`, QuantumLeap interprets this as an address
+field typically found in the [FIWARE Data Models](https://github.com/smart-data-models/data-models).
+It then adds to the entity an attribute called `location` of the corresponding
+geo-type. This means, if the address is a complete address with city,
+street name and postal number, it maps that to a point and hence the generated
+attribute will be of type `geo:point`. Without a postal number, the address
+will represent the street (if any) or the city boundaries (if any) or even the
+country boundaries. In these cases the generated location will be of the
+`geo:json` form and will contain the values of such shapes.
+
+**WARNING:** This feature uses [OpenStreetMap](https://www.openstreetmap.org)
+and its Nominatim service. As such, you need to be aware of its
+[copyright notes](https://www.openstreetmap.org/copyright) and most importantly
+of their Usage Policies ([API Usage Policy](https://operations.osmfoundation.org/policies/api/)
+and [Nominatim Usage Policy](https://operations.osmfoundation.org/policies/nominatim/)).
+You should not abuse of this free service and you should cache your requests.
+This is why you better enable caching to use the geocoding feature.
+QuantumLeap uses [Redis](https://redis.io/) for that.
+
+So, to enable this feature, you need to pass (at initialisation time) to the
+QuantumLeap container the environment variable `USE_GEOCODING` set to `True`
+and the environment variables `REDIS_HOST` and `REDIS_PORT` respectively set to
+the location of your REDIS instance and its access port. See the
+[docker-compose-dev.yml](https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
+for example.
 
 ### Restrictions and Limitations
 
@@ -347,60 +400,25 @@ attribute names of a given entity. I.e, attributes `hotSpot` and `hotspot`
 will be treated as the same. These are rare corner-cases, but it is worth
 keeping in mind this. Ultimately, the correct naming of types and attributes
 should respect the naming guidelines explained
-[here](http://fiware-datamodels.readthedocs.io/en/latest/guidelines/index.html).
+[here](https://github.com/smart-data-models/data-models/blob/master/guidelines.md).
 
 - Attributes metadata are still not being persisted. See [Issue 12](https://github.com/orchestracities/ngsi-timeseries-api/issues/12)
 
-- While support for multiple data in a single notification as been recently introduced
+- While support for multiple data in a single notification as been introduced
   (See [PR 191](https://github.com/orchestracities/ngsi-timeseries-api/pull/191)),
-  The following limitations still apply: a error in a single data entity will invalidate
-  the all set. There is not optimisation for large message size.
+  The following limitation still apply: a error in a single data entity will invalidate
+  the all set (or batch, optimisation for large message size is done using batches).
 
 - Data are assumed to be consistent. I.e., if the first data notification for
   an entity type use a given set of data types for the attributes, the following
   data notifications must be consistent, or they will be rejected. E.g. if
   the data type of attribute `speed` of entity type `car` is set initially
   to `Number`, later on it cannot be set to `Text`.
-  
-### Inserting data into QuantumLeap directly
-
-To insert the data directly into quantum leap, we can use
-`http://localhost:8668/v2/notify` API, i.e.
-To notify QuantumLeap about the arrival of a new NGSI notification.
-
-Consider the below example:
-
-```bash
-curl http://localhost:8668/v2/notify -s -S -H 'Content-Type: application/json' -d @- <<EOF
-{ 
-    "subscriptionId": "5ce3dbb331dfg9h71aad5deeaa", 
-    "data": [ 
-        { 
-            "id": "Room1", 
-            "temperature": 
-               { 
-                 "value": "10", 
-                 "type": "Number" 
-               }, 
-             "pressure": 
-               { 
-                 "value": "12", 
-                 "type": "Number" 
-               }, 
-            "type": "Room" 
-        } 
-    ] 
-}
-```
-
-The data will be inserted into QuantumLeap successfully.
 
 ## Data Retrieval
 
 To retrieve historical data from QuantumLeap, you can use the API endpoints
 documented [here](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb).
-Note there are a lot of possibilities, but not all of them are fully
-implemented yet.
 
 If you want to, you can interact directly with the database. For more details
 refer to the [CrateDB](../admin/crate.md) or to the [Timescale](../admin/timescale.md)
@@ -453,35 +471,3 @@ with a specific prefix. This way, if you insert an entity of type
 table as `mtmagic.etroom`. This information is also useful for example if you
 are configuring the Grafana datasource, as explained in the
 [Grafana section](../admin/grafana.md) of the docs.
-
-## GeoCoding
-
-This is an optional and experimental feature of QuantumLeap, which helps
-harmonising the way location information is stored in the historical records.
-
-The idea is that if entities arrive in QuantumLeap with an attribute of type
-`StructuredValue` and named `address`, QuantumLeap interprets this as an address
-field typically found in the [FIWARE Data Models](https://github.com/fiware/dataModels).
-It then adds to the entity an attribute called `location` of the corresponding
-geo-type. This means, if the address is a complete address with city,
-street name and postal number, it maps that to a point and hence the generated
-attribute will be of type `geo:point`. Without a postal number, the address
-will represent the street (if any) or the city boundaries (if any) or even the
-country boundaries. In these cases the generated location will be of the
-`geo:json` form and will contain the values of such shapes.
-
-**WARNING:** This feature uses [OpenStreetMap](https://www.openstreetmap.org)
-and its Nominatim service. As such, you need to be aware of its
-[copyright notes](https://www.openstreetmap.org/copyright) and most importantly
-of their Usage Policies ([API Usage Policy](https://operations.osmfoundation.org/policies/api/)
-and [Nominatim Usage Policy](https://operations.osmfoundation.org/policies/nominatim/)).
-You should not abuse of this free service and you should cache your requests.
-This is why you need to specify a cache in order to enable the geocoding.
-QuantumLeap uses [Redis](https://redis.io/) for that.
-
-So, to enable this feature, you need to pass (at initialisation time) to the
-QuantumLeap container the environment variable `USE_GEOCODING` set to `True`
-and the environment variables `REDIS_HOST` and `REDIS_PORT` respectively set to
-the location of your REDIS instance and its access port. See the
-[docker-compose-dev.yml](https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/docker/docker-compose-dev.yml)
-for example.

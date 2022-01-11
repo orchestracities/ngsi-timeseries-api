@@ -1,14 +1,14 @@
 # Work Queue
 
-The QL Web app can offload the execution of some tasks to a work queue.
-In this configuration, a set of QL Web servers add tasks to a queue
-and a pool of QL queue worker processes fetch tasks from the queue
+The QuantumLeap Web app can offload the execution of some tasks to a work queue.
+In this configuration, a set of QuantumLeap Web servers add tasks to a queue
+and a pool of QuantumLeap queue worker processes fetch tasks from the queue
 and run them asynchronously, optionally retrying failed tasks. The
-queue data sits in Redis and QL relies on [RQ][rq] to manage it, provide
+queue data sits in Redis and QuantumLeap relies on [RQ][rq] to manage it, provide
 worker processes to run tasks and do all the necessary bookkeeping—e.g.
 purging data past a configured time to live (TTL).
 
-The QL Web app comes with a REST API to manage work queue tasks. Clients
+The QuantumLeap Web app comes with a REST API to manage work queue tasks. Clients
 can query, retrieve and inspect task inputs as well as task runtime
 information, count tasks satisfying a given predicate to gauge system
 load, and delete tasks. The implementation features efficient algorithms
@@ -22,19 +22,19 @@ level, independently of the queue backend—RQ, as noted earlier. By
 the same token, it's possible to implement an alternative queue backend
 without modifying existing tasks and high-level task management modules.
 
-At the moment, QL only uses the work queue for NGSI notifications, if
+At the moment, QuantumLeap only uses the work queue for NGSI notifications, if
 configured to do so. When an entity payload comes through the `notify`
 endpoint, the Web app turns the payload into a task to save it to the
 DB, adds the task to the queue and returns a 200 to the client immediately.
-A separate instance of QL, configured as a queue worker, fetches the
+A separate instance of QuantumLeap, configured as a queue worker, fetches the
 task from the queue and runs it to actually insert the NGSI entities
 into the DB, possibly retrying the insert at a later time if it fails.
 Clients connect to the Web app to manage notify tasks in the queue.
 
 ## Task life-cycle
 
-The way the QL Web app, the queue worker, RQ and Redis collaborate
-to process tasks is a key aspect of the QL work queue architecture.
+The way the QuantumLeap Web app, the queue worker, RQ and Redis collaborate
+to process tasks is a key aspect of the QuantumLeap work queue architecture.
 In a nutshell, the Web app creates a task and stores it, through RQ,
 in a Redis hash containing the queue data. Then the worker, through
 RQ, fetches the task from Redis and runs it. If the task fails and
@@ -61,7 +61,7 @@ the task state machine.
 
 ![Task life-cycle][task-life-cycle.dia]
 
-A task begins its life when the QL Web app adds it to the work queue—`enqueue`
+A task begins its life when the QuantumLeap Web app adds it to the work queue—`enqueue`
 event in the diagram. At this point the task is in the `Queued` state
 and is waiting for a queue worker process to fetch it and run it for
 the first time.
