@@ -712,7 +712,8 @@ class SQLTranslator(base_translator.BaseTranslator):
             # Attempt to re-create metadata table
             self._create_metadata_table()
             persisted_metadata = {}
-
+        
+        metadata['ql_version'] = (ql_version ,"Text")
         diff = metadata.keys() - persisted_metadata.keys()
         if diff:
             # we update using the difference to "not" corrupt the metadata
