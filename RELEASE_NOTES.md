@@ -5,6 +5,7 @@
 ### New features
 
 - Removed subscription API (#493)
+- Added quantum leap version in metadata (#651)
 
 ### Bug fixes
 
