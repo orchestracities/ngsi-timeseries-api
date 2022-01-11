@@ -104,6 +104,7 @@ def expected_entity_attrs_meta():
     return {
         'entity_id': ['id', 'Text'],
         'entity_type': ['type', 'Text'],
+        'ql_version': ['0.8.3', 'Text'],
         TIME_INDEX_NAME: ['time_index', 'DateTime'],
         'a_number': ['a_number', 'Number'],
         'an_integer': ['an_integer', 'Integer'],
