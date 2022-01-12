@@ -211,7 +211,8 @@ def test_aggregation_on_different_attribute_types_timescale(
     expected = {
         'index': [],
         'attributes': expected_attrs,
-        'entityId': entity_id
+        'entityId': entity_id,
+        'entityType': entity_type
     }
     obtained = r.json()
     assert obtained == expected
@@ -401,7 +402,8 @@ def test_aggregation_on_different_data_types_crate(
     expected = {
         'index': [],
         'attributes': expected_attrs,
-        'entityId': entity_id
+        'entityId': entity_id,
+        'entityType': entity_type
     }
 
     assert obtained == expected
@@ -525,7 +527,8 @@ def test_aggregation_on_different_data_types_crate(
     expected = {
         'index': [],
         'attributes': expected_attrs,
-        'entityId': entity_id
+        'entityId': entity_id,
+        'entityType': entity_type
     }
 
     obtained = r.json()
@@ -654,7 +657,8 @@ def test_aggregation_on_different_data_types_crate(
     expected = {
         'index': [],
         'attributes': expected_attrs,
-        'entityId': entity_id
+        'entityId': entity_id,
+        'entityType': entity_type
     }
 
     obtained = r.json()
