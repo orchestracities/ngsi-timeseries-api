@@ -96,7 +96,7 @@ def get_notification_different_types(
     }
 
 
-def send_notifications(service, notifications, service_path=None):
+def send_notifications(service, notifications, service_path='/'):
     assert isinstance(notifications, list)
     h = {'Content-Type': 'application/json'}
     if service:
