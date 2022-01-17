@@ -54,7 +54,6 @@ def test_1T1E1A_defaults(service, reporter_dataset):
         'type': entity_type,
     }
     h = {'Fiware-Service': service}
-    h = {'Fiware-ServicePath': '/'}
 
     r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text

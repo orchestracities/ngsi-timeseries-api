@@ -279,7 +279,7 @@ def wait_for_delete(entity_type: str, service: Optional[str],
     wait_until(lambda: not has_entities(entity_type, service, entity_id))
 
 
-def delete_entity_type(service, entity_type, service_path=None):
+def delete_entity_type(service, entity_type, service_path='/'):
     h = {}
     if service:
         h['Fiware-Service'] = service
