@@ -7,6 +7,7 @@ from translators.config import SQLTranslatorConfig
 from utils.common import iter_entity_attrs
 from utils.jsondict import safe_get_value
 from utils.maybe import maybe_map
+from _version import __version__
 import logging
 from geocoding.slf import SlfQuery
 import dateutil.parser
@@ -35,7 +36,6 @@ FIWARE_SERVICEPATH = 'fiware_servicepath'
 TENANT_PREFIX = 'mt'
 TYPE_PREFIX = 'et'
 TIME_INDEX = 'timeindex'
-ql_version = "0.8.3"
 VALID_AGGR_METHODS = ['count', 'sum', 'avg', 'min', 'max']
 VALID_AGGR_PERIODS = ['year', 'month', 'day', 'hour', 'minute', 'second']
 # The name of the column where we store the original JSON entity received
@@ -714,7 +714,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             self._create_metadata_table()
             persisted_metadata = {}
         
-        metadata['ql_version'] = (ql_version, "Text")
+        metadata['ql_version'] = (__version__, "Text")
         diff = metadata.keys() - persisted_metadata.keys()
         if diff:
             # we update using the difference to "not" corrupt the metadata
