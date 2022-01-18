@@ -1,4 +1,5 @@
 from conftest import QL_BASE_URL
+from _version import __dev_version__
 import requests
 
 
@@ -7,5 +8,5 @@ def test_version():
     r = requests.get('{}'.format(version_url))
     assert r.status_code == 200, r.text
     assert r.json() == {
-        "version": "0.9.0-dev"
+        "version": __dev_version__
     }
