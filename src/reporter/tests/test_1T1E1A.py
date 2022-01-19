@@ -7,6 +7,7 @@ import dateutil.parser
 import pytest
 import requests
 
+
 entity_type = 'Room'
 entity_id = 'Room0'
 attr_name = 'temperature'
