@@ -98,6 +98,11 @@ ARG GITHUB_ACCOUNT
 ARG GITHUB_REPOSITORY
 
 LABEL "maintainer"="QuantumLeap Team, Orchestra Cities"
+LABEL "description"="QuantumLeap is a REST service for storing, querying and retrieving NGSI v2 and NGSI-LD (experimental support) spatial-temporal data. QuantumLeap converts NGSI semi-structured data into tabular format and stores it in a time-series database, associating each database record with a time index and, if present in the NGSI data, a location on Earth. REST clients can then retrieve NGSI entities by filtering entity sets through time ranges and spatial operators."
+LABEL "name"="quantum-leap"
+LABEL "summary"="FIWARE Generic Enabler to support the usage of NGSI-v2 (and NGSI-LD experimentally) data in time-series databases"
+
+
 LABEL "org.opencontainers.image.documentation"="https://quantumleap.readthedocs.io/"
 LABEL "org.opencontainers.image.vendor"="Martel Innovate GmbH"
 LABEL "org.opencontainers.image.licenses"="MIT"
