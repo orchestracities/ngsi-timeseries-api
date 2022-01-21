@@ -59,7 +59,7 @@ class CrateTranslator(sql_translator.SQLTranslator):
         # Added backoff_factor for retry interval between attempt of
         # consecutive retries
         backoff_factor = EnvReader(log=logging.getLogger(__name__).debug) \
-+            .read(FloatRangeVar('CRATE_BACKOFF_FACTOR', 0.0))
+            .read(FloatRangeVar('CRATE_BACKOFF_FACTOR', 0.0))
         import warnings
         if backoff_factor > 120:
             logging.warn("backoff_factor value should be less than 120")
