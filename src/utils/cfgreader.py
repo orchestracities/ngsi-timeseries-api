@@ -79,6 +79,19 @@ class FloatVar(EVar):
         return float(rep)
 
 
+class FloatRangeVar(EVar):
+    """
+    An env value parsed as a FloatRange. Value of "CRATE_BACKOFF_FACTOR"
+    expected to be in range of 0 to 120 otherwise it will raise Value error.
+    """
+
+    def _do_read(self, rep: str) -> float:
+        backoff_factor = int(os.environ.get('CRATE_BACKOFF_FACTOR'))
+        if backoff_factor not in range(0,120):
+            raise ValueError('value out of range: {}'.format(backoff_factor))
+        return float(rep)
+
+
 class BoolVar(EVar):
     """
     An env value parsed as a boolean. It evaluates to true just in case the
