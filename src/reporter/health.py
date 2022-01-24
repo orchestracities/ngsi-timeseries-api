@@ -11,8 +11,8 @@ def check_db(db=CRATE_BACKEND):
     default.
     """
     if db == CRATE_BACKEND:
-        from translators.crate import CrateTranslatorInstance
-        with CrateTranslatorInstance() as trans:
+        from translators.crate import crate_translator_instance
+        with crate_translator_instance() as trans:
             health = trans.get_health()
             return health
     if db == TIMESCALE_BACKEND:

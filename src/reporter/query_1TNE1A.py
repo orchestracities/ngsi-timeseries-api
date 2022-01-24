@@ -3,6 +3,7 @@ from flask import request
 from reporter.reporter import _validate_query_params
 from translators.factory import translator_for
 import logging
+import warnings
 from .geo_query_handler import handle_geo_query
 from utils.jsondict import lookup_string_match
 
@@ -48,19 +49,19 @@ def query_1TNE1A(attr_name,   # In Path
     try:
         with translator_for(fiware_s) as trans:
             entities, err = trans.query(attr_names=[attr_name],
-                                   entity_type=entity_type,
-                                   entity_ids=entity_ids,
-                                   aggr_method=aggr_method,
-                                   aggr_period=aggr_period,
-                                   aggr_scope=aggr_scope,
-                                   from_date=from_date,
-                                   to_date=to_date,
-                                   last_n=last_n,
-                                   limit=limit,
-                                   offset=offset,
-                                   fiware_service=fiware_s,
-                                   fiware_servicepath=fiware_sp,
-                                   geo_query=geo_query)
+                                        entity_type=entity_type,
+                                        entity_ids=entity_ids,
+                                        aggr_method=aggr_method,
+                                        aggr_period=aggr_period,
+                                        aggr_scope=aggr_scope,
+                                        from_date=from_date,
+                                        to_date=to_date,
+                                        last_n=last_n,
+                                        limit=limit,
+                                        offset=offset,
+                                        fiware_service=fiware_s,
+                                        fiware_servicepath=fiware_sp,
+                                        geo_query=geo_query)
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)
         logging.getLogger(__name__).error(msg, exc_info=True)
@@ -86,8 +87,7 @@ def query_1TNE1A(attr_name,   # In Path
     if err == "AggrMethod cannot be applied":
         r = {
             "error": "AggrMethod cannot be applied",
-            "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
-        }
+            "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."}
         logging.getLogger(__name__).info("AggrMethod cannot be applied")
         return r, 404
 
@@ -101,6 +101,8 @@ def query_1TNE1A(attr_name,   # In Path
                                 from_date,
                                 to_date,)
         logging.getLogger(__name__).info("Query processed successfully")
+        logging.warning(
+            "usage of id and type rather than entityId and entityType from version 0.9")
         return res
 
     r = {
@@ -168,4 +170,6 @@ def query_1TNE1A_value(*args, **kwargs):
         res.pop('attrName', None)
         res['values'] = res['entities']
         res.pop('entities', None)
+    logging.warning(
+        "usage of id and type rather than entityId and entityType from version 0.9")
     return res

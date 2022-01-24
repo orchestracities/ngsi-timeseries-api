@@ -1,4 +1,5 @@
 import json
+import os
 from contextlib import contextmanager
 from crate import client
 from crate.client import exceptions
@@ -40,30 +41,66 @@ NGSI_TO_SQL = {
 CRATE_TO_NGSI = dict((v, k) for (k, v) in NGSI_TO_SQL.items())
 CRATE_TO_NGSI['string_array'] = 'Array'
 
+CRATE_HOST_ENV_VAR = 'CRATE_HOST'
+CRATE_PORT_ENV_VAR = 'CRATE_PORT'
+CRATE_DB_NAME_ENV_VAR = 'CRATE_DB_NAME'
+CRATE_DB_USER_ENV_VAR = 'CRATE_DB_USER'
+CRATE_DB_PASS_ENV_VAR = 'CRATE_DB_PASS'
+
+
+class CrateConnectionData:
+
+    def __init__(self, host='0.0.0.0', port=4200,
+                 db_user='crate', db_pass=''):
+        self.host = host
+        self.port = port
+        self.db_name = "ngsi-tsdb"
+        self.db_user = db_user
+        self.db_pass = db_pass
+        self.backoff_factor = 0.0
+        self.active_shards = '1'
+
+    def read_env(self, env: dict = os.environ):
+        r = EnvReader(env, log=logging.getLogger(__name__).debug)
+        self.host = r.read(StrVar(CRATE_HOST_ENV_VAR, self.host))
+        self.port = r.read(IntVar(CRATE_PORT_ENV_VAR, self.port))
+        self.db_user = r.read(StrVar(CRATE_DB_USER_ENV_VAR, self.db_user))
+        self.db_pass = r.read(StrVar(CRATE_DB_PASS_ENV_VAR, self.db_pass,
+                                     mask_value=True))
+        # Added backoff_factor for retry interval between attempt of
+        # consecutive retries
+        self.backoff_factor = r.read(FloatVar('CRATE_BACKOFF_FACTOR', 0.0))
+        self.active_shards = r.read(StrVar('CRATE_WAIT_ACTIVE_SHARDS', '1'))
+
 
 class CrateTranslator(sql_translator.SQLTranslator):
     NGSI_TO_SQL = NGSI_TO_SQL
 
-    def __init__(self, host, port=4200, db_name="ngsi-tsdb"):
-        super(CrateTranslator, self).__init__(host, port, db_name)
+    def __init__(self, conn_data=CrateConnectionData()):
+        super(CrateTranslator, self).__init__(
+            conn_data.host, conn_data.port, conn_data.db_name)
         self.logger = logging.getLogger(__name__)
-        self.dbCacheName = 'crate'
+        self.username = conn_data.db_user
+        self.password = conn_data.db_pass
+        self.backoff_factor = conn_data.backoff_factor
+        self.active_shards = conn_data.active_shards
         self.ccm = None
         self.connection = None
         self.cursor = None
+        self.dbCacheName = 'crate'
 
     def setup(self):
         url = "{}:{}".format(self.host, self.port)
         self.ccm = ConnectionManager()
         self.connection = self.ccm.get_connection('crate')
-        # Added backoff_factor for retry interval between attempt of
-        # consecutive retries
-        backoff_factor = EnvReader(log=logging.getLogger(__name__).debug) \
-            .read(FloatVar('CRATE_BACKOFF_FACTOR', 0.0))
         if self.connection is None:
             try:
                 self.connection = client.connect(
-                    [url], error_trace=True, backoff_factor=backoff_factor)
+                    [url],
+                    error_trace=True,
+                    backoff_factor=self.backoff_factor,
+                    username=self.username,
+                    password=self.password)
                 self.ccm.set_connection('crate', self.connection)
             except Exception as e:
                 self.logger.warning(str(e), exc_info=True)
@@ -75,8 +112,6 @@ class CrateTranslator(sql_translator.SQLTranslator):
         # we need to think if we want to cache this information
         # and save few msec for evey API call
         self.db_version = self.get_db_version()
-        self.active_shards = EnvReader(log=logging.getLogger(__name__).debug) \
-            .read(StrVar('CRATE_WAIT_ACTIVE_SHARDS', '1'))
 
         major = int(self.db_version.split('.')[0])
         if major < 4:
@@ -86,6 +121,10 @@ class CrateTranslator(sql_translator.SQLTranslator):
     def dispose(self):
         super(CrateTranslator, self).dispose()
         self.cursor.close()
+
+    def dispose_connection(self):
+        self.cursor.close()
+        self.ccm.reset_connection('crate')
 
     def sql_error_handler(self, exception):
         analyzer = CrateErrorAnalyzer(exception)
@@ -273,11 +312,8 @@ class CrateTranslator(sql_translator.SQLTranslator):
 
 
 @contextmanager
-def CrateTranslatorInstance():
-    r = EnvReader(log=logging.getLogger(__name__).debug)
-    db_host = r.read(StrVar('CRATE_HOST', 'crate'))
-    db_port = r.read(IntVar('CRATE_PORT', 4200))
-    db_name = "ngsi-tsdb"
-
-    with CrateTranslator(db_host, db_port, db_name) as trans:
+def crate_translator_instance():
+    conn_data = CrateConnectionData()
+    conn_data.read_env()
+    with CrateTranslator(conn_data) as trans:
         yield trans

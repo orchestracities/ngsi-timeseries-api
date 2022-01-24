@@ -170,7 +170,7 @@ def select_entities(pg_cursor, full_table_name, entity_id):
     stmt = f'select * from {full_table_name} where entity_id = ?'
 
     rows = pg_cursor.execute(stmt, [entity_id])
-    keys = [k[0].decode('utf-8') for k in pg_cursor.description]
+    keys = [k[0] for k in pg_cursor.description]
     return [dict(zip(keys, row)) for row in rows]
 
 

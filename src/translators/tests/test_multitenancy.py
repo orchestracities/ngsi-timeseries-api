@@ -71,12 +71,14 @@ def test_fiware_tenant_services(translator):
     translator.insert([e], fiware_service="B", fiware_servicepath="/")
 
     # Query tenant A
-    entities, err = translator.query(fiware_service="A", fiware_servicepath="/")
+    entities, err = translator.query(
+        fiware_service="A", fiware_servicepath="/")
     assert len(entities) == 1
     assert entities[0]['id'] == "X"
 
     # Query tenant B
-    entities, err = translator.query(fiware_service="B", fiware_servicepath="/")
+    entities, err = translator.query(
+        fiware_service="B", fiware_servicepath="/")
     assert len(entities) == 1
     assert entities[0]['id'] == "Y"
     translator.clean("A")
@@ -95,24 +97,24 @@ def test_fiware_tenant_servicepath(translator):
     insert_with_tenant(entity("Patras"), "/eu/greece/patras")
 
     entities, err = translator.query(fiware_service="EU",
-                                fiware_servicepath="/eu")
+                                     fiware_servicepath="/eu")
     assert len(entities) == 4
 
     entities, err = translator.query(fiware_service="EU",
-                                fiware_servicepath="/eu/germany")
+                                     fiware_servicepath="/eu/germany")
     assert len(entities) == 1
 
     entities, err = translator.query(fiware_service="EU",
-                                fiware_servicepath="/eu/greece")
+                                     fiware_servicepath="/eu/greece")
     assert len(entities) == 2
     assert set([e['id'] for e in entities]) == set(["Athens", "Patras"])
 
     entities, err = translator.query(fiware_service="EU",
-                                fiware_servicepath="/eu/g")
+                                     fiware_servicepath="/eu/g")
     assert len(entities) == 0
 
     entities, err = translator.query(fiware_service="EU",
-                                fiware_servicepath="/eu/greece/athens")
+                                     fiware_servicepath="/eu/greece/athens")
     assert len(entities) == 1
     translator.clean("EU")
 

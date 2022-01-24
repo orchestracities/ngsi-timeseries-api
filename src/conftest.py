@@ -11,9 +11,6 @@ QL_URL = "http://{}:{}/v2".format(QL_HOST, QL_PORT)
 QL_BASE_URL = "http://{}:{}".format(QL_HOST, QL_PORT)
 QL_DEFAULT_DB = os.environ.get('QL_DEFAULT_DB', 'crate')
 
-CRATE_HOST = os.environ.get('CRATE_HOST', 'crate')
-CRATE_PORT = 4200
-
 POSTGRES_HOST = os.environ.get('POSTGRES_HOST', 'timescale')
 POSTGRES_PORT = 5432
 
@@ -96,9 +93,17 @@ def orion_client():
 
 
 def do_clean_crate():
+    crate_host = os.environ.get('CRATE_HOST', 'crate')
+    crate_port = 4200
+    crate_db_username = os.environ.get('CRATE_DB_USER', 'crate')
+    crate_db_password = os.environ.get('CRATE_DB_PASS', None)
+
     from crate import client
-    conn = client.connect(["{}:{}".format(CRATE_HOST, CRATE_PORT)],
-                          error_trace=True)
+    conn = client.connect(["{}:{}".format(crate_host,
+                                          crate_port)],
+                          error_trace=True,
+                          username=crate_db_username,
+                          password=crate_db_password)
     cursor = conn.cursor()
 
     try:
@@ -128,7 +133,11 @@ def clean_crate():
 
 @pytest.fixture()
 def crate_translator(clean_crate):
-    from src.translators.crate import CrateTranslator
+    from src.translators.crate import CrateTranslator, CrateConnectionData
+    crate_host = os.environ.get('CRATE_HOST', 'crate')
+    crate_port = 4200
+    crate_db_username = os.environ.get('CRATE_DB_USER', 'crate')
+    crate_db_password = os.environ.get('CRATE_DB_PASS', None)
 
     class Translator(CrateTranslator):
 
@@ -184,8 +193,9 @@ def crate_translator(clean_crate):
                 except exceptions.ProgrammingError:
                     pass
 
-    with Translator(host=CRATE_HOST, port=CRATE_PORT) as trans:
+    with Translator(CrateConnectionData(host=crate_host, port=crate_port, db_user=crate_db_username, db_pass=crate_db_password)) as trans:
         yield trans
+        trans.dispose_connection()
 
 
 @pytest.fixture()

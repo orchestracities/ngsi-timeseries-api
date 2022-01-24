@@ -29,12 +29,36 @@ If you don't use Postman, you can use the equivalent curl commands bellow.
 
     You should get a return status `200 OK`.
 
-1. Create an Orion Subscription via "QuantumLeap Subscribe"
+1. Create an Orion Subscription via "Orion Subscriptions" as described
+    in [Orion docs](https://fiware-orion.readthedocs.io/en/master/user/walkthrough_apiv2/index.html#subscriptions)
 
     ```bash
     $ curl -X POST \
-    'http://0.0.0.0:8668/v2/subscribe?orionUrl=http://orion:1026/v2&quantumleapUrl=http://quantumleap:8668/v2&entityType=AirQualityObserved' \
-    -H 'Accept: application/json'
+    'http://0.0.0.0:1026/v2/subscriptions \
+    -H 'Accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{
+    "description": "A subscription to get info about Room1",
+    "subject": {
+      "entities": [
+        {
+          "id": ".*",
+          "type": "AirQualityObserved"
+        }
+      ],
+      "condition": {
+        "attrs": [
+        ]
+      }
+    },
+    "notification": {
+      "http": {
+        "url": "http://quantumleap:8668/v2/notify"
+      },
+      "attrs": [
+      ]
+    },
+    "expires": "2040-01-01T14:00:00.00Z"
     ```
 
     Note we've just created a subscription for any change in any attribute of
@@ -122,7 +146,7 @@ If you don't use Postman, you can use the equivalent curl commands bellow.
 
 1. Finally, to tidy things up, you can delete all created records.
 
-    Delete records from QL
+    Delete records from QuantumLeap
 
     ```bash
     $ curl -X DELETE http://0.0.0.0:8668/v2/types/AirQualityObserved
@@ -161,9 +185,10 @@ By default, it assumes all services run in a local docker-based deployment.
 
 You can quickly execute the test in a container as shown below. You will have to
 adjust, of course, the urls so that they point to your deployed services. In
-the following example, ORION and QL are reachable by the test container at
-`192.0.0.1` and then, by default, ORION and QL find each other at `orion` and
-`quantumleap` endpoints because both were deployed in the same docker network.
+the following example, Orion and QuantumLeap are reachable by the test container
+at `192.0.0.1` and then, by default, Orion and QuantumLeap find each other at
+`orion` and `quantumleap` endpoints because both were deployed in the same
+docker network.
 
 ```bash
 $ docker run -ti --rm -e ORION_URL="http://192.0.0.1:1026" -e QL_URL="http://192.0.0.1:8668" quantumleap pytest tests/test_integration.py
