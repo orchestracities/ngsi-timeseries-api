@@ -83,15 +83,17 @@ latency between the data writing and the time the data is available for reading.
 
 1. Orion takes some msec to process a request and trigger a notification.
 
-1. The QL takes some msec to process a single message and store it in the database.
+1. The QuantumLeap takes some msec to process a single message and store it in
+    the database.
 
 1. Especially in the case of CrateDB, indexing of inserted data may take a bit,
     so this means that there is additional latency between when the a message
     is stored in crate, and when it is actually available for querying. In case
-    of multi-node CrateDB deployment this can take even more because QL writes
-    on Crate node A, first the data is indexed in node A, and then replicated
-    on node B. So if you issue a query right after writing a message and QL
-    picks node B, probability to find the data you just pushed is even lower.
+    of multi-node CrateDB deployment this can take even more because QuantumLeap
+    writes on Crate node A, first the data is indexed in node A, and then
+    replicated on node B. So if you issue a query right after writing a message
+    and QuantumLeap picks node B, probability to find the data you just pushed
+    is even lower.
 
 ### Crate configuration and active shards
 
@@ -142,8 +144,8 @@ and [resiliency](https://crate.io/docs/crate/reference/en/4.3/appendices/resilie
 ## Bug reporting
 
 Bugs should be reported in the form of
-[issues](https://github.com/orchestracities/ngsi-timeseries-api/issues) in the github
-repository.
+[issues](https://github.com/orchestracities/ngsi-timeseries-api/issues)
+in the github repository.
 
 Please, look through the open issues before opening a duplicated one :)
 
@@ -167,6 +169,6 @@ of Orion documentation.
 
     The logs can be retrieved with the [docker logs command](https://docs.docker.com/engine/reference/commandline/logs/#options)
     or [docker service logs](https://docs.docker.com/engine/reference/commandline/service_logs/)
-    if you deployed QL as a service. In the first case, you can discover the
-    container id with `docker ps -a`. In the second case, use
+    if you deployed QuantumLeap as a service. In the first case, you can
+    discover the container id with `docker ps -a`. In the second case, use
     `docker service ls` to find the service name.
