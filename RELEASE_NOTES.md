@@ -5,6 +5,7 @@
 ### New features
 
 - Removed subscription API (#493)
+- Replaced geocoder with [geopy](https://geopy.readthedocs.io/en/stable/) (#610)
 
 ### Bug fixes
 
