@@ -64,8 +64,7 @@ def query():
 
         if entities:
             if len(entities) > 1:
-                import warnings
-                warnings.warn(
+                logging.warning(
                     "Not expecting more than one result for a 1T1ENA.")
 
             logging.getLogger(__name__).info("Query processed successfully")
