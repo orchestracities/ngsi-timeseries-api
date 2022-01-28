@@ -43,9 +43,9 @@ been scheduled for a release in the near future. Please feel free to contact us
 (with a new issue) if you would like to either get involved in the
 implementation or influence the roadmap.
 
-- [Statics API](https://github.com/orchestracities/ngsi-timeseries-api/issues/262)
+- [Statistics API](https://github.com/orchestracities/ngsi-timeseries-api/issues/262)
 - [Support retention policy](https://github.com/orchestracities/ngsi-timeseries-api/issues/15)
 - [Advanced configuration API](https://github.com/orchestracities/ngsi-timeseries-api/issues/10)
-- [Support virtual entities](https://github.com/orchestracitiesk/ngsi-timeseries-api/issues/101)
+- [Support virtual entities](https://github.com/orchestracities/ngsi-timeseries-api/issues/101)
 - [Support efficient data download](https://github.com/orchestracities/ngsi-timeseries-api/issues/155)
 - [SLF responses for geo-queries](https://github.com/orchestracities/ngsi-timeseries-api/issues/149)

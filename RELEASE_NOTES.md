@@ -50,10 +50,11 @@
 
 ### Documentation
 
-- Improved contributing docuemntation (#557)
+- Improved contributing documentation (#557)
 - Introduced reference about `options=sysAttrs` for ngsi-ld time indexing (#546)
 - Documented API pagination (#511)
 - Revised documentation (#596)
+- Fixed typos in roadmap and release notes (#617)
 
 ### Technical debt
 
