@@ -6,6 +6,7 @@
 
 - Removed subscription API (#493)
 - Replaced geocoder with [geopy](https://geopy.readthedocs.io/en/stable/) (#610)
+- Bumped pillow from 8.4.0 to 9.0.0
 
 ### Bug fixes
 
