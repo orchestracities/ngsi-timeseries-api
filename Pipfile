@@ -10,7 +10,6 @@ certifi = "==2018.10.15"
 click = "~=7.1"
 crate = "~=0.22"
 flask = "~=1.1.0"
-geocoder = "~=1.33"
 geojson = "~=2.4"
 geomet = "~=0.2"
 gunicorn = "~=20.1"
@@ -24,9 +23,10 @@ objsize = "~=0.3"
 redis = "~=3.5"
 requests = ">=2.20"
 rq = "~=1.8"
-# run `pipenv install --dev` to get the packages below in your env
+geopy = "~=2.2.0"
 
 [dev-packages]
+# run `pipenv install --dev` to get the packages below in your env
 aiohttp = ">=3.7.4"
 backoff = "~=1.1"
 matplotlib = "~=3.3"
