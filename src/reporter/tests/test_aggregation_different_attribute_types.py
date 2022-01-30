@@ -63,7 +63,10 @@ def test_aggregation_on_different_attribute_types_timescale(
     assert obtained['error'] == expected
 
     # /entities/{eid}
-    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    r = query(
+        url_path="entities/TestRoom1",
+        params=query_params,
+        service=service)
     assert r.status_code == 404, r.text
 
     obtained = r.json()
@@ -74,7 +77,10 @@ def test_aggregation_on_different_attribute_types_timescale(
     assert obtained['error'] == expected
 
     # /types/{etype}
-    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
+    r = query(
+        url_path="types/TestRoomAggregationDifferentTypes",
+        params=query_params,
+        service=service)
     assert r.status_code == 404, r.text
 
     obtained = r.json()
@@ -104,7 +110,10 @@ def test_aggregation_on_different_attribute_types_timescale(
     assert obtained['error'] == expected
 
     # /entities/{eid}
-    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    r = query(
+        url_path="entities/TestRoom1",
+        params=query_params,
+        service=service)
     assert r.status_code == 404, r.text
 
     obtained = r.json()
@@ -115,7 +124,10 @@ def test_aggregation_on_different_attribute_types_timescale(
     assert obtained['error'] == expected
 
     # /types/{etype}
-    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
+    r = query(
+        url_path="types/TestRoomAggregationDifferentTypes",
+        params=query_params,
+        service=service)
     assert r.status_code == 404, r.text
 
     obtained = r.json()
@@ -124,7 +136,6 @@ def test_aggregation_on_different_attribute_types_timescale(
     expected = 'AggrMethod cannot be applied'
 
     assert obtained['error'] == expected
-
 
     # 'aggrMethod': 'count'
     # /attrs
@@ -188,7 +199,10 @@ def test_aggregation_on_different_attribute_types_timescale(
     assert obtained == expected
 
     # /entities/{eid}
-    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    r = query(
+        url_path="entities/TestRoom1",
+        params=query_params,
+        service=service)
     assert r.status_code == 200, r.text
 
     obtained = r.json()
@@ -218,7 +232,10 @@ def test_aggregation_on_different_attribute_types_timescale(
     assert obtained == expected
 
     # /types/{etype}
-    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
+    r = query(
+        url_path="types/TestRoomAggregationDifferentTypes",
+        params=query_params,
+        service=service)
     assert r.status_code == 200, r.text
 
     obtained = r.json()
@@ -252,7 +269,6 @@ def test_aggregation_on_different_attribute_types_timescale(
     obtained = r.json()
     assert obtained == expected
 
-
     # 'aggrMethod': 'avg'
     # /attrs
     query_params = {
@@ -267,7 +283,10 @@ def test_aggregation_on_different_attribute_types_timescale(
     }
 
     # /entities/{eid}
-    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    r = query(
+        url_path="entities/TestRoom1",
+        params=query_params,
+        service=service)
     assert r.status_code == 404, r.text
     assert r.json() == {
         "error": "AggrMethod cannot be applied",
@@ -275,13 +294,15 @@ def test_aggregation_on_different_attribute_types_timescale(
     }
 
     # /types/{etype}
-    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
+    r = query(
+        url_path="types/TestRoomAggregationDifferentTypes",
+        params=query_params,
+        service=service)
     assert r.status_code == 404, r.text
     assert r.json() == {
         "error": "AggrMethod cannot be applied",
         "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
     }
-
 
     # 'aggrMethod': 'sum'
     # /attrs
@@ -297,7 +318,10 @@ def test_aggregation_on_different_attribute_types_timescale(
     }
 
     # /entities/{eid}
-    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    r = query(
+        url_path="entities/TestRoom1",
+        params=query_params,
+        service=service)
     assert r.status_code == 404, r.text
     assert r.json() == {
         "error": "AggrMethod cannot be applied",
@@ -305,7 +329,10 @@ def test_aggregation_on_different_attribute_types_timescale(
     }
 
     # /types/{etype}
-    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
+    r = query(
+        url_path="types/TestRoomAggregationDifferentTypes",
+        params=query_params,
+        service=service)
     assert r.status_code == 404, r.text
     assert r.json() == {
         "error": "AggrMethod cannot be applied",
@@ -378,7 +405,10 @@ def test_aggregation_on_different_data_types_crate(
     assert obtained == expected
 
     # /entities/{eid}
-    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    r = query(
+        url_path="entities/TestRoom1",
+        params=query_params,
+        service=service)
     assert r.status_code == 200, r.text
 
     obtained = r.json()
@@ -409,7 +439,10 @@ def test_aggregation_on_different_data_types_crate(
     assert obtained == expected
 
     # /types/{etype}
-    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
+    r = query(
+        url_path="types/TestRoomAggregationDifferentTypes",
+        params=query_params,
+        service=service)
     assert r.status_code == 200, r.text
 
     obtained = r.json()
@@ -503,7 +536,10 @@ def test_aggregation_on_different_data_types_crate(
     assert obtained == expected
 
     # /entities/{eid}
-    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    r = query(
+        url_path="entities/TestRoom1",
+        params=query_params,
+        service=service)
     assert r.status_code == 200, r.text
 
     obtained = r.json()
@@ -535,7 +571,10 @@ def test_aggregation_on_different_data_types_crate(
     assert obtained == expected
 
     # /types/{etype}
-    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
+    r = query(
+        url_path="types/TestRoomAggregationDifferentTypes",
+        params=query_params,
+        service=service)
     assert r.status_code == 200, r.text
 
     obtained = r.json()
@@ -569,7 +608,6 @@ def test_aggregation_on_different_data_types_crate(
 
     obtained = r.json()
     assert obtained == expected
-
 
     # 'aggrMethod': 'count'
     # /attrs
@@ -633,7 +671,10 @@ def test_aggregation_on_different_data_types_crate(
     assert obtained == expected
 
     # /entities/{eid}
-    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    r = query(
+        url_path="entities/TestRoom1",
+        params=query_params,
+        service=service)
     assert r.status_code == 200, r.text
 
     obtained = r.json()
@@ -665,7 +706,10 @@ def test_aggregation_on_different_data_types_crate(
     assert obtained == expected
 
     # /types/{etype}
-    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
+    r = query(
+        url_path="types/TestRoomAggregationDifferentTypes",
+        params=query_params,
+        service=service)
     assert r.status_code == 200, r.text
 
     obtained = r.json()
@@ -715,7 +759,10 @@ def test_aggregation_on_different_data_types_crate(
     }
 
     # /entities/{eid}
-    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    r = query(
+        url_path="entities/TestRoom1",
+        params=query_params,
+        service=service)
     assert r.status_code == 404, r.text
     assert r.json() == {
         "error": "AggrMethod cannot be applied",
@@ -723,13 +770,15 @@ def test_aggregation_on_different_data_types_crate(
     }
 
     # /types/{etype}
-    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
+    r = query(
+        url_path="types/TestRoomAggregationDifferentTypes",
+        params=query_params,
+        service=service)
     assert r.status_code == 404, r.text
     assert r.json() == {
         "error": "AggrMethod cannot be applied",
         "description": "AggrMethod cannot be applied on type TEXT and BOOLEAN."
     }
-
 
     # 'aggrMethod': 'sum'
     # attrs
@@ -746,7 +795,10 @@ def test_aggregation_on_different_data_types_crate(
     }
 
     # /entities/{eid}
-    r = query(url_path="entities/TestRoom1", params=query_params, service=service)
+    r = query(
+        url_path="entities/TestRoom1",
+        params=query_params,
+        service=service)
     assert r.status_code == 404, r.text
     assert r.json() == {
         "error": "AggrMethod cannot be applied",
@@ -754,7 +806,10 @@ def test_aggregation_on_different_data_types_crate(
     }
 
     # /types/{etype}
-    r = query(url_path="types/TestRoomAggregationDifferentTypes", params=query_params, service=service)
+    r = query(
+        url_path="types/TestRoomAggregationDifferentTypes",
+        params=query_params,
+        service=service)
     assert r.status_code == 404, r.text
     assert r.json() == {
         "error": "AggrMethod cannot be applied",
