@@ -9,7 +9,6 @@
 - Bumped pillow from 8.4.0 to 9.0.0
 - Added more test cases for Aggregation (#499)
 
-
 ### Bug fixes
 
 ### Continuous Integration
