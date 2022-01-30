@@ -36,11 +36,12 @@ which will be the search term for osm. This is to cover cases where you want
 a point but don't necessary have a street + postOfficeBoxNumber. For example,
 "Eiffel Tower, Paris".
 """
+import asyncio
 from datetime import datetime
-import geocoder
+from geopy.adapters import AioHTTPAdapter
+from geopy.geocoders import Nominatim
 import json
 import logging
-import requests
 
 from exceptions.exceptions import InvalidNGSIEntity
 
@@ -53,15 +54,14 @@ TYPE_RELATION = 2
 
 def add_locations(entities, raise_error=False):
     result = []
-    with requests.Session() as session:
-        for e in entities:
-            result.append(
-                add_location(e, raise_error=raise_error, session=session)
-            )
+    for e in entities:
+        result.append(
+            add_location(e, raise_error=raise_error)
+        )
     return result
 
 
-def add_location(entity, raise_error=False, session=None, cache=None):
+def add_location(entity, raise_error=False, cache=None):
     """
     :param dict entity:
         A valid NGSI entity, as usual, expected in JSON Entity Representation.
@@ -118,19 +118,17 @@ def add_location(entity, raise_error=False, session=None, cache=None):
             return _do_add_location(entity, json.loads(loc))
 
     # Get Location from Provider (if possible)
+    info = None
     try:
-        if session:
-            info = geocoder.osm(key, maxRows=10, session=session)
-        else:
-            info = geocoder.osm(key, maxRows=10)
+        info = asyncio.run(geocode(key))
 
-    except requests.exceptions.RequestException as re:
-        logging.error(repr(re))
+    except Exception as e:
+        logging.error(repr(e))
         if raise_error:
-            raise re
+            raise e
         return entity
 
-    if not info.ok:
+    if not info:
         msg = "Request to provider was not OK. {}".format(info)
         logging.error(msg)
         if raise_error:
@@ -145,19 +143,15 @@ def add_location(entity, raise_error=False, session=None, cache=None):
     elif osm_type == TYPE_WAY:
         # We are looking for a street
         for i in info:
-            if i.osm_type == 'way':
-                loc = _get_polygon_geojson(i.osm_id, 'W')
-                if loc is None:
-                    loc = i.geojson
+            if i.raw['osm_type'] == 'way':
+                loc = i.raw['geojson']
                 break
 
     elif osm_type == TYPE_RELATION:
         # We are looking for a state or country
         for i in info:
-            if i.osm_type == 'relation':
-                loc = _get_polygon_geojson(i.osm_id, 'R')
-                if loc is None:
-                    loc = i.geojson
+            if i.raw['osm_type'] == 'relation':
+                loc = i.raw['geojson']
                 break
 
     if loc is None:
@@ -172,17 +166,23 @@ def add_location(entity, raise_error=False, session=None, cache=None):
 
 
 def _osm_result_geom_type(result):
-    if hasattr(result, 'geojson') and isinstance(result.geojson, dict):
-        return result.geojson.get('geometry', {}).get('type', '')
+    if 'geojson' in result.raw and isinstance(result.raw['geojson'], dict):
+        return result.raw['geojson'].get('type', '')
     return None
 
 
 def _extract_most_accurate_osm_result(osm_response, geom_type):
-    results = sorted(osm_response, key=lambda r: r.accuracy)
+    results = sorted(osm_response, key=lambda r: r.raw['importance'])
     results_of_specified_type = [r for r in results
                                  if geom_type == _osm_result_geom_type(r)]
     if len(results_of_specified_type) > 0:
         return results_of_specified_type[0].geojson
+    elif geom_type == 'Point' and len(results) > 0:
+        return {
+            'type': 'geo:point',
+            'value': "{}, {}".format(
+                results[0].latitude,
+                results[0].longitude)}
     return None
 
 
@@ -196,13 +196,8 @@ def _do_add_location(entity, location):
     is_json_repr = 'value' in entity['address']
 
     if is_json_repr:
-        if location.get('geometry', {}).get('type') == 'Point':
-            coords = location.get('geometry').get('coordinates')
-            entity['location'] = {
-                'type': 'geo:point',
-                # Seems osm response is long,lat rather than lat,long
-                'value': "{}, {}".format(coords[1], coords[0])
-            }
+        if location.get('type') == 'geo:point':
+            entity['location'] = location
         else:
             entity['location'] = {
                 'type': 'geo:json',
@@ -290,22 +285,13 @@ def is_valid_address(street, number, locality, region, country):
     return True, "OK"
 
 
-def _get_polygon_geojson(osm_id, osm_type):
-    """
-    :param int osm_id: see https://wiki.openstreetmap.org/wiki/Elements
-    :param char osm_type: N | W | R
-    :return: dict (geojson of the requested element).
-    """
-    params = {
-        'format': 'json',
-        'osm_id': osm_id,
-        'osm_type': osm_type,
-        'polygon_geojson': 1,
-    }
-    url = "http://nominatim.openstreetmap.org/reverse"
-    r = requests.get(url, params=params)
-    if r.ok:
-        return r.json().get('geojson', None)
+async def geocode(key: str):
+    async with Nominatim(
+            user_agent="quantumleap",
+            adapter_factory=AioHTTPAdapter,
+    ) as geolocator:
+        info = await geolocator.geocode(key, geometry='geojson', exactly_one=False, limit=5, timeout=30)
+        return info
 
 
 def get_health():
@@ -313,17 +299,17 @@ def get_health():
     :return: dictionary with geocoder service health. ::see:: reporter.health.
     """
     try:
-        g = geocoder.osm("New York city", maxRows=1)
-    except (requests.exceptions.RequestException, Exception) as e:
+        location = asyncio.run(geocode("New York City"))
+    except (Exception) as e:
         # geocoder docs say exception will be raised to the caller
         time = datetime.now().isoformat()
         output = "{}".format(e)
         res = {'status': 'fail', 'time': time, 'output': output}
         return res
     else:
-        if g.ok:
+        if location:
             return {'status': 'pass'}
 
         time = datetime.now().isoformat()
-        res = {'status': 'fail', 'time': time, 'output': g.status}
+        res = {'status': 'fail', 'time': time, 'output': location}
         return res

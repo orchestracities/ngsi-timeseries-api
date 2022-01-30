@@ -5,6 +5,8 @@
 ### New features
 
 - Removed subscription API (#493)
+- Replaced geocoder with [geopy](https://geopy.readthedocs.io/en/stable/) (#610)
+- Bumped pillow from 8.4.0 to 9.0.0
 
 ### Bug fixes
 
@@ -37,6 +39,7 @@
 - Fixed OpenAPI spec for /wq/management (#544)
 - Fixed attributes names in /v2/entities query (#478)
 - Fixed index ordering in /v2/entities query (#521)
+- Fixed Deprecated warning by updating "warn" to "warning" (#605)
 
 ### Continuous Integration
 
@@ -50,10 +53,11 @@
 
 ### Documentation
 
-- Improved contributing docuemntation (#557)
+- Improved contributing documentation (#557)
 - Introduced reference about `options=sysAttrs` for ngsi-ld time indexing (#546)
 - Documented API pagination (#511)
 - Revised documentation (#596)
+- Fixed typos in roadmap and release notes (#617)
 
 ### Technical debt
 
