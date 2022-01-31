@@ -205,7 +205,7 @@ CREATE DATABASE ${db_name}
     OWNER ${db_user}
     ENCODING 'UTF8';
 
-\\connect ${db_name}
+\connect ${db_name}
 
 CREATE EXTENSION IF NOT EXISTS postgis CASCADE;
 CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
