@@ -14,6 +14,8 @@
 
 ### Documentation
 
+- Fix links in pr template
+
 ### Technical debt
 
 ## 0.8.3

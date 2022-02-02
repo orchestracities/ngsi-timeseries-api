@@ -26,7 +26,7 @@ to look for before merging your code._
 - [ ] I have signed the [CLA][cla]
 - [ ] I have added tests that prove my fix is effective or that my
       feature works
-- [ ] I have updated the [RELEASE_NOTES][RELEASE_NOTES.md]
+- [ ] I have updated the [RELEASE NOTES][release]
 - [ ] I have added necessary documentation (if appropriate)
 - [ ] Any dependent changes have been merged and published in
       downstream modules
@@ -42,5 +42,7 @@ you considered, etc...
 
 [cla]: https://raw.githubusercontent.com/orchestracities/ngsi-timeseries-api/master/individual_cla.pdf
     "Martel Open Source Software Individual Contributor License Agreement"
-[contrib]: https://github.com/smartsdk/ngsi-timeseries-api/blob/master/CONTRIBUTING.md
+[contrib]: https://github.com/orchestracities/ngsi-timeseries-api/blob/master/CONTRIBUTING.md
     "Contributing to QuantumLeap"
+[release]: https://github.com/orchestracities/ngsi-timeseries-api/blob/master/RELEASE_NOTES.md
+    "QuantumLeap Release Notes"
