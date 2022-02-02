@@ -21,6 +21,8 @@ _Put an `x` in the boxes that apply. You can also fill these out after creating 
 - [ ] I have read the [CONTRIBUTING][contrib] doc
 - [ ] I have signed the [CLA][cla]
 - [ ] I have added tests that prove my fix is effective or that my feature works
+- [ ] I have run **all** the existing tests locally (not just those related to my feature) and there are no errors
+- [ ] After the last push to the PR branch, I have run the lint script locally and there are no changes to the code base
 - [ ] I have updated the [RELEASE NOTES][release]
 - [ ] I have added necessary documentation (if appropriate)
 - [ ] Any dependent changes have been merged and published in downstream modules
