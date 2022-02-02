@@ -14,7 +14,8 @@
 
 ### Documentation
 
-- Fix links in pr template
+- Fix links in pr template (#620)
+- Mention running tests locally as well as linting in PR template (#621)
 
 ### Technical debt
 
