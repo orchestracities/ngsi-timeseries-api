@@ -6,6 +6,7 @@ from exceptions.exceptions import AmbiguousNGSIIdError
 from translators.base_translator import BaseTranslator
 from translators.sql_translator import NGSI_TEXT, NGSI_DATETIME, NGSI_STRUCTURED_VALUE
 from utils.common import *
+from src._version import __version__
 from utils.tests.common import *
 from datetime import datetime, timezone
 
@@ -774,3 +775,24 @@ def test_ngsi_ld(translator, ngsi_ld):
     assert ngsi_ld['location']['value'] == loaded[0]['location']['values'][0]
 
     translator.clean()
+
+def expected_entity_attrs_meta_version():
+    return {
+        'entity_id': ['id', 'Text'],
+        'entity_type': ['type', 'Text'],
+        TIME_INDEX_NAME: ['time_index', 'DateTime'],
+        'ql_version': [__version__, 'Text'],
+        'a_number': ['a_number', 'Number'],
+        'an_integer': ['an_integer', 'Integer'],
+        'a_bool': ['a_bool', 'Boolean'],
+        'a_datetime': ['a_datetime', 'DateTime'],
+        'a_point': ['a_point', 'geo:point'],
+        'a_geom': ['a_geom', 'geo:json'],
+        'a_text': ['a_text', 'Text'],
+        'an_obj': ['an_obj', 'Custom'],
+        'an_array': ['an_array', 'StructuredValue']
+    }
+
+def assert_entity_attrs_meta_version(translator, entity):
+    data = select_entity_attrs_meta_version(translator, entity)
+    assert data == expected_entity_attrs_meta_version()
