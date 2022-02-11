@@ -32,7 +32,6 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=ref,event=branch
       -
         name: Login to DockerHub
         if: github.event_name != 'pull_request'
@@ -68,7 +67,6 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=ref,event=branch
       -
         name: Login to DockerHub
         if: github.event_name != 'pull_request'
