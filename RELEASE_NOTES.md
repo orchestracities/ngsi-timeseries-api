@@ -13,6 +13,7 @@
 ### Continuous Integration
 
 - Improve github action for docker images (#624)
+- Add caching to docker image builds (#626)
 
 ### Documentation
 
