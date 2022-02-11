@@ -12,6 +12,8 @@
 
 ### Continuous Integration
 
+- Fix docker image generation issues (#624)
+
 ### Documentation
 
 - Fix links in pr template (#620)
