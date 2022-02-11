@@ -12,7 +12,7 @@
 
 ### Continuous Integration
 
-- Fix docker image generation issues (#624)
+- Improve github action for docker images (#624)
 
 ### Documentation
 
