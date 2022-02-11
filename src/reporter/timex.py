@@ -5,6 +5,7 @@ from utils.jsondict import maybe_value, maybe_string_match
 from utils.timestr import latest_from_str_rep, to_datetime
 
 TIME_INDEX_HEADER_NAME = 'Fiware-TimeIndex-Attribute'
+TIME_INDEX_ATTRIBUTE_NAME = 'time_index_attribute'
 
 MaybeString = Union[str, None]
 
@@ -61,7 +62,6 @@ def time_index_priority_list(
     """
     # Custom time index attribute
     yield to_datetime(_attribute(notification, custom_index))
-
     # The most recent custom time index metadata
     yield latest_from_str_rep(_iter_metadata(notification, custom_index))
 
@@ -104,7 +104,6 @@ def select_time_index_value(custom_index: str, notification: dict) -> datetime:
     be converted to a ``datetime``. Items are considered from top to bottom,
     so that if multiple values are present and they can all be converted to
     ``datetime``, the topmost value is chosen.
-
     - Custom time index. The value of the ``TIME_INDEX_HEADER_NAME``. Note
       that for a notification to contain such header, the corresponding
       subscription has to be created with an ``httpCustom`` block as detailed
@@ -124,7 +123,6 @@ def select_time_index_value(custom_index: str, notification: dict) -> datetime:
     - Current time. This is the default value we use if any of the above isn't
       present or none of the values found can actually be converted to a
       ``datetime``.
-
     :param custom_index: name of the custom_index (if requested,
     None otherwise)
     :param notification: the notification JSON payload as received from Orion.
@@ -136,10 +134,14 @@ def select_time_index_value(custom_index: str, notification: dict) -> datetime:
             custom_index, notification):
         if index_candidate:
             return index_candidate
-
-    # use the current time as a last resort
     return current_time
-
+    
+def select_time_index_attr(attr_name:str, notification: dict):
+     attr_names = []
+     for attr_name in iter_entity_attrs(notification):
+         if attr_name != 'time_index':
+             attr_names.append(attr_name)
+     return attr_names
 
 def select_time_index_value_as_iso(custom_index: str, notification: dict) -> \
         str:

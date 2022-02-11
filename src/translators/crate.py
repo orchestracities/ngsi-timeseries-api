@@ -11,7 +11,7 @@ from translators import sql_translator
 from translators.errors import CrateErrorAnalyzer
 from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
     NGSI_GEOJSON, NGSI_GEOPOINT, NGSI_TEXT, NGSI_STRUCTURED_VALUE, \
-    NGSI_LD_GEOMETRY, TIME_INDEX, METADATA_TABLE_NAME, FIWARE_SERVICEPATH
+    NGSI_LD_GEOMETRY, TIME_INDEX, TIME_INDEX_ATTRIBUTE, METADATA_TABLE_NAME, FIWARE_SERVICEPATH
 import logging
 from .crate_geo_query import from_ngsi_query
 from utils.cfgreader import EnvReader, StrVar, IntVar, FloatVar
@@ -34,7 +34,8 @@ NGSI_TO_SQL = {
     "Number": 'real',
     NGSI_TEXT: 'text',
     NGSI_STRUCTURED_VALUE: 'object',
-    TIME_INDEX: 'timestamptz'
+    TIME_INDEX: 'timestamptz',
+    TIME_INDEX_ATTRIBUTE: CRATE_ARRAY_STR
 }
 
 CRATE_TO_NGSI = dict((v, k) for (k, v) in NGSI_TO_SQL.items())

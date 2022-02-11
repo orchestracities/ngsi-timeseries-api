@@ -253,6 +253,7 @@ def test_insert_entity(translator, entity):
     now = datetime.now(timezone.utc)
     now_iso = now.isoformat(timespec='milliseconds')
     entity[BaseTranslator.TIME_INDEX_NAME] = now_iso
+    entity[BaseTranslator.TIME_INDEX_ATTRIBUTE_NAME] = ['temperature','pressure']
 
     result = translator.insert([entity])
     assert result.rowcount != 0
@@ -274,7 +275,7 @@ def test_insert_same_entity_with_different_attrs(
     # of temperature.
     for entity in sameEntityWithDifferentAttrs:
         entity[BaseTranslator.TIME_INDEX_NAME] = entity['temperature']['metadata']['dateModified']['value']
-
+        entity[BaseTranslator.TIME_INDEX_ATTRIBUTE_NAME] = ['temperature','pressure']
     result = translator.insert(sameEntityWithDifferentAttrs)
     assert result.rowcount != 0
 
@@ -521,6 +522,7 @@ def test_accept_unknown_ngsi_type(translator):
         TIME_INDEX_NAME: datetime.now(
             timezone.utc).isoformat(
             timespec='milliseconds'),
+        TIME_INDEX_ATTRIBUTE_NAME: ['temperature','pressure'],
         "address": {
             "type": "PostalAddress",
                 "value": {
@@ -549,6 +551,7 @@ def test_accept_special_chars(translator):
         TIME_INDEX_NAME: datetime.now(
             timezone.utc).isoformat(
             timespec='milliseconds'),
+        TIME_INDEX_ATTRIBUTE_NAME: ['temperature','pressure'],
         "address": {
             "type": "Address-Type",
                 "value": {
@@ -572,6 +575,7 @@ def test_missing_type_defaults_to_string(translator):
         TIME_INDEX_NAME: datetime.now(
             timezone.utc).isoformat(
             timespec='milliseconds'),
+        TIME_INDEX_ATTRIBUTE_NAME: ['temperature','pressure'],
         "foo": {
             "value": "BaR",
         },
@@ -590,7 +594,8 @@ def test_missing_type_defaults_to_string(translator):
 def test_capitals(translator):
     entity_type = "SoMeWeIrDtYpE"
     e1 = {
-        "type": entity_type, "id": "sOmEwEiRdId", TIME_INDEX_NAME: datetime.now(
+        "type": entity_type, "id": "sOmEwEiRdId",TIME_INDEX_ATTRIBUTE_NAME: 
+            ['temperature','pressure'], TIME_INDEX_NAME: datetime.now(
             timezone.utc).isoformat(
             timespec='milliseconds'), "Foo": {
                 "type": "Text", "value": "FoO", }, "bAr": {
@@ -606,7 +611,7 @@ def test_capitals(translator):
     e2['NewAttr'] = {"type": "Text", "value": "NewAttrValue!"}
     e2[TIME_INDEX_NAME] = datetime.now(
         timezone.utc).isoformat(timespec='milliseconds')
-
+    e2[TIME_INDEX_ATTRIBUTE_NAME]: ['temperature','pressure']
     translator.insert([e2])
     entities, err = translator.query()
     assert len(entities) == 2
@@ -646,6 +651,7 @@ def test_long_json(translator):
     big_entity = {
         'id': 'entityId1',
         'type': 'type1',
+        TIME_INDEX_ATTRIBUTE_NAME: ['temperature','pressure'],
         TIME_INDEX_NAME: datetime.now(
             timezone.utc).isoformat(
             timespec='milliseconds'),
@@ -666,6 +672,7 @@ def test_structured_value_to_array(translator):
     entity = {
         'id': '8906',
         'type': 'AirQualityObserved',
+        TIME_INDEX_ATTRIBUTE_NAME: ['temperature','pressure'],
         TIME_INDEX_NAME: datetime.now(timezone.utc).isoformat(timespec='milliseconds'),
         'aqi': {'type': 'Number', 'value': 43},
         'city': {'type': 'Text', 'value': 'Antwerpen'},
@@ -699,6 +706,7 @@ def test_ISO8601(translator):
     e = {
         "type": "MyType",
         "id": "MyId",
+        TIME_INDEX_ATTRIBUTE_NAME: ['temperature','pressure'],
         TIME_INDEX_NAME: datetime.now(
             timezone.utc).isoformat(
             timespec='milliseconds'),

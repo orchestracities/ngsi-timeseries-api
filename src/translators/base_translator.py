@@ -1,5 +1,4 @@
-from utils.common import TIME_INDEX_NAME
-
+from utils.common import TIME_INDEX_NAME, TIME_INDEX_ATTRIBUTE_NAME
 
 class BaseTranslator(object):
     """
@@ -11,7 +10,8 @@ class BaseTranslator(object):
     # Note: Some databases will restrict the possible names for tables and
     # columns.
     TIME_INDEX_NAME = TIME_INDEX_NAME
-
+    TIME_INDEX_ATTRIBUTE_NAME = TIME_INDEX_ATTRIBUTE_NAME
+ 
     def __init__(self, host, port, db_name):
         self.host = host
         self.port = port

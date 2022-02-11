@@ -1,5 +1,5 @@
 TIME_INDEX_NAME = 'time_index'
-
+TIME_INDEX_ATTRIBUTE_NAME = 'time_index_attribute'
 
 def entity_pk(entity):
     """
