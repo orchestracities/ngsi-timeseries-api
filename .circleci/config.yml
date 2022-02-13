@@ -3,8 +3,8 @@ version: 2.1
 jobs:
   build:
     machine:
-      image: ubuntu-2004:202104-01
-      docker_layer_caching: true   # default - false
+      image: ubuntu-2004:202008-01
+      docker_layer_caching: true    # default - false
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
@@ -32,8 +32,8 @@ jobs:
       timescale-version:
         type: string
     machine:
-      image: ubuntu-2004:202104-01
-      docker_layer_caching: true  # default - false
+      image: ubuntu-2004:202008-01
+      docker_layer_caching: true    # default - false
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
@@ -74,8 +74,8 @@ jobs:
             coveralls
   test_reporter:
     machine:
-      image: ubuntu-2004:202104-01
-      docker_layer_caching: true   # default - false
+      image: ubuntu-2004:202008-01
+      docker_layer_caching: true    # default - false
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
@@ -114,8 +114,8 @@ jobs:
             coveralls
   test_integration:
     machine:
-      image: ubuntu-2004:202104-01
-      docker_layer_caching: true  # default - false
+      image: ubuntu-2004:202008-01
+      docker_layer_caching: true    # default - false
     parameters:
       orion-version:
         type: string
@@ -158,8 +158,8 @@ jobs:
             coveralls
   test_others:
     machine:
-      image: ubuntu-2004:202104-01
-      docker_layer_caching: true  # default - false
+      image: ubuntu-2004:202008-01
+      docker_layer_caching: true    # default - false
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
