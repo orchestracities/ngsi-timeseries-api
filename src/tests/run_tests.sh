@@ -71,6 +71,7 @@ pytest src/tests/test_bc.py --cov-report= --cov-config=.coveragerc --cov-append 
     --junitxml=test-results/junit-bc.xml
 tot=$?
 
+cd src/tests
 docker-compose -f docker-compose-bc.yml down -v
 
 # Integration Test
