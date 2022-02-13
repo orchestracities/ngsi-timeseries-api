@@ -10,7 +10,7 @@ tot=0
 # Launch services with previous CRATE and QL version
 echo "\n"
 echo "Launch services with previous CRATE and QL version"
-#cp -f docker-compose-bc-3.yml docker-compose-bc.yml
+
 CRATE_VERSION=${PREV_CRATE} QL_VERSION=${PREV_QL} docker-compose -f docker-compose-bc.yml up -d
 
 HOST="http://localhost:4200"
@@ -44,11 +44,13 @@ docker run -ti --rm --network tests_default \
            orchestracities/quantumleap:${PREV_QL} python tests/common.py
 
 # Restart QL on development version and CRATE on current version
-#cp -f docker-compose-bc-4.yml docker-compose-bc.yml
+echo "\n"
+echo "Use current version of ql and crate"
 
-#docker-compose stop quantumleap
+CRATE_VERSION=${CRATE_VERSION} QL_VERSION=latest docker-compose -f docker-compose-bc.yml stop quantumleap crate
 CRATE_VERSION=${CRATE_VERSION} QL_VERSION=latest docker-compose -f docker-compose-bc.yml up -d
 
+sleep 5
 wait=0
 while [ "$(curl -s -o /dev/null -L -w ''%{http_code}'' $HOST)" != "200" ] && [ $wait -lt 30 ]
 do
