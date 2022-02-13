@@ -143,7 +143,13 @@ def check_data(entities, check_n_indexes=False):
     for e in entities:
         # Query specific entity and check values
         url = "{}/v2/entities/{}/attrs/int_attr".format(QL_URL, e.id)
-        res = requests.get(url, params={'type': e.type}, headers=e.headers())
+        res = None
+        for t in range(30):
+            res = requests.get(url, params={'type': e.type}, headers=e.headers())
+            if res.ok:
+                break
+            else:
+                time.sleep(1)
         assert res.ok, res.text
 
         obtained = res.json()

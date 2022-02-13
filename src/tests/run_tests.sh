@@ -72,18 +72,17 @@ pytest src/tests/test_bc.py --cov-report= --cov-config=.coveragerc --cov-append 
     --junitxml=test-results/junit-bc.xml
 tot=$?
 
-cd src/tests
-docker-compose -f docker-compose-bc.yml down -v
-
 # Integration Test
-# echo "\n"
-# echo "Integration Test"
-# pytest -s src/tests/test_integration.py --cov-report= --cov-config=.coveragerc --cov-append --cov=src/ \
-#     --junitxml=test-results/junit-it.xml
-# loc=$?
-# if [ "$tot" -eq 0 ]; then
-#   tot=$loc
-# fi
-# cd -
+echo "\n"
+echo "Integration Test"
+pytest -s src/tests/test_integration.py --cov-report= --cov-config=.coveragerc --cov-append --cov=src/ \
+    --junitxml=test-results/junit-it.xml
+loc=$?
+if [ "$tot" -eq 0 ]; then
+  tot=$loc
+fi
+cd -
+
+docker-compose -f docker-compose-bc.yml down -v
 
 exit ${tot}
