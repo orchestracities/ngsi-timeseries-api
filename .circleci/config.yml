@@ -24,7 +24,7 @@ jobs:
             - "/usr/local/bin"
             - "/usr/local/lib/python3.8"
             - "/opt/circleci/.pyenv/versions/3.8.5/lib"
-      - run: docker build -t orchestracities/quantumleap .
+#      - run: docker build -t orchestracities/quantumleap .
   test_translator:
     parameters:
       crate-version:

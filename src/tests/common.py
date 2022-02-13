@@ -67,15 +67,18 @@ def check_ql_url():
     assert res.ok, "{} not accessible. {}".format(QL_URL, res.text)
 
 
-def create_entities():
+def create_entities(old=True):
     entities = [
         IntegrationTestEntity("ite1", "Orchestracities", "/ParkingManagement"),
         IntegrationTestEntity("ite2", "Orchestracities", "/ParkingManagement"),
         IntegrationTestEntity("ite3", "Orchestracities", "/WasteManagement"),
         IntegrationTestEntity("ite4", "MyCity", "/WasteManagement"),
         IntegrationTestEntity("ite5", "MyCity", "/"),
-        IntegrationTestEntity("ite6"),
     ]
+    if old:
+        entities.append(IntegrationTestEntity("ite6"))
+    else:
+        entities.append(IntegrationTestEntity("ite6", None, "/"))
     return entities
 
 
@@ -101,11 +104,11 @@ def post_orion_subscriptions(entities):
                                      "{}".format(r.text)
 
 
-def load_data():
+def load_data(old=True):
     check_orion_url()
     check_ql_url()
 
-    entities = create_entities()
+    entities = create_entities(old)
 
     # Post Subscriptions in Orion
     post_orion_subscriptions(entities)
@@ -143,11 +146,20 @@ def check_data(entities, check_n_indexes=False):
     for e in entities:
         # Query specific entity and check values
         url = "{}/v2/entities/{}/attrs/int_attr".format(QL_URL, e.id)
-        res = requests.get(url, params={'type': e.type}, headers=e.headers())
+        res = None
+        for t in range(30):
+            res = requests.get(
+                url,
+                params={
+                    'type': e.type},
+                headers=e.headers())
+            if res.ok:
+                break
+            else:
+                time.sleep(1)
         assert res.ok, res.text
 
         obtained = res.json()
-        assert obtained['entityId'] == e.id
         assert obtained['entityId'] == e.id
 
         index = obtained['index']
@@ -162,9 +174,6 @@ def check_data(entities, check_n_indexes=False):
         #
         if check_n_indexes:
             assert len(index) == UPDATES + 1
-        else:
-            print("expected updates: {}".format(UPDATES + 1))
-            print("actual updates: {}".format(len(index)))
 
         # Now without explicit type to trigger type search in metadata table
         res = requests.get(url, headers=e.headers())

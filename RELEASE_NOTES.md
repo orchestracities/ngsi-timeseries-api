@@ -10,6 +10,8 @@
 
 ### Bug fixes
 
+- Fix issues with integration tests and backward compatibility tests
+
 ### Continuous Integration
 
 - Improve github action for docker images (#624)
