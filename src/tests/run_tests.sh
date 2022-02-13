@@ -50,7 +50,6 @@ echo "Use current version of ql and crate"
 CRATE_VERSION=${CRATE_VERSION} QL_VERSION=latest docker-compose -f docker-compose-bc.yml stop quantumleap crate
 CRATE_VERSION=${CRATE_VERSION} QL_VERSION=latest docker-compose -f docker-compose-bc.yml up -d
 
-sleep 5
 wait=0
 while [ "$(curl -s -o /dev/null -L -w ''%{http_code}'' $HOST)" != "200" ] && [ $wait -lt 30 ]
 do
