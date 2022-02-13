@@ -16,7 +16,7 @@ CRATE_VERSION=${PREV_CRATE} QL_IMAGE=${QL_PREV_IMAGE} docker-compose -f docker-c
 HOST="http://localhost:4200"
 echo "Testing $HOST"
 wait=0
-while [[ "$(curl -s -o /dev/null -L -w ''%{http_code}'' $HOST)" != "200" ]] && [[ $wait -lt 30 ]]
+while [ "$(curl -s -o /dev/null -L -w ''%{http_code}'' $HOST)" != "200" ] && [ $wait -lt 30 ]
 do
   echo "Waiting for $HOST"
   sleep 5
@@ -24,7 +24,7 @@ do
   echo "Elapsed time: $wait"
 done
 
-if [[ $wait -gt 30 ]]; then
+if [ $wait -gt 30 ]; then
   echo "timeout while waiting services to be ready"
   exit -1
 fi
@@ -50,7 +50,7 @@ docker run -ti --rm --network tests_default \
 CRATE_VERSION=${CRATE_VERSION} QL_IMAGE=orchestracities/quantumleap docker-compose -f docker-compose-bc.yml up -d
 
 wait=0
-while [[ "$(curl -s -o /dev/null -L -w ''%{http_code}'' $HOST)" != "200" ]] && [[ $wait -lt 30 ]]
+while [ "$(curl -s -o /dev/null -L -w ''%{http_code}'' $HOST)" != "200" ] && [ $wait -lt 30 ]
 do
   echo "Waiting for $HOST"
   sleep 5
@@ -58,7 +58,7 @@ do
   echo "Elapsed time: $wait"
 done
 
-if [[ $wait -gt 30 ]]; then
+if [ $wait -gt 30 ]; then
   echo "timeout while waiting services to be ready"
   exit -1
 fi

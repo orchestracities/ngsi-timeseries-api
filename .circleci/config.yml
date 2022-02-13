@@ -24,7 +24,7 @@ jobs:
             - "/usr/local/bin"
             - "/usr/local/lib/python3.8"
             - "/opt/circleci/.pyenv/versions/3.8.5/lib"
-      - run: docker build -t orchestracities/quantumleap .
+#      - run: docker build -t orchestracities/quantumleap .
   test_translator:
     parameters:
       crate-version:
@@ -210,28 +210,28 @@ workflows:
   main:
     jobs:
       - build
-      - test_translator:
-          requires:
-            - build
-          matrix:
-            parameters:
-              crate-version: ["4.6.6", "4.2.7"]
-              timescale-version: ["2.3.0-pg13", "1.7.5-pg12"]
-      - test_reporter:
-          requires:
-            - build
+      # - test_translator:
+      #     requires:
+      #       - build
+      #     matrix:
+      #       parameters:
+      #         crate-version: ["4.6.6", "4.2.7"]
+      #         timescale-version: ["2.3.0-pg13", "1.7.5-pg12"]
+      # - test_reporter:
+      #     requires:
+      #       - build
       - test_integration:
           requires:
             - build
           matrix:
             parameters:
               orion-version: ["2.6.1", "2.4.2"]
-      - test_others:
-          requires:
-            - build
-      - coveralls:
-          requires:
-            - test_translator
-            - test_reporter
-            - test_integration
-            - test_others
+      # - test_others:
+      #     requires:
+      #       - build
+      # - coveralls:
+      #     requires:
+      #       - test_translator
+      #       - test_reporter
+      #       - test_integration
+      #       - test_others
