@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Prepare Docker Images
-docker pull ${QL_PREV_IMAGE}
+docker pull orchestracities/quantumleap:${PREV_QL}
 docker build -t orchestracities/quantumleap ../../
 CRATE_VERSION=${PREV_CRATE} docker-compose -f docker-compose-bc.yml pull --ignore-pull-failures
 
@@ -11,7 +11,7 @@ tot=0
 echo "\n"
 echo "Launch services with previous CRATE and QL version"
 #cp -f docker-compose-bc-3.yml docker-compose-bc.yml
-CRATE_VERSION=${PREV_CRATE} QL_IMAGE=${QL_PREV_IMAGE} docker-compose -f docker-compose-bc.yml up -d
+CRATE_VERSION=${PREV_CRATE} QL_VERSION=${PREV_QL} docker-compose -f docker-compose-bc.yml up -d
 
 HOST="http://localhost:4200"
 echo "Testing $HOST"
@@ -41,13 +41,13 @@ docker run -ti --rm --network tests_default \
            -e QL_URL="http://$QL_BC_HOST:8668" \
            --entrypoint "" \
            -e USE_FLASK=TRUE \
-           orchestracities/quantumleap:0.8.0 python tests/common.py
+           orchestracities/quantumleap:${PREV_QL} python tests/common.py
 
 # Restart QL on development version and CRATE on current version
 #cp -f docker-compose-bc-4.yml docker-compose-bc.yml
 
 #docker-compose stop quantumleap
-CRATE_VERSION=${CRATE_VERSION} QL_IMAGE=orchestracities/quantumleap docker-compose -f docker-compose-bc.yml up -d
+CRATE_VERSION=${CRATE_VERSION} QL_VERSION=latest docker-compose -f docker-compose-bc.yml up -d
 
 wait=0
 while [ "$(curl -s -o /dev/null -L -w ''%{http_code}'' $HOST)" != "200" ] && [ $wait -lt 30 ]
