@@ -10,8 +10,24 @@ tot=0
 # Launch services with previous CRATE and QL version
 echo "\n"
 echo "Launch services with previous CRATE and QL version"
+#cp -f docker-compose-bc-3.yml docker-compose-bc.yml
 CRATE_VERSION=${PREV_CRATE} QL_IMAGE=${QL_PREV_IMAGE} docker-compose -f docker-compose-bc.yml up -d
-sleep 20
+
+HOST="http://localhost:4200"
+echo "Testing $HOST"
+wait=0
+while [[ "$(curl -s -o /dev/null -L -w ''%{http_code}'' $HOST)" != "200" ]] && [[ $wait -lt 30 ]]
+do
+  echo "Waiting for $HOST"
+  sleep 5
+  wait=$((wait+5))
+  echo "Elapsed time: $wait"
+done
+
+if [[ $wait -gt 30 ]]; then
+  echo "timeout while waiting services to be ready"
+  exit -1
+fi
 
 
 ORION_BC_HOST=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps | grep "1026" | awk '{ print $1 }')`
@@ -28,9 +44,24 @@ docker run -ti --rm --network tests_default \
            orchestracities/quantumleap:0.8.0 python tests/common.py
 
 # Restart QL on development version and CRATE on current version
-docker-compose stop quantumleap
+#cp -f docker-compose-bc-4.yml docker-compose-bc.yml
+
+#docker-compose stop quantumleap
 CRATE_VERSION=${CRATE_VERSION} QL_IMAGE=orchestracities/quantumleap docker-compose -f docker-compose-bc.yml up -d
-sleep 40
+
+wait=0
+while [[ "$(curl -s -o /dev/null -L -w ''%{http_code}'' $HOST)" != "200" ]] && [[ $wait -lt 30 ]]
+do
+  echo "Waiting for $HOST"
+  sleep 5
+  wait=$((wait+5))
+  echo "Elapsed time: $wait"
+done
+
+if [[ $wait -gt 30 ]]; then
+  echo "timeout while waiting services to be ready"
+  exit -1
+fi
 
 # Backwards Compatibility Test
 echo "\n"
@@ -40,16 +71,17 @@ pytest src/tests/test_bc.py --cov-report= --cov-config=.coveragerc --cov-append 
     --junitxml=test-results/junit-bc.xml
 tot=$?
 
-# Integration Test
-echo "\n"
-echo "Integration Test"
-pytest -s src/tests/test_integration.py --cov-report= --cov-config=.coveragerc --cov-append --cov=src/ \
-    --junitxml=test-results/junit-it.xml
-loc=$?
-if [ "$tot" -eq 0 ]; then
-  tot=$loc
-fi
-cd -
-
 docker-compose -f docker-compose-bc.yml down -v
+
+# Integration Test
+# echo "\n"
+# echo "Integration Test"
+# pytest -s src/tests/test_integration.py --cov-report= --cov-config=.coveragerc --cov-append --cov=src/ \
+#     --junitxml=test-results/junit-it.xml
+# loc=$?
+# if [ "$tot" -eq 0 ]; then
+#   tot=$loc
+# fi
+# cd -
+
 exit ${tot}
