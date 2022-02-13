@@ -41,10 +41,10 @@ def headers(service=None, service_path=None, content_type=True):
 def test_integration_basic():
     entities = []
     try:
-        entities = load_data()
+        entities = load_data(old=False)
         assert len(entities) > 1
         # sleep is not needed now since we have a retries in check_data
-        check_data(entities, True)
+        check_data(entities, False)
     finally:
         unload_data(entities)
         check_deleted_data(entities)

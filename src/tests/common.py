@@ -39,8 +39,6 @@ class IntegrationTestEntity:
             h['Fiware-Service'] = self.fiware_service
         if self.fiware_servicepath:
             h[self.FIWARE_SERVICEPATH_KEY] = self.fiware_servicepath
-        else:
-            h[self.FIWARE_SERVICEPATH_KEY] = '/'
         return h
 
     def payload(self):
@@ -69,15 +67,18 @@ def check_ql_url():
     assert res.ok, "{} not accessible. {}".format(QL_URL, res.text)
 
 
-def create_entities():
+def create_entities(old=True):
     entities = [
         IntegrationTestEntity("ite1", "Orchestracities", "/ParkingManagement"),
         IntegrationTestEntity("ite2", "Orchestracities", "/ParkingManagement"),
         IntegrationTestEntity("ite3", "Orchestracities", "/WasteManagement"),
         IntegrationTestEntity("ite4", "MyCity", "/WasteManagement"),
         IntegrationTestEntity("ite5", "MyCity", "/"),
-        IntegrationTestEntity("ite6"),
     ]
+    if old:
+        entities.append(IntegrationTestEntity("ite6"))
+    else:
+        entities.append(IntegrationTestEntity("ite6", None, "/"))
     return entities
 
 
@@ -103,11 +104,11 @@ def post_orion_subscriptions(entities):
                                      "{}".format(r.text)
 
 
-def load_data():
+def load_data(old=True):
     check_orion_url()
     check_ql_url()
 
-    entities = create_entities()
+    entities = create_entities(old)
 
     # Post Subscriptions in Orion
     post_orion_subscriptions(entities)
