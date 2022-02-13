@@ -43,11 +43,8 @@ def test_integration_basic():
     try:
         entities = load_data()
         assert len(entities) > 1
-        # it seems data consolidation takes now longer in cratedb
-        time.sleep(20)
-        # TODO to avoid random test failures we disable index check, anyhow the
-        # the issue should be better investigated
-        check_data(entities, False)
+        # sleep is not needed now since we have a retries in check_data
+        check_data(entities, True)
     finally:
         unload_data(entities)
         check_deleted_data(entities)

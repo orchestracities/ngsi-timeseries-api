@@ -39,6 +39,8 @@ class IntegrationTestEntity:
             h['Fiware-Service'] = self.fiware_service
         if self.fiware_servicepath:
             h[self.FIWARE_SERVICEPATH_KEY] = self.fiware_servicepath
+        else:
+            h[self.FIWARE_SERVICEPATH_KEY] = '/'
         return h
 
     def payload(self):
@@ -167,9 +169,6 @@ def check_data(entities, check_n_indexes=False):
         #
         if check_n_indexes:
             assert len(index) == UPDATES + 1
-        else:
-            print("expected updates: {}".format(UPDATES + 1))
-            print("actual updates: {}".format(len(index)))
 
         # Now without explicit type to trigger type search in metadata table
         res = requests.get(url, headers=e.headers())
