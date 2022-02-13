@@ -148,7 +148,11 @@ def check_data(entities, check_n_indexes=False):
         url = "{}/v2/entities/{}/attrs/int_attr".format(QL_URL, e.id)
         res = None
         for t in range(30):
-            res = requests.get(url, params={'type': e.type}, headers=e.headers())
+            res = requests.get(
+                url,
+                params={
+                    'type': e.type},
+                headers=e.headers())
             if res.ok:
                 break
             else:

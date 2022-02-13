@@ -56,12 +56,15 @@ def do_integration(entity, subscription, orion_client, service=None,
     try:
         subscription_id = orion_client.subscribe(subscription, service,
                                                  service_path). \
-                              headers['Location'][18:]
+            headers['Location'][18:]
         time.sleep(1)
         orion_client.insert(entity, service, service_path)
         entities_url = "{}/entities".format(QL_URL)
 
-        h = headers(service=service, service_path=service_path, content_type=False)
+        h = headers(
+            service=service,
+            service_path=service_path,
+            content_type=False)
         r = None
         for t in range(30):
             r = requests.get(entities_url, params=None, headers=h)
