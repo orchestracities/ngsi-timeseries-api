@@ -1,14 +1,9 @@
-import pytest
-import requests
 import time
-import json
 
 from tests.common import load_data, check_data, unload_data, \
-    check_deleted_data, QL_URL_4ORION, ORION_URL_4QL
+    check_deleted_data, QL_URL_4ORION
 from reporter.tests.utils import delete_entity_type
-from reporter.tests.utils import delete_test_data
 from conftest import *
-from reporter.timex import TIME_INDEX_HEADER_NAME
 
 
 def notify_header(service=None, service_path=None):
