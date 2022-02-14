@@ -1,11 +1,11 @@
+from six.moves.urllib.request import urlopen
+from six.moves.urllib.error import HTTPError
+import os
 import pytest
 
 from reporter.tests.embedded_server import start_embedded_flask
 
 +import pytest
-import os
-from six.moves.urllib.error import HTTPError
-from six.moves.urllib.request import urlopen
 
 
 def check_crate(docker_ip, public_port):
