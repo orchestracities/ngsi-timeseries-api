@@ -15,7 +15,12 @@ UPDATES = 3
 
 
 class IntegrationTestEntity:
-    def __init__(self, e_id, fiware_service=None, fiware_servicepath=None, entity_type="IntegrationTestEntity"):
+    def __init__(
+            self,
+            e_id,
+            fiware_service=None,
+            fiware_servicepath=None,
+            entity_type="IntegrationTestEntity"):
         self.FIWARE_SERVICEPATH_KEY = 'Fiware-ServicePath'
         self.id = e_id
         self.type = entity_type
@@ -67,11 +72,31 @@ def check_ql_url():
 
 def create_entities(old=True, entity_type="IntegrationTestEntity"):
     entities = [
-        IntegrationTestEntity("ite1", "Orchestracities", "/ParkingManagement", entity_type),
-        IntegrationTestEntity("ite2", "Orchestracities", "/ParkingManagement", entity_type),
-        IntegrationTestEntity("ite3", "Orchestracities", "/WasteManagement", entity_type),
-        IntegrationTestEntity("ite4", "MyCity", "/WasteManagement", entity_type),
-        IntegrationTestEntity("ite5", "MyCity", "/", entity_type),
+        IntegrationTestEntity(
+            "ite1",
+            "Orchestracities",
+            "/ParkingManagement",
+            entity_type),
+        IntegrationTestEntity(
+            "ite2",
+            "Orchestracities",
+            "/ParkingManagement",
+            entity_type),
+        IntegrationTestEntity(
+            "ite3",
+            "Orchestracities",
+            "/WasteManagement",
+            entity_type),
+        IntegrationTestEntity(
+            "ite4",
+            "MyCity",
+            "/WasteManagement",
+            entity_type),
+        IntegrationTestEntity(
+            "ite5",
+            "MyCity",
+            "/",
+            entity_type),
     ]
     if old:
         entities.append(IntegrationTestEntity("ite6", None, None, entity_type))
