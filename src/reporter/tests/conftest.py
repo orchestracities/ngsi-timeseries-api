@@ -55,12 +55,6 @@ def docker_services_project_name():
     return "reporter-test"
 
 
-import pytest
-import os
-from six.moves.urllib.error import HTTPError
-from six.moves.urllib.request import urlopen
-
-
 def check_crate(docker_ip, public_port):
     """Check if a crate is reachable.
 
@@ -108,6 +102,7 @@ def docker_stack(docker_services):
 @pytest.fixture(scope='session')
 def docker_services_project_name():
     return "reporter-test"
+
 
 @pytest.fixture(scope='session', autouse=True)
 def embedded_flask():
