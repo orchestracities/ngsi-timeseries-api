@@ -2,7 +2,6 @@ import pytest
 
 from reporter.tests.embedded_server import start_embedded_flask
 
-+import pytest
 import os
 from six.moves.urllib.error import HTTPError
 from six.moves.urllib.request import urlopen
