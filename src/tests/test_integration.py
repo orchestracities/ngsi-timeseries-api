@@ -38,7 +38,8 @@ def test_integration_basic():
     try:
         entities = load_data(old=False, entity_type="TestEntity")
         assert len(entities) > 1
-        # sleep is not needed now since we have a retries in check_data
+        # sleep should not be needed now since we have a retries in check_data...
+        time.sleep(10)
         check_data(entities, False)
     finally:
         unload_data(entities)
