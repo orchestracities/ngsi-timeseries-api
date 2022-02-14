@@ -33,6 +33,7 @@ def docker_stack(docker_services):
         "crate",
         4200,
         check_server=check_crate,
+        timeout=60.0
     )
     # even though the http api is available, cratedb does not allow
     # connections immediately. so sleep a little before creating a user
