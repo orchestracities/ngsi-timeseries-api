@@ -1,14 +1,9 @@
-import pytest
-import requests
 import time
-import json
 
 from tests.common import load_data, check_data, unload_data, \
-    check_deleted_data, QL_URL_4ORION, ORION_URL_4QL
+    check_deleted_data, QL_URL_4ORION
 from reporter.tests.utils import delete_entity_type
-from reporter.tests.utils import delete_test_data
 from conftest import *
-from reporter.timex import TIME_INDEX_HEADER_NAME
 
 
 def notify_header(service=None, service_path=None):
@@ -41,7 +36,7 @@ def headers(service=None, service_path=None, content_type=True):
 def test_integration_basic():
     entities = []
     try:
-        entities = load_data(old=False)
+        entities = load_data(old=False,  entity_type="TestEntity")
         assert len(entities) > 1
         # sleep is not needed now since we have a retries in check_data
         check_data(entities, False)
