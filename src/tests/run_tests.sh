@@ -16,7 +16,7 @@ CRATE_VERSION=${PREV_CRATE} QL_VERSION=${PREV_QL} docker-compose -f docker-compo
 HOST="http://localhost:4200"
 echo "Testing $HOST"
 wait=0
-while [ "$(curl -s -o /dev/null -L -w ''%{http_code}'' $HOST)" != "200" ] && [ $wait -lt 30 ]
+while [ "$(curl -s -o /dev/null -L -w ''%{http_code}'' $HOST)" != "200" ] && [ $wait -le 30 ]
 do
   echo "Waiting for $HOST"
   sleep 5
@@ -51,7 +51,7 @@ CRATE_VERSION=${CRATE_VERSION} QL_VERSION=latest docker-compose -f docker-compos
 CRATE_VERSION=${CRATE_VERSION} QL_VERSION=latest docker-compose -f docker-compose-bc.yml up -d
 
 wait=0
-while [ "$(curl -s -o /dev/null -L -w ''%{http_code}'' $HOST)" != "200" ] && [ $wait -lt 30 ]
+while [ "$(curl -s -o /dev/null -L -w ''%{http_code}'' $HOST)" != "200" ] && [ $wait -le 30 ]
 do
   echo "Waiting for $HOST"
   sleep 5
