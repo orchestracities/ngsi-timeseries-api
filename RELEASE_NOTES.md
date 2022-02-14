@@ -13,6 +13,7 @@
 ### Continuous Integration
 
 - Improve github action for docker images (#624)
+- Add maintenance type to pr template
 
 ### Documentation
 
