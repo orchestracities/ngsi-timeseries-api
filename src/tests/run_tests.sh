@@ -26,6 +26,7 @@ done
 
 if [ $wait -gt 30 ]; then
   echo "timeout while waiting services to be ready"
+  docker-compose -f docker-compose-bc.yml down -v
   exit -1
 fi
 
@@ -61,6 +62,7 @@ done
 
 if [ $wait -gt 30 ]; then
   echo "timeout while waiting services to be ready"
+  docker-compose -f docker-compose-bc.yml down -v
   exit -1
 fi
 
