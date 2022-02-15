@@ -27,7 +27,7 @@ jobs:
       - run: docker build -t orchestracities/quantumleap .
       - run: source deps.env
       - run: cd docker
-      - run: docker compose pull
+      - run: docker-compose pull
   test_translator:
     parameters:
       crate-version:
