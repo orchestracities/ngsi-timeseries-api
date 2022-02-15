@@ -32,6 +32,22 @@ export POSTGRES_HOST=$LH
 
 export REDIS_HOST=$LH
 
+case $(uname -m) in
+    arm64)
+      echo "arm64 detected set DOCKER_DEFAULT_PLATFORM=linux/amd64"
+      export DOCKER_DEFAULT_PLATFORM=linux/amd64
+      ;;
+    i386)
+      ;;
+    i686)
+      ;;
+    x86_64)
+      ;;
+    arm)
+      dpkg --print-architecture | grep -q "arm64" && export DOCKER_DEFAULT_PLATFORM=linux/amd64 || architecture="arm"
+     ;;
+esac
+
 echo "used ip: $LH"
 
 [[ "$PIPENV_SHELL" == "no" ]] || pipenv shell

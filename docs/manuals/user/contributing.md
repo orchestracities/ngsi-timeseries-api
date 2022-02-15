@@ -66,6 +66,20 @@ To run tests (assuming you run `source setup_dev_env.sh`):
 sh run_tests.sh
 ```
 
+In case you are running on a ARM64 platform (e.g. Apple M1), recall to set
+docker default platform to amd64 (not all image used exists also for arm64):
+
+```bash
+export DOCKER_DEFAULT_PLATFORM=linux/amd64 
+```
+
+Also, if you run bc tests, you will have issues with crate image, add the
+following line to the list of crate commands in `docker-compose-bc.yml`:
+
+```yaml
+      -Cbootstrap.system_call_filter=false
+```
+
 ## Using Gunicorn & fine tuning it
 
 Details on how to use QuantumLeap WSGI app in Gunicorn:

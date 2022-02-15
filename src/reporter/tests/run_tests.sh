@@ -1,12 +1,4 @@
 #!/usr/bin/env bash
-docker-compose build quantumleap-db-setup
-docker-compose pull crate
-docker-compose pull timescale
-docker-compose pull redis
-
-docker-compose up -d
-sleep 20
-
 # Set test QL config file
 export QL_CONFIG='src/reporter/tests/ql-config.yml'
 
@@ -17,5 +9,4 @@ pytest src/reporter/ \
 r=$?
 cd -
 
-docker-compose down -v
 exit $r
