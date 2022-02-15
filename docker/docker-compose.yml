@@ -3,7 +3,7 @@ version: '3'
 services:
 
   orion:
-    image: fiware/orion:${ORION_VERSION:-2.6.1}
+    image: fiware/orion:${ORION_VERSION:-3.3.1}
     ports:
       - "1026:1026"
     command: -logLevel DEBUG -noCache -dbhost mongo
@@ -16,7 +16,7 @@ services:
       retries: 3
 
   quantumleap:
-    image: ${QL_IMAGE:-orchestracities/quantumleap}
+    image: orchestracities/quantumleap:${QL_VERSION:-latest}
     ports:
       - "8668:8668"
     depends_on:
@@ -31,14 +31,14 @@ services:
       - LOGLEVEL=DEBUG
 
   mongo:
-    image: mongo:3.2.19
+    image: mongo:${MONGO_VERSION:-4.4}
     ports:
       - "27017:27017"
     volumes:
       - mongodata:/data/db
 
   crate:
-    image: crate:${CRATE_VERSION:-4.6.5}
+    image: crate:${CRATE_VERSION:-4.6.7}
     command: crate -Cauth.host_based.enabled=false
       -Ccluster.name=democluster -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*"
     environment:
@@ -51,6 +51,16 @@ services:
     volumes:
       - cratedata:/data
 
+  timescale:
+    image: timescale/timescaledb-postgis:${TIMESCALE_VERSION:-2.3.0-pg13}
+    ports:
+      - "5432:5432"
+      # Don't expose container port 5432 with the same number outside of the
+      # swarm. In the Travis test env, there's already a PG instance running
+      # on port 5432!
+    environment:
+      - POSTGRES_PASSWORD=*
+
   grafana:
     image: grafana/grafana
     ports:
@@ -59,7 +69,7 @@ services:
       - crate
 
   redis:
-    image: redis:${REDIS_VERSION:-4}
+    image: redis:${REDIS_VERSION:-6.2.3}
     ports:
       - "6379:6379"
     volumes:
