@@ -6,7 +6,6 @@
 
 - Removed subscription API (#493)
 
-
 ### Bug fixes
 
 ### Continuous Integration
