@@ -22,7 +22,7 @@ services:
       - "27017:27017"
 
   quantumleap:
-    image: ${QL_IMAGE:-orchestracities/quantumleap:latest}
+    image: orchestracities/quantumleap:${QL_VERSION:-latest}
     sysctls:
       net.core.somaxconn: 4096
     ports:

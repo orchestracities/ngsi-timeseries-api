@@ -10,9 +10,17 @@
 
 ### Bug fixes
 
+- Fix issues with integration tests and backward compatibility tests
+
 ### Continuous Integration
 
+- Improve github action for docker images (#624)
+- Add caching to docker image builds (#626)
+
 ### Documentation
+
+- Fix links in pr template (#620)
+- Mention running tests locally as well as linting in PR template (#621)
 
 ### Technical debt
 

@@ -11,16 +11,19 @@ ORION_URL_4QL = os.environ.get("ORION_URL_4QL", "http://orion:1026")
 QL_URL_4ORION = os.environ.get("QL_URL_4ORION", "http://quantumleap:8668")
 
 # HELPER VARIABLES
-ENTITY_TYPE = "IntegrationTestEntity"
-
 UPDATES = 3
 
 
 class IntegrationTestEntity:
-    def __init__(self, e_id, fiware_service=None, fiware_servicepath=None):
+    def __init__(
+            self,
+            e_id,
+            fiware_service=None,
+            fiware_servicepath=None,
+            entity_type="IntegrationTestEntity"):
         self.FIWARE_SERVICEPATH_KEY = 'Fiware-ServicePath'
         self.id = e_id
-        self.type = ENTITY_TYPE
+        self.type = entity_type
 
         self.fiware_service = fiware_service
         self.fiware_servicepath = fiware_servicepath
@@ -67,15 +70,38 @@ def check_ql_url():
     assert res.ok, "{} not accessible. {}".format(QL_URL, res.text)
 
 
-def create_entities():
+def create_entities(old=True, entity_type="IntegrationTestEntity"):
     entities = [
-        IntegrationTestEntity("ite1", "Orchestracities", "/ParkingManagement"),
-        IntegrationTestEntity("ite2", "Orchestracities", "/ParkingManagement"),
-        IntegrationTestEntity("ite3", "Orchestracities", "/WasteManagement"),
-        IntegrationTestEntity("ite4", "MyCity", "/WasteManagement"),
-        IntegrationTestEntity("ite5", "MyCity", "/"),
-        IntegrationTestEntity("ite6"),
+        IntegrationTestEntity(
+            "ite1",
+            "Orchestracities",
+            "/ParkingManagement",
+            entity_type),
+        IntegrationTestEntity(
+            "ite2",
+            "Orchestracities",
+            "/ParkingManagement",
+            entity_type),
+        IntegrationTestEntity(
+            "ite3",
+            "Orchestracities",
+            "/WasteManagement",
+            entity_type),
+        IntegrationTestEntity(
+            "ite4",
+            "MyCity",
+            "/WasteManagement",
+            entity_type),
+        IntegrationTestEntity(
+            "ite5",
+            "MyCity",
+            "/",
+            entity_type),
     ]
+    if old:
+        entities.append(IntegrationTestEntity("ite6", None, None, entity_type))
+    else:
+        entities.append(IntegrationTestEntity("ite6", None, "/", entity_type))
     return entities
 
 
@@ -101,11 +127,11 @@ def post_orion_subscriptions(entities):
                                      "{}".format(r.text)
 
 
-def load_data():
+def load_data(old=True, entity_type="IntegrationTestEntity"):
     check_orion_url()
     check_ql_url()
 
-    entities = create_entities()
+    entities = create_entities(old, entity_type="IntegrationTestEntity")
 
     # Post Subscriptions in Orion
     post_orion_subscriptions(entities)
@@ -143,11 +169,20 @@ def check_data(entities, check_n_indexes=False):
     for e in entities:
         # Query specific entity and check values
         url = "{}/v2/entities/{}/attrs/int_attr".format(QL_URL, e.id)
-        res = requests.get(url, params={'type': e.type}, headers=e.headers())
+        res = None
+        for t in range(30):
+            res = requests.get(
+                url,
+                params={
+                    'type': e.type},
+                headers=e.headers())
+            if res.ok:
+                break
+            else:
+                time.sleep(1)
         assert res.ok, res.text
 
         obtained = res.json()
-        assert obtained['entityId'] == e.id
         assert obtained['entityId'] == e.id
 
         index = obtained['index']
@@ -162,9 +197,6 @@ def check_data(entities, check_n_indexes=False):
         #
         if check_n_indexes:
             assert len(index) == UPDATES + 1
-        else:
-            print("expected updates: {}".format(UPDATES + 1))
-            print("actual updates: {}".format(len(index)))
 
         # Now without explicit type to trigger type search in metadata table
         res = requests.get(url, headers=e.headers())
