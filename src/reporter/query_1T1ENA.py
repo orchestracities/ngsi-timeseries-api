@@ -3,7 +3,6 @@ from flask import request
 from reporter.reporter import _validate_query_params
 from translators.factory import translator_for
 import logging
-import warnings
 from .geo_query_handler import handle_geo_query
 
 
@@ -87,8 +86,7 @@ def query_1T1ENA(entity_id,   # In Path
 
     if entities:
         if len(entities) > 1:
-            import warnings
-            warnings.warn("Not expecting more than one result for a 1T1ENA.")
+            logging.warning("Not expecting more than one result for a 1T1ENA.")
 
         attributes = []
         ignore = ('type', 'id', 'index')
