@@ -34,7 +34,7 @@ def delete_entity(entity_id, type_=None, from_date=None, to_date=None):
 def delete_entities(entity_type, from_date=None, to_date=None,
                     drop_table=False):
     with translator_for(fiware_s()) as trans:
-        if drop_table and fiware_sp() == '/':
+        if drop_table and fiware_sp() is None:
             trans.drop_table(etype=entity_type,
                              fiware_service=fiware_s())
             logging.getLogger(__name__).info(
@@ -42,7 +42,7 @@ def delete_entities(entity_type, from_date=None, to_date=None,
             return 'entity table dropped', 204
         elif drop_table:
             e = fiware_sp().split(",")
-            if e != '/' and len(e) > 0:
+            if e is not None and len(e) > 0:
                 return "request has one or more fiware service paths," \
                        "dropTable requires no service path", 422
 
