@@ -49,4 +49,4 @@ def docker_stack(docker_services):
 
 @pytest.fixture(scope='session')
 def docker_services_project_name():
-    return "reporter-test"
+    return "translators-test"

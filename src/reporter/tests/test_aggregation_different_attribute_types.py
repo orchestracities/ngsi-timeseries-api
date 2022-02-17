@@ -1,14 +1,11 @@
 from conftest import QL_URL
-from datetime import datetime
 from reporter.tests.utils import delete_test_data, \
     insert_test_data_different_types, wait_for_insert
 import pytest
 import requests
-import dateutil.parser
-import time
 
 entity_type = "TestRoomAggregationDifferentTypes"
-entity_id = "TestRoom1"
+entity_id = "TestRoomAggregationDifferentTypes1"
 n_days = 4
 
 services = ['t1', 't2']
