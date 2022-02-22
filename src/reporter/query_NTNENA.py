@@ -8,7 +8,6 @@ from .geo_query_handler import handle_geo_query
 import dateutil.parser
 from datetime import datetime, timezone
 from translators.factory import translator_for
-from .httputil import fiware_s, fiware_sp
 
 
 def query_NTNENA(id_=None,  # In Query
@@ -42,6 +41,9 @@ def query_NTNENA(id_=None,  # In Query
     if attrs is not None:
         attrs = attrs.split(',')
 
+    fiware_s = request.headers.get('fiware-service', None)
+    fiware_sp = request.headers.get('fiware-servicepath', '/')
+
     entities = None
     entity_ids = None
     if id_:
@@ -60,8 +62,8 @@ def query_NTNENA(id_=None,  # In Query
                                         last_n=last_n,
                                         limit=limit,
                                         offset=offset,
-                                        fiware_service=fiware_s(),
-                                        fiware_servicepath=fiware_sp(),
+                                        fiware_service=fiware_s,
+                                        fiware_servicepath=fiware_sp,
                                         geo_query=geo_query)
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)

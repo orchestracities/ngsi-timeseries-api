@@ -3,7 +3,6 @@ from flask import request
 from reporter.reporter import _validate_query_params
 from translators.factory import translator_for
 import logging
-from .httputil import fiware_s, fiware_sp
 import warnings
 
 
@@ -16,6 +15,9 @@ def query_NTNE(limit=10000,
     See /entities in API Specification
     quantumleap.yml
     """
+    fiware_s = request.headers.get('fiware-service', None)
+    fiware_sp = request.headers.get('fiware-servicepath', '/')
+
     entities = None
     try:
         with translator_for(fiware_s) as trans:
@@ -24,8 +26,8 @@ def query_NTNE(limit=10000,
                                        from_date=from_date,
                                        to_date=to_date,
                                        offset=offset,
-                                       fiware_service=fiware_s(),
-                                       fiware_servicepath=fiware_sp(),)
+                                       fiware_service=fiware_s,
+                                       fiware_servicepath=fiware_sp,)
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)
         logging.getLogger(__name__).error(msg, exc_info=True)

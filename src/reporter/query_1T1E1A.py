@@ -6,7 +6,6 @@ import logging
 import warnings
 from .geo_query_handler import handle_geo_query
 from utils.jsondict import lookup_string_match
-from .httputil import fiware_s, fiware_sp
 
 
 def query_1T1E1A(attr_name,   # In Path
@@ -36,6 +35,9 @@ def query_1T1E1A(attr_name,   # In Path
     if r:
         return r, c
 
+    fiware_s = request.headers.get('fiware-service', None)
+    fiware_sp = request.headers.get('fiware-servicepath', '/')
+
     entities = None
     try:
         with translator_for(fiware_s) as trans:
@@ -49,8 +51,8 @@ def query_1T1E1A(attr_name,   # In Path
                                         last_n=last_n,
                                         limit=limit,
                                         offset=offset,
-                                        fiware_service=fiware_s(),
-                                        fiware_servicepath=fiware_sp(),
+                                        fiware_service=fiware_s,
+                                        fiware_servicepath=fiware_sp,
                                         geo_query=geo_query)
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)
