@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 # Set test QL config file
 export QL_CONFIG='src/reporter/tests/ql-config.yml'
 
