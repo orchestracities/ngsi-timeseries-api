@@ -10,9 +10,13 @@
 
 ### Bug fixes
 
+- Fix issues with integration tests and backward compatibility tests
+
 ### Continuous Integration
 
 - Improve github action for docker images (#624)
+- Add caching to docker image builds (#626)
+- Update CI to use CrateDB 4.6.7 and Orion 3.3.1
 - Add maintenance type to pr template
 
 ### Documentation

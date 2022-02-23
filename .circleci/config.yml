@@ -4,6 +4,7 @@ jobs:
   build:
     machine:
       image: ubuntu-2004:202008-01
+      docker_layer_caching: true    # default - false
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
@@ -24,6 +25,7 @@ jobs:
             - "/usr/local/lib/python3.8"
             - "/opt/circleci/.pyenv/versions/3.8.5/lib"
       - run: docker build -t orchestracities/quantumleap .
+      - run: source deps.env && cd docker && docker-compose pull
   test_translator:
     parameters:
       crate-version:
@@ -32,6 +34,7 @@ jobs:
         type: string
     machine:
       image: ubuntu-2004:202008-01
+      docker_layer_caching: true    # default - false
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
@@ -73,6 +76,7 @@ jobs:
   test_reporter:
     machine:
       image: ubuntu-2004:202008-01
+      docker_layer_caching: true    # default - false
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
@@ -112,6 +116,7 @@ jobs:
   test_integration:
     machine:
       image: ubuntu-2004:202008-01
+      docker_layer_caching: true    # default - false
     parameters:
       orion-version:
         type: string
@@ -155,6 +160,7 @@ jobs:
   test_others:
     machine:
       image: ubuntu-2004:202008-01
+      docker_layer_caching: true    # default - false
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
@@ -210,7 +216,7 @@ workflows:
             - build
           matrix:
             parameters:
-              crate-version: ["4.6.6", "4.2.7"]
+              crate-version: ["4.6.7", "4.2.7"]
               timescale-version: ["2.3.0-pg13", "1.7.5-pg12"]
       - test_reporter:
           requires:
@@ -220,7 +226,7 @@ workflows:
             - build
           matrix:
             parameters:
-              orion-version: ["2.6.1", "2.4.2"]
+              orion-version: ["3.3.1", "2.4.2"]
       - test_others:
           requires:
             - build

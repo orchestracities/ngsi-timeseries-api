@@ -1,14 +1,9 @@
-import pytest
-import requests
 import time
-import json
 
 from tests.common import load_data, check_data, unload_data, \
-    check_deleted_data, QL_URL_4ORION, ORION_URL_4QL
+    check_deleted_data, QL_URL_4ORION
 from reporter.tests.utils import delete_entity_type
-from reporter.tests.utils import delete_test_data
 from conftest import *
-from reporter.timex import TIME_INDEX_HEADER_NAME
 
 
 def notify_header(service=None, service_path=None):
@@ -41,12 +36,11 @@ def headers(service=None, service_path=None, content_type=True):
 def test_integration_basic():
     entities = []
     try:
-        entities = load_data()
+        entities = load_data(old=False, entity_type="TestEntity")
         assert len(entities) > 1
-        # it seems data consolidation takes now longer in cratedb
-        time.sleep(20)
-        # TODO to avoid random test failures we disable index check, anyhow the
-        # the issue should be better investigated
+        # sleep should not be needed now since we have a retries in
+        # check_data...
+        time.sleep(10)
         check_data(entities, False)
     finally:
         unload_data(entities)
@@ -55,30 +49,37 @@ def test_integration_basic():
 
 def do_integration(entity, subscription, orion_client, service=None,
                    service_path=None):
-    subscription_id = orion_client.subscribe(subscription, service,
-                                             service_path). \
-        headers['Location'][18:]
-    time.sleep(SLEEP_TIME)
 
-    orion_client.insert(entity, service, service_path)
-    time.sleep(4 * SLEEP_TIME)  # Give time for notification to be processed.
+    try:
+        subscription_id = orion_client.subscribe(subscription, service,
+                                                 service_path). \
+            headers['Location'][18:]
+        time.sleep(1)
+        orion_client.insert(entity, service, service_path)
+        entities_url = "{}/entities".format(QL_URL)
 
-    entities_url = "{}/entities".format(QL_URL)
+        h = headers(
+            service=service,
+            service_path=service_path,
+            content_type=False)
+        r = None
+        for t in range(30):
+            r = requests.get(entities_url, params=None, headers=h)
+            if r.status_code == 200:
+                break
+            else:
+                time.sleep(1)
+        assert r.status_code == 200
+        entities = r.json()
+        assert len(entities) == 1
 
-    h = headers(service=service, service_path=service_path, content_type=False)
-
-    r = requests.get(entities_url, params=None, headers=h)
-    assert r.status_code == 200
-    entities = r.json()
-    assert len(entities) == 1
-
-    assert entities[0]['id'] == entity['id']
-    assert entities[0]['type'] == entity['type']
-
-    delete_entity_type(service, entity['type'], service_path)
-    orion_client.delete(entity['id'], service, service_path)
-    orion_client.delete_subscription(subscription_id, service,
-                                     service_path)
+        assert entities[0]['entityId'] == entity['id']
+        assert entities[0]['entityType'] == entity['type']
+    finally:
+        delete_entity_type(service, entity['type'], None)
+        orion_client.delete(entity['id'], service, service_path)
+        orion_client.delete_subscription(subscription_id, service,
+                                         service_path)
 
 
 @pytest.mark.parametrize("service", services)
