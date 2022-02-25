@@ -28,6 +28,7 @@
 
 - Fix links in pr template (#620)
 - Mention running tests locally as well as linting in PR template (#621)
+- Fix variable names for CrateDB authentication (#636)
 
 ### Technical debt
 
