@@ -2,7 +2,7 @@
 
 # Prepare Docker Images
 docker pull orchestracities/quantumleap:${PREV_QL}
-docker build -t orchestracities/quantumleap ../../
+docker build -t orchestracities/quantumleap:latest ../../
 CRATE_VERSION=${PREV_CRATE} docker-compose -f docker-compose-bc.yml pull --ignore-pull-failures
 
 tot=0

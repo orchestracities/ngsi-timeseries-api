@@ -16,6 +16,7 @@
 ### Bug fixes
 
 - Fix issues with integration tests and backward compatibility tests
+- Fix forward compatibility issue from <=0.8.2 to 0.8.3 (#638)
 
 ### Continuous Integration
 

@@ -98,10 +98,10 @@ def create_entities(old=True, entity_type="IntegrationTestEntity"):
             "/",
             entity_type),
     ]
-    if old:
-        entities.append(IntegrationTestEntity("ite6", None, None, entity_type))
-    else:
-        entities.append(IntegrationTestEntity("ite6", None, "/", entity_type))
+    #if old:
+    #    entities.append(IntegrationTestEntity("ite6", None, None, entity_type))
+    #else:
+    #    entities.append(IntegrationTestEntity("ite6", None, "/", entity_type))
     return entities
 
 
@@ -147,7 +147,13 @@ def load_data(old=True, entity_type="IntegrationTestEntity"):
         assert res.ok, res.text
 
     # Update Entities in Orion
-    for i in range(UPDATES):
+    update_data(entities)
+
+    return entities
+
+
+def update_data(entities, updates=UPDATES):
+    for i in range(updates):
         # this sleep ensures that there is some time between entities
         # updates, to avoid that orion combines notifications
         time.sleep(1)
@@ -158,10 +164,8 @@ def load_data(old=True, entity_type="IntegrationTestEntity"):
             res = requests.patch(url, data=json.dumps(patch), headers=h)
             assert res.ok, res.text
 
-    return entities
 
-
-def check_data(entities, check_n_indexes=False):
+def check_data(entities, check_n_indexes=False, updates=UPDATES):
     check_orion_url()
     check_ql_url()
 
@@ -196,7 +200,7 @@ def check_data(entities, check_n_indexes=False):
         # to subscription creation, but this may not be supported by old orion
         #
         if check_n_indexes:
-            assert len(index) == UPDATES + 1
+            assert len(index) == updates + 1
 
         # Now without explicit type to trigger type search in metadata table
         res = requests.get(url, headers=e.headers())
