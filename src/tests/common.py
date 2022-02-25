@@ -98,9 +98,9 @@ def create_entities(old=True, entity_type="IntegrationTestEntity"):
             "/",
             entity_type),
     ]
-    #if old:
+    # if old:
     #    entities.append(IntegrationTestEntity("ite6", None, None, entity_type))
-    #else:
+    # else:
     #    entities.append(IntegrationTestEntity("ite6", None, "/", entity_type))
     return entities
 

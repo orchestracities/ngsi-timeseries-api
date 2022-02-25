@@ -9,7 +9,7 @@ def test_backwards_compatibility():
     assert len(entities) > 1
     try:
         check_data(entities)
-        #add more data
+        # add more data
         update_data(entities, updates=1)
         check_data(entities, check_n_indexes=True, updates=UPDATES + 1)
     finally:
