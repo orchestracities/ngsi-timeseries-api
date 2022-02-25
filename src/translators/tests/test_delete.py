@@ -158,7 +158,7 @@ def test_delete_entities_customs(translator):
 
 @pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
 def test_delete_entities_with_tenancy(translator):
-    fs = 'fs'
+    fs = 'fs1'
     fsp = 'fsp'
     entities = create_random_entities(num_types=3,
                                       num_ids_per_type=1,
