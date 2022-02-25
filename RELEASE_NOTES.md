@@ -7,6 +7,11 @@
 - Removed subscription API (#493)
 - Replaced geocoder with [geopy](https://geopy.readthedocs.io/en/stable/) (#610)
 - Bumped pillow from 8.4.0 to 9.0.0
+- Aligned missing Fiware-servicePath behaviour with the one of Orion
+  Context Broker (#564). This is a breaking change! Before no value for
+  Fiware-servicePath was interpreted as python None, from now on, None 
+  will be replaced with /. This affects only users that manually injected
+  data, since Orion, assume / when no servicePath is passed.
 
 ### Bug fixes
 
@@ -40,7 +45,7 @@
 - Added instanceId for each entry received (#565)
 - Support CrateDB authentication (#474)
 - Updated PG8000 to 1.23.0 (#586)
-- aligned servicePath: none behaviour with the one of orion (#564)
+
 
 ### Bug fixes
 
