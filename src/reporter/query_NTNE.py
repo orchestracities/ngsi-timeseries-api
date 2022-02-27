@@ -16,7 +16,7 @@ def query_NTNE(limit=10000,
     quantumleap.yml
     """
     fiware_s = request.headers.get('fiware-service', None)
-    fiware_sp = request.headers.get('fiware-servicepath', None)
+    fiware_sp = request.headers.get('fiware-servicepath', '/')
 
     entities = None
     try:
@@ -27,7 +27,7 @@ def query_NTNE(limit=10000,
                                        to_date=to_date,
                                        offset=offset,
                                        fiware_service=fiware_s,
-                                       fiware_servicepath=fiware_sp)
+                                       fiware_servicepath=fiware_sp,)
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)
         logging.getLogger(__name__).error(msg, exc_info=True)

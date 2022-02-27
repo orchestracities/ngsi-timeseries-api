@@ -13,7 +13,7 @@ notify_url = "{}/notify".format(QL_URL)
 SLEEP_TIME = 1
 
 
-def insert_test_data(service, service_path=None, entity_id=None):
+def insert_test_data(service, service_path='/', entity_id=None):
     etypes = ['AirQualityObserved', 'Room', 'TrafficFlowObserved']
     # 3 entity types, 2 entities for each, 10 updates for each entity.
     for t in etypes:

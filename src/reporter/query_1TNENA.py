@@ -45,7 +45,7 @@ def query_1TNENA(entity_type=None,  # In Path
         attrs = attrs.split(',')
 
     fiware_s = request.headers.get('fiware-service', None)
-    fiware_sp = request.headers.get('fiware-servicepath', None)
+    fiware_sp = request.headers.get('fiware-servicepath', '/')
 
     entities = None
     entity_ids = None

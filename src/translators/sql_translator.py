@@ -204,7 +204,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         # Implement when that becomes a real problem.
         return "{}".format(entity_attr.lower())
 
-    def insert(self, entities, fiware_service=None, fiware_servicepath=None):
+    def insert(self, entities, fiware_service=None, fiware_servicepath='/'):
         if not isinstance(entities, list):
             msg = "Entities expected to be of type list, but got {}"
             raise TypeError(msg.format(type(entities)))
@@ -255,7 +255,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                                  entity_type,
                                  entities,
                                  fiware_service=None,
-                                 fiware_servicepath=None):
+                                 fiware_servicepath='/'):
         # All entities must be of the same type and have a time index
         # Also, an entity can't have an attribute with the same name
         # as that specified by ORIGINAL_ENTITY_COL_NAME.
@@ -482,7 +482,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             elif cn == self.TIME_INDEX_NAME:
                 values.append(e[self.TIME_INDEX_NAME])
             elif cn == FIWARE_SERVICEPATH:
-                values.append(fiware_servicepath or '')
+                values.append(fiware_servicepath or '/')
             elif cn == 'instanceId':
                 values.append("urn:ngsi-ld:" + str(uuid4()))
             else:
@@ -806,7 +806,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                 f"last_n should be >=1 and <= {default_limit}.")
         return min(last_n, limit)
 
-    def _get_where_clause(self, entity_ids, from_date, to_date, fiware_sp=None,
+    def _get_where_clause(self, entity_ids, from_date, to_date, fiware_sp='/',
                           geo_query=None, prefix=''):
         clauses = []
         where_clause = ""
@@ -921,7 +921,7 @@ class SQLTranslator(base_translator.BaseTranslator):
               limit=10000,
               offset=0,
               fiware_service=None,
-              fiware_servicepath=None,
+              fiware_servicepath='/',
               geo_query: SlfQuery = None):
         """
         This translator method is used by all API query endpoints.
@@ -1152,7 +1152,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                   limit=10000,
                   offset=0,
                   fiware_service=None,
-                  fiware_servicepath=None):
+                  fiware_servicepath='/'):
         if limit == 0:
             return []
 
@@ -1219,7 +1219,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                          limit=10000,
                          offset=0,
                          fiware_service=None,
-                         fiware_servicepath=None):
+                         fiware_servicepath='/'):
         if limit == 0:
             return []
         # todo filter only selected attributes.
@@ -1513,7 +1513,7 @@ class SQLTranslator(base_translator.BaseTranslator):
 
     def delete_entity(self, eid, etype=None, from_date=None,
                       to_date=None, fiware_service=None,
-                      fiware_servicepath=None):
+                      fiware_servicepath='/'):
         if not eid:
             raise NGSIUsageError("entity_id cannot be None nor empty")
 
@@ -1532,7 +1532,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                                     fiware_servicepath=fiware_servicepath)
 
     def delete_entities(self, etype, eid=None, from_date=None, to_date=None,
-                        fiware_service=None, fiware_servicepath=None):
+                        fiware_service=None, fiware_servicepath='/'):
         table_name = self._et2tn(etype, fiware_service)
         where_clause = self._get_where_clause(eid,
                                               from_date,
@@ -1584,7 +1584,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                 self.sql_error_handler(e)
                 self.logger.error(str(e), exc_info=True)
 
-    def query_entity_types(self, fiware_service=None, fiware_servicepath=None):
+    def query_entity_types(self, fiware_service=None, fiware_servicepath='/'):
         """
         Find the types of for a given fiware_service and fiware_servicepath.
         :return: list of strings.

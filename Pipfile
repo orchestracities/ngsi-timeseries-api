@@ -36,7 +36,7 @@ pytest-flask = "~=0.10"
 pytest = "~=3.0"
 pytest-cov = "~=2.7.1"
 coveralls = "~=2.0"
-lovely-pytest-docker = "~=0.2.1"
+lovely-pytest-docker = "~=0.3.0"
 pyyaml = "~=5.4"
 
 [requires]

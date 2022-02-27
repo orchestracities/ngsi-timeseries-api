@@ -6,6 +6,7 @@
 
 - Removed subscription API (#493)
 
+
 ### Bug fixes
 
 - Fix issues with integration tests and backward compatibility tests
@@ -14,11 +15,14 @@
 
 - Improve github action for docker images (#624)
 - Add caching to docker image builds (#626)
+- Update CI to use CrateDB 4.6.7 and Orion 3.3.1
+- Add maintenance type to pr template
 
 ### Documentation
 
 - Fix links in pr template (#620)
 - Mention running tests locally as well as linting in PR template (#621)
+- Fix variable names for CrateDB authentication (#636)
 
 ### Technical debt
 
