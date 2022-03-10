@@ -61,7 +61,7 @@ def test_aggregation_on_different_attribute_types_timescale(
 
     # /entities/{eid}
     r = query(
-        url_path="entities/TestRoom1",
+        url_path="entities/TestRoomAggregationDifferentTypes1",
         params=query_params,
         service=service)
     assert r.status_code == 404, r.text
@@ -108,7 +108,7 @@ def test_aggregation_on_different_attribute_types_timescale(
 
     # /entities/{eid}
     r = query(
-        url_path="entities/TestRoom1",
+        url_path="entities/TestRoomAggregationDifferentTypes1",
         params=query_params,
         service=service)
     assert r.status_code == 404, r.text
@@ -197,7 +197,7 @@ def test_aggregation_on_different_attribute_types_timescale(
 
     # /entities/{eid}
     r = query(
-        url_path="entities/TestRoom1",
+        url_path="entities/TestRoomAggregationDifferentTypes1",
         params=query_params,
         service=service)
     assert r.status_code == 200, r.text
@@ -253,7 +253,7 @@ def test_aggregation_on_different_attribute_types_timescale(
                     'values': [4]
                 }
             ],
-            'entityId': 'TestRoom1',
+            'entityId': entity_id,
             'index': ['', '']
         }
     ]
@@ -281,7 +281,7 @@ def test_aggregation_on_different_attribute_types_timescale(
 
     # /entities/{eid}
     r = query(
-        url_path="entities/TestRoom1",
+        url_path="entities/TestRoomAggregationDifferentTypes1",
         params=query_params,
         service=service)
     assert r.status_code == 404, r.text
@@ -316,7 +316,7 @@ def test_aggregation_on_different_attribute_types_timescale(
 
     # /entities/{eid}
     r = query(
-        url_path="entities/TestRoom1",
+        url_path="entities/TestRoomAggregationDifferentTypes1",
         params=query_params,
         service=service)
     assert r.status_code == 404, r.text
@@ -398,12 +398,11 @@ def test_aggregation_on_different_data_types_crate(
     expected = {
         'attrs': expected_attrs
     }
-
     assert obtained == expected
 
     # /entities/{eid}
     r = query(
-        url_path="entities/TestRoom1",
+        url_path="entities/TestRoomAggregationDifferentTypes1",
         params=query_params,
         service=service)
     assert r.status_code == 200, r.text
@@ -460,7 +459,7 @@ def test_aggregation_on_different_data_types_crate(
                     'values': [0.0]
                 }
             ],
-            'entityId': 'TestRoom1',
+            'entityId': entity_id,
             'index': ['', '']
         }
     ]
@@ -534,7 +533,7 @@ def test_aggregation_on_different_data_types_crate(
 
     # /entities/{eid}
     r = query(
-        url_path="entities/TestRoom1",
+        url_path="entities/TestRoomAggregationDifferentTypes1",
         params=query_params,
         service=service)
     assert r.status_code == 200, r.text
@@ -593,7 +592,7 @@ def test_aggregation_on_different_data_types_crate(
                     'values': [3.0]
                 }
             ],
-            'entityId': 'TestRoom1',
+            'entityId': entity_id,
             'index': ['', '']
         }
     ]
@@ -669,7 +668,7 @@ def test_aggregation_on_different_data_types_crate(
 
     # /entities/{eid}
     r = query(
-        url_path="entities/TestRoom1",
+        url_path="entities/TestRoomAggregationDifferentTypes1",
         params=query_params,
         service=service)
     assert r.status_code == 200, r.text
@@ -728,7 +727,7 @@ def test_aggregation_on_different_data_types_crate(
                     'values': [4]
                 }
             ],
-            'entityId': 'TestRoom1',
+            'entityId': entity_id,
             'index': ['', '']
         }
     ]
@@ -757,7 +756,7 @@ def test_aggregation_on_different_data_types_crate(
 
     # /entities/{eid}
     r = query(
-        url_path="entities/TestRoom1",
+        url_path="entities/TestRoomAggregationDifferentTypes1",
         params=query_params,
         service=service)
     assert r.status_code == 404, r.text
@@ -793,7 +792,7 @@ def test_aggregation_on_different_data_types_crate(
 
     # /entities/{eid}
     r = query(
-        url_path="entities/TestRoom1",
+        url_path="entities/TestRoomAggregationDifferentTypes1",
         params=query_params,
         service=service)
     assert r.status_code == 404, r.text
