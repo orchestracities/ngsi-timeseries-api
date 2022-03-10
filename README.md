@@ -70,14 +70,14 @@ QuantumLeap supports both Crate DB and Timescale as time-series DB
 backends. The following versions are currently covered in tests
 (see [.circleci/config.yml](https://github.com/orchestracities/ngsi-timeseries-api/blob/master/.circleci/config.yml#L204)):
 
-- Crate backend: Crate DB version `4.2.7` up to `4.6.6`
+- Crate backend: Crate DB version `4.2.7` up to `4.6.7`
 - Timescale backend: Postgres version `12` up to `13` +
   Timescale extension `1.7.5` up to `2.3.0` + Postgis extension `2.5.*`.
 
 As regards caching feature, QuantumLeap has been tested with Redis `4.*` up
 to `6.2.3`.
 Integration with Orion Context Broker is tested from version `2.4.2`
-up to `2.6.1`.
+up to `3.3.1`.
 
 Automated tests, to avoid too long testing time, are not combining all possible
 versions. This anyhow should not be an issue given that component

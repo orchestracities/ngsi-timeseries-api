@@ -40,7 +40,7 @@ def query_1TNE1A(attr_name,   # In Path
         return r, c
 
     fiware_s = request.headers.get('fiware-service', None)
-    fiware_sp = request.headers.get('fiware-servicepath', None)
+    fiware_sp = request.headers.get('fiware-servicepath', '/')
 
     entities = None
     entity_ids = None
