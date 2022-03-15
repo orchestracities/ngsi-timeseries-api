@@ -776,6 +776,7 @@ def test_ngsi_ld(translator, ngsi_ld):
 
     translator.clean()
 
+
 def expected_entity_attrs_meta_version():
     return {
         'entity_id': ['id', 'Text'],
@@ -792,6 +793,7 @@ def expected_entity_attrs_meta_version():
         'an_obj': ['an_obj', 'Custom'],
         'an_array': ['an_array', 'StructuredValue']
     }
+
 
 def assert_entity_attrs_meta_version(translator, entity):
     data = select_entity_attrs_meta_version(translator, entity)
