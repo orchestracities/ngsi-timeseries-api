@@ -12,6 +12,7 @@
   Fiware-servicePath was interpreted as python None, from now on, None
   will be replaced with /. This affects only users that manually injected
   data, since Orion, assume / when no servicePath is passed.
+- Added more test cases for Aggregation (#499)
 
 ### Bug fixes
 
