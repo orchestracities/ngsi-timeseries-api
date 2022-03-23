@@ -730,6 +730,22 @@ class SQLTranslator(base_translator.BaseTranslator):
         # This implementation paves
         # the way to lost updates...
 
+    def query_metadata_table(self):
+        # Bring translation table!
+        stmt = 'select entity_attrs from "{}" limit 100'.format(
+            METADATA_TABLE_NAME)
+        # By design, one entry per table_name
+        try:
+            res = self.cursor.execute(stmt)
+            row = self.cursor.fetchall()
+            persisted_metadata = row[0][0] if row else {}
+        except Exception as e:
+            self.sql_error_handler(e)
+            # Metadata table still not created
+            logging.debug(str(e), exc_info=True)
+            persisted_metadata = {}
+        return persisted_metadata
+
     def _store_metadata(self, table_name, persisted_metadata):
         raise NotImplementedError
 

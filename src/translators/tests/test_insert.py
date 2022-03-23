@@ -777,24 +777,16 @@ def test_ngsi_ld(translator, ngsi_ld):
     translator.clean()
 
 
-def expected_entity_attrs_meta_version():
-    return {
-        'entity_id': ['id', 'Text'],
-        'entity_type': ['type', 'Text'],
-        TIME_INDEX_NAME: ['time_index', 'DateTime'],
-        'ql_version': [__version__, 'Text'],
-        'a_number': ['a_number', 'Number'],
-        'an_integer': ['an_integer', 'Integer'],
-        'a_bool': ['a_bool', 'Boolean'],
-        'a_datetime': ['a_datetime', 'DateTime'],
-        'a_point': ['a_point', 'geo:point'],
-        'a_geom': ['a_geom', 'geo:json'],
-        'a_text': ['a_text', 'Text'],
-        'an_obj': ['an_obj', 'Custom'],
-        'an_array': ['an_array', 'StructuredValue']
-    }
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
+def test_entity_meta_version(translator):
 
+    entities = create_random_entities(1, 2, 3, use_time=True, use_geo=True)
+    result = translator.insert(entities)
+    assert result.rowcount > 0
+    table_name = "et0"
+    data = translator.query_metadata_table()
+    observed = data['ql_version']
+    expected = [__version__, 'Text']
 
-def assert_entity_attrs_meta_version(translator, entity):
-    data = select_entity_attrs_meta_version(translator, entity)
-    assert data == expected_entity_attrs_meta_version()
+    assert observed == expected
+    translator.clean()
