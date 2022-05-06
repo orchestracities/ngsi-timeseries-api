@@ -208,13 +208,13 @@ configuration:
 ```yaml
 tenants:
     t1:
-        backend: Timescale
+        backend: timescale
     t2:
-        backend: Crate
+        backend: crate
     t3:
-        backend: Timescale
+        backend: timescale
 
-default-backend: Crate
+default-backend: crate
 ```
 
 With this configuration, any NGSI entity coming in for tenant `t1`
