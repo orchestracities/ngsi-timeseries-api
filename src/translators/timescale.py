@@ -82,7 +82,6 @@ class PostgresTranslator(sql_translator.SQLTranslator):
     def __init__(self, conn_data=PostgresConnectionData()):
         super(PostgresTranslator, self).__init__(
             conn_data.host, conn_data.port, conn_data.db_name)
-        conn_data.read_env()
         self.logger = logging.getLogger(__name__)
         self.db_user = conn_data.db_user
         self.db_pass = conn_data.db_pass
