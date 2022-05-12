@@ -13,6 +13,7 @@
   will be replaced with /. This affects only users that manually injected
   data, since Orion, assume / when no servicePath is passed.
 - Added more test cases for Aggregation (#499)
+- fix translator initialization
 - Added quantum leap version in metadata (#615)
 
 ### Bug fixes
