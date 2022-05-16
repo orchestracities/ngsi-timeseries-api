@@ -713,14 +713,13 @@ class SQLTranslator(base_translator.BaseTranslator):
             self._create_metadata_table()
             persisted_metadata = {}
 
-        metadata['ql_version'] = (__version__, "Text")
         diff = metadata.keys() - persisted_metadata.keys()
         if diff:
             # we update using the difference to "not" corrupt the metadata
             # by previous insert
             update = dict((k, metadata[k]) for k in diff if k in metadata)
             persisted_metadata.update(update)
-            self._store_metadata(table_name, persisted_metadata)
+            self._store_metadata(table_name, __version__, persisted_metadata)
             self._cache(self.dbCacheName,
                         table_name,
                         [[persisted_metadata]],
@@ -730,9 +729,9 @@ class SQLTranslator(base_translator.BaseTranslator):
         # This implementation paves
         # the way to lost updates...
 
-    def query_metadata_table(self):
-        # Bring translation table!
-        stmt = 'select entity_attrs from "{}" limit 100'.format(
+    def query_version_meta_table(self):
+        # Bring version from metadata table!
+        stmt = 'select version from "{}" limit 100'.format(
             METADATA_TABLE_NAME)
         # By design, one entry per table_name
         try:
@@ -746,7 +745,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             persisted_metadata = {}
         return persisted_metadata
 
-    def _store_metadata(self, table_name, persisted_metadata):
+    def _store_metadata(self, table_name, version, persisted_metadata):
         raise NotImplementedError
 
     def _get_et_table_names(self, fiware_service=None):

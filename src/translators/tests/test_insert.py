@@ -784,9 +784,9 @@ def test_entity_meta_version(translator):
     result = translator.insert(entities)
     assert result.rowcount > 0
     table_name = "et0"
-    data = translator.query_metadata_table()
-    observed = data['ql_version']
-    expected = [__version__, 'Text']
+    data = translator.query_version_meta_table()
+    observed = data
+    expected = __version__
 
     assert observed == expected
     translator.clean()
