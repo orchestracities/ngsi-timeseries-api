@@ -14,6 +14,7 @@
   data, since Orion, assume / when no servicePath is passed.
 - Added more test cases for Aggregation (#499)
 - fix translator initialization
+- List Addix among adopters (#649)
 
 ### Bug fixes
 
