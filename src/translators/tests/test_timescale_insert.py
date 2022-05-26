@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 import pg8000
 import pytest
 import random
+from _version import __version__
 from time import sleep
 
 from geocoding.geojson.wktcodec import decode_wkb_hexstr
@@ -105,6 +106,7 @@ def expected_entity_attrs_meta():
         'entity_id': ['id', 'Text'],
         'entity_type': ['type', 'Text'],
         TIME_INDEX_NAME: ['time_index', 'DateTime'],
+        'ql_version': [__version__, 'Text'],
         'a_number': ['a_number', 'Number'],
         'an_integer': ['an_integer', 'Integer'],
         'a_bool': ['a_bool', 'Boolean'],

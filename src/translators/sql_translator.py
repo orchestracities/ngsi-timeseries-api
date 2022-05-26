@@ -7,6 +7,7 @@ from translators.config import SQLTranslatorConfig
 from utils.common import iter_entity_attrs
 from utils.jsondict import safe_get_value
 from utils.maybe import maybe_map
+from _version import __version__
 import logging
 from geocoding.slf import SlfQuery
 import dateutil.parser
@@ -718,7 +719,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             # by previous insert
             update = dict((k, metadata[k]) for k in diff if k in metadata)
             persisted_metadata.update(update)
-            self._store_metadata(table_name, persisted_metadata)
+            self._store_metadata(table_name, __version__, persisted_metadata)
             self._cache(self.dbCacheName,
                         table_name,
                         [[persisted_metadata]],
@@ -728,7 +729,23 @@ class SQLTranslator(base_translator.BaseTranslator):
         # This implementation paves
         # the way to lost updates...
 
-    def _store_metadata(self, table_name, persisted_metadata):
+    def query_version_meta_table(self):
+        # Bring version from metadata table!
+        stmt = 'select version from "{}" limit 100'.format(
+            METADATA_TABLE_NAME)
+        # By design, one entry per table_name
+        try:
+            res = self.cursor.execute(stmt)
+            row = self.cursor.fetchall()
+            persisted_metadata = row[0][0] if row else {}
+        except Exception as e:
+            self.sql_error_handler(e)
+            # Metadata table still not created
+            logging.debug(str(e), exc_info=True)
+            persisted_metadata = {}
+        return persisted_metadata
+
+    def _store_metadata(self, table_name, version, persisted_metadata):
         raise NotImplementedError
 
     def _get_et_table_names(self, fiware_service=None):

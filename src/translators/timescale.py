@@ -269,20 +269,20 @@ class PostgresTranslator(sql_translator.SQLTranslator):
     def _create_metadata_table(self):
         def do_create():
             stmt = "create table if not exists {} " \
-                   "(table_name text primary key, entity_attrs jsonb)"
+                   "(table_name text primary key, version text, entity_attrs jsonb)"
             op = stmt.format(METADATA_TABLE_NAME)
             self.cursor.execute(op)
 
         self.with_connection_guard(do_create)
 
-    def _store_metadata(self, table_name, persisted_metadata):
+    def _store_metadata(self, table_name, version, persisted_metadata):
         def do_store():
-            stmt = "insert into {} (table_name, entity_attrs) values (?, ?)" \
+            stmt = "insert into {} (table_name, version, entity_attrs) values (?, ?, ?)" \
                    " on conflict (table_name)" \
                    " do update set entity_attrs = ?"
             stmt = stmt.format(METADATA_TABLE_NAME)
             entity_attrs_value = _encode_to_json_string(persisted_metadata)
-            self.cursor.execute(stmt, (table_name, entity_attrs_value,
+            self.cursor.execute(stmt, (table_name, version, entity_attrs_value,
                                        entity_attrs_value))
 
         self.with_connection_guard(do_store)

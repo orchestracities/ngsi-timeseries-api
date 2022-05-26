@@ -6,6 +6,7 @@ from exceptions.exceptions import AmbiguousNGSIIdError
 from translators.base_translator import BaseTranslator
 from translators.sql_translator import NGSI_TEXT, NGSI_DATETIME, NGSI_STRUCTURED_VALUE
 from utils.common import *
+from src._version import __version__
 from utils.tests.common import *
 from datetime import datetime, timezone
 
@@ -773,4 +774,19 @@ def test_ngsi_ld(translator, ngsi_ld):
     assert ngsi_ld['refStreetlightModel']['object'] == loaded[0]['refStreetlightModel']['values'][0]
     assert ngsi_ld['location']['value'] == loaded[0]['location']['values'][0]
 
+    translator.clean()
+
+
+@pytest.mark.parametrize("translator", translators, ids=["crate", "timescale"])
+def test_entity_meta_version(translator):
+
+    entities = create_random_entities(1, 2, 3, use_time=True, use_geo=True)
+    result = translator.insert(entities)
+    assert result.rowcount > 0
+    table_name = "et0"
+    data = translator.query_version_meta_table()
+    observed = data
+    expected = __version__
+
+    assert observed == expected
     translator.clean()

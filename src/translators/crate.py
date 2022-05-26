@@ -241,19 +241,19 @@ class CrateTranslator(sql_translator.SQLTranslator):
 
     def _create_metadata_table(self):
         stmt = "create table if not exists {} " \
-               "(table_name string primary key, entity_attrs object) " \
+               "(table_name string primary key, version text, entity_attrs object) " \
                "with (" \
                "number_of_replicas = '2-all', " \
                "column_policy = 'dynamic')"
         op = stmt.format(METADATA_TABLE_NAME)
         self.cursor.execute(op)
 
-    def _store_metadata(self, table_name, persisted_metadata):
-        stmt = "insert into {} (table_name, entity_attrs) values (?,?) " \
+    def _store_metadata(self, table_name, version, persisted_metadata):
+        stmt = "insert into {} (table_name, version, entity_attrs) values (?,?,?) " \
             "on conflict(table_name) " \
             "DO UPDATE SET entity_attrs = excluded.entity_attrs"
         stmt = stmt.format(METADATA_TABLE_NAME)
-        self.cursor.execute(stmt, (table_name, persisted_metadata))
+        self.cursor.execute(stmt, (table_name, version, persisted_metadata))
 
     def _compute_db_specific_type(self, attr_t, attr):
         """

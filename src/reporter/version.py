@@ -1,6 +1,7 @@
+from _version import __dev_version__
 
 
 def version():
     return {
-        'version': '0.9.0-dev'
+        'version': __dev_version__
     }
