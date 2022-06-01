@@ -15,6 +15,7 @@
 - Added more test cases for Aggregation (#499)
 - fix translator initialization
 - List Addix among adopters (#649)
+- Replaced string with the constants (#650)
 
 ### Bug fixes
 
