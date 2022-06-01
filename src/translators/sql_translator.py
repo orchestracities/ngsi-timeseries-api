@@ -41,7 +41,6 @@ VALID_AGGR_PERIODS = ['year', 'month', 'day', 'hour', 'minute', 'second']
 # in the notification when its corresponding DB row can't be inserted.
 ORIGINAL_ENTITY_COL = '__original_ngsi_entity__'
 # The name of the entity ID and type columns.
-# TODO: replace each occurrence of these strings with the below constants.
 ENTITY_ID_COL = 'entity_id'
 ENTITY_TYPE_COL = 'entity_type'
 
