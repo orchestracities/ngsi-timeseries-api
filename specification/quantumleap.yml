@@ -638,6 +638,7 @@ paths:
         - $ref: '#/parameters/toDate'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/idPattern'
         # In Header...
         - $ref: '#/parameters/fiware-Service'
         - $ref: '#/parameters/fiware-ServicePath'
@@ -1029,6 +1030,7 @@ paths:
         - $ref: '#/parameters/georel'
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
+        - $ref: '#/parameters/idPattern'
         # In Header...
         - $ref: '#/parameters/fiware-Service'
         - $ref: '#/parameters/fiware-ServicePath'
@@ -1096,6 +1098,7 @@ paths:
         - $ref: '#/parameters/georel'
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
+        - $ref: '#/parameters/idPattern'
         # In Header...
         - $ref: '#/parameters/fiware-Service'
         - $ref: '#/parameters/fiware-ServicePath'
@@ -1157,6 +1160,7 @@ paths:
         - $ref: '#/parameters/georel'
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
+        - $ref: '#/parameters/idPattern'
         # In Header...
         - $ref: '#/parameters/fiware-Service'
         - $ref: '#/parameters/fiware-ServicePath'
@@ -1272,6 +1276,7 @@ paths:
         - $ref: '#/parameters/georel'
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
+        - $ref: '#/parameters/idPattern'
         # In Header...
         - $ref: '#/parameters/fiware-Service'
         - $ref: '#/parameters/fiware-ServicePath'
@@ -1364,6 +1369,8 @@ paths:
         - $ref: '#/parameters/georel'
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
+        - $ref: '#/parameters/idPattern'
+        
         # In Header...
         - $ref: '#/parameters/fiware-Service'
         - $ref: '#/parameters/fiware-ServicePath'
@@ -1464,6 +1471,7 @@ paths:
         - $ref: '#/parameters/georel'
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
+        - $ref: '#/parameters/idPattern'
         # In Header...
         - $ref: '#/parameters/fiware-Service'
         - $ref: '#/parameters/fiware-ServicePath'
@@ -1561,6 +1569,7 @@ paths:
         - $ref: '#/parameters/georel'
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
+        - $ref: '#/parameters/idPattern'
         # In Header...
         - $ref: '#/parameters/fiware-Service'
         - $ref: '#/parameters/fiware-ServicePath'
@@ -1669,6 +1678,8 @@ paths:
         - $ref: '#/parameters/georel'
         - $ref: '#/parameters/geometry'
         - $ref: '#/parameters/coords'
+        - $ref: '#/parameters/idPattern'
+
         # In Header...
         - $ref: '#/parameters/fiware-Service'
         - $ref: '#/parameters/fiware-ServicePath'
