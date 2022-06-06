@@ -74,7 +74,6 @@ def current_timex() -> str:
     return datetime.utcnow().isoformat(timespec='milliseconds')
 
 
-# TODO: use below getters everywhere rather than entity id and type strings!
 
 def entity_id(entity: dict) -> Optional[str]:
     """
@@ -294,7 +293,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         }
 
         for e in entities:
-            entity_id = e.get('id')
+            entity_id = entity_id(e)
             for attr in iter_entity_attrs(e):
                 if attr == self.TIME_INDEX_NAME:
                     continue
