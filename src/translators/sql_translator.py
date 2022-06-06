@@ -41,7 +41,6 @@ VALID_AGGR_PERIODS = ['year', 'month', 'day', 'hour', 'minute', 'second']
 # in the notification when its corresponding DB row can't be inserted.
 ORIGINAL_ENTITY_COL = '__original_ngsi_entity__'
 # The name of the entity ID and type columns.
-# TODO: replace each occurrence of these strings with the below constants.
 ENTITY_ID_COL = 'entity_id'
 ENTITY_TYPE_COL = 'entity_type'
 
@@ -277,8 +276,8 @@ class SQLTranslator(base_translator.BaseTranslator):
         # Define column types
         # {column_name -> crate_column_type}
         table = {
-            'entity_id': self.NGSI_TO_SQL['Text'],
-            'entity_type': self.NGSI_TO_SQL['Text'],
+            ENTITY_ID_COL: self.NGSI_TO_SQL['Text'],
+            ENTITY_TYPE_COL: self.NGSI_TO_SQL['Text'],
             self.TIME_INDEX_NAME: self.NGSI_TO_SQL[TIME_INDEX],
             FIWARE_SERVICEPATH: self.NGSI_TO_SQL['Text'],
             ORIGINAL_ENTITY_COL: self.NGSI_TO_SQL[NGSI_STRUCTURED_VALUE],
@@ -288,8 +287,8 @@ class SQLTranslator(base_translator.BaseTranslator):
         # Preserve original attr names and types
         # {column_name -> (attr_name, attr_type)}
         original_attrs = {
-            'entity_type': (NGSI_TYPE, NGSI_TEXT),
-            'entity_id': (NGSI_ID, NGSI_TEXT),
+            ENTITY_TYPE_COL: (NGSI_TYPE, NGSI_TEXT),
+            ENTITY_ID_COL: (NGSI_ID, NGSI_TEXT),
             self.TIME_INDEX_NAME: (self.TIME_INDEX_NAME, NGSI_DATETIME),
         }
 
@@ -474,9 +473,9 @@ class SQLTranslator(base_translator.BaseTranslator):
                            fiware_servicepath):
         values = []
         for cn in col_names:
-            if cn == 'entity_type':
+            if cn == ENTITY_TYPE_COL:
                 values.append(e['type'])
-            elif cn == 'entity_id':
+            elif cn == ENTITY_ID_COL:
                 values.append(e['id'])
             elif cn == self.TIME_INDEX_NAME:
                 values.append(e[self.TIME_INDEX_NAME])
@@ -766,7 +765,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         if not attr_names:
             return prefix + '*'
 
-        attrs = [prefix + 'entity_type', prefix + 'entity_id']
+        attrs = [prefix + ENTITY_TYPE_COL, prefix + ENTITY_ID_COL]
         if aggr_method:
             if aggr_period:
                 attrs.append(
@@ -804,7 +803,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                 f"last_n should be >=1 and <= {default_limit}.")
         return min(last_n, limit)
 
-    def _get_where_clause(self, entity_ids, from_date, to_date,idPattern, fiware_sp='/',
+    def _get_where_clause(self, entity_ids, from_date, to_date, idPattern, fiware_sp='/',
                           geo_query=None, prefix=''):
         clauses = []
         where_clause = ""
@@ -822,7 +821,8 @@ class SQLTranslator(base_translator.BaseTranslator):
         if fiware_sp:
             # Match prefix of fiware service path
             if fiware_sp == '/':
-                clauses.append(   " " + prefix + FIWARE_SERVICEPATH + " ~* '/.*'")
+                clauses.append(
+                    " " + prefix + FIWARE_SERVICEPATH + " ~* '/.*'")
             else:
                 clauses.append(
                     " " + prefix + FIWARE_SERVICEPATH + " ~* '"
@@ -831,9 +831,8 @@ class SQLTranslator(base_translator.BaseTranslator):
             # Match prefix of fiware service path
             clauses.append(" " + prefix + FIWARE_SERVICEPATH + " = ''")
 
-        if idPattern:        
+        if idPattern:
             clauses.append(  " " + prefix + ENTITY_ID_COL  + " ~* '" + idPattern +  "($|.*)'")
-
 
         # TODO implement prefix also for geo_clause
         geo_clause = self._get_geo_clause(geo_query)
@@ -1208,7 +1207,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                 entities = []
             else:
                 res = self.cursor.fetchall()
-                col_names = ['entity_id', 'entity_type', 'time_index']
+                col_names = [ENTITY_ID_COL, ENTITY_TYPE_COL, 'time_index']
                 entities = self._format_response(res,
                                                  col_names,
                                                  table_names,
@@ -1462,7 +1461,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                 self.logger.error(msg)
                 raise RuntimeError(msg)
             entity_attrs = entity_attrs[0]
-            idx_entity_type = col_names.index('entity_type')
+            idx_entity_type = col_names.index(ENTITY_TYPE_COL)
             if idx_entity_type < 0:
                 msg = "entity_type not available"
                 self.logger.error(msg)
@@ -1476,7 +1475,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                         # e.g. fiware-servicepath
                         continue
 
-                    e_id = r[col_names.index('entity_id')]
+                    e_id = r[col_names.index(ENTITY_ID_COL)]
                     e = entities.setdefault(e_id, {})
                     original_name, original_type = entity_attrs[k]
 
