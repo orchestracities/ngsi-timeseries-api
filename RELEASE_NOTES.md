@@ -18,7 +18,6 @@
 - Replaced string with the constants (#650)
 - Remove duplicate code in src/reporter/tests/test_timescale_types.py
 
-
 ### Bug fixes
 
 - Fix issues with integration tests and backward compatibility tests
