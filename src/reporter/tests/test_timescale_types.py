@@ -14,6 +14,7 @@ from utils.kvt import merge_dicts
 
 from .geo_queries_fixture import query_1t1ena
 from .utils import notify_url
+from src.utils.tests.tenant import gen_tenant_id
 
 
 ENTITY_TYPE = 'device'
@@ -25,12 +26,6 @@ ENTITY_TYPE = 'device'
 #
 
 
-def gen_tenant_id() -> str:
-    tid = random.randint(1, 2**32)
-    return f"tenant{tid}"
-# TODO: duplicated code.
-# Move to some test util pkg that can be shared between reporter and
-# translators.
 
 
 TIMEX_ATTR_NAME = 'TimeInstant'
