@@ -1,6 +1,5 @@
 import os
 import pytest
-import random
 import json
 from time import sleep
 from typing import Any, Callable, Generator, List
@@ -22,7 +21,6 @@ TranslatorFactory = Callable[[], Generator[SQLTranslator, Any, None]]
 # have to clean up the DB after each test, which would slow down the whole
 # test suite.
 #
-
 
 
 def gen_entity(entity_id: int, attr_type: str, attr_value) -> dict:

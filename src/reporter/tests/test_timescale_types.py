@@ -1,7 +1,6 @@
 import json
 import os
 import pytest
-import random
 import requests
 from requests import Response
 from typing import List, Union
@@ -24,8 +23,6 @@ ENTITY_TYPE = 'device'
 # have to clean up the DB after each test, which would slow down the whole
 # test suite.
 #
-
-
 
 
 TIMEX_ATTR_NAME = 'TimeInstant'
