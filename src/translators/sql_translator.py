@@ -1223,6 +1223,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                          to_date=None,
                          limit=10000,
                          offset=0,
+                         idPattern=None,
                          fiware_service=None,
                          fiware_servicepath='/'):
         if limit == 0:
@@ -1255,10 +1256,11 @@ class SQLTranslator(base_translator.BaseTranslator):
                 select_clause = self._get_select_clause(lower_attr_names, None,
                                                         None, prefix=prefix)
                 where_clause_no_prefix = self._get_where_clause(
-                    entity_ids, from_date, to_date, fiware_servicepath, None)
+                    entity_ids, from_date, to_date, idPattern, fiware_servicepath, None)
                 where_clause = self._get_where_clause(entity_ids,
                                                       from_date,
                                                       to_date,
+                                                      idPattern,
                                                       fiware_servicepath,
                                                       None, prefix=prefix)
                 stmt += "select {select} " \
@@ -1314,6 +1316,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                          to_date=None,
                          limit=10000,
                          offset=0,
+                         idPattern=None,
                          fiware_service=None,
                          fiware_servicepath=None):
         if limit == 0:
@@ -1339,6 +1342,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         where_clause = self._get_where_clause(entity_ids,
                                               from_date,
                                               to_date,
+                                              idPattern,
                                               fiware_servicepath)
 
         limit = min(10000, limit)
@@ -1537,11 +1541,12 @@ class SQLTranslator(base_translator.BaseTranslator):
                                     fiware_servicepath=fiware_servicepath)
 
     def delete_entities(self, etype, eid=None, from_date=None, to_date=None,
-                        fiware_service=None, fiware_servicepath='/'):
+                        idPattern=None, fiware_service=None, fiware_servicepath='/'):
         table_name = self._et2tn(etype, fiware_service)
         where_clause = self._get_where_clause(eid,
                                               from_date,
                                               to_date,
+                                              idPattern,
                                               fiware_servicepath)
         op = "delete from {} {}".format(table_name, where_clause)
         try:
