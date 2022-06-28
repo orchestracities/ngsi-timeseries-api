@@ -8,7 +8,11 @@ from wq.core import TaskInfo, TaskStatus, QMan, \
     CompositeTaskId, Tasklet, WorkQ, StopTask
 import wq.core.cfg as cfg
 from wq.ql.flaskutils import build_json_array_response_stream
+import logging
 
+def log():
+    logger = logging.getLogger(__name__)
+    return logger
 
 class FiwareTaskId(CompositeTaskId):
 
@@ -126,27 +130,27 @@ def list_insert_tasks(task_status: Optional[str] = None):
     task_id_prefix = build_task_id_init_segment()
     find_tasks = insert_task_finder(task_status)
     response_payload = find_tasks(task_id_prefix)
+    log().info("Retrieved notification tasks to the work queue successfully")
 
     return build_json_array_response_stream(response_payload)
 # TODO error handling
-# TODO logging
 
 
 def list_insert_tasks_runtime_info():
     task_id_prefix = build_task_id_init_segment()
     response_payload = QMan.load_tasks_runtime_info(task_id_prefix)
+    log().info("Retrieved summary of notification tasks to the work queue successfully")
 
     return build_json_array_response_stream(response_payload)
 # TODO error handling
-# TODO logging
 
 
 def delete_insert_tasks():
     qman = QMan(InsertAction.insert_queue())
     task_id_prefix = build_task_id_init_segment()
     qman.delete_tasks(task_id_prefix)
+    log().info("Deleted notifcation tasks from the work queue successfully")
 # TODO error handling
-# TODO logging
 
 
 def insert_task_count_calculator(task_status: Optional[str] = None) \
