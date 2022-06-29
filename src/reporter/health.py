@@ -16,8 +16,8 @@ def check_db(db=CRATE_BACKEND):
             health = trans.get_health()
             return health
     if db == TIMESCALE_BACKEND:
-        from translators.timescale import PostgresTranslator
-        with PostgresTranslator() as trans:
+        from translators.timescale import postgres_translator_instance
+        with postgres_translator_instance() as trans:
             health = trans.get_health()
             return health
 

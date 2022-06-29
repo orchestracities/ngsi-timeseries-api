@@ -13,7 +13,11 @@
   will be replaced with /. This affects only users that manually injected
   data, since Orion, assume / when no servicePath is passed.
 - Added more test cases for Aggregation (#499)
+- fix translator initialization
+- List Addix among adopters (#649)
+- Replaced string with the constants (#650)
 - Added logs in src/wq/ql/notify.py (#656)
+
 ### Bug fixes
 
 - Fix issues with integration tests and backward compatibility tests
