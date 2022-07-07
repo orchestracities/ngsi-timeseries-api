@@ -22,11 +22,13 @@ def query_1TNE1A(attr_name,   # In Path
                  offset=0,
                  georel=None,
                  geometry=None,
-                 coords=None):
+                 coords=None,
+                 id_pattern=None):
     """
     See /types/{entityType}/attrs/{attrName} in API Specification
     quantumleap.yml
     """
+
     r, c = _validate_query_params([attr_name],
                                   aggr_period,
                                   aggr_method,
@@ -59,6 +61,7 @@ def query_1TNE1A(attr_name,   # In Path
                                         last_n=last_n,
                                         limit=limit,
                                         offset=offset,
+                                        idPattern=id_pattern,
                                         fiware_service=fiware_s,
                                         fiware_servicepath=fiware_sp,
                                         geo_query=geo_query)

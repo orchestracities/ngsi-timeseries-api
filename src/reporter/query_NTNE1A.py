@@ -24,7 +24,10 @@ def query_NTNE1A(attr_name,  # In Path
                  offset=0,
                  georel=None,
                  geometry=None,
-                 coords=None):
+                 coords=None,
+                 id_pattern=None
+                ):
+
     """
     See /attrs/{attrName} in API Specification
         quantumleap.yml
@@ -57,6 +60,7 @@ def query_NTNE1A(attr_name,  # In Path
                                         aggr_scope=aggr_scope,
                                         from_date=from_date,
                                         to_date=to_date,
+                                        idPattern=id_pattern,
                                         last_n=last_n,
                                         limit=limit,
                                         offset=offset,

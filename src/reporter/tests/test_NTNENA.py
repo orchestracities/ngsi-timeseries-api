@@ -14,6 +14,8 @@ entity_id_1_1 = 'Kitchen1'
 attrs = 'pressure'
 n_days = 4
 
+idPattern = "R"
+
 services = ['t1', 't2']
 
 
@@ -217,6 +219,91 @@ def test_NTNENA_type(service, reporter_dataset):
     obtained = r.json()
     assert obtained == expected
 
+@pytest.mark.parametrize("service", services)
+def test_NTNENA_idPattern(service, reporter_dataset):
+    # Query
+    query_params = {
+        'idPattern': idPattern
+    }
+    r = query(params=query_params, service=service)
+    assert r.status_code == 200, r.text
+
+    expected_temperatures = list(range(4))
+    expected_pressures = [t * 10 for t in expected_temperatures]
+    # Assert
+    obtained = r.json()
+    expected_values = list(range(4))
+    expected_index = [
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i + 1) for i in expected_values
+    ]
+    expected_entities = [
+        {
+            'entityId': entity_id,
+            'index': expected_index,
+            'values': expected_temperatures
+        },
+        {
+            'entityId': entity_id_1,
+            'index': expected_index,
+            'values': expected_temperatures
+
+        }
+    ]
+    expected_entities_pressure = [
+        {
+            'entityId': entity_id,
+            'index': expected_index,
+            'values': expected_pressures
+        },
+        {
+            'entityId': entity_id_1,
+            'index': expected_index,
+            'values': expected_pressures
+
+        }
+    ]
+
+    expected_types = [
+        {
+            'entities': expected_entities,
+            'entityType': entity_type
+        }
+    ]
+    expected_types_pressure = [
+        {
+            'entities': expected_entities_pressure,
+            'entityType': entity_type
+        }
+    ]
+    expected_attrs = [
+        {
+            'attrName': 'pressure',
+            'types': expected_types_pressure
+        },
+        {
+            'attrName': 'temperature',
+            'types': expected_types
+        }
+    ]
+
+    expected = {
+        'attrs': expected_attrs
+    }
+
+    obtained = r.json()
+    assert obtained == expected
+
+@pytest.mark.parametrize("service", services)
+def idPattern_not_found(service, reporter_dataset):
+    query_params = {
+        'idPattern': 'NotThere'
+    }
+    r = query(params=query_params, service=service)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "Not Found",
+        "description": "No records were found for such query."
+    }
 
 @pytest.mark.parametrize("service", services)
 def test_NTNE1A_one_entity(service, reporter_dataset):
