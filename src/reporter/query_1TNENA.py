@@ -24,7 +24,8 @@ def query_1TNENA(entity_type=None,  # In Path
                  offset=0,
                  georel=None,
                  geometry=None,
-                 coords=None):
+                 coords=None,
+                 id_pattern=None):
     """
     See /types/{entityType} in API Specification
     quantumleap.yml
@@ -64,6 +65,7 @@ def query_1TNENA(entity_type=None,  # In Path
                                         last_n=last_n,
                                         limit=limit,
                                         offset=offset,
+                                        idPattern=id_pattern,
                                         fiware_service=fiware_s,
                                         fiware_servicepath=fiware_sp,
                                         geo_query=geo_query)
