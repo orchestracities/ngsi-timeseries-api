@@ -16,6 +16,7 @@
 - fix translator initialization
 - List Addix among adopters (#649)
 - Replaced string with the constants (#650)
+- Added logs in src/wq/core/task.py (#662)
 
 ### Bug fixes
 
