@@ -278,7 +278,7 @@ class Tasklet(ABC):
         except Exception as e:
             log().error(e)
             if recover_from_enqueueing_failure():
-                msg="you'll run this task on the spot last ditch attempt, but only if configured to do so"
+                msg="This task could not be added to the work queue, QuantumLeap will try running this task synchronously if WQ_RECOVER_FROM_ENQUEUEING_FAILURE = true"
                 log().info(msg)
                 run_action(self)
             else:
