@@ -13,6 +13,8 @@ attr_name_2 = 'pressure'
 n_days = 6
 services = ['t1', 't2']
 
+idPattern = "R"
+
 
 def query_url(etype=entity_type, values=False):
     url = "{qlUrl}/types/{entityType}"
@@ -100,6 +102,66 @@ def test_1TNENA_defaults(service, reporter_dataset):
     obtained = r.json()
     assert_1TNENA_response(obtained, expected)
 
+@pytest.mark.parametrize("service", services)
+def test_1TNENA_idPattern(service, reporter_dataset):
+    h = {'Fiware-Service': service}
+    query_params = {'idPattern':idPattern}
+    r = requests.get(query_url(),params= query_params, headers=h)
+    assert r.status_code == 200, r.text
+
+    # Assert Results
+    expected_temperatures = list(range(n_days))
+    expected_pressures = [t * 10 for t in expected_temperatures]
+    expected_index = [
+        '1970-01-{:02}T00:00:00.000+00:00'.format(i + 1) for i in expected_temperatures
+    ]
+    expected_attributes = [
+        {
+            'attrName': attr_name_2,
+            'values': expected_pressures
+        },
+        {
+            'attrName': attr_name_1,
+            'values': expected_temperatures
+        }
+    ]
+    expected_entities = [
+        {
+            'attributes': expected_attributes,
+            'entityId': 'Room0',
+            'index': expected_index
+        },
+        {
+            'attributes': expected_attributes,
+            'entityId': 'Room1',
+            'index': expected_index
+        },
+        {
+            'attributes': expected_attributes,
+            'entityId': 'Room2',
+            'index': expected_index
+        }
+    ]
+    expected = {
+        'entities': expected_entities,
+        'entityType': entity_type
+    }
+
+    obtained = r.json()
+    assert_1TNENA_response(obtained, expected)
+
+@pytest.mark.parametrize("service", services)
+def idPattern_not_found(service):
+    query_params = {
+        'idPattern': 'roomNotFound'
+    }
+    h = {'Fiware-Service': service}
+    r = requests.get(query_url(), params=query_params, headers=h)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "Not Found",
+        "description": "No records were found for such query."
+    }
 
 @pytest.mark.parametrize("service", services)
 def test_1TNENA_one_entity(service, reporter_dataset):

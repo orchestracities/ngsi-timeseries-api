@@ -16,7 +16,8 @@
 - fix translator initialization
 - List Addix among adopters (#649)
 - Replaced string with the constants (#650)
-- Remove duplicate code in src/reporter/tests/test_timescale_types.py
+- Added idPattern ain query parameter (#648)
+- Remove duplicate code in src/reporter/tests/test_timescale_types.py (#657)
 
 ### Bug fixes
 

@@ -10,7 +10,9 @@ def query_NTNE(limit=10000,
                type_=None,  # In Query
                from_date=None,
                to_date=None,
-               offset=0):
+               offset=0,
+               id_pattern = None):
+
     """
     See /entities in API Specification
     quantumleap.yml
@@ -26,6 +28,7 @@ def query_NTNE(limit=10000,
                                        from_date=from_date,
                                        to_date=to_date,
                                        offset=offset,
+                                       idPattern=id_pattern,
                                        fiware_service=fiware_s,
                                        fiware_servicepath=fiware_sp,)
     except NGSIUsageError as e:

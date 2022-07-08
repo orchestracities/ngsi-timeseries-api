@@ -24,7 +24,8 @@ def query_NTNENA(id_=None,  # In Query
                  offset=0,
                  georel=None,
                  geometry=None,
-                 coords=None):
+                 coords=None,
+                 id_pattern=None):
     """
     See /v2/attrs in API Specification
     quantumleap.yml
@@ -62,6 +63,7 @@ def query_NTNENA(id_=None,  # In Query
                                         last_n=last_n,
                                         limit=limit,
                                         offset=offset,
+                                        idPattern=id_pattern,
                                         fiware_service=fiware_s,
                                         fiware_servicepath=fiware_sp,
                                         geo_query=geo_query)
