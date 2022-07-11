@@ -459,14 +459,9 @@ class SQLTranslator(base_translator.BaseTranslator):
             return True
         return False
 
-    # TODO this logic is too simple. looks like this actually only used
-    # in row 67 of reporter.py and in test_validate_notifivation (i.e
-    # most probably we can remove
     @staticmethod
     def is_text(attr_type):
-        # TODO: verify: same logic in two different places!
-        # The above kinda reproduces the tests done by the translator,
-        # we should factor this logic out and keep it in just one place!
+    
         return attr_type == NGSI_TEXT or attr_type not in NGSI_TO_SQL
 
     def _preprocess_values(self, e, original_attrs, col_names,
