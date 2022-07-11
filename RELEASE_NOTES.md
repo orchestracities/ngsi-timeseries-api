@@ -16,6 +16,7 @@
 - fix translator initialization
 - List Addix among adopters (#649)
 - Replaced string with the constants (#650)
+- Added idPattern ain query parameter (#648)
 - Replaced entity with getter (#652)
 
 ### Bug fixes
