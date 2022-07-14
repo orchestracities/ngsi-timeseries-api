@@ -6,9 +6,10 @@ import sys
 from translators.base_translator import TIME_INDEX_NAME
 from translators.insert_splitter import INSERT_MAX_SIZE_VAR
 from translators.tests.original_data_scenarios import full_table_name, \
-    gen_tenant_id, gen_entity, OriginalDataScenarios
+    gen_entity, OriginalDataScenarios
 from translators.tests.test_original_data import translators, \
     with_crate, with_timescale
+from src.utils.tests.tenant import gen_tenant_id
 # NOTE. ^ your IDE is likely to tell you this is dead code, but it isn't
 # actually, we need to bring those two fixtures into scope to use them
 # with the lazy_fixture calls in 'translators'.
