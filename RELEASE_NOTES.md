@@ -18,7 +18,8 @@
 - Replaced string with the constants (#650)
 - Added idPattern ain query parameter (#648)
 - Remove duplicate code in src/reporter/tests/test_timescale_types.py (#657)
--Added logs in src/wq/core/task.py (#662)
+- Removed comments on line no.462 and 467 in sql_translator.py (#659)
+- Added logs in src/wq/core/task.py (#662)
 
 ### Bug fixes
 
