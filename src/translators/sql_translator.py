@@ -292,7 +292,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         }
 
         for e in entities:
-            entity_id = entity_id(e)
+            entity_id = e.get('id')
             for attr in iter_entity_attrs(e):
                 if attr == self.TIME_INDEX_NAME:
                     continue
@@ -444,7 +444,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         stmt = f"insert into {table_name} ({cols}) values (?, ?, ?, ?)"
         tix = current_timex()
         batch_id = uuid4().hex
-        rows = [[entity_id(e), entity_type(e), tix,
+        rows = [[e.get('id'),  e.get('type'),  tix,
                  self._build_original_data_value(e, insert_error, batch_id)]
                 for e in entities]
 
