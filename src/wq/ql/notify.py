@@ -10,9 +10,11 @@ import wq.core.cfg as cfg
 from wq.ql.flaskutils import build_json_array_response_stream
 import logging
 
+
 def log():
     logger = logging.getLogger(__name__)
     return logger
+
 
 class FiwareTaskId(CompositeTaskId):
 
