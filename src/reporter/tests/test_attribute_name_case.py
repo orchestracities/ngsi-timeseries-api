@@ -2,7 +2,7 @@ from conftest import QL_URL
 import pytest
 import requests
 import urllib
-from reporter.tests.utils import send_notifications, delete_test_data, \
+from reporter.tests.utils import insert_entities, delete_test_data, \
     wait_for_insert
 
 
@@ -42,17 +42,13 @@ def mk_entities():
     ]
 
 
-def insert_entities(service):
-    entities = mk_entities()
-    notification_data = [{'data': entities}]
-    send_notifications(service, notification_data)
-    wait_for_insert([entity_type], service, len(entities))
-
-
 @pytest.fixture(scope='module')
 def manage_db_entities():
     for service in services:
-        insert_entities(service)
+        notification_data = [{'data': mk_entities()}]
+        insert_entities(notification_data, service=service)
+    for service in services:
+        wait_for_insert([entity_type], service, len(mk_entities()))
 
     yield
 

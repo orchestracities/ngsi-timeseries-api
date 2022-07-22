@@ -1,7 +1,7 @@
 from conftest import QL_URL
 import pytest
 import requests
-from .utils import send_notifications, delete_entity_type, wait_for_insert
+from .utils import delete_entity_type, wait_for_insert, insert_entities
 
 entity_type = 'TestDevice'
 
@@ -39,15 +39,11 @@ def mk_entities():
     ]
 
 
-def insert_entities(service):
-    notification_data = [{'data': mk_entities()}]
-    send_notifications(service, notification_data)
-
-
 @pytest.fixture(scope='module')
 def manage_db_entities():
     for service in tenants:
-        insert_entities(service)
+        notification_data = [{'data': mk_entities()}]
+        insert_entities(notification_data, service=service)
     for service in tenants:
         wait_for_insert([entity_type], service, len(mk_entities()))
 
