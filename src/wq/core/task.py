@@ -11,6 +11,12 @@ from utils.b64 import to_b64_list, from_b64_list
 from wq.core.cfg import redis_connection, default_queue_name, \
     offload_to_work_queue, recover_from_enqueueing_failure, \
     failed_task_retention_period, successful_task_retention_period
+import logging
+
+
+def log():
+    logger = logging.getLogger(__name__)
+    return logger
 
 
 class TaskId(ABC):
@@ -270,10 +276,12 @@ class Tasklet(ABC):
                             result_ttl=self.success_ttl(),
                             failure_ttl=self.failure_ttl())
         except Exception as e:
-            print(e)    # TODO log error
+            log().error(e)
             if recover_from_enqueueing_failure():
-                # TODO log msg to say you'll run this task on the spot
-                # last ditch attempt, but only if configured to do so.
+                msg="This task could not be added to the work queue, " \
+                    "QuantumLeap will try running this task synchronously " \
+                    "if WQ_RECOVER_FROM_ENQUEUEING_FAILURE = true"
+                log().info(msg)
                 run_action(self)
             else:
                 raise e
