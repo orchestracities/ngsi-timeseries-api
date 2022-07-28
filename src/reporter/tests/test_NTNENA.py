@@ -219,6 +219,7 @@ def test_NTNENA_type(service, reporter_dataset):
     obtained = r.json()
     assert obtained == expected
 
+
 @pytest.mark.parametrize("service", services)
 def test_NTNENA_idPattern(service, reporter_dataset):
     # Query
@@ -293,6 +294,7 @@ def test_NTNENA_idPattern(service, reporter_dataset):
     obtained = r.json()
     assert obtained == expected
 
+
 @pytest.mark.parametrize("service", services)
 def idPattern_not_found(service, reporter_dataset):
     query_params = {
@@ -304,6 +306,7 @@ def idPattern_not_found(service, reporter_dataset):
         "error": "Not Found",
         "description": "No records were found for such query."
     }
+
 
 @pytest.mark.parametrize("service", services)
 def test_NTNE1A_one_entity(service, reporter_dataset):

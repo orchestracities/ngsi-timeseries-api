@@ -102,11 +102,12 @@ def test_1TNENA_defaults(service, reporter_dataset):
     obtained = r.json()
     assert_1TNENA_response(obtained, expected)
 
+
 @pytest.mark.parametrize("service", services)
 def test_1TNENA_idPattern(service, reporter_dataset):
     h = {'Fiware-Service': service}
-    query_params = {'idPattern':idPattern}
-    r = requests.get(query_url(),params= query_params, headers=h)
+    query_params = {'idPattern': idPattern}
+    r = requests.get(query_url(), params= query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Assert Results
@@ -150,6 +151,7 @@ def test_1TNENA_idPattern(service, reporter_dataset):
     obtained = r.json()
     assert_1TNENA_response(obtained, expected)
 
+
 @pytest.mark.parametrize("service", services)
 def idPattern_not_found(service):
     query_params = {
@@ -162,6 +164,7 @@ def idPattern_not_found(service):
         "error": "Not Found",
         "description": "No records were found for such query."
     }
+
 
 @pytest.mark.parametrize("service", services)
 def test_1TNENA_one_entity(service, reporter_dataset):
