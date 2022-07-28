@@ -27,7 +27,6 @@ def query_NTNE1A(attr_name,  # In Path
                  coords=None,
                  id_pattern=None
                  ):
-
     """
     See /attrs/{attrName} in API Specification
         quantumleap.yml

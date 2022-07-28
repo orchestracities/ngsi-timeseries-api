@@ -105,7 +105,7 @@ def test_NTNE_type(service, reporter_dataset):
         'entityType': expected_type
     }
     ]
-    assert obtained == expected 
+    assert obtained == expected
 
 
 @pytest.mark.parametrize("service", services)

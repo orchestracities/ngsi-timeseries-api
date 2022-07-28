@@ -798,13 +798,13 @@ class SQLTranslator(base_translator.BaseTranslator):
         return min(last_n, limit)
 
     def _get_where_clause(
-            self, 
-            entity_ids, 
-            from_date, 
-            to_date, 
-            idPattern, 
+            self,
+            entity_ids,
+            from_date,
+            to_date,
+            idPattern,
             fiware_sp='/',
-            geo_query=None, 
+            geo_query=None,
             prefix=''):
         clauses = []
         where_clause = ""
@@ -833,12 +833,12 @@ class SQLTranslator(base_translator.BaseTranslator):
             clauses.append(" " + prefix + FIWARE_SERVICEPATH + " = ''")
 
         if idPattern:
-            clauses.append(  
-                " " + 
-                prefix + 
-                ENTITY_ID_COL + 
-                " ~* '" + 
-                idPattern +  
+            clauses.append(
+                " " +
+                prefix +
+                ENTITY_ID_COL +
+                " ~* '" +
+                idPattern +
                 "($|.*)'")
 
         # TODO implement prefix also for geo_clause
@@ -1548,13 +1548,13 @@ class SQLTranslator(base_translator.BaseTranslator):
                                     fiware_servicepath=fiware_servicepath)
 
     def delete_entities(
-            self, 
-            etype, 
-            eid=None, 
-            from_date=None, 
+            self,
+            etype,
+            eid=None,
+            from_date=None,
             to_date=None,
-            idPattern=None, 
-            fiware_service=None, 
+            idPattern=None,
+            fiware_service=None,
             fiware_servicepath='/'):
         table_name = self._et2tn(etype, fiware_service)
         where_clause = self._get_where_clause(eid,

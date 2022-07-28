@@ -107,7 +107,7 @@ def test_1TNENA_defaults(service, reporter_dataset):
 def test_1TNENA_idPattern(service, reporter_dataset):
     h = {'Fiware-Service': service}
     query_params = {'idPattern': idPattern}
-    r = requests.get(query_url(), params= query_params, headers=h)
+    r = requests.get(query_url(), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
     # Assert Results
