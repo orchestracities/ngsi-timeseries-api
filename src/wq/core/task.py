@@ -278,7 +278,7 @@ class Tasklet(ABC):
         except Exception as e:
             log().error(e)
             if recover_from_enqueueing_failure():
-                msg="This task could not be added to the work queue, " \
+                msg = "This task could not be added to the work queue, " \
                     "QuantumLeap will try running this task synchronously " \
                     "if WQ_RECOVER_FROM_ENQUEUEING_FAILURE = true"
                 log().info(msg)
