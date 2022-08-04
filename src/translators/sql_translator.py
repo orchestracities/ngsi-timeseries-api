@@ -460,7 +460,6 @@ class SQLTranslator(base_translator.BaseTranslator):
 
     @staticmethod
     def is_text(attr_type):
-    
         return attr_type == NGSI_TEXT or attr_type not in NGSI_TO_SQL
 
     def _preprocess_values(self, e, original_attrs, col_names,
@@ -797,8 +796,15 @@ class SQLTranslator(base_translator.BaseTranslator):
                 f"last_n should be >=1 and <= {default_limit}.")
         return min(last_n, limit)
 
-    def _get_where_clause(self, entity_ids, from_date, to_date, idPattern, fiware_sp='/',
-                          geo_query=None, prefix=''):
+    def _get_where_clause(
+            self,
+            entity_ids,
+            from_date,
+            to_date,
+            idPattern,
+            fiware_sp='/',
+            geo_query=None,
+            prefix=''):
         clauses = []
         where_clause = ""
 
@@ -826,7 +832,13 @@ class SQLTranslator(base_translator.BaseTranslator):
             clauses.append(" " + prefix + FIWARE_SERVICEPATH + " = ''")
 
         if idPattern:
-            clauses.append(  " " + prefix + ENTITY_ID_COL  + " ~* '" + idPattern +  "($|.*)'")
+            clauses.append(
+                " " +
+                prefix +
+                ENTITY_ID_COL +
+                " ~* '" +
+                idPattern +
+                "($|.*)'")
 
         # TODO implement prefix also for geo_clause
         geo_clause = self._get_geo_clause(geo_query)
@@ -1534,8 +1546,15 @@ class SQLTranslator(base_translator.BaseTranslator):
                                     fiware_service=fiware_service,
                                     fiware_servicepath=fiware_servicepath)
 
-    def delete_entities(self, etype, eid=None, from_date=None, to_date=None,
-                        idPattern=None, fiware_service=None, fiware_servicepath='/'):
+    def delete_entities(
+            self,
+            etype,
+            eid=None,
+            from_date=None,
+            to_date=None,
+            idPattern=None,
+            fiware_service=None,
+            fiware_servicepath='/'):
         table_name = self._et2tn(etype, fiware_service)
         where_clause = self._get_where_clause(eid,
                                               from_date,

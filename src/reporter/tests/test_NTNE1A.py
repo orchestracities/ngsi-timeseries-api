@@ -18,6 +18,7 @@ services = ['t1', 't2']
 
 idPattern = "R"
 
+
 def ix_intervals():
     bs = list(range(0, result_gen.time_index_size)) + [None]
     prod = [(i, j) for i in bs for j in bs]
@@ -84,6 +85,7 @@ def test_NTNE1A_type(service, reporter_dataset):
     response = requests.get(query_url(), params=query_params, headers=h)
     assert_entities(response, [entity_id_1, entity_id_2])
 
+
 @pytest.mark.parametrize("service", services)
 def test_NTNE1A_type(service, reporter_dataset):
     query_params = {
@@ -93,6 +95,7 @@ def test_NTNE1A_type(service, reporter_dataset):
     response = requests.get(query_url(), params=query_params, headers=h)
     assert_entities(response, [entity_id_1, entity_id_2])
 
+
 @pytest.mark.parametrize("service", services)
 def test_NTNE1A_idPattern(service, reporter_dataset):
     query_params = {
@@ -101,6 +104,7 @@ def test_NTNE1A_idPattern(service, reporter_dataset):
     h = {'Fiware-Service': service}
     response = requests.get(query_url(), params=query_params, headers=h)
     assert_entities(response, [entity_id_1, entity_id_2])
+
 
 @pytest.mark.parametrize("service", services)
 def idPattern_not_found(service, reporter_dataset):

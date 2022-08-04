@@ -11,8 +11,7 @@ def query_NTNE(limit=10000,
                from_date=None,
                to_date=None,
                offset=0,
-               id_pattern = None):
-
+               id_pattern=None):
     """
     See /entities in API Specification
     quantumleap.yml

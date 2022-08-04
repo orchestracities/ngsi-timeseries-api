@@ -100,6 +100,7 @@ def test_1TNE1A_defaults(service, reporter_dataset):
     obtained = r.json()
     assert_1TNE1A_response(obtained, expected)
 
+
 @pytest.mark.parametrize("service", services)
 def test_1TNE1A_idPattern(service, reporter_dataset):
     query_params = {
@@ -141,11 +142,12 @@ def test_1TNE1A_idPattern(service, reporter_dataset):
     obtained = r.json()
     assert_1TNE1A_response(obtained, expected)
 
+
 @pytest.mark.parametrize("service", services)
 def idPattern_not_found(service):
     query_params = {
         'idPattern': 'nothingThere',
-        }
+    }
 
     h = {'Fiware-Service': service}
 
@@ -155,6 +157,7 @@ def idPattern_not_found(service):
         "error": "Not Found",
         "description": "No records were found for such query."
     }
+
 
 @pytest.mark.parametrize("service", services)
 def test_1TNE1A_one_entity(service, reporter_dataset):

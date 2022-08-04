@@ -26,6 +26,7 @@
 ### Bug fixes
 
 - Fix issues with integration tests and backward compatibility tests
+- Fix for linter failures (#670)
 
 ### Continuous Integration
 
