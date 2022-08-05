@@ -73,7 +73,6 @@ def current_timex() -> str:
     return datetime.utcnow().isoformat(timespec='milliseconds')
 
 
-
 def entity_id(entity: dict) -> Optional[str]:
     """
     Safely get the NGSI ID of the given entity.
@@ -259,7 +258,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         for e in entities:
             if e[NGSI_TYPE] != entity_type:
                 msg = "Entity {} is not of type {}."
-                raise ValueError(msg.format(e[NGSI_ID], entity_type))
+                raise ValueError(msg.format(entity_id(e), entity_type))
 
             if self.TIME_INDEX_NAME not in e:
                 msg = "Translating entity without TIME_INDEX. " \
@@ -269,7 +268,7 @@ class SQLTranslator(base_translator.BaseTranslator):
 
             if ORIGINAL_ENTITY_COL in e:
                 raise ValueError(
-                    f"Entity {e[NGSI_ID]} has a reserved attribute name: " +
+                    f"Entity {entity_id(e)} has a reserved attribute name: " +
                     "'{ORIGINAL_ENTITY_COL_NAME}'")
 
         # Define column types
@@ -292,7 +291,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         }
 
         for e in entities:
-            entity_id = e.get('id')
+            entityId = entity_id(e)
             for attr in iter_entity_attrs(e):
                 if attr == self.TIME_INDEX_NAME:
                     continue
@@ -329,7 +328,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                 col = self._ea2cn(attr)
                 original_attrs[col] = (attr, attr_t)
 
-                table[col] = self._compute_type(entity_id, attr_t, e[attr])
+                table[col] = self._compute_type(entityId, attr_t, e[attr])
 
         # Create/Update metadata table for this type
         table_name = self._et2tn(entity_type, fiware_service)
@@ -444,7 +443,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         stmt = f"insert into {table_name} ({cols}) values (?, ?, ?, ?)"
         tix = current_timex()
         batch_id = uuid4().hex
-        rows = [[e.get('id'),  e.get('type'),  tix,
+        rows = [[entity_id(e), entity_type(e), tix,
                  self._build_original_data_value(e, insert_error, batch_id)]
                 for e in entities]
 
