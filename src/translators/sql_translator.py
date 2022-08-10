@@ -214,7 +214,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         if len(service_paths) == 1:
             entities_by_type = {}
             for e in entities:
-                entities_by_type.setdefault(e['type'], []).append(e)
+                entities_by_type.setdefault(entity_type(e), []).append(e)
 
             res = None
             for et in entities_by_type.keys():
@@ -231,7 +231,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             for path in entities_by_service_path.keys():
                 entities_by_type = {}
                 for e in entities_by_service_path[path]:
-                    entities_by_type.setdefault(e['type'], []).append(e)
+                    entities_by_type.setdefault(entity_type(e), []).append(e)
 
                 res = None
                 for et in entities_by_type.keys():
@@ -248,7 +248,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         return res
 
     def _insert_entities_of_type(self,
-                                 entity_type,
+                                 entityType,
                                  entities,
                                  fiware_service=None,
                                  fiware_servicepath='/'):
@@ -256,7 +256,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         # Also, an entity can't have an attribute with the same name
         # as that specified by ORIGINAL_ENTITY_COL_NAME.
         for e in entities:
-            if e[NGSI_TYPE] != entity_type:
+            if entity_type(e) != entityType:
                 msg = "Entity {} is not of type {}."
                 raise ValueError(msg.format(entity_id(e), entity_type))
 
@@ -331,7 +331,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                 table[col] = self._compute_type(entityId, attr_t, e[attr])
 
         # Create/Update metadata table for this type
-        table_name = self._et2tn(entity_type, fiware_service)
+        table_name = self._et2tn(entityType, fiware_service)
         modified = self._update_metadata_table(table_name, original_attrs)
         # Sort out data table.
         if modified and modified == original_attrs.keys():
@@ -466,9 +466,9 @@ class SQLTranslator(base_translator.BaseTranslator):
         values = []
         for cn in col_names:
             if cn == ENTITY_TYPE_COL:
-                values.append(e['type'])
+                values.append(entity_type(e))
             elif cn == ENTITY_ID_COL:
-                values.append(e['id'])
+                values.append(entity_id(e))
             elif cn == self.TIME_INDEX_NAME:
                 values.append(e[self.TIME_INDEX_NAME])
             elif cn == FIWARE_SERVICEPATH:
