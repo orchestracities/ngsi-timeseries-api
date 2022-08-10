@@ -20,11 +20,13 @@
 - Remove duplicate code in src/reporter/tests/test_timescale_types.py (#657)
 - Removed comments on line no.462 and 467 in sql_translator.py (#659)
 - Added logs in src/wq/ql/notify.py (#656)
+- Added logs in src/wq/core/task.py (#662)
 - Resolved TODO at src/reporter/tests/test_timescale_types.py (#667)
 
 ### Bug fixes
 
 - Fix issues with integration tests and backward compatibility tests
+- Fix for linter failures (#670)
 
 ### Continuous Integration
 

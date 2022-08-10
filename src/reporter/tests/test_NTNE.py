@@ -71,6 +71,7 @@ def test_not_found(service):
         "description": "No records were found for such query."
     }
 
+
 @pytest.mark.parametrize("service", services)
 def idpattern_not_found(service):
     query_params = {
@@ -83,6 +84,7 @@ def idpattern_not_found(service):
         "error": "Not Found",
         "description": "No records were found for such query."
     }
+
 
 @pytest.mark.parametrize("service", services)
 def test_NTNE_type(service, reporter_dataset):
@@ -103,7 +105,8 @@ def test_NTNE_type(service, reporter_dataset):
         'entityType': expected_type
     }
     ]
-    assert obtained == expected 
+    assert obtained == expected
+
 
 @pytest.mark.parametrize("service", services)
 def test_NTNE_idPattern(service, reporter_dataset):
@@ -127,6 +130,8 @@ def test_NTNE_idPattern(service, reporter_dataset):
 
 # TODO we removed order comparison given that in
 # CRATE4.0 union all and order by don't work correctly with offset
+
+
 @pytest.mark.parametrize("service", services)
 def test_NTNE_fromDate_toDate(service, reporter_dataset):
     # Query
