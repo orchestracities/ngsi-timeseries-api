@@ -172,7 +172,7 @@ def test_entity_with_all_supported_types():
                    num_v=321.07,
                    text_v='wada wada',
                    timex=current_timex() + '+00:00',
-                   array_v=[123, {}, False],
+                   array_v=['123', '{}', 'f'],
                    structured_v={'x': 1},
                    geoj_v={'type': 'Point', 'coordinates': [30.02, 10.03],
                            'crs': {'properties': {'name': 'EPSG4326'},
@@ -180,13 +180,15 @@ def test_entity_with_all_supported_types():
                            'meta': {'srid': 4326}
                            },
                    slf_point_v='41.3763726, 2.186447514',
-                   slf_line_v=['1.0, 2.0', '3.0, 4.0'],
-                   slf_polygon_v=['0.0, 0.0', '1.0, 0.0', '0.0, 1.0',
-                                  '0.0, 0.0'],
-                   slf_box_v=['40.63913831188419, -8.653321266174316',
-                              '40.63881265804603, -8.653149604797363'])
+                   slf_line_v=None,
+                   slf_polygon_v=None,
+                   slf_box_v=None)
 
-    insert_entities(e, service=service)
+    body = [{
+        'data': e if isinstance(e, List) else [e]
+    }]
+
+    insert_entities(body, service=service)
 
     result_set = query_entity_by_id(e['id'], service)
 
