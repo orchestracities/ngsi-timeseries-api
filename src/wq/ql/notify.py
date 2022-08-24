@@ -132,27 +132,39 @@ def list_insert_tasks(task_status: Optional[str] = None):
     task_id_prefix = build_task_id_init_segment()
     find_tasks = insert_task_finder(task_status)
     response_payload = find_tasks(task_id_prefix)
-    log().info("Retrieved notification tasks to the work queue successfully")
+    try:
+        task_status == TaskStatus.FAILED.value
+    except Exception as e:
+        log().error(e)
+    else:
+        log().info("Retrieved notification tasks to the work queue successfully")
 
     return build_json_array_response_stream(response_payload)
-# TODO error handling
 
 
-def list_insert_tasks_runtime_info():
+def list_insert_tasks_runtime_info(task_status: Optional[str] = None):
     task_id_prefix = build_task_id_init_segment()
     response_payload = QMan.load_tasks_runtime_info(task_id_prefix)
-    log().info("Retrieved summary of notification tasks to the work queue successfully")
+    try:
+        task_status == TaskStatus.FAILED.value
+    except Exception as e:
+        log().error(e)
+    else:
+        log().info("Retrieved summary of notification tasks to the work queue successfully")
 
     return build_json_array_response_stream(response_payload)
-# TODO error handling
 
 
-def delete_insert_tasks():
+def delete_insert_tasks(task_status: Optional[str] = None):
     qman = QMan(InsertAction.insert_queue())
     task_id_prefix = build_task_id_init_segment()
     qman.delete_tasks(task_id_prefix)
-    log().info("Deleted notifcation tasks from the work queue successfully")
-# TODO error handling
+    try:
+        task_status == TaskStatus.FAILED.value
+    except Exception as e:
+        log().error(e)
+    else:
+        log().info("Deleted notifcation tasks from the work queue successfully")
 
 
 def insert_task_count_calculator(task_status: Optional[str] = None) \
