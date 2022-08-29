@@ -6,7 +6,7 @@ RUN pip install pipenv
 RUN mkdir -p /src/ngsi-timeseries-api
 COPY Pipfile /src/ngsi-timeseries-api/Pipfile
 COPY Pipfile.lock /src/ngsi-timeseries-api/Pipfile.lock
-RUN cd /src/ngsi-timeseries-api && { pipenv lock -r > /requirements.txt; }
+RUN cd /src/ngsi-timeseries-api && { pipenv requirements > /requirements.txt; }
 RUN pip install -r /requirements.txt
 RUN pip install supervisor
 
