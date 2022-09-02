@@ -11,6 +11,9 @@ from typing import Union
 import yaml
 
 
+USE_GEOCODING_ENV_VAR = 'USE_GEOCODING'
+CACHE_GEOCODING_ENV_VAR = 'CACHE_GEOCODING'
+
 MaybeString = Union[str, None]
 
 

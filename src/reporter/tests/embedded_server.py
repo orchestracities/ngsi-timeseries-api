@@ -7,7 +7,7 @@ from typing import Any
 
 from conftest import QL_BASE_URL
 from cache.factory import CACHE_QUERIES_ENV_VAR, REDIS_HOST_ENV_VAR
-from geocoding.factory import USE_GEOCODING_ENV_VAR
+from utils.cfgreader import USE_GEOCODING_ENV_VAR
 import server.wsgi as flask
 from translators.factory import QL_CONFIG_ENV_VAR
 from translators.timescale import POSTGRES_HOST_ENV_VAR

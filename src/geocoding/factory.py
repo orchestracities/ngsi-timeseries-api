@@ -4,19 +4,9 @@ from typing import Union
 from cache.factory import REDIS_HOST_ENV_VAR, REDIS_PORT_ENV_VAR
 from .geocache import GeoCodingCache
 from utils.cfgreader import EnvReader, BoolVar, IntVar, StrVar, MaybeString
+from utils.cfgreader import USE_GEOCODING_ENV_VAR, CACHE_GEOCODING_ENV_VAR
 
 MaybeGeoCache = Union[GeoCodingCache, None]
-
-
-# TODO: it looks like way back then we had a plan to use a config file
-# rather than many env vars. In fact I found this comment when refactoring
-# the reporter
-#   TODO: Move this setting to configuration (See GH issue #10)
-# which referred to the below env vars.
-
-
-USE_GEOCODING_ENV_VAR = 'USE_GEOCODING'
-CACHE_GEOCODING_ENV_VAR = 'CACHE_GEOCODING'
 
 
 class GeoCodingEnvReader:
