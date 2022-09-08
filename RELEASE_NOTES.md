@@ -24,7 +24,6 @@
 - Replaced entity with getter (#652)
 - Resolved TODO at src/reporter/tests/test_timescale_types.py (#667)
 
-
 ### Bug fixes
 
 - Fix issues with integration tests and backward compatibility tests
