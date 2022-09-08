@@ -22,12 +22,15 @@
 - Added logs in src/wq/ql/notify.py (#656)
 - Added logs in src/wq/core/task.py (#662)
 - Replaced entity with getter (#652)
+- Resolved TODO in Dockerfile (#680)
+- Resolved TODO at src/reporter/tests/test_timescale_types.py (#667)
 - Added error handling in src/wq/ql/notify.py (#673)
 
 ### Bug fixes
 
 - Fix issues with integration tests and backward compatibility tests
 - Fix for linter failures (#670)
+- Fix for issue broken docker image (#674)
 
 ### Continuous Integration
 
