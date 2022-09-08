@@ -3,7 +3,6 @@ import pytest
 import requests
 from reporter.tests.utils import send_notifications, delete_entity_type, \
     wait_for_insert
-import time
 
 
 entity_type = 'TestDevice'
@@ -43,7 +42,6 @@ def setup_entities():
 
 
 def run_query(service, base_url, query_params, expected_status_code=200):
-    time.sleep(1)
     h = {'Fiware-Service': service}
     r = requests.get(base_url, params=query_params, headers=h)
     assert r.status_code == expected_status_code
