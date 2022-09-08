@@ -6,6 +6,7 @@ import time
 from typing import Callable, Iterable, List, Optional, Tuple, Union
 import re
 import random
+from requests import Response
 
 from translators.factory import translator_for
 from translators.sql_translator import ENTITY_ID_COL, TENANT_PREFIX, \
@@ -94,6 +95,22 @@ def get_notification_different_types(
             }
         ]
     }
+
+
+def insert_entities(entities: Union[List[dict], dict],
+                    service: str = None, service_path: str = None,
+                    expected_status_code=200) -> Response:
+    headers = {
+        'Content-Type': 'application/json',
+        'fiware-Service': service,
+        'fiware-ServicePath': service_path
+    }
+    body = json.dumps({
+        'data': entities if isinstance(entities, List) else [entities]
+    })
+    response = requests.post(notify_url(), data=body, headers=headers)
+    assert response.status_code == expected_status_code
+    return response
 
 
 def send_notifications(service, notifications, service_path='/'):

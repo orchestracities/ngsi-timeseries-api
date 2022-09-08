@@ -12,7 +12,7 @@ from utils.jsondict import maybe_value
 from utils.kvt import merge_dicts
 
 from .geo_queries_fixture import query_1t1ena
-from .utils import notify_url
+from .utils import notify_url, insert_entities
 from src.utils.tests.tenant import gen_tenant_id
 
 
@@ -107,25 +107,6 @@ def gen_entity(entity_id: int,
     }
 # TODO: factor out?
 # Similar to gen_entity in test_timescale_insert module in translators.tests.
-
-
-def insert_entities(entities: Union[List[dict], dict],
-                    service: str = None, service_path: str = None,
-                    expected_status_code=200) -> Response:
-    headers = {
-        'Content-Type': 'application/json',
-        'fiware-Service': service,
-        'fiware-ServicePath': service_path
-    }
-    body = json.dumps({
-        'data': entities if isinstance(entities, List) else [entities]
-    })
-    response = requests.post(notify_url(), data=body, headers=headers)
-    assert response.status_code == expected_status_code
-    return response
-# TODO: factor out?
-# This function could sit in a separate module and be shared across all
-# reporter tests.
 
 
 def entity_name_value_pairs(entity: dict) -> dict:
