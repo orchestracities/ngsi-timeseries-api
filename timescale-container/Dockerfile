@@ -8,7 +8,6 @@ COPY ./quantumleap-db-setup.py /ngsi-timeseries-api/timescale-container/
 
 WORKDIR /ngsi-timeseries-api/timescale-container
 
-# TODO: read args from config file to be mounted on running container.
 CMD python quantumleap-db-setup.py \
         --ql-db-pass "$QL_DB_PASS" \
         --ql-db-init-dir "$QL_DB_INIT_DIR" \

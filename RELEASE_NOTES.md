@@ -22,6 +22,7 @@
 - Added logs in src/wq/ql/notify.py (#656)
 - Added logs in src/wq/core/task.py (#662)
 - Replaced entity with getter (#652)
+- Resolved TODO in Dockerfile (#680)
 - Resolved TODO at src/reporter/tests/test_timescale_types.py (#667)
 
 ### Bug fixes
