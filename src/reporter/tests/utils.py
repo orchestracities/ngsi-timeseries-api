@@ -11,6 +11,91 @@ from requests import Response
 from translators.factory import translator_for
 from translators.sql_translator import ENTITY_ID_COL, TENANT_PREFIX, \
     TYPE_PREFIX
+from geocoding.slf.geotypes import SlfBox, SlfLine, SlfPoint, SlfPolygon
+from translators.sql_translator import NGSI_DATETIME, NGSI_GEOJSON,\
+    NGSI_STRUCTURED_VALUE, NGSI_TEXT
+
+
+TIMEX_ATTR_NAME = 'TimeInstant'
+BOOL_ATTR_NAME = 'a_bool'
+INT_ATTR_NAME = 'an_int'
+NUM_ATTR_NAME = 'a_num'
+TEXT_ATTR_NAME = 'a_text'
+ARR_ATTR_NAME = 'an_array'
+SV_ATTR_NAME = 'a_struct_val'
+GEOJ_ATTR_NAME = 'a_geojson'
+PT_ATTR_NAME = 'an_slf_point'
+LINE_ATTR_NAME = 'an_slf_line'
+POLY_ATTR_NAME = 'an_slf_polygon'
+BOX_ATTR_NAME = 'an_slf_box'
+
+
+def gen_entity(entity_id: int,
+               bool_v: bool,
+               int_v: int,
+               num_v: float,
+               text_v: str,
+               timex: str,
+               array_v: List,
+               structured_v: dict,
+               geoj_v: dict,
+               slf_point_v: str,
+               slf_line_v: [str],
+               slf_polygon_v: [str],
+               slf_box_v: [str],
+               ) -> dict:
+    return {
+        'id': f"eid:{entity_id}",
+        'type': ENTITY_TYPE,
+        TIMEX_ATTR_NAME: {
+            'type': NGSI_DATETIME,
+            'value': timex
+        },
+        BOOL_ATTR_NAME: {
+            'type': 'Boolean',
+            'value': bool_v
+        },
+        INT_ATTR_NAME: {
+            'type': 'Integer',
+            'value': int_v
+        },
+        NUM_ATTR_NAME: {
+            'type': 'Number',
+            'value': num_v
+        },
+        TEXT_ATTR_NAME: {
+            'type': NGSI_TEXT,
+            'value': text_v
+        },
+        ARR_ATTR_NAME: {
+            'type': 'Array',
+            'value': array_v
+        },
+        SV_ATTR_NAME: {
+            'type': NGSI_STRUCTURED_VALUE,
+            'value': structured_v
+        },
+        GEOJ_ATTR_NAME: {
+            'type': NGSI_GEOJSON,
+            'value': geoj_v
+        },
+        PT_ATTR_NAME: {
+            'type': SlfPoint.ngsi_type(),
+            'value': slf_point_v
+        },
+        LINE_ATTR_NAME: {
+            'type': SlfLine.ngsi_type(),
+            'value': slf_line_v
+        },
+        POLY_ATTR_NAME: {
+            'type': SlfPolygon.ngsi_type(),
+            'value': slf_polygon_v
+        },
+        BOX_ATTR_NAME: {
+            'type': SlfBox.ngsi_type(),
+            'value': slf_box_v
+        }
+    }
 
 
 def notify_url():
