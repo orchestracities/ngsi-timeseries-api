@@ -2,6 +2,7 @@ from pathlib import Path
 import shutil
 from time import sleep
 
+from conftest import QL_BASE_URL
 from tests.benchmark.driver_base import NOTIFY_TEST
 from tests.benchmark.threaded_driver import ThreadedDriver
 from utils.tests.docker import dir_from_file_path, DockerCompose
@@ -48,9 +49,9 @@ class TestScript:
 
     def _start_docker_and_wait_for_services(self):
         self._docker.start()
-        sleep(10)
-        # TODO call QL's version endpoint rather than sleeping.
-        # If it's up, then Redis & DB backend are up to b/c of docker deps.
+        version_url = f"{QL_BASE_URL}/version"
+        r = requests.get(version_url)
+        r.raise_for_status()
 
     def _start_samplers(self):
         self._db_sampler = new_row_count_sampler(self._mon_dir,
