@@ -22,6 +22,13 @@ def fiware_correlator() -> str:
     return request.headers.get('Fiware-Correlator', None)
 
 
+def ngsild_tenant() -> str:
+    """
+    :return: The content of the NGSILD tenant header if any.
+    """
+    return request.headers.get('ngsild-tenant', None)
+
+
 def is_root_service_path() -> bool:
     sp = fiware_sp()  # cater for header not present
     # cater for whitespace around paths

@@ -9,6 +9,7 @@ from wq.core import TaskInfo, TaskStatus, QMan, \
 import wq.core.cfg as cfg
 from wq.ql.flaskutils import build_json_array_response_stream
 import logging
+import server
 
 
 def log():
@@ -21,11 +22,13 @@ class FiwareTaskId(CompositeTaskId):
     def __init__(self,
                  fiware_service: Optional[str],
                  fiware_service_path: Optional[str],
-                 fiware_correlation_id: Optional[str]):
+                 fiware_correlation_id: Optional[str],
+                 ngsild_tenant: Optional[str]):
         super().__init__(
             fiware_service or '',
             fiware_service_path or '',
-            fiware_correlation_id or ''
+            fiware_correlation_id or '',
+            ngsild_tenant or ''
         )
 
     def fiware_tags_repr(self) -> str:
@@ -39,6 +42,7 @@ class InsertActionInput(BaseModel):
     fiware_service: Optional[str]
     fiware_service_path: Optional[str]
     fiware_correlator: Optional[str]
+    ngsild_tenant: Optional[str]
     payload: List[dict]
 
 
@@ -58,14 +62,16 @@ class InsertAction(Tasklet):
                  fiware_service: Optional[str],
                  fiware_service_path: Optional[str],
                  fiware_correlation_id: Optional[str],
+                 ngsild_tenant: Optional[str],
                  payload: [dict],
                  retry_intervals: [int] = None):
         self._id = FiwareTaskId(fiware_service, fiware_service_path,
-                                fiware_correlation_id)
+                                fiware_correlation_id, ngsild_tenant)
         self._input = InsertActionInput(
             fiware_service=fiware_service,
             fiware_service_path=fiware_service_path,
             fiware_correlator=fiware_correlation_id,
+            ngsild_tenant=ngsild_tenant,
             payload=payload
         )
         self._retry_int = retry_intervals
@@ -86,32 +92,43 @@ class InsertAction(Tasklet):
         data = self.task_input()
         svc = data.fiware_service
         svc_path = data.fiware_service_path
-        try:
-            with translator_for(svc) as trans:
-                trans.insert(data.payload, svc, svc_path)
-        except Exception as e:
-            self._handle_exception(svc, e)
+        tenant = data.ngsild_tenant
+        if server.LD:
+            try:
+                with translator_for(tenant) as trans:
+                    trans.insert(data.payload, tenant)
+            except Exception as e:
+                self._handle_exception(tenant, e)
+        else:
+            try:
+                with translator_for(svc) as trans:
+                    trans.insert(data.payload, svc, svc_path)
+            except Exception as e:
+                self._handle_exception(svc, e)
 
     @staticmethod
-    def _handle_exception(fiware_service: str, e: Exception):
+    def _handle_exception(fiware_service: str, ngsild_tenant: str, e: Exception):
         if not cfg.offload_to_work_queue():
             raise e
 
-        analyzer = error_analyser_for(fiware_service, e)
+        if server.LD:
+            analyzer = error_analyser_for(ngsild_tenant, e)
+        else:
+            analyzer = error_analyser_for(fiware_service, e)
         if analyzer.can_retry_insert():
             raise e
         raise StopTask() from e
 
 
 def build_task_id_init_segment():
-    fid = FiwareTaskId(fiware_s(), fiware_sp(), fiware_correlator())
+    fid = FiwareTaskId(fiware_s(), fiware_sp(), fiware_correlator(), ngsild_tenant())
     if fiware_correlator():
         return fid.fiware_tags_repr()
     return fid.fiware_svc_and_svc_path_repr()
 
 
 def has_fiware_headers() -> bool:
-    hs = [fiware_s(), fiware_sp(), fiware_correlator()]
+    hs = [fiware_s(), fiware_sp(), fiware_correlator(), ngsild_tenant()]
     ks = [h for h in hs if h]
     return len(ks) > 0
 
