@@ -7,6 +7,9 @@ from typing import Callable, Iterable, List, Optional, Tuple, Union
 import re
 import random
 from requests import Response
+import crate
+import pg8000
+import logging
 
 from translators.factory import translator_for
 from translators.sql_translator import ENTITY_ID_COL, TENANT_PREFIX, \
@@ -221,21 +224,18 @@ def insert_test_data_different_types(
 
 def has_entities(entity_type: str, service: Optional[str],
                  entity_id: Optional[str] = None) -> bool:
+    logger = logging.getLogger(__name__)
     try:
         entity_count = count_entities(entity_type, service, entity_id)
         return entity_count > 0
-    except Exception as e:
-        print(e)
+    except crate.client.exceptions.ProgrammingError as e:
+        if "SchemaUnknownException" in str(e) or "RelationUnknown" in str(e):
+            logger.error(e)
         return False
-        # Most likely the table is not there. Example exceptions:
-        # - pg8000.exceptions.ProgrammingError:
-        #    {'C': '42P01', 'M': 'relation mtt2.et... does not exist', ...}
-        # - crate.client.exceptions.ProgrammingError:
-        #     RelationUnknown[Relation 'mtt1.et... unknown...']
-        #
-        # TODO. See if there's a better way of doing this, e.g. catching a
-        # specific exception and error code to make sure the table isn't
-        # actually there.
+    except pg8000.ProgrammingError as e:
+        if "does not exist" in str(e):
+            logger.error(e)
+        return False
 
 
 def count_entities(entity_type: str, service: Optional[str],
