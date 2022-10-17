@@ -15,6 +15,7 @@ QL_DB_PASS = '*'
 
 
 FIWARE_SVC = 'x'
+TENANT = 'y'
 ENTITY = {
     "id": "Room:1",
     "type": "Room",
@@ -67,6 +68,7 @@ def enqueue_entity(svc_path: str, delay_after=3.0,
     task = InsertAction(fiware_service=FIWARE_SVC,
                         fiware_service_path=svc_path,
                         fiware_correlation_id=None,
+                        ngsild_tenant=TENANT,
                         payload=[ENTITY],
                         retry_intervals=retry_intervals)
     task.enqueue()
