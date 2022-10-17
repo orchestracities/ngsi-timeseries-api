@@ -1596,15 +1596,6 @@ class SQLTranslator(base_translator.BaseTranslator):
             self.sql_error_handler(e)
             self.logger.error(str(e), exc_info=True)
 
-        # TODO this can be removed most probably
-        if self.cursor.rowcount == 0 and table_name.startswith('"'):
-            # See GH #173
-            old_tn = ".".join([x.strip('"') for x in table_name.split('.')])
-            try:
-                self.cursor.execute(op, [old_tn])
-            except Exception as e:
-                self.sql_error_handler(e)
-                self.logger.error(str(e), exc_info=True)
 
     def query_entity_types(self, fiware_service=None, fiware_servicepath='/'):
         """
