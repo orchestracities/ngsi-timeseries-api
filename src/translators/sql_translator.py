@@ -1596,7 +1596,6 @@ class SQLTranslator(base_translator.BaseTranslator):
             self.sql_error_handler(e)
             self.logger.error(str(e), exc_info=True)
 
-
     def query_entity_types(self, fiware_service=None, fiware_servicepath='/'):
         """
         Find the types of for a given fiware_service and fiware_servicepath.
