@@ -9,7 +9,6 @@ from wq.core import TaskInfo, TaskStatus, QMan, \
 import wq.core.cfg as cfg
 from wq.ql.flaskutils import build_json_array_response_stream
 import logging
-import server
 
 
 def log():
@@ -93,7 +92,7 @@ class InsertAction(Tasklet):
         svc = data.fiware_service
         svc_path = data.fiware_service_path
         tenant = data.ngsild_tenant
-        if server.LD:
+        if tenant:
             try:
                 with translator_for(tenant) as trans:
                     trans.insert(data.payload, tenant)
@@ -107,14 +106,11 @@ class InsertAction(Tasklet):
                 self._handle_exception(svc, e)
 
     @staticmethod
-    def _handle_exception(fiware_service: str, ngsild_tenant: str, e: Exception):
+    def _handle_exception(fiware_service: str, e: Exception):
         if not cfg.offload_to_work_queue():
             raise e
 
-        if server.LD:
-            analyzer = error_analyser_for(ngsild_tenant, e)
-        else:
-            analyzer = error_analyser_for(fiware_service, e)
+        analyzer = error_analyser_for(fiware_service, e)
         if analyzer.can_retry_insert():
             raise e
         raise StopTask() from e
