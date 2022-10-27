@@ -5,7 +5,7 @@ def fiware_s() -> str:
     """
     :return: The content of the FIWARE service header if any.
     """
-    return request.headers.get('fiware-service', None)
+    return request.headers.get('ngsild-tenant', None) or request.headers.get('fiware-service', None)
 
 
 def fiware_sp() -> str:
@@ -20,13 +20,6 @@ def fiware_correlator() -> str:
     :return: The content of the FIWARE correlator path header if any.
     """
     return request.headers.get('Fiware-Correlator', None)
-
-
-def ngsild_tenant() -> str:
-    """
-    :return: The content of the NGSILD tenant header if any.
-    """
-    return request.headers.get('ngsild-tenant', None)
 
 
 def is_root_service_path() -> bool:

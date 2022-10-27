@@ -41,7 +41,7 @@ from reporter.timex import select_time_index_value_as_iso, \
 from geocoding.location import normalize_location, LOCATION_ATTR_NAME
 from exceptions.exceptions import NGSIUsageError, InvalidParameterValue, InvalidHeaderValue
 from wq.ql.notify import InsertAction
-from reporter.httputil import fiware_correlator, fiware_s, fiware_sp, ngsild_tenant
+from reporter.httputil import fiware_correlator, fiware_s, fiware_sp
 
 
 def log():
@@ -189,7 +189,7 @@ def notify():
             res_entity.append(e_new)
     payload = res_entity
     try:
-        InsertAction(fiware_s(), fiware_sp(), fiware_correlator(), ngsild_tenant(), payload) \
+        InsertAction(fiware_s(), fiware_sp(), fiware_correlator(), payload) \
             .enqueue()
     except Exception as e:
         msg = "Notification not processed or not updated: {}".format(e)

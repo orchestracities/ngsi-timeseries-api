@@ -21,13 +21,11 @@ class FiwareTaskId(CompositeTaskId):
     def __init__(self,
                  fiware_service: Optional[str],
                  fiware_service_path: Optional[str],
-                 fiware_correlation_id: Optional[str],
-                 ngsild_tenant: Optional[str]):
+                 fiware_correlation_id: Optional[str]):
         super().__init__(
             fiware_service or '',
             fiware_service_path or '',
-            fiware_correlation_id or '',
-            ngsild_tenant or ''
+            fiware_correlation_id or ''
         )
 
     def fiware_tags_repr(self) -> str:
@@ -41,7 +39,6 @@ class InsertActionInput(BaseModel):
     fiware_service: Optional[str]
     fiware_service_path: Optional[str]
     fiware_correlator: Optional[str]
-    ngsild_tenant: Optional[str]
     payload: List[dict]
 
 
@@ -61,16 +58,14 @@ class InsertAction(Tasklet):
                  fiware_service: Optional[str],
                  fiware_service_path: Optional[str],
                  fiware_correlation_id: Optional[str],
-                 ngsild_tenant: Optional[str],
                  payload: [dict],
                  retry_intervals: [int] = None):
         self._id = FiwareTaskId(fiware_service, fiware_service_path,
-                                fiware_correlation_id, ngsild_tenant)
+                                fiware_correlation_id)
         self._input = InsertActionInput(
             fiware_service=fiware_service,
             fiware_service_path=fiware_service_path,
             fiware_correlator=fiware_correlation_id,
-            ngsild_tenant=ngsild_tenant,
             payload=payload
         )
         self._retry_int = retry_intervals
@@ -91,19 +86,11 @@ class InsertAction(Tasklet):
         data = self.task_input()
         svc = data.fiware_service
         svc_path = data.fiware_service_path
-        tenant = data.ngsild_tenant
-        if tenant:
-            try:
-                with translator_for(tenant) as trans:
-                    trans.insert(data.payload, tenant)
-            except Exception as e:
-                self._handle_exception(tenant, e)
-        else:
-            try:
-                with translator_for(svc) as trans:
-                    trans.insert(data.payload, svc, svc_path)
-            except Exception as e:
-                self._handle_exception(svc, e)
+        try:
+            with translator_for(svc) as trans:
+                trans.insert(data.payload, svc, svc_path)
+        except Exception as e:
+            self._handle_exception(svc, e)
 
     @staticmethod
     def _handle_exception(fiware_service: str, e: Exception):
@@ -117,14 +104,14 @@ class InsertAction(Tasklet):
 
 
 def build_task_id_init_segment():
-    fid = FiwareTaskId(fiware_s(), fiware_sp(), fiware_correlator(), ngsild_tenant())
+    fid = FiwareTaskId(fiware_s(), fiware_sp(), fiware_correlator())
     if fiware_correlator():
         return fid.fiware_tags_repr()
     return fid.fiware_svc_and_svc_path_repr()
 
 
 def has_fiware_headers() -> bool:
-    hs = [fiware_s(), fiware_sp(), fiware_correlator(), ngsild_tenant()]
+    hs = [fiware_s(), fiware_sp(), fiware_correlator()]
     ks = [h for h in hs if h]
     return len(ks) > 0
 
