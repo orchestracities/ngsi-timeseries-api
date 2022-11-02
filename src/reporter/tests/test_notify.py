@@ -35,14 +35,24 @@ def notify_header(service=None, service_path=None):
     return headers(service, service_path, True)
 
 
+def notify_ld_header(ngsild=None, service=None, service_path=None):
+    return headers(service, service_path, True, ngsild)
+
+
 def query_header(service=None, service_path=None):
     return headers(service, service_path, False)
 
 
-def headers(service=None, service_path=None, content_type=True):
+def query_ld_header(ngsild=None, service=None, service_path=None):
+    return headers(service, service_path, False, ngsild)
+
+
+def headers(service=None, service_path=None, content_type=True, ngsild=None):
     h = {}
     if content_type:
         h['Content-Type'] = 'application/json'
+    if ngsild:
+        h['NGSILD-Tenant'] = ngsild
     if service:
         h['Fiware-Service'] = service
     if service_path:
@@ -763,6 +773,79 @@ def test_json_ld(service, notification):
     assert res_get.status_code == 200
     assert res_get.json()['values'][0] == 10
     delete_entity_type(service, notification['data'][0]['type'])
+
+
+@pytest.mark.parametrize("service", services)
+def test_ngsi_ld(ngsild, notification):
+    # example json-ld entity
+    notification['data'][0] = {
+        "id": "urn:ngsi-ld:Streetlight:streetlight:guadalajara:4567",
+        "type": "Streetlight",
+        "location": {
+            "type": "GeoProperty",
+            "value": {
+                "type": "Point",
+                "coordinates": [-3.164485591715449, 40.62785133667262]
+            }
+        },
+        "areaServed": {
+            "type": "Property",
+            "value": "Roundabouts city entrance"
+        },
+        "status": {
+            "type": "Property",
+            "value": "ok"
+        },
+        "refStreetlightGroup": {
+            "type": "Relationship",
+            "object": "urn:ngsi-ld:StreetlightGroup:streetlightgroup:G345"
+        },
+        "refStreetlightModel": {
+            "type": "Relationship",
+            "object": "urn:ngsi-ld:StreetlightModel:streetlightmodel:STEEL_Tubular_10m"
+        },
+        "circuit": {
+            "type": "Property",
+            "value": "C-456-A467"
+        },
+        "lanternHeight": {
+            "type": "Property",
+            "value": 10
+        },
+        "locationCategory": {
+            "type": "Property",
+            "value": "centralIsland"
+        },
+        "powerState": {
+            "type": "Property",
+            "value": "off"
+        },
+        "controllingMethod": {
+            "type": "Property",
+            "value": "individual"
+        },
+        "dateLastLampChange": {
+            "type": "Property",
+            "value": {
+                "@type": "DateTime",
+                "@value": "2016-07-08T08:02:21.753Z"
+            }
+        },
+        "@context": [
+            "https://schema.lab.fiware.org/ld/context",
+            "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+        ]
+    }
+    url = '{}'.format(notify_url)
+    get_url = "{}/entities/urn:ngsi-ld:Streetlight:streetlight:guadalajara:4567/attrs/lanternHeight/value".format(
+        QL_URL)
+    url_new = '{}'.format(get_url)
+    insert_data(notification, notify_ld_header(ngsild), ngsild)
+
+    res_get = requests.get(url_new, headers=query_ld_header(ngsild))
+    assert res_get.status_code == 200
+    assert res_get.json()['values'][0] == 10
+    delete_entity_type(ngsild, notification['data'][0]['type'])
 
 
 @pytest.mark.parametrize("service", services)
