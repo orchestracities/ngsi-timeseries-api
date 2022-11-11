@@ -35,24 +35,14 @@ def notify_header(service=None, service_path=None):
     return headers(service, service_path, True)
 
 
-def notify_ld_header(ngsild=None, service=None, service_path=None):
-    return headers(service, service_path, True, ngsild)
-
-
 def query_header(service=None, service_path=None):
     return headers(service, service_path, False)
 
 
-def query_ld_header(ngsild=None, service=None, service_path=None):
-    return headers(service, service_path, False, ngsild)
-
-
-def headers(service=None, service_path=None, content_type=True, ngsild=None):
+def headers(service=None, service_path=None, content_type=True):
     h = {}
     if content_type:
         h['Content-Type'] = 'application/json'
-    if ngsild:
-        h['NGSILD-Tenant'] = ngsild
     if service:
         h['Fiware-Service'] = service
     if service_path:
