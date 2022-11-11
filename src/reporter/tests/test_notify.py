@@ -779,7 +779,7 @@ def test_json_ld(service, notification):
 def test_ngsi_ld(service, notification):
     # example json-ld entity
     notification['data'][0] = {
-        "id": "urn:ngsi-ld:Streetlight:streetlight:guadalajara:4567",
+        "id": "urn:ngsi-ld:Streetlight:streetlight:guadalajara:4568",
         "type": "Streetlight",
         "location": {
             "type": "GeoProperty",
@@ -795,6 +795,14 @@ def test_ngsi_ld(service, notification):
         "status": {
             "type": "Property",
             "value": "ok"
+        },
+        "refStreetlightGroup": {
+            "type": "Relationship",
+            "object": "urn:ngsi-ld:StreetlightGroup:streetlightgroup:G345"
+        },
+        "refStreetlightModel": {
+            "type": "Relationship",
+            "object": "urn:ngsi-ld:StreetlightModel:streetlightmodel:STEEL_Tubular_10m"
         },
         "circuit": {
             "type": "Property",
@@ -829,7 +837,7 @@ def test_ngsi_ld(service, notification):
         ]
     }
     url = '{}'.format(notify_url)
-    get_url = "{}/entities/urn:ngsi-ld:Streetlight:streetlight:guadalajara:4567/attrs/lanternHeight/value".format(
+    get_url = "{}/entities/urn:ngsi-ld:Streetlight:streetlight:guadalajara:4568/attrs/lanternHeight/value".format(
         QL_URL)
     url_new = '{}'.format(get_url)
     insert_data(notification, notify_ld_header(service), service)
