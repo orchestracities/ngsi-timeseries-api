@@ -796,14 +796,6 @@ def test_ngsi_ld(service, notification):
             "type": "Property",
             "value": "ok"
         },
-        "refStreetlightGroup": {
-            "type": "Relationship",
-            "object": "urn:ngsi-ld:StreetlightGroup:streetlightgroup:G345"
-        },
-        "refStreetlightModel": {
-            "type": "Relationship",
-            "object": "urn:ngsi-ld:StreetlightModel:streetlightmodel:STEEL_Tubular_10m"
-        },
         "circuit": {
             "type": "Property",
             "value": "C-456-A467"
