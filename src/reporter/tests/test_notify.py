@@ -786,7 +786,7 @@ def test_json_ld(service, notification):
 
 
 @pytest.mark.parametrize("service", services)
-def test_json_ld(service, notification):
+def test_ngsi_ld(service, notification):
     # example json-ld entity
     notification['data'][0] = {
         "id": "urn:ngsi-ld:Streetlight:streetlight:guadalajara:4568",
@@ -850,9 +850,9 @@ def test_json_ld(service, notification):
     get_url = "{}/entities/urn:ngsi-ld:Streetlight:streetlight:guadalajara:4568/attrs/lanternHeight/value".format(
         QL_URL)
     url_new = '{}'.format(get_url)
-    insert_data(notification, notify_ld_header(service), service)
+    insert_data(notification, notify_header(service), service)
 
-    res_get = requests.get(url_new, headers=query_ld_header(service))
+    res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 200
     assert res_get.json()['values'][0] == 10
     delete_entity_type(service, notification['data'][0]['type'])
