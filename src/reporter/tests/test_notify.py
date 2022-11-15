@@ -850,7 +850,7 @@ def test_ngsi_ld(service, notification):
     get_url = "{}/entities/urn:ngsi-ld:Streetlight:streetlight:guadalajara:4568/attrs/lanternHeight/value".format(
         QL_URL)
     url_new = '{}'.format(get_url)
-    insert_data(notification, notify_header(service), service)
+    insert_data(notification, notify_ld_header(service), service)
 
     res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 200
