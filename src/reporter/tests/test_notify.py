@@ -43,10 +43,6 @@ def query_header(service=None, service_path=None):
     return headers(service, service_path, False)
 
 
-def query_ld_header(service=None, service_path=None):
-    return ld_headers(service, service_path, False)
-
-
 def headers(service=None, service_path=None, content_type=True):
     h = {}
     if content_type:
