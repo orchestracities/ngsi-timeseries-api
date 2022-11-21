@@ -362,15 +362,12 @@ class SQLTranslator(base_translator.BaseTranslator):
         stmt = f"insert into {table_name} ({col_list}) values ({placeholders})"
         try:
             start_time = datetime.now()
+            res_list = []
 
             for batch in to_insert_batches(rows):
                 res = self.cursor.executemany(stmt, batch)
-                # new version of crate does not bomb anymore when
-                # something goes wrong in multi entries
-                # simply it returns -2 for each row that have an issue
-                # TODO: improve error handling.
-                # using batches, we don't need to fail the whole set
-                # but only failing batches.
+                res_list.append(res)
+            for res in res_list:
                 if isinstance(res, list):
                     for i in range(len(res)):
                         if res[i]['rowcount'] < 0:
