@@ -1,0 +1,30 @@
+diff --git a/timescale-container/crate-exporter.py b/timescale-container/crate-exporter.py
+index cabe093..2bba653 100644
+--- a/timescale-container/crate-exporter.py
++++ b/timescale-container/crate-exporter.py
+@@ -69,21 +69,13 @@ class CrateSql:
+ 
+     @staticmethod
+     def to_string(x) -> str:
+-        """
+-        Convert the input into a Crate string.
+-        E.g. input   ~~~> 'input'
+-        """
+-        v = str(x)  # TODO consider escaping?
+-        return f"'{v}'"
++
++        return f"'{x}'"
+ 
+     @staticmethod
+     def to_quoted_identifier(x) -> str:
+-        """
+-        Convert the input into a Crate quoted identifier.
+-        E.g. input   ~~~> "input"
+-        """
+-        v = str(x)  # TODO consider escaping?
+-        return f'"{v}"'
++
++        return f'"{x}"'
+ 
+ 
+ class CrateTableIdentifier:

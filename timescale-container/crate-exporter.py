@@ -69,21 +69,13 @@ class CrateSql:
 
     @staticmethod
     def to_string(x) -> str:
-        """
-        Convert the input into a Crate string.
-        E.g. input   ~~~> 'input'
-        """
-        v = str(x)  # TODO consider escaping?
-        return f"'{v}'"
+
+        return f"'{x}'"
 
     @staticmethod
     def to_quoted_identifier(x) -> str:
-        """
-        Convert the input into a Crate quoted identifier.
-        E.g. input   ~~~> "input"
-        """
-        v = str(x)  # TODO consider escaping?
-        return f'"{v}"'
+
+        return f'"{x}"'
 
 
 class CrateTableIdentifier:
