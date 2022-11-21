@@ -367,7 +367,6 @@ class SQLTranslator(base_translator.BaseTranslator):
             for batch in to_insert_batches(rows):
                 res = self.cursor.executemany(stmt, batch)
                 res_list.append(res)
-        
             for res in res_list:
                 if isinstance(res, list):
                     for i in range(len(res)):
