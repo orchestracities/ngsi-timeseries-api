@@ -5,7 +5,7 @@ from typing import Iterable
 
 from flask import Response
 from pydantic import BaseModel
-import logging
+
 
 def json_array_streamer(xs: Iterable[BaseModel]) -> Iterable[str]:
     yield '[\n'
