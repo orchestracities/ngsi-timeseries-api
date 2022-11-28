@@ -12,10 +12,7 @@ def json_array_streamer(xs: Iterable[BaseModel]) -> Iterable[str]:
     for x in xs:
         json_repr = x.json()
         yield json_repr + ',\n'
-    yield 'null\n]'
-# TODO how to get rid of the null terminator in an efficient and **simple**
-# way? I could use the same put-back approach as in itersplit but I'd rather
-# keep it simple.
+    yield '\n]'
 
 
 def build_json_array_response_stream(xs: Iterable[BaseModel]) -> Response:
