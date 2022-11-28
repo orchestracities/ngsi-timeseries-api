@@ -9,8 +9,10 @@ from pydantic import BaseModel
 
 def json_array_streamer(xs: Iterable[BaseModel]) -> Iterable[str]:
     yield '[\n'
+    print(xs,"===============")
     for x in xs:
         json_repr = x.json()
+        print(json_repr,"----")
         yield json_repr + ',\n'
     yield 'null\n]'
 # TODO how to get rid of the null terminator in an efficient and **simple**
