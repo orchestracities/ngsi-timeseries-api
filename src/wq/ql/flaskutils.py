@@ -9,16 +9,10 @@ import logging
 
 def json_array_streamer(xs: Iterable[BaseModel]) -> Iterable[str]:
     yield '[\n'
-    print(xs,"===============")
-    import pdb
-    pdb.set_trace()
-    logging.info("===============00xs",xs)
-    print("all ok--")
     for x in xs:
         json_repr = x.json()
-        print(json_repr,"----")
         yield json_repr + ',\n'
-    yield 'null\n]'
+    yield '\n]'
 # TODO how to get rid of the null terminator in an efficient and **simple**
 # way? I could use the same put-back approach as in itersplit but I'd rather
 # keep it simple.
