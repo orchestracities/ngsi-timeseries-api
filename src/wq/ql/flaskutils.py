@@ -5,13 +5,14 @@ from typing import Iterable
 
 from flask import Response
 from pydantic import BaseModel
-
+import logging
 
 def json_array_streamer(xs: Iterable[BaseModel]) -> Iterable[str]:
     yield '[\n'
     print(xs,"===============")
     import pdb
     pdb.set_trace()
+    logging.info("===============xs",xs)
     for x in xs:
         json_repr = x.json()
         print(json_repr,"----")
