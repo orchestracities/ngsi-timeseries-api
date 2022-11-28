@@ -12,7 +12,8 @@ def json_array_streamer(xs: Iterable[BaseModel]) -> Iterable[str]:
     print(xs,"===============")
     import pdb
     pdb.set_trace()
-    logging.info("===============xs",xs)
+    logging.info("===============00xs",xs)
+    print("all ok--")
     for x in xs:
         json_repr = x.json()
         print(json_repr,"----")
