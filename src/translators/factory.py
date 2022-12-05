@@ -15,6 +15,7 @@ QL_CONFIG_ENV_VAR = 'QL_CONFIG'
 
 QL_DEFAULT_DB_ENV_VAR = 'QL_DEFAULT_DB'
 
+#QL_SECONDARY_DB_ENV_VAR = 'QL_SECONDARY_DB'
 
 def log():
     return logging.getLogger(__name__)
@@ -42,6 +43,19 @@ def default_backend() -> MaybeString:
     env_backend = env_reader.read(StrVar(QL_DEFAULT_DB_ENV_VAR, None))
 
     return env_backend or config_backend or CRATE_BACKEND
+
+
+def secondary_backend() -> MaybeString:
+    cfg_reader = YamlReader(log=log().debug)
+    env_reader = EnvReader(log=log().debug)
+
+    config = cfg_reader.from_env_file(QL_CONFIG_ENV_VAR, defaults={})
+
+    config_backend = maybe_string_match(config, 'secondary-backend')
+
+    env_backend = env_reader.read(StrVar(QL_DEFAULT_DB_ENV_VAR, None))
+
+    return env_backend or config_backend or TIMESCALE_BACKEND
 
 
 def backend_id_for(fiware_service: str) -> str:
