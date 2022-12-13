@@ -15,7 +15,8 @@ QL_CONFIG_ENV_VAR = 'QL_CONFIG'
 
 QL_DEFAULT_DB_ENV_VAR = 'QL_DEFAULT_DB'
 
-#QL_SECONDARY_DB_ENV_VAR = 'QL_SECONDARY_DB'
+QL_SECONDARY_DB_ENV_VAR = 'QL_SECONDARY_DB'
+
 
 def log():
     return logging.getLogger(__name__)
