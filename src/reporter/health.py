@@ -88,7 +88,7 @@ def get_health(with_geocoder=False):
     # Check defaultDB (critical)
     db = default_backend().lower()
     db2 = secondary_backend().lower()
-    if db2 == None:
+    if db2 is None:
         res = _check_critical(check_db(db2), res, db2)
     else:
         res = _check_not_critical(check_db(db2), res, db2)
@@ -98,7 +98,6 @@ def get_health(with_geocoder=False):
     except Exception:
         res['status'] = 'fail'
         res.setdefault('details', {})[db] = 'cannot reach ' + db
-
 
     # Check cache (not critical)
     res = _check_not_critical(check_cache(), res, 'redis')
