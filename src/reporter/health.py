@@ -2,7 +2,7 @@ from geocoding import geocoding
 from geocoding.factory import get_geo_cache, is_geo_coding_available
 from cache.factory import get_cache, is_cache_available
 from translators.factory import CRATE_BACKEND, TIMESCALE_BACKEND, \
-    default_backend
+    default_backend, secondary_backend
 
 
 def check_db(db=CRATE_BACKEND):
@@ -16,6 +16,11 @@ def check_db(db=CRATE_BACKEND):
             health = trans.get_health()
             return health
     if db == TIMESCALE_BACKEND:
+        from translators.timescale import postgres_translator_instance
+        with postgres_translator_instance() as trans:
+            health = trans.get_health()
+            return health
+    if db2 == TIMESCALE_BACKEND:
         from translators.timescale import postgres_translator_instance
         with postgres_translator_instance() as trans:
             health = trans.get_health()
@@ -82,13 +87,17 @@ def get_health(with_geocoder=False):
 
     # Check defaultDB (critical)
     db = default_backend().lower()
+    db2 = secondary_backend().lower()
+    if db2 is None:
+        res = _check_critical(check_db(db2), res, db2)
+    else:
+        res = _check_not_critical(check_db(db2), res, db2)
     try:
         res = _check_critical(check_db(db), res, db)
+
     except Exception:
         res['status'] = 'fail'
         res.setdefault('details', {})[db] = 'cannot reach ' + db
-
-    # TODO add not critical check if a secondary db is configured
 
     # Check cache (not critical)
     res = _check_not_critical(check_cache(), res, 'redis')
