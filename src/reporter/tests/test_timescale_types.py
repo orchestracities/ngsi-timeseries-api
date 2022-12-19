@@ -109,40 +109,12 @@ def gen_entity(entity_id: int,
 # Similar to gen_entity in test_timescale_insert module in translators.tests.
 
 
-def entity_name_value_pairs(entity: dict) -> dict:
-    """
-    Transform an NGSI entity ``e`` into the format::
+def entity_query_result_name_value_pairs(data: dict) -> dict:
 
-        {
-            entityId: e[id]
-            attr1: [ e[attr1][value] ]
-            ...
-            attrN: [ e[attrN][value] ]
-        }
-    """
-    eid = {'entityId': entity['id']}
+    eid = {'entityId': maybe_value(data, 'entityId')}
 
-    attr_names = {k for k in entity.keys()} - {'id', 'type'}
-    attrs = {k: [maybe_value(entity, k, 'value')] for k in attr_names}
-
-    return merge_dicts(eid, attrs)
-
-# TODO: factor out?
-# This function and the one below could come in handy when testing a number
-# of scenarios where we first insert entities and then query them by ID.
-
-
-def query_result_name_value_pairs(result: dict) -> dict:
-    """
-    Extract the result set returned by the ``/v2/entities/{entityId}`` endpoint
-    using the same format as that of ``entity_name_value_pairs``.
-    """
-    eid = {'entityId': maybe_value(result, 'entityId')}
-
-    attrs_array = maybe_value(result, 'attributes')
-    attrs_array = attrs_array if attrs_array else []
-    attrs = {maybe_value(a, 'attrName'): maybe_value(a, 'values')
-             for a in attrs_array}
+    attr_names = {k for k in data.keys()} - {'id', 'type'}
+    attrs = {k: [maybe_value(data, k, 'value')] for k in attr_names}
 
     return merge_dicts(eid, attrs)
 
@@ -189,8 +161,8 @@ def test_entity_with_all_supported_types():
 
     result_set = query_entity_by_id(e['id'], service)
 
-    actual = query_result_name_value_pairs(result_set)
-    expected = entity_name_value_pairs(e)
+    actual = entity_query_result_name_value_pairs(result_set)
+    expected = entity_query_result_name_value_pairs(e)
     assert actual == expected
 
 # TODO: probabilistic testing.
