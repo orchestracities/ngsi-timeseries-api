@@ -24,6 +24,8 @@
 - Replaced entity with getter (#652)
 - Resolved TODO in Dockerfile (#680)
 - Resolved TODO at src/reporter/tests/test_timescale_types.py (#667)
+- Resolved TODO at src/wq/ql/flask_utils.py (#707)
+- factor out in src/reporter/tests/test_timescale_types.py (#710)
 
 ### Bug fixes
 
