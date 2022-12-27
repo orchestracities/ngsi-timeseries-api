@@ -1105,7 +1105,8 @@ class SQLTranslator(base_translator.BaseTranslator):
 
         limit = self._get_limit(limit, last_n)
         offset = max(0, offset)
-
+        
+        import crate
         for tn in sorted(table_names):
             op = "select {select_clause} " \
                  "from {tn} " \
@@ -1122,10 +1123,14 @@ class SQLTranslator(base_translator.BaseTranslator):
             try:
                 self.cursor.execute(op)
 
+            except crate.client.exceptions.ProgrammingError as e:
+                err_msg = self.sql_error_handler(e)
+                self.logger.error(str(e),exc_info=True)
+                entities = []
+                if err_msg:
+                    message = err_msg
+
             except Exception as e:
-                # TODO due to this except in case of sql errors,
-                # all goes fine, and users gets 404 as result
-                # Reason 1: fiware_service_path column in legacy dbs.
                 err_msg = self.sql_error_handler(e)
                 self.logger.error(str(e), exc_info=True)
                 entities = []
