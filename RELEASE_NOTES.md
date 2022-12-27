@@ -25,6 +25,7 @@
 - Resolved TODO in Dockerfile (#680)
 - Resolved TODO at src/reporter/tests/test_timescale_types.py (#667)
 - Resolved TODO at src/wq/ql/flask_utils.py (#707)
+- Resolved TODO in sql_translator.py   (#714)
 
 ### Bug fixes
 
