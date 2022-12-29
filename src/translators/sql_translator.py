@@ -12,6 +12,7 @@ from geocoding.slf import SlfQuery
 import dateutil.parser
 from typing import Any, List, Optional, Sequence
 from uuid import uuid4
+import crate
 
 from cache.factory import get_cache, is_cache_available
 from translators.insert_splitter import to_insert_batches
@@ -1122,10 +1123,14 @@ class SQLTranslator(base_translator.BaseTranslator):
             try:
                 self.cursor.execute(op)
 
+            except crate.client.exceptions.ProgrammingError as e:
+                err_msg = self.sql_error_handler(e)
+                self.logger.error(str(e),exc_info=True)
+                entities = []
+                if err_msg:
+                    message = err_msg
+
             except Exception as e:
-                # TODO due to this except in case of sql errors,
-                # all goes fine, and users gets 404 as result
-                # Reason 1: fiware_service_path column in legacy dbs.
                 err_msg = self.sql_error_handler(e)
                 self.logger.error(str(e), exc_info=True)
                 entities = []
