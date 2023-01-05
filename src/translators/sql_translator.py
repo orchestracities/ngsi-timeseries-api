@@ -137,7 +137,6 @@ class SQLTranslator(base_translator.BaseTranslator):
     def sql_error_handler(self, exception):
         raise NotImplementedError
 
-    # TODO is this still needed?
     def _refresh(self, entity_types, fiware_service=None):
         """
         Used for testing purposes only!
