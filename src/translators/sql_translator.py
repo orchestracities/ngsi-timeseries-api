@@ -765,8 +765,6 @@ class SQLTranslator(base_translator.BaseTranslator):
                         aggr_period, self.TIME_INDEX_NAME,
                         self.TIME_INDEX_NAME)
                 )
-            # TODO:
-            # https://github.com/orchestracities/ngsi-timeseries-api/issues/106
             m = '{}("{}") as "{}"'
             attrs.extend(m.format(aggr_method, a, a) for a in set(attr_names))
 
