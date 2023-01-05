@@ -25,12 +25,15 @@
 - Resolved TODO in Dockerfile (#680)
 - Resolved TODO at src/reporter/tests/test_timescale_types.py (#667)
 - Resolved TODO at src/transaltors/sql_transaltor.py (#694)
+- Resolved TODO at src/translator/sql_translator.py (#686)
+- Resolved TODO at src/translators/sql_translator.py#L768.py (#683)
 
 ### Bug fixes
 
 - Fix issues with integration tests and backward compatibility tests
 - Fix for linter failures (#670)
 - Fix for issue broken docker image (#674)
+- Fix for broken link in README.md (#688)
 
 ### Continuous Integration
 
