@@ -236,6 +236,11 @@ def has_entities(entity_type: str, service: Optional[str],
         if "does not exist" in str(e):
             logger.error(e)
         return False
+    # Most likely the table is not there. Example exceptions:
+    # - pg8000.exceptions.ProgrammingError:
+    #    {'C': '42P01', 'M': 'relation mtt2.et... does not exist', ...}
+    # - crate.client.exceptions.ProgrammingError:
+    #     RelationUnknown[Relation 'mtt1.et... unknown...']
 
 
 def count_entities(entity_type: str, service: Optional[str],
