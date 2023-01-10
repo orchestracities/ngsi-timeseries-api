@@ -136,7 +136,7 @@ def list_insert_tasks(task_status: Optional[str] = None):
         log().info("Retrieved notification tasks to the work queue successfully")
         return build_json_array_response_stream(response_payload)
     except Exception as e:
-        log().exception("list_insert_tasks failed: ", e)
+        log().exception("list_insert_tasks failed")
         raise e
 
 
@@ -147,7 +147,7 @@ def list_insert_tasks_runtime_info(task_status: Optional[str] = None):
         log().info("Retrieved summary of notification tasks to the work queue successfully")
         return build_json_array_response_stream(response_payload)
     except Exception as e:
-        log().exception("list_insert_tasks_runtime_info failed: ", e)
+        log().exception("list_insert_tasks_runtime_info failed")
         raise e
 
 
@@ -158,7 +158,7 @@ def delete_insert_tasks(task_status: Optional[str] = None):
         qman.delete_tasks(task_id_prefix)
         log().info("Deleted notifcation tasks from the work queue successfully")
     except Exception as e:
-        log().exception("delete_insert_tasks failed: ", e)
+        log().exception("delete_insert_tasks failed")
         raise e
 
 
