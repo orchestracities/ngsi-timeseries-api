@@ -5,7 +5,11 @@ def fiware_s() -> str:
     """
     :return: The content of the FIWARE service header if any.
     """
-    return request.headers.get('fiware-service', None)
+    return request.headers.get(
+        'ngsild-tenant',
+        None) or request.headers.get(
+        'fiware-service',
+        None)
 
 
 def fiware_sp() -> str:

@@ -11,7 +11,11 @@ class RequestFormatter(logging.Formatter):
         if has_request_context():
             record.corr = request.headers.get('fiware_correlator', None)
             record.remote_addr = request.remote_addr
-            record.srv = request.headers.get('fiware-service', None)
+            record.srv = request.headers.get(
+                'ngsild-tenant',
+                None) or request.headers.get(
+                'fiware-service',
+                None)
             if record.srv:
                 record.subserv = request.headers.get(
                     'fiware-servicepath', '/')

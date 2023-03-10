@@ -29,6 +29,7 @@
 - Resolved TODO at src/translators/sql_translator.py#L768.py (#683)
 - Resolved TODO at src/reporter/tests/utils.py (#692)
 - Added error handling in src/wq/ql/notify.py (#673)
+- NGSI-LD tenant header (#664, #669)
 
 ### Bug fixes
 
