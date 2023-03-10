@@ -3,13 +3,16 @@ from flask import request
 
 def fiware_s() -> str:
     """
-    :return: The content of the FIWARE service header if any.
+    Read the tenant header.
+    If the request has an `ngsild-tenant` header, return its value.
+    Otherwise if there's a `fiware-service` return that value. If
+    none of those headers are present, return `None`. Notice if both
+    headers are present, `ngsild-tenant` takes precedence.
+
+    :return: The content of the tenant header if any.
     """
-    return request.headers.get(
-        'ngsild-tenant',
-        None) or request.headers.get(
-        'fiware-service',
-        None)
+    return request.headers.get('ngsild-tenant', None) \
+        or request.headers.get('fiware-service', None)
 
 
 def fiware_sp() -> str:
