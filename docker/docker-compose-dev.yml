@@ -27,7 +27,7 @@ services:
     command: crate -Cauth.host_based.enabled=false
       -Ccluster.name=democluster -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*"
     environment:
-      LOG4J_FORMAT_MSG_NO_LOOKUPS=true
+      - LOG4J_FORMAT_MSG_NO_LOOKUPS=true
     ports:
       # Admin UI
       - "4200:4200"
