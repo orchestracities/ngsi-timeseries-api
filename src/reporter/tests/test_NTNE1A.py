@@ -16,6 +16,8 @@ index = result_gen.time_index()
 
 services = ['t1', 't2']
 
+idPattern = "R"
+
 
 def ix_intervals():
     bs = list(range(0, result_gen.time_index_size)) + [None]
@@ -82,6 +84,40 @@ def test_NTNE1A_type(service, reporter_dataset):
     h = {'Fiware-Service': service}
     response = requests.get(query_url(), params=query_params, headers=h)
     assert_entities(response, [entity_id_1, entity_id_2])
+
+
+@pytest.mark.parametrize("service", services)
+def test_NTNE1A_type(service, reporter_dataset):
+    query_params = {
+        'type': result_gen.entity_type()
+    }
+    h = {'Fiware-Service': service}
+    response = requests.get(query_url(), params=query_params, headers=h)
+    assert_entities(response, [entity_id_1, entity_id_2])
+
+
+@pytest.mark.parametrize("service", services)
+def test_NTNE1A_idPattern(service, reporter_dataset):
+    query_params = {
+        'idPattern': idPattern
+    }
+    h = {'Fiware-Service': service}
+    response = requests.get(query_url(), params=query_params, headers=h)
+    assert_entities(response, [entity_id_1, entity_id_2])
+
+
+@pytest.mark.parametrize("service", services)
+def idPattern_not_found(service, reporter_dataset):
+    query_params = {
+        'idPattern': 'RoomNotValid'
+    }
+    h = {'Fiware-Service': service}
+    r = requests.get(query_url(), params=query_params, headers=h)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "Not Found",
+        "description": "No records were found for such query."
+    }
 
 
 @pytest.mark.parametrize("service", services)

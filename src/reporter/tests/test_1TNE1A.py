@@ -11,6 +11,7 @@ entity_type = 'Room'
 attr_name = 'temperature'
 n_days = 6
 services = ['t1', 't2']
+idPattern = 'R'
 
 
 def query_url(values=False, etype=entity_type):
@@ -98,6 +99,64 @@ def test_1TNE1A_defaults(service, reporter_dataset):
 
     obtained = r.json()
     assert_1TNE1A_response(obtained, expected)
+
+
+@pytest.mark.parametrize("service", services)
+def test_1TNE1A_idPattern(service, reporter_dataset):
+    query_params = {
+        'idPattern': idPattern,
+    }
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
+    assert r.status_code == 200, r.text
+
+    # Assert Results
+    expected_values = list(range(n_days))
+    expected_index = [
+        '1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in expected_values
+    ]
+    expected_entities = [
+        {
+            'entityId': 'Room0',
+            'index': expected_index,
+            'values': expected_values,
+        },
+        {
+            'entityId': 'Room1',
+            'index': expected_index,
+            'values': expected_values,
+        },
+        {
+            'entityId': 'Room2',
+            'index': expected_index,
+            'values': expected_values,
+        }
+    ]
+    expected = {
+        'entityType': entity_type,
+        'attrName': attr_name,
+        'entities': expected_entities
+    }
+
+    obtained = r.json()
+    assert_1TNE1A_response(obtained, expected)
+
+
+@pytest.mark.parametrize("service", services)
+def idPattern_not_found(service):
+    query_params = {
+        'idPattern': 'nothingThere',
+    }
+
+    h = {'Fiware-Service': service}
+
+    r = requests.get(query_url(), params=query_params, headers=h)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "Not Found",
+        "description": "No records were found for such query."
+    }
 
 
 @pytest.mark.parametrize("service", services)

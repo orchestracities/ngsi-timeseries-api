@@ -1,5 +1,5 @@
 from exceptions.exceptions import AmbiguousNGSIIdError
-from .httputil import fiware_s, fiware_sp
+from .httputil import fiware_s, fiware_sp, is_root_service_path
 from translators.factory import translator_for
 import logging
 
@@ -34,17 +34,15 @@ def delete_entity(entity_id, type_=None, from_date=None, to_date=None):
 def delete_entities(entity_type, from_date=None, to_date=None,
                     drop_table=False):
     with translator_for(fiware_s()) as trans:
-        if drop_table and fiware_sp() is None:
-            trans.drop_table(etype=entity_type,
-                             fiware_service=fiware_s())
-            logging.getLogger(__name__).info(
-                "dropped entity_type {}".format(entity_type))
-            return 'entity table dropped', 204
-        elif drop_table:
-            e = fiware_sp().split(",")
-            if e is not None and len(e) > 0:
-                return "request has one or more fiware service paths," \
-                       "dropTable requires no service path", 422
+        if drop_table:
+            if is_root_service_path():
+                trans.drop_table(etype=entity_type,
+                                 fiware_service=fiware_s())
+                logging.getLogger(__name__).info(
+                    "dropped entity_type {}".format(entity_type))
+                return 'entity table dropped', 204
+            else:
+                return "dropTable requires the root fiware-servicepath: '/'", 422
 
         deleted = trans.delete_entities(etype=entity_type,
                                         from_date=from_date,

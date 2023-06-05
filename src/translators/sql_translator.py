@@ -41,7 +41,6 @@ VALID_AGGR_PERIODS = ['year', 'month', 'day', 'hour', 'minute', 'second']
 # in the notification when its corresponding DB row can't be inserted.
 ORIGINAL_ENTITY_COL = '__original_ngsi_entity__'
 # The name of the entity ID and type columns.
-# TODO: replace each occurrence of these strings with the below constants.
 ENTITY_ID_COL = 'entity_id'
 ENTITY_TYPE_COL = 'entity_type'
 
@@ -73,8 +72,6 @@ def current_timex() -> str:
     """
     return datetime.utcnow().isoformat(timespec='milliseconds')
 
-
-# TODO: use below getters everywhere rather than entity id and type strings!
 
 def entity_id(entity: dict) -> Optional[str]:
     """
@@ -140,7 +137,6 @@ class SQLTranslator(base_translator.BaseTranslator):
     def sql_error_handler(self, exception):
         raise NotImplementedError
 
-    # TODO is this still needed?
     def _refresh(self, entity_types, fiware_service=None):
         """
         Used for testing purposes only!
@@ -203,7 +199,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         # Implement when that becomes a real problem.
         return "{}".format(entity_attr.lower())
 
-    def insert(self, entities, fiware_service=None, fiware_servicepath=None):
+    def insert(self, entities, fiware_service=None, fiware_servicepath='/'):
         if not isinstance(entities, list):
             msg = "Entities expected to be of type list, but got {}"
             raise TypeError(msg.format(type(entities)))
@@ -217,7 +213,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         if len(service_paths) == 1:
             entities_by_type = {}
             for e in entities:
-                entities_by_type.setdefault(e['type'], []).append(e)
+                entities_by_type.setdefault(entity_type(e), []).append(e)
 
             res = None
             for et in entities_by_type.keys():
@@ -234,7 +230,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             for path in entities_by_service_path.keys():
                 entities_by_type = {}
                 for e in entities_by_service_path[path]:
-                    entities_by_type.setdefault(e['type'], []).append(e)
+                    entities_by_type.setdefault(entity_type(e), []).append(e)
 
                 res = None
                 for et in entities_by_type.keys():
@@ -251,35 +247,34 @@ class SQLTranslator(base_translator.BaseTranslator):
         return res
 
     def _insert_entities_of_type(self,
-                                 entity_type,
+                                 entityType,
                                  entities,
                                  fiware_service=None,
-                                 fiware_servicepath=None):
+                                 fiware_servicepath='/'):
         # All entities must be of the same type and have a time index
         # Also, an entity can't have an attribute with the same name
         # as that specified by ORIGINAL_ENTITY_COL_NAME.
         for e in entities:
-            if e[NGSI_TYPE] != entity_type:
+            if entity_type(e) != entityType:
                 msg = "Entity {} is not of type {}."
-                raise ValueError(msg.format(e[NGSI_ID], entity_type))
+                raise ValueError(msg.format(entity_id(e), entity_type))
 
             if self.TIME_INDEX_NAME not in e:
-                import warnings
                 msg = "Translating entity without TIME_INDEX. " \
                       "It should have been inserted by the 'Reporter'. {}"
-                warnings.warn(msg.format(e))
+                logging.warning(msg.format(e))
                 e[self.TIME_INDEX_NAME] = current_timex()
 
             if ORIGINAL_ENTITY_COL in e:
                 raise ValueError(
-                    f"Entity {e[NGSI_ID]} has a reserved attribute name: " +
+                    f"Entity {entity_id(e)} has a reserved attribute name: " +
                     "'{ORIGINAL_ENTITY_COL_NAME}'")
 
         # Define column types
         # {column_name -> crate_column_type}
         table = {
-            'entity_id': self.NGSI_TO_SQL['Text'],
-            'entity_type': self.NGSI_TO_SQL['Text'],
+            ENTITY_ID_COL: self.NGSI_TO_SQL['Text'],
+            ENTITY_TYPE_COL: self.NGSI_TO_SQL['Text'],
             self.TIME_INDEX_NAME: self.NGSI_TO_SQL[TIME_INDEX],
             FIWARE_SERVICEPATH: self.NGSI_TO_SQL['Text'],
             ORIGINAL_ENTITY_COL: self.NGSI_TO_SQL[NGSI_STRUCTURED_VALUE],
@@ -289,13 +284,13 @@ class SQLTranslator(base_translator.BaseTranslator):
         # Preserve original attr names and types
         # {column_name -> (attr_name, attr_type)}
         original_attrs = {
-            'entity_type': (NGSI_TYPE, NGSI_TEXT),
-            'entity_id': (NGSI_ID, NGSI_TEXT),
+            ENTITY_TYPE_COL: (NGSI_TYPE, NGSI_TEXT),
+            ENTITY_ID_COL: (NGSI_ID, NGSI_TEXT),
             self.TIME_INDEX_NAME: (self.TIME_INDEX_NAME, NGSI_DATETIME),
         }
 
         for e in entities:
-            entity_id = e.get('id')
+            entityId = entity_id(e)
             for attr in iter_entity_attrs(e):
                 if attr == self.TIME_INDEX_NAME:
                     continue
@@ -332,10 +327,10 @@ class SQLTranslator(base_translator.BaseTranslator):
                 col = self._ea2cn(attr)
                 original_attrs[col] = (attr, attr_t)
 
-                table[col] = self._compute_type(entity_id, attr_t, e[attr])
+                table[col] = self._compute_type(entityId, attr_t, e[attr])
 
         # Create/Update metadata table for this type
-        table_name = self._et2tn(entity_type, fiware_service)
+        table_name = self._et2tn(entityType, fiware_service)
         modified = self._update_metadata_table(table_name, original_attrs)
         # Sort out data table.
         if modified and modified == original_attrs.keys():
@@ -461,28 +456,22 @@ class SQLTranslator(base_translator.BaseTranslator):
             return True
         return False
 
-    # TODO this logic is too simple. looks like this actually only used
-    # in row 67 of reporter.py and in test_validate_notifivation (i.e
-    # most probably we can remove
     @staticmethod
     def is_text(attr_type):
-        # TODO: verify: same logic in two different places!
-        # The above kinda reproduces the tests done by the translator,
-        # we should factor this logic out and keep it in just one place!
         return attr_type == NGSI_TEXT or attr_type not in NGSI_TO_SQL
 
     def _preprocess_values(self, e, original_attrs, col_names,
                            fiware_servicepath):
         values = []
         for cn in col_names:
-            if cn == 'entity_type':
-                values.append(e['type'])
-            elif cn == 'entity_id':
-                values.append(e['id'])
+            if cn == ENTITY_TYPE_COL:
+                values.append(entity_type(e))
+            elif cn == ENTITY_ID_COL:
+                values.append(entity_id(e))
             elif cn == self.TIME_INDEX_NAME:
                 values.append(e[self.TIME_INDEX_NAME])
             elif cn == FIWARE_SERVICEPATH:
-                values.append(fiware_servicepath or '')
+                values.append(fiware_servicepath or '/')
             elif cn == 'instanceId':
                 values.append("urn:ngsi-ld:" + str(uuid4()))
             else:
@@ -767,7 +756,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         if not attr_names:
             return prefix + '*'
 
-        attrs = [prefix + 'entity_type', prefix + 'entity_id']
+        attrs = [prefix + ENTITY_TYPE_COL, prefix + ENTITY_ID_COL]
         if aggr_method:
             if aggr_period:
                 attrs.append(
@@ -775,8 +764,6 @@ class SQLTranslator(base_translator.BaseTranslator):
                         aggr_period, self.TIME_INDEX_NAME,
                         self.TIME_INDEX_NAME)
                 )
-            # TODO:
-            # https://github.com/orchestracities/ngsi-timeseries-api/issues/106
             m = '{}("{}") as "{}"'
             attrs.extend(m.format(aggr_method, a, a) for a in set(attr_names))
 
@@ -805,8 +792,15 @@ class SQLTranslator(base_translator.BaseTranslator):
                 f"last_n should be >=1 and <= {default_limit}.")
         return min(last_n, limit)
 
-    def _get_where_clause(self, entity_ids, from_date, to_date, fiware_sp=None,
-                          geo_query=None, prefix=''):
+    def _get_where_clause(
+            self,
+            entity_ids,
+            from_date,
+            to_date,
+            idPattern,
+            fiware_sp='/',
+            geo_query=None,
+            prefix=''):
         clauses = []
         where_clause = ""
 
@@ -832,6 +826,16 @@ class SQLTranslator(base_translator.BaseTranslator):
         else:
             # Match prefix of fiware service path
             clauses.append(" " + prefix + FIWARE_SERVICEPATH + " = ''")
+
+        if idPattern:
+            clauses.append(
+                " " +
+                prefix +
+                ENTITY_ID_COL +
+                " ~* '" +
+                idPattern +
+                "($|.*)'")
+
         # TODO implement prefix also for geo_clause
         geo_clause = self._get_geo_clause(geo_query)
         if geo_clause:
@@ -919,8 +923,9 @@ class SQLTranslator(base_translator.BaseTranslator):
               last_n=None,
               limit=10000,
               offset=0,
+              idPattern=None,
               fiware_service=None,
-              fiware_servicepath=None,
+              fiware_servicepath='/',
               geo_query: SlfQuery = None):
         """
         This translator method is used by all API query endpoints.
@@ -1081,6 +1086,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             where_clause = self._get_where_clause(entity_ids,
                                                   from_date,
                                                   to_date,
+                                                  idPattern,
                                                   fiware_servicepath,
                                                   geo_query)
 
@@ -1150,14 +1156,16 @@ class SQLTranslator(base_translator.BaseTranslator):
                   to_date=None,
                   limit=10000,
                   offset=0,
+                  idPattern=None,
                   fiware_service=None,
-                  fiware_servicepath=None):
+                  fiware_servicepath='/'):
         if limit == 0:
             return []
 
         where_clause = self._get_where_clause(None,
                                               from_date,
                                               to_date,
+                                              idPattern,
                                               fiware_servicepath,
                                               None)
 
@@ -1201,7 +1209,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                 entities = []
             else:
                 res = self.cursor.fetchall()
-                col_names = ['entity_id', 'entity_type', 'time_index']
+                col_names = [ENTITY_ID_COL, ENTITY_TYPE_COL, 'time_index']
                 entities = self._format_response(res,
                                                  col_names,
                                                  table_names,
@@ -1217,8 +1225,9 @@ class SQLTranslator(base_translator.BaseTranslator):
                          to_date=None,
                          limit=10000,
                          offset=0,
+                         idPattern=None,
                          fiware_service=None,
-                         fiware_servicepath=None):
+                         fiware_servicepath='/'):
         if limit == 0:
             return []
         # todo filter only selected attributes.
@@ -1249,10 +1258,11 @@ class SQLTranslator(base_translator.BaseTranslator):
                 select_clause = self._get_select_clause(lower_attr_names, None,
                                                         None, prefix=prefix)
                 where_clause_no_prefix = self._get_where_clause(
-                    entity_ids, from_date, to_date, fiware_servicepath, None)
+                    entity_ids, from_date, to_date, idPattern, fiware_servicepath, None)
                 where_clause = self._get_where_clause(entity_ids,
                                                       from_date,
                                                       to_date,
+                                                      idPattern,
                                                       fiware_servicepath,
                                                       None, prefix=prefix)
                 stmt += "select {select} " \
@@ -1308,6 +1318,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                          to_date=None,
                          limit=10000,
                          offset=0,
+                         idPattern=None,
                          fiware_service=None,
                          fiware_servicepath=None):
         if limit == 0:
@@ -1333,6 +1344,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         where_clause = self._get_where_clause(entity_ids,
                                               from_date,
                                               to_date,
+                                              idPattern,
                                               fiware_servicepath)
 
         limit = min(10000, limit)
@@ -1455,7 +1467,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                 self.logger.error(msg)
                 raise RuntimeError(msg)
             entity_attrs = entity_attrs[0]
-            idx_entity_type = col_names.index('entity_type')
+            idx_entity_type = col_names.index(ENTITY_TYPE_COL)
             if idx_entity_type < 0:
                 msg = "entity_type not available"
                 self.logger.error(msg)
@@ -1469,7 +1481,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                         # e.g. fiware-servicepath
                         continue
 
-                    e_id = r[col_names.index('entity_id')]
+                    e_id = r[col_names.index(ENTITY_ID_COL)]
                     e = entities.setdefault(e_id, {})
                     original_name, original_type = entity_attrs[k]
 
@@ -1512,7 +1524,7 @@ class SQLTranslator(base_translator.BaseTranslator):
 
     def delete_entity(self, eid, etype=None, from_date=None,
                       to_date=None, fiware_service=None,
-                      fiware_servicepath=None):
+                      fiware_servicepath='/'):
         if not eid:
             raise NGSIUsageError("entity_id cannot be None nor empty")
 
@@ -1530,12 +1542,20 @@ class SQLTranslator(base_translator.BaseTranslator):
                                     fiware_service=fiware_service,
                                     fiware_servicepath=fiware_servicepath)
 
-    def delete_entities(self, etype, eid=None, from_date=None, to_date=None,
-                        fiware_service=None, fiware_servicepath=None):
+    def delete_entities(
+            self,
+            etype,
+            eid=None,
+            from_date=None,
+            to_date=None,
+            idPattern=None,
+            fiware_service=None,
+            fiware_servicepath='/'):
         table_name = self._et2tn(etype, fiware_service)
         where_clause = self._get_where_clause(eid,
                                               from_date,
                                               to_date,
+                                              idPattern,
                                               fiware_servicepath)
         op = "delete from {} {}".format(table_name, where_clause)
         try:
@@ -1573,17 +1593,7 @@ class SQLTranslator(base_translator.BaseTranslator):
             self.sql_error_handler(e)
             self.logger.error(str(e), exc_info=True)
 
-        # TODO this can be removed most probably
-        if self.cursor.rowcount == 0 and table_name.startswith('"'):
-            # See GH #173
-            old_tn = ".".join([x.strip('"') for x in table_name.split('.')])
-            try:
-                self.cursor.execute(op, [old_tn])
-            except Exception as e:
-                self.sql_error_handler(e)
-                self.logger.error(str(e), exc_info=True)
-
-    def query_entity_types(self, fiware_service=None, fiware_servicepath=None):
+    def query_entity_types(self, fiware_service=None, fiware_servicepath='/'):
         """
         Find the types of for a given fiware_service and fiware_servicepath.
         :return: list of strings.

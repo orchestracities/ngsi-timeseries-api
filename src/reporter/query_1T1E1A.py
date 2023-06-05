@@ -36,7 +36,7 @@ def query_1T1E1A(attr_name,   # In Path
         return r, c
 
     fiware_s = request.headers.get('fiware-service', None)
-    fiware_sp = request.headers.get('fiware-servicepath', None)
+    fiware_sp = request.headers.get('fiware-servicepath', '/')
 
     entities = None
     try:
@@ -79,8 +79,7 @@ def query_1T1E1A(attr_name,   # In Path
 
     if entities:
         if len(entities) > 1:
-            import warnings
-            warnings.warn("Not expecting more than one result for a 1T1E1A.")
+            logging.warning("Not expecting more than one result for a 1T1E1A.")
 
         index = [] if aggr_method and not aggr_period else entities[0]['index']
         matched_attr = lookup_string_match(entities[0], attr_name)

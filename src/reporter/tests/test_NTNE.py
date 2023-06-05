@@ -11,6 +11,8 @@ services = ['t1', 't2']
 entity_type_1 = 'Kitchen'
 entity_id_1 = 'Kitchen0'
 
+idPattern = 'R'
+
 
 def query_url():
     url = "{qlUrl}/entities"
@@ -71,6 +73,20 @@ def test_not_found(service):
 
 
 @pytest.mark.parametrize("service", services)
+def idpattern_not_found(service):
+    query_params = {
+        'idPattern': 'NotThere'
+    }
+    h = {'Fiware-Service': service}
+    r = requests.get(query_url(), params=query_params, headers=h)
+    assert r.status_code == 404, r.text
+    assert r.json() == {
+        "error": "Not Found",
+        "description": "No records were found for such query."
+    }
+
+
+@pytest.mark.parametrize("service", services)
 def test_NTNE_type(service, reporter_dataset):
     # Query
     query_params = {
@@ -92,8 +108,30 @@ def test_NTNE_type(service, reporter_dataset):
     assert obtained == expected
 
 
+@pytest.mark.parametrize("service", services)
+def test_NTNE_idPattern(service, reporter_dataset):
+    query_params = {
+        'idPattern': idPattern
+    }
+    h = {'Fiware-Service': service}
+    r = requests.get(query_url(), params=query_params, headers=h)
+    assert r.status_code == 200, r.text
+    # Assert
+    obtained = r.json()
+    expected_type = 'Room'
+    expected_index = '1970-01-30T00:00:00.000+00:00'
+    expected = [{
+        'entityId': 'Room0',
+        'index': expected_index,
+        'entityType': expected_type
+    }
+    ]
+    assert obtained == expected
+
 # TODO we removed order comparison given that in
 # CRATE4.0 union all and order by don't work correctly with offset
+
+
 @pytest.mark.parametrize("service", services)
 def test_NTNE_fromDate_toDate(service, reporter_dataset):
     # Query

@@ -6,6 +6,10 @@ import time
 from typing import Callable, Iterable, List, Optional, Tuple, Union
 import re
 import random
+from requests import Response
+import crate
+import pg8000
+import logging
 
 from translators.factory import translator_for
 from translators.sql_translator import ENTITY_ID_COL, TENANT_PREFIX, \
@@ -96,7 +100,23 @@ def get_notification_different_types(
     }
 
 
-def send_notifications(service, notifications, service_path=None):
+def insert_entities(entities: Union[List[dict], dict],
+                    service: str = None, service_path: str = None,
+                    expected_status_code=200) -> Response:
+    headers = {
+        'Content-Type': 'application/json',
+        'fiware-Service': service,
+        'fiware-ServicePath': service_path
+    }
+    body = json.dumps({
+        'data': entities if isinstance(entities, List) else [entities]
+    })
+    response = requests.post(notify_url(), data=body, headers=headers)
+    assert response.status_code == expected_status_code
+    return response
+
+
+def send_notifications(service, notifications, service_path='/'):
     assert isinstance(notifications, list)
     h = {'Content-Type': 'application/json'}
     if service:
@@ -120,7 +140,7 @@ def send_notifications_different_types(service, notifications):
 
 def insert_test_data(service, entity_types, n_entities=1, index_size=30,
                      entity_id=None, index_base=None, index_period="day",
-                     service_path=None):
+                     service_path='/'):
     assert isinstance(entity_types, list)
     index_base = index_base or datetime(1970, 1, 1, 0, 0, 0, 0, timezone.utc)
 
@@ -204,21 +224,23 @@ def insert_test_data_different_types(
 
 def has_entities(entity_type: str, service: Optional[str],
                  entity_id: Optional[str] = None) -> bool:
+    logger = logging.getLogger(__name__)
     try:
         entity_count = count_entities(entity_type, service, entity_id)
         return entity_count > 0
-    except Exception as e:
-        print(e)
+    except crate.client.exceptions.ProgrammingError as e:
+        if "SchemaUnknownException" in str(e) or "RelationUnknown" in str(e):
+            logger.error(e)
         return False
-        # Most likely the table is not there. Example exceptions:
-        # - pg8000.exceptions.ProgrammingError:
-        #    {'C': '42P01', 'M': 'relation mtt2.et... does not exist', ...}
-        # - crate.client.exceptions.ProgrammingError:
-        #     RelationUnknown[Relation 'mtt1.et... unknown...']
-        #
-        # TODO. See if there's a better way of doing this, e.g. catching a
-        # specific exception and error code to make sure the table isn't
-        # actually there.
+    except pg8000.ProgrammingError as e:
+        if "does not exist" in str(e):
+            logger.error(e)
+        return False
+    # Most likely the table is not there. Example exceptions:
+    # - pg8000.exceptions.ProgrammingError:
+    #    {'C': '42P01', 'M': 'relation mtt2.et... does not exist', ...}
+    # - crate.client.exceptions.ProgrammingError:
+    #     RelationUnknown[Relation 'mtt1.et... unknown...']
 
 
 def count_entities(entity_type: str, service: Optional[str],
@@ -279,7 +301,7 @@ def wait_for_delete(entity_type: str, service: Optional[str],
     wait_until(lambda: not has_entities(entity_type, service, entity_id))
 
 
-def delete_entity_type(service, entity_type, service_path=None):
+def delete_entity_type(service, entity_type, service_path='/'):
     h = {}
     if service:
         h['Fiware-Service'] = service
@@ -297,7 +319,7 @@ def delete_entity_type(service, entity_type, service_path=None):
     wait_for_delete(entity_type, service)
 
 
-def delete_test_data(service, entity_types, service_path=None):
+def delete_test_data(service, entity_types, service_path='/'):
     assert isinstance(entity_types, list)
 
     for et in entity_types:

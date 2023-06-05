@@ -70,14 +70,14 @@ QuantumLeap supports both Crate DB and Timescale as time-series DB
 backends. The following versions are currently covered in tests
 (see [.circleci/config.yml](https://github.com/orchestracities/ngsi-timeseries-api/blob/master/.circleci/config.yml#L204)):
 
-- Crate backend: Crate DB version `4.2.7` up to `4.6.6`
+- Crate backend: Crate DB version `4.2.7` up to `4.6.7`
 - Timescale backend: Postgres version `12` up to `13` +
   Timescale extension `1.7.5` up to `2.3.0` + Postgis extension `2.5.*`.
 
 As regards caching feature, QuantumLeap has been tested with Redis `4.*` up
 to `6.2.3`.
 Integration with Orion Context Broker is tested from version `2.4.2`
-up to `2.6.1`.
+up to `3.3.1`.
 
 Automated tests, to avoid too long testing time, are not combining all possible
 versions. This anyhow should not be an issue given that component
@@ -146,8 +146,8 @@ If you would like to add your company to this list, please mention it in
 this [issue](https://github.com/orchestracities/ngsi-timeseries-api/issues/436)
 or create a PR to update the list.
 
-| <a href="https://www.ekz.ch/"><img src="https://www.ekz.ch/.resources/ekzweb/webresources/resources/ekz_logo.svg" height="75" /></a> | <a href="https://www.stadtwerke-wolfsburg.de/"><img src="https://www.stadtwerke-wolfsburg.de/fileadmin/templates/Images/logo_stadtwerke.png" height="75" /></a> | <a href="https://profirator.fi/"><img alt="Profirator" src="https://user-images.githubusercontent.com/7221736/113831287-1e0a2c00-9790-11eb-9167-2c336276d716.png" height="45" /></a>  |  |
-|---|---|---|---|
+| <a href="https://www.ekz.ch/"><img src="https://www.ekz.ch/.resources/ekzweb/webresources/resources/ekz_logo.svg" height="75" /></a> | <a href="https://www.stadtwerke-wolfsburg.de/"><img src="https://www.stadtwerke-wolfsburg.de/typo3conf/ext/vc_theme/Resources/Public/Graphics/SVG-Logo.svg" height="75" /></a> | <a href="https://profirator.fi/"><img alt="Profirator" src="https://user-images.githubusercontent.com/7221736/113831287-1e0a2c00-9790-11eb-9167-2c336276d716.png" height="45" /></a>  | <a href="https://addix.net/"><img src="https://user-images.githubusercontent.com/60972305/169762069-85f54ab0-381d-4837-a0fe-68628453173b.jpg" height="45" /></a> |  |
+|---|---|---|---|---|
 
 ## Linked projects
 

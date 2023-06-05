@@ -5,12 +5,52 @@
 ### New features
 
 - Removed subscription API (#493)
+- Replaced geocoder with [geopy](https://geopy.readthedocs.io/en/stable/) (#610)
+- Bumped pillow from 8.4.0 to 9.0.0
+- Aligned missing Fiware-servicePath behaviour with the one of Orion
+  Context Broker (#564). This is a breaking change! Before no value for
+  Fiware-servicePath was interpreted as python None, from now on, None
+  will be replaced with /. This affects only users that manually injected
+  data, since Orion, assume / when no servicePath is passed.
+- Added more test cases for Aggregation (#499)
+- fix translator initialization
+- List Addix among adopters (#649)
+- Replaced string with the constants (#650)
+- Added idPattern ain query parameter (#648)
+- Remove duplicate code in src/reporter/tests/test_timescale_types.py (#657)
+- Removed comments on line no.462 and 467 in sql_translator.py (#659)
+- Added logs in src/wq/ql/notify.py (#656)
+- Added logs in src/wq/core/task.py (#662)
+- Replaced entity with getter (#652)
+- Resolved TODO in Dockerfile (#680)
+- Resolved TODO at src/reporter/tests/test_timescale_types.py (#667)
+- Resolved TODO at src/transaltors/sql_transaltor.py (#694)
+- Resolved TODO at src/translator/sql_translator.py (#686)
+- Resolved TODO at src/translators/sql_translator.py#L768.py (#683)
+- Resolved TODO at src/reporter/tests/utils.py (#692)
+- Added error handling in src/wq/ql/notify.py (#673)
+- NGSI-LD tenant header (#664, #669)
 
 ### Bug fixes
 
+- Fix issues with integration tests and backward compatibility tests
+- Fix for linter failures (#670)
+- Fix for issue broken docker image (#674)
+- Fix for broken link in README.md (#688)
+- Fix for incorrect notation in file (#725)
+
 ### Continuous Integration
 
+- Improve github action for docker images (#624)
+- Add caching to docker image builds (#626)
+- Update CI to use CrateDB 4.6.7 and Orion 3.3.1
+- Add maintenance type to pr template
+
 ### Documentation
+
+- Fix links in pr template (#620)
+- Mention running tests locally as well as linting in PR template (#621)
+- Fix variable names for CrateDB authentication (#636)
 
 ### Technical debt
 
@@ -36,6 +76,7 @@
 - Fixed OpenAPI spec for /wq/management (#544)
 - Fixed attributes names in /v2/entities query (#478)
 - Fixed index ordering in /v2/entities query (#521)
+- Fixed Deprecated warning by updating "warn" to "warning" (#605)
 
 ### Continuous Integration
 
@@ -49,10 +90,11 @@
 
 ### Documentation
 
-- Improved contributing docuemntation (#557)
+- Improved contributing documentation (#557)
 - Introduced reference about `options=sysAttrs` for ngsi-ld time indexing (#546)
 - Documented API pagination (#511)
 - Revised documentation (#596)
+- Fixed typos in roadmap and release notes (#617)
 
 ### Technical debt
 
