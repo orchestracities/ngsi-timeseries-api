@@ -2,7 +2,7 @@
 
 [![FIWARE Core Context Management](https://nexus.lab.fiware.org/static/badges/chapters/core.svg)](https://www.fiware.org/developers/catalogue/)
 [![License: MIT](https://img.shields.io/github/license/orchestracities/ngsi-timeseries-api.svg)](https://opensource.org/licenses/MIT)
-[![Docker Status](https://img.shields.io/docker/pulls/orchestracities/quantumleap.svg)](https://hub.docker.com/r/orchestracities/quantumleap/)
+[![Docker badge](https://img.shields.io/badge/quay.io-fiware%2Fquantumleap-grey?logo=red%20hat&labelColor=EE0000)](https://quay.io/repository/fiware/quantumleap)
 [![Support](https://img.shields.io/badge/support-ask-yellowgreen.svg)](https://ask.fiware.org/questions/)
 <br/>
 [![Documentation badge](https://img.shields.io/readthedocs/quantumleap.svg)](https://quantumleap.readthedocs.io/en/latest/)
@@ -47,7 +47,7 @@ platform.
 You can find more FIWARE components in the
 [FIWARE catalogue](https://catalogue.fiware.org).
 
-|  :books: [Documentation](https://quantumleap.rtfd.io/) | :mortar_board: [Academy](https://fiware-academy.readthedocs.io/en/latest/core/quantum-leap) |  :whale: [Docker Hub](https://hub.docker.com/r/orchestracities/quantumleap/) | :dart: [Roadmap](https://github.com/orchestracities/ngsi-timeseries-api/blob/master/docs/roadmap.md) |
+|  :books: [Documentation](https://quantumleap.rtfd.io/) | :mortar_board: [Academy](https://fiware-academy.readthedocs.io/en/latest/core/quantum-leap) |   <img style="height:1em" src="https://quay.io/static/img/quay_favicon.png"/> [quay.io](https://quay.io/repository/fiware/quantumleap) | :dart: [Roadmap](https://github.com/orchestracities/ngsi-timeseries-api/blob/master/docs/roadmap.md) |
 |---|---|---|---|
 
 ## Contents
@@ -172,4 +172,4 @@ if you need Enterprise Support for your QuantumLeap installation.
 
 QuantumLeap is licensed under the [MIT](LICENSE) License
 
-© 2017-2021 Martel Innovate
+© 2017-2023 Martel Innovate
