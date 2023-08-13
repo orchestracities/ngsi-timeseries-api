@@ -1,7 +1,8 @@
-FROM python:3.8.5-alpine3.12 as base
+FROM python:3.8.17-alpine3.18 as base
 FROM base as builder
-RUN apk --no-cache --update-cache add gcc python3 python3-dev py-pip build-base wget
+RUN apk --no-cache --update-cache add gcc python3 python3-dev py-pip build-base wget rust cargo
 RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
+RUN pip install --upgrade pip
 RUN pip install pipenv
 RUN mkdir -p /src/ngsi-timeseries-api
 COPY Pipfile /src/ngsi-timeseries-api/Pipfile
