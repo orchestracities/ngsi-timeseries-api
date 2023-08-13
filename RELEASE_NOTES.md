@@ -54,6 +54,9 @@
 
 ### Technical debt
 
+- Upgrade Python deps to fix security vulnerabilities, make the Docker
+  image build again and restore a working dev env on Apple silicon. (#737)
+
 ## 0.8.3
 
 ### New features
