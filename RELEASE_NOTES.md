@@ -1,5 +1,17 @@
 # QuantumLeap Release Notes
 
+## 1.0.1
+
+### New features
+
+### Bug fixes
+
+### Continuous Integration
+
+### Documentation
+
+### Technical debt
+
 ## 1.0.0
 
 ### New features
