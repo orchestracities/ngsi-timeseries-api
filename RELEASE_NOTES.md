@@ -1,6 +1,6 @@
 # QuantumLeap Release Notes
 
-## 0.9.0-dev
+## 1.0.0
 
 ### New features
 
