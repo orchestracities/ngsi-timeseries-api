@@ -14,7 +14,7 @@ from translators.sql_translator import NGSI_ISO8601, NGSI_DATETIME, \
     NGSI_LD_GEOMETRY, TIME_INDEX, METADATA_TABLE_NAME, FIWARE_SERVICEPATH
 import logging
 from .crate_geo_query import from_ngsi_query
-from utils.cfgreader import EnvReader, StrVar, IntVar, FloatVar
+from utils.cfgreader import EnvReader, StrVar, IntVar, FloatRangeVar
 from utils.connection_manager import ConnectionManager
 
 # CRATE TYPES
@@ -68,7 +68,7 @@ class CrateConnectionData:
                                      mask_value=True))
         # Added backoff_factor for retry interval between attempt of
         # consecutive retries
-        self.backoff_factor = r.read(FloatVar('CRATE_BACKOFF_FACTOR', 0.0))
+        self.backoff_factor = r.read(FloatRangeVar(var_name='CRATE_BACKOFF_FACTOR', default_value=0.0, lo=0.0, hi=120.0))
         self.active_shards = r.read(StrVar('CRATE_WAIT_ACTIVE_SHARDS', '1'))
 
 
