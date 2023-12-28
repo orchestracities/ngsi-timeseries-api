@@ -179,8 +179,8 @@ def test_disjoint_with_overlapping_polygon(service, setup_entities, query_fn):
         'coords': '-0.1,0.1;-0.1,1;1.1,1;1.1,0.1;-0.1,0.1'
     }
 
-    query_fn(service, entity_1['id'], query_params, expected_status_code=404)
-    query_fn(service, entity_2['id'], query_params, expected_status_code=404)
+    query_fn(service, entity_1['id'], query_params, expected_status_code=200)
+    query_fn(service, entity_2['id'], query_params, expected_status_code=200)
 
 
 @pytest.mark.parametrize('query_fn', [

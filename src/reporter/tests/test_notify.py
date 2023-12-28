@@ -514,7 +514,8 @@ def test_no_value_for_attributes(service, notification):
     # Give time for notification to be processed
     time.sleep(SLEEP_TIME)
     res_get = requests.get(url_new, headers=notify_header(service))
-    assert res_get.status_code == 404
+    assert res_get.status_code == 200
+    assert res_get.json() == []
     # entity with missing value string
     notification['data'][0] = {
         'id': '299531',
@@ -532,7 +533,8 @@ def test_no_value_for_attributes(service, notification):
     # Give time for notification to be processed
     time.sleep(SLEEP_TIME)
     res_get = requests.get(url_new, headers=query_header(service))
-    assert res_get.status_code == 404
+    assert res_get.status_code == 200
+    assert res_get.json() == []
     # entity has both valid and empty attributes
     notification['data'][0] = {
         'id': '299531',
@@ -573,7 +575,8 @@ def test_no_value_no_type_for_attributes(service, notification):
     # Give time for notification to be processed
     time.sleep(SLEEP_TIME)
     res_get = requests.get(url_new, headers=query_header(service))
-    assert res_get.status_code == 404
+    assert res_get.status_code == 200
+    assert res_get.json() == []
     # Get value of attribute having value
     get_url_new = "{}/entities/Room1/attrs/pressure/value".format(QL_URL)
     url_new = '{}'.format(get_url_new)

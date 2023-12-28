@@ -21,11 +21,8 @@ def delete_entity(entity_id, type_=None, from_date=None, to_date=None):
 
     logging.getLogger(__name__).info("deleted {} entities".format(deleted))
     if deleted == 0:
-        r = {
-            "error": "Not Found",
-            "description": "No records were found for such query."
-        }
-        return r, 404
+        r = []
+        return r, 200
 
     if deleted > 0:
         return '{} records successfully deleted.'.format(deleted), 204
@@ -53,11 +50,8 @@ def delete_entities(entity_type, from_date=None, to_date=None,
         logging.getLogger(__name__).info(
             "deleted {} entities of type {}".format(deleted, entity_type))
         if deleted == 0:
-            r = {
-                "error": "Not Found",
-                "description": "No records were found for such query."
-            }
-            return r, 404
+            r = []
+            return r, 200
 
         if deleted > 0:
             return '{} records successfully deleted.'.format(deleted), 204

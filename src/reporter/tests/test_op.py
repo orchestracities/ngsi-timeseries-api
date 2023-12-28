@@ -141,11 +141,8 @@ def test_query_not_found(service, reporter_dataset):
     r = requests.post('{}'.format(query_url),
                       data=json.dumps(body),
                       headers=headers(service))
-    assert r.status_code == 404, r.text
-    assert r.json() == {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    assert r.status_code == 200, r.text
+    assert r.json() == []
 
 
 @pytest.mark.parametrize("service", services)

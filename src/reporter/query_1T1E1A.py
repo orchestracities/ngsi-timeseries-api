@@ -93,12 +93,9 @@ def query_1T1E1A(attr_name,   # In Path
         logging.getLogger(__name__).info("Query processed successfully")
         return res
 
-    r = {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    r = []
     logging.getLogger(__name__).info("No value found for query")
-    return r, 404
+    return r, 200
 
 
 def query_1T1E1A_value(*args, **kwargs):

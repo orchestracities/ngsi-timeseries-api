@@ -159,12 +159,9 @@ def query_NTNENA(id_=None,  # In Query
         logging.getLogger(__name__).info("AggrMethod cannot be applied")
         return r, 404
 
-    r = {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    r = []
     logging.getLogger(__name__).info("No value found for query")
-    return r, 404
+    return r, 200
 
 
 def query_NTNENA_value(*args, **kwargs):
