@@ -70,12 +70,9 @@ def query():
             logging.getLogger(__name__).info("Query processed successfully")
             res.append(entities[0])
         else:
-            r = {
-                "error": "Not Found",
-                "description": "No records were found for such query."
-            }
+            r = []
             logging.getLogger(__name__).info("No value found for query")
-            return r, 404
+            return r, 200
     return res, 200
 
 

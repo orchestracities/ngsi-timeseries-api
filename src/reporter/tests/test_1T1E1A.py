@@ -437,11 +437,8 @@ def test_not_found(service):
     h = {'Fiware-Service': service}
 
     r = requests.get(query_url(), params=query_params, headers=h)
-    assert r.status_code == 404, r.text
-    assert r.json() == {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    assert r.status_code == 200, r.text
+    assert r.json() == []
 
 
 @pytest.mark.parametrize("service", services)

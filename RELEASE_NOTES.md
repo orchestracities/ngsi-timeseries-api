@@ -6,6 +6,8 @@
 
 ### Bug fixes
 
+- Fix to return OK/200 and an empty result set when no data found (#720)
+
 ### Continuous Integration
 
 ### Documentation

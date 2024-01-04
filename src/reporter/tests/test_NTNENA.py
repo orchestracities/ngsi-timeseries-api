@@ -301,11 +301,8 @@ def idPattern_not_found(service, reporter_dataset):
         'idPattern': 'NotThere'
     }
     r = query(params=query_params, service=service)
-    assert r.status_code == 404, r.text
-    assert r.json() == {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    assert r.status_code == 200, r.text
+    assert r.json() == []
 
 
 @pytest.mark.parametrize("service", services)
@@ -985,11 +982,8 @@ def test_not_found(service, reporter_dataset):
         'type': 'NotThere'
     }
     r = query(params=query_params, service=service)
-    assert r.status_code == 404, r.text
-    assert r.json() == {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    assert r.status_code == 200, r.text
+    assert r.json() == []
 
 
 @pytest.mark.parametrize("service", services)

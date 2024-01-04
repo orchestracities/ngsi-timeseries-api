@@ -108,12 +108,9 @@ def query_1TNE1A(attr_name,   # In Path
             "usage of id and type rather than entityId and entityType from version 0.9")
         return res
 
-    r = {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    r = []
     logging.getLogger(__name__).info("No value found for query")
-    return r, 404
+    return r, 200
 
 
 def _prepare_response(entities, attr_name, entity_type, entity_ids,

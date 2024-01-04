@@ -149,7 +149,7 @@ def test_disjoint_with_overlapping_polygon(service, setup_entities):
         'coords': '-0.1,0.1;-0.1,1;1.1,1;1.1,0.1;-0.1,0.1'
     }
 
-    query_1tne1a(service, query_params, expected_status_code=404)
+    query_1tne1a(service, query_params, expected_status_code=200)
 
 
 @pytest.mark.parametrize("service", services)

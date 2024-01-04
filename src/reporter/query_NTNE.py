@@ -62,9 +62,6 @@ def query_NTNE(limit=10000,
         logging.getLogger(__name__).info("Query processed successfully")
         return res
 
-    r = {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    r = []
     logging.getLogger(__name__).info("No value found for query")
-    return r, 404
+    return r, 200

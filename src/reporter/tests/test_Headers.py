@@ -77,9 +77,8 @@ def test_for_invalid_headers(notification):
     get_url = "{}/entities/Room0".format(QL_URL)
     res_get = requests.get(get_url, headers=HEADERS_INVALID)
 
-    assert res_get.status_code == 404
+    assert res_get.status_code == 200
+    assert res_get.json() == []
 
-    exp_result = {
-        'description': 'No records were found for such query.',
-        'error': 'Not Found'}
+    exp_result = []
     assert res_get.json() == exp_result
