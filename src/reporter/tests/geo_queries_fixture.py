@@ -68,7 +68,7 @@ def eids_from_response(response):
     if not entities:
         entities = [response.json()]
 
-    return set([e['entityId'] for e in entities])
+    return set([e['id'] for e in entities])
 
 
 def expected_eids(*es):

@@ -345,7 +345,7 @@ class AttrQueryResultFormatter:
     def _attr_values(entity_id: str, time_index: List[str],
                      values: List) -> dict:
         return {
-            'entityId': entity_id,
+            'id': entity_id,
             'index': time_index,
             'values': values
         }
@@ -357,7 +357,7 @@ class AttrQueryResultFormatter:
     def _values_for(self, entities: Iterable[AttrValues]) -> List[dict]:
         return [{
             'entities': [self._attr_values(*e) for e in entities],
-            'entityType': self.entity_type
+            'type': self.entity_type
         }]
 
     def format(

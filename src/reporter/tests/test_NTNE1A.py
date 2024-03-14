@@ -278,7 +278,7 @@ def test_NTNE1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
     obtained = r.json()
     expected_entities = [
         {
-            'entityId': entity_id,
+            'id': entity_id,
             'index': exp_index,
             'values': [expected_temperatures, expected_temperatures,
                        expected_temperatures]
@@ -287,7 +287,7 @@ def test_NTNE1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
     expected_types = [
         {
             'entities': expected_entities,
-            'entityType': entity_type
+            'type': entity_type
         }
     ]
     expected = {

@@ -57,8 +57,8 @@ def test_for_valid_headers(notification):
                                   'values': [10.0]},
                                  {'attrName': 'temperature',
                                   'values': [100.0]}],
-                  "entityId": 'Room0',
-                  "entityType": 'Room',
+                  "id": 'Room0',
+                  "type": 'Room',
                   "index": ['1980-01-30T00:00:00.000+00:00']}
     assert res_get.json() == exp_values
     delete_entity_type('test', 'Room')

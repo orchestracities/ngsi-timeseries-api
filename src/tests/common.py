@@ -183,7 +183,7 @@ def check_data(entities, check_n_indexes=False):
         assert res.ok, res.text
 
         obtained = res.json()
-        assert obtained['entityId'] == e.id
+        assert obtained['id'] == e.id
 
         index = obtained['index']
         values = obtained['values']
