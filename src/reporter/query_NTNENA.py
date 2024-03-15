@@ -118,7 +118,7 @@ def query_NTNENA(id_=None,  # In Query
                     index = [
                         f_date, t_date] if aggr_method and not aggr_period else e['index']
                     entity = {
-                        'entityId': e['id'],
+                        'id': e['id'],
                         'index': index,
                         'values': matched_attr['values'] if matched_attr else [],
                     }
@@ -126,7 +126,7 @@ def query_NTNENA(id_=None,  # In Query
                         entity_value = []
                         entity_value.append(entity)
                         entity_ty = {
-                            'entityType': e['type'],
+                            'type': e['type'],
                             'entities': entity_value
                         }
                         entity_type.append(entity_ty)
@@ -135,7 +135,7 @@ def query_NTNENA(id_=None,  # In Query
                         entity_value.append(entity)
                         entity_type.pop()
                         entity_ty = {
-                            'entityType': e['type'],
+                            'type': e['type'],
                             'entities': entity_value
                         }
                         entity_type.append(entity_ty)
@@ -148,8 +148,6 @@ def query_NTNENA(id_=None,  # In Query
             'attrs': attrs_values
         }
         logging.getLogger(__name__).info("Query processed successfully")
-        logging.warning(
-            "usage of id and type rather than entityId and entityType from version 0.9")
         return res
 
     if err == "AggrMethod cannot be applied":
@@ -169,6 +167,4 @@ def query_NTNENA_value(*args, **kwargs):
     if isinstance(res, dict):
         res['values'] = res['attrs']
         res.pop('attrs', None)
-    logging.warning(
-        "usage of id and type rather than entityId and entityType from version 0.9")
     return res

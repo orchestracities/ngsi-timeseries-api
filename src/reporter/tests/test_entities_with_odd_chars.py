@@ -44,8 +44,8 @@ def run_test(service, entity_type, attr_name):
     query_result.pop('index', None)
     assert query_result == {
         'attrName': attr_name,
-        'entityId': entity['id'],
-        'entityType': entity_type,
+        'id': entity['id'],
+        'type': entity_type,
         'values': [entity[attr_name]['value']]
     }
 

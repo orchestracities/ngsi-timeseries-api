@@ -138,7 +138,7 @@ def entities_with_different_attrs(etype: str) -> [dict]:
 
 
 def find_by_type(etype: str, entities: [dict]) -> [dict]:
-    return [e for e in entities if e['entityType'] == etype]
+    return [e for e in entities if e['type'] == etype]
 
 
 @pytest.mark.parametrize("service", services)

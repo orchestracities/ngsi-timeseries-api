@@ -153,11 +153,11 @@ def test_aggregation_on_different_attribute_types_timescale(
             [{
                 'entities':
                 [{
-                    'entityId': entity_id,
+                    'id': entity_id,
                     'index': ['', ''],
                     'values': [4]
                 }],
-                'entityType': entity_type
+                'type': entity_type
             }]
         },
         {
@@ -166,11 +166,11 @@ def test_aggregation_on_different_attribute_types_timescale(
             [{
                 'entities':
                 [{
-                    'entityId': entity_id,
+                    'id': entity_id,
                     'index': ['', ''],
                     'values': [4]
                 }],
-                'entityType': entity_type
+                'type': entity_type
             }]
         },
         {
@@ -179,11 +179,11 @@ def test_aggregation_on_different_attribute_types_timescale(
             [{
                 'entities':
                 [{
-                    'entityId': entity_id,
+                    'id': entity_id,
                     'index': ['', ''],
                     'values': [4]
                 }],
-                'entityType': entity_type
+                'type': entity_type
             }]
         },
     ]
@@ -222,8 +222,8 @@ def test_aggregation_on_different_attribute_types_timescale(
     expected = {
         'index': [],
         'attributes': expected_attrs,
-        'entityId': entity_id,
-        'entityType': entity_type
+        'id': entity_id,
+        'type': entity_type
     }
     obtained = r.json()
     assert obtained == expected
@@ -253,14 +253,14 @@ def test_aggregation_on_different_attribute_types_timescale(
                     'values': [4]
                 }
             ],
-            'entityId': entity_id,
+            'id': entity_id,
             'index': ['', '']
         }
     ]
 
     expected = {
         'entities': expected_values,
-        'entityType': entity_type
+        'type': entity_type
     }
 
     obtained = r.json()
@@ -360,11 +360,11 @@ def test_aggregation_on_different_data_types_crate(
             [{
                 'entities':
                 [{
-                    'entityId': entity_id,
+                    'id': entity_id,
                     'index': ['', ''],
                     'values': [False]
                 }],
-                'entityType': entity_type
+                'type': entity_type
             }]
         },
         {
@@ -373,11 +373,11 @@ def test_aggregation_on_different_data_types_crate(
             [{
                 'entities':
                 [{
-                    'entityId': entity_id,
+                    'id': entity_id,
                     'index': ['', ''],
                     'values': ['str1']
                 }],
-                'entityType': entity_type
+                'type': entity_type
             }]
         },
         {
@@ -386,11 +386,11 @@ def test_aggregation_on_different_data_types_crate(
             [{
                 'entities':
                 [{
-                    'entityId': entity_id,
+                    'id': entity_id,
                     'index': ['', ''],
                     'values': [0.0]
                 }],
-                'entityType': entity_type
+                'type': entity_type
             }]
         },
     ]
@@ -428,8 +428,8 @@ def test_aggregation_on_different_data_types_crate(
     expected = {
         'index': [],
         'attributes': expected_attrs,
-        'entityId': entity_id,
-        'entityType': entity_type
+        'id': entity_id,
+        'type': entity_type
     }
 
     assert obtained == expected
@@ -459,14 +459,14 @@ def test_aggregation_on_different_data_types_crate(
                     'values': [0.0]
                 }
             ],
-            'entityId': entity_id,
+            'id': entity_id,
             'index': ['', '']
         }
     ]
 
     expected = {
         'entities': expected_values,
-        'entityType': entity_type
+        'type': entity_type
     }
 
     assert obtained == expected
@@ -490,11 +490,11 @@ def test_aggregation_on_different_data_types_crate(
             [{
                 'entities':
                 [{
-                    'entityId': entity_id,
+                    'id': entity_id,
                     'index': ['', ''],
                     'values': [True]
                 }],
-                'entityType': entity_type
+                'type': entity_type
             }]
         },
         {
@@ -503,11 +503,11 @@ def test_aggregation_on_different_data_types_crate(
             [{
                 'entities':
                 [{
-                    'entityId': entity_id,
+                    'id': entity_id,
                     'index': ['', ''],
                     'values': ['str1']
                 }],
-                'entityType': entity_type
+                'type': entity_type
             }]
         },
         {
@@ -516,11 +516,11 @@ def test_aggregation_on_different_data_types_crate(
             [{
                 'entities':
                 [{
-                    'entityId': entity_id,
+                    'id': entity_id,
                     'index': ['', ''],
                     'values': [3.0]
                 }],
-                'entityType': entity_type
+                'type': entity_type
             }]
         },
     ]
@@ -559,8 +559,8 @@ def test_aggregation_on_different_data_types_crate(
     expected = {
         'index': [],
         'attributes': expected_attrs,
-        'entityId': entity_id,
-        'entityType': entity_type
+        'id': entity_id,
+        'type': entity_type
     }
 
     obtained = r.json()
@@ -592,14 +592,14 @@ def test_aggregation_on_different_data_types_crate(
                     'values': [3.0]
                 }
             ],
-            'entityId': entity_id,
+            'id': entity_id,
             'index': ['', '']
         }
     ]
 
     expected = {
         'entities': expected_values,
-        'entityType': entity_type
+        'type': entity_type
     }
 
     obtained = r.json()
@@ -624,11 +624,11 @@ def test_aggregation_on_different_data_types_crate(
             [{
                 'entities':
                 [{
-                    'entityId': entity_id,
+                    'id': entity_id,
                     'index': ['', ''],
                     'values': [4]
                 }],
-                'entityType': entity_type
+                'type': entity_type
             }]
         },
         {
@@ -637,11 +637,11 @@ def test_aggregation_on_different_data_types_crate(
             [{
                 'entities':
                 [{
-                    'entityId': entity_id,
+                    'id': entity_id,
                     'index': ['', ''],
                     'values': [4]
                 }],
-                'entityType': entity_type
+                'type': entity_type
             }]
         },
         {
@@ -650,11 +650,11 @@ def test_aggregation_on_different_data_types_crate(
             [{
                 'entities':
                 [{
-                    'entityId': entity_id,
+                    'id': entity_id,
                     'index': ['', ''],
                     'values': [4]
                 }],
-                'entityType': entity_type
+                'type': entity_type
             }]
         },
     ]
@@ -694,8 +694,8 @@ def test_aggregation_on_different_data_types_crate(
     expected = {
         'index': [],
         'attributes': expected_attrs,
-        'entityId': entity_id,
-        'entityType': entity_type
+        'id': entity_id,
+        'type': entity_type
     }
 
     obtained = r.json()
@@ -727,14 +727,14 @@ def test_aggregation_on_different_data_types_crate(
                     'values': [4]
                 }
             ],
-            'entityId': entity_id,
+            'id': entity_id,
             'index': ['', '']
         }
     ]
 
     expected = {
         'entities': expected_values,
-        'entityType': entity_type
+        'type': entity_type
     }
 
     obtained = r.json()

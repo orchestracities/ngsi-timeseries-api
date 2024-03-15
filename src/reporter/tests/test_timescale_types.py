@@ -114,13 +114,13 @@ def entity_name_value_pairs(entity: dict) -> dict:
     Transform an NGSI entity ``e`` into the format::
 
         {
-            entityId: e[id]
+            id: e[id]
             attr1: [ e[attr1][value] ]
             ...
             attrN: [ e[attrN][value] ]
         }
     """
-    eid = {'entityId': entity['id']}
+    eid = {'id': entity['id']}
 
     attr_names = {k for k in entity.keys()} - {'id', 'type'}
     attrs = {k: [maybe_value(entity, k, 'value')] for k in attr_names}
@@ -137,7 +137,7 @@ def query_result_name_value_pairs(result: dict) -> dict:
     Extract the result set returned by the ``/v2/entities/{entityId}`` endpoint
     using the same format as that of ``entity_name_value_pairs``.
     """
-    eid = {'entityId': maybe_value(result, 'entityId')}
+    eid = {'id': maybe_value(result, 'id')}
 
     attrs_array = maybe_value(result, 'attributes')
     attrs_array = attrs_array if attrs_array else []

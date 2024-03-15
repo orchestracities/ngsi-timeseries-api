@@ -114,7 +114,7 @@ def query_NTNE1A(attr_name,  # In Path
                 f_date,
                 t_date] if aggr_method and not aggr_period else e['index']
             entity = {
-                'entityId': e['id'],
+                'id': e['id'],
                 'index': index,
                 'values': matched_attr['values'] if matched_attr else []
             }
@@ -124,7 +124,7 @@ def query_NTNE1A(attr_name,  # In Path
                 entity_value.append(entity)
 
                 entity_ty = {
-                    'entityType': e['type'],
+                    'type': e['type'],
                     'entities': entity_value
                 }
                 entity_type.append(entity_ty)
@@ -134,7 +134,7 @@ def query_NTNE1A(attr_name,  # In Path
                 entity_type.pop()
                 entity_ty = {
                     'entities': entity_value,
-                    'entityType': e['type']
+                    'type': e['type']
                 }
                 entity_type.append(entity_ty)
 
@@ -143,8 +143,6 @@ def query_NTNE1A(attr_name,  # In Path
             'types': entity_type
         }
         logging.getLogger(__name__).info("Query processed successfully")
-        logging.warning(
-            "usage of id and type rather than entityId and entityType from version 0.9")
         return res
     r = []
     logging.getLogger(__name__).info("No value found for query")
@@ -157,6 +155,4 @@ def query_NTNE1A_value(*args, **kwargs):
         res['values'] = res['types']
         res.pop('attrName', None)
         res.pop('types', None)
-    logging.warning(
-        "usage of id and type rather than entityId and entityType from version 0.9")
     return res
