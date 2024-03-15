@@ -73,8 +73,8 @@ def do_integration(entity, subscription, orion_client, service=None,
         entities = r.json()
         assert len(entities) == 1
 
-        assert entities[0]['id'] == entity['id']
-        assert entities[0]['type'] == entity['type']
+        assert entities[0]['entityId'] == entity['id']
+        assert entities[0]['entityType'] == entity['type']
     finally:
         delete_entity_type(service, entity['type'], None)
         orion_client.delete(entity['id'], service, service_path)
