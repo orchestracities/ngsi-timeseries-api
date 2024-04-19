@@ -6,7 +6,7 @@ from requests import Response
 from typing import List, Union
 
 from geocoding.slf.geotypes import SlfBox, SlfLine, SlfPoint, SlfPolygon
-from translators.sql_translator import NGSI_DATETIME, NGSI_GEOJSON,\
+from translators.sql_translator import NGSI_DATETIME, NGSI_GEOJSON, \
     NGSI_STRUCTURED_VALUE, NGSI_TEXT, current_timex
 from utils.jsondict import maybe_value
 from utils.kvt import merge_dicts

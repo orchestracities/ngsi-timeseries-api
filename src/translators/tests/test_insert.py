@@ -463,7 +463,7 @@ def beyond_mid_epoch(e):
     ("attr_str", "> 'M'", lambda e: e["attr_str"]["values"][0] > "M"),
     ("attr_float", "< 0.5", lambda e: e["attr_float"]["values"][0] < 0.5),
     ("attr_time", "> '1970-06-28T00:00'", beyond_mid_epoch)
-    ##    (WITHIN_EAST_HEMISPHERE, "", within_east_hemisphere)
+    # (WITHIN_EAST_HEMISPHERE, "", within_east_hemisphere)
 ])
 def test_query_per_attribute(translator, attr_name, clause, tester):
     num_types = 1

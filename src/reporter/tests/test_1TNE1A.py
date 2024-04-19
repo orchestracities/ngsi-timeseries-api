@@ -433,7 +433,7 @@ def test_aggregation_is_per_instance(service):
     # Assert Results
     expected_entities = [{'id': 'Room0',
                           'index': ['1970-01-01T00:00:00+00:00',
-                                      '1970-01-06T00:00:00+00:00'],
+                                    '1970-01-06T00:00:00+00:00'],
                           'values': [2],
                           },
                          {'id': 'Room1',

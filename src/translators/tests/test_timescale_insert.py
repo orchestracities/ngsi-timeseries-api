@@ -6,9 +6,9 @@ from time import sleep
 
 from geocoding.geojson.wktcodec import decode_wkb_hexstr
 from translators.base_translator import TIME_INDEX_NAME
-from translators.timescale import postgres_translator_instance,\
+from translators.timescale import postgres_translator_instance, \
     PostgresConnectionData
-from translators.sql_translator import METADATA_TABLE_NAME,\
+from translators.sql_translator import METADATA_TABLE_NAME, \
     TYPE_PREFIX, TENANT_PREFIX, FIWARE_SERVICEPATH
 
 #

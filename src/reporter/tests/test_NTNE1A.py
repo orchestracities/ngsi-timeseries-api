@@ -1,5 +1,5 @@
 from conftest import QL_URL
-from reporter.tests.utils import AttrQueryResultGen, insert_test_data,\
+from reporter.tests.utils import AttrQueryResultGen, insert_test_data, \
     delete_test_data, temperatures, wait_for_insert
 import pytest
 import requests
