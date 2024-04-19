@@ -7,6 +7,33 @@
 ### Bug fixes
 
 - Fix to return OK/200 and an empty result set when no data found (#720)
+- Fix to return id and type in place of entityId and entityType (#751)
+
+### Important: Backward compatibility
+
+This release breaks API backward compatibility. Existing `1.0.0` clients may
+**not** be able to work with this new Quantum Leap version without code
+changes.
+
+In detail: version `1.0.1` changes fields of query results. Up to
+version 1.0.0, Quantum Leap used the following JSON format for query results:
+
+    {
+        entityId: ...,
+        entityType: ...,
+        index: ...,
+        values: ...
+    }
+
+Version 1.0.1 changed `entityId` and `entityType` to `id` and `type`
+respectively for the query result as in e.g.
+
+    {
+        id: ...,
+        type: ...,
+        index: ...,
+        values: ...
+    }
 
 ### Continuous Integration
 

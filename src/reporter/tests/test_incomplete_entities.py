@@ -46,7 +46,7 @@ def get_all_stored_attributes(service, entity_id):
 #         ]
 #       }
 #     ],
-#     "entityId": "d:1",
+#     "id": "d:1",
 #     "index": [
 #       "2018-12-20T10:50:42.438",
 #       "2018-12-20T10:56:38.654",
