@@ -64,8 +64,8 @@ def test_1T1ENA_defaults(service, reporter_dataset):
         '1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in expected_temperatures
     ]
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -117,8 +117,8 @@ def test_1T1ENA_aggrMethod(
 
     # Assert
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'index': [],
         'attributes': [
             {
@@ -191,8 +191,8 @@ def test_1T1ENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
     assert r.status_code == 200, r.text
     # Assert Results
     expected = {
-        'entityId': eid,
-        'entityType': etype,
+        'id': eid,
+        'type': etype,
         'index': exp_index,
         'attributes': [
             {
@@ -235,8 +235,8 @@ def test_1T1ENA_fromDate_toDate(service, reporter_dataset):
 
     # Assert
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -277,8 +277,8 @@ def test_1T1ENA_fromDate(service, reporter_dataset):
 
     # Assert
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -324,8 +324,8 @@ def test_1T1ENA_fromDate_and_last(service, last, reporter_dataset):
 
     # Assert
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -367,8 +367,8 @@ def test_1T1ENA_fromDate_toDate_with_quotes(service, reporter_dataset):
 
     # Assert
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -409,8 +409,8 @@ def test_1T1ENA_lastN(service, reporter_dataset):
 
     # Assert
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -452,8 +452,8 @@ def test_1T1E1A_lastN_with_limit(service, reporter_dataset):
         '1970-01-30T00:00:00+00:00'
     ]
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -496,8 +496,8 @@ def test_1T1ENA_limit(service, reporter_dataset):
 
     # Assert
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -538,8 +538,8 @@ def test_1T1ENA_offset(service, reporter_dataset):
 
     # Assert
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -582,8 +582,8 @@ def test_1T1ENA_combined(service, reporter_dataset):
 
     # Assert
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'index': expected_index,
         'attributes': [
             {
@@ -642,8 +642,5 @@ def test_not_found(service):
     h = {'Fiware-Service': service}
 
     r = requests.get(query_url(), params=query_params, headers=h)
-    assert r.status_code == 404, r.text
-    assert r.json() == {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    assert r.status_code == 200, r.text
+    assert r.json() == []

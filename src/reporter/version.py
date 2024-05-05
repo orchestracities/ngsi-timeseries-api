@@ -2,5 +2,5 @@
 
 def version():
     return {
-        'version': '0.9.0-dev'
+        'version': '1.0.1-dev'
     }

@@ -42,7 +42,7 @@ def assert_1TNE1A_response(obtained, expected, etype=entity_type,
     """
     assert isinstance(obtained, dict)
     if not values_only:
-        assert obtained['entityType'] == etype
+        assert obtained['type'] == etype
         assert obtained['attrName'] == attr_name
         obt_entities = obtained['entities']
         exp_entities = expected['entities']
@@ -76,23 +76,23 @@ def test_1TNE1A_defaults(service, reporter_dataset):
     ]
     expected_entities = [
         {
-            'entityId': 'Room0',
+            'id': 'Room0',
             'index': expected_index,
             'values': expected_values,
         },
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_values,
         },
         {
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index,
             'values': expected_values,
         }
     ]
     expected = {
-        'entityType': entity_type,
+        'type': entity_type,
         'attrName': attr_name,
         'entities': expected_entities
     }
@@ -118,23 +118,23 @@ def test_1TNE1A_idPattern(service, reporter_dataset):
     ]
     expected_entities = [
         {
-            'entityId': 'Room0',
+            'id': 'Room0',
             'index': expected_index,
             'values': expected_values,
         },
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_values,
         },
         {
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index,
             'values': expected_values,
         }
     ]
     expected = {
-        'entityType': entity_type,
+        'type': entity_type,
         'attrName': attr_name,
         'entities': expected_entities
     }
@@ -152,11 +152,8 @@ def idPattern_not_found(service):
     h = {'Fiware-Service': service}
 
     r = requests.get(query_url(), params=query_params, headers=h)
-    assert r.status_code == 404, r.text
-    assert r.json() == {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    assert r.status_code == 200, r.text
+    assert r.json() == []
 
 
 @pytest.mark.parametrize("service", services)
@@ -181,13 +178,13 @@ def test_1TNE1A_one_entity(service, reporter_dataset):
     ]
     expected_entities = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_values,
         }
     ]
     expected = {
-        'entityType': entity_type,
+        'type': entity_type,
         'attrName': attr_name,
         'entities': expected_entities
     }
@@ -215,19 +212,19 @@ def test_1TNE1A_some_entities(service, reporter_dataset):
     ]
     expected_entities = [
         {
-            'entityId': 'Room0',
+            'id': 'Room0',
             'index': expected_index,
             'values': expected_values,
         },
         {
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index,
             'values': expected_values,
         }
     ]
 
     expected = {
-        'entityType': entity_type,
+        'type': entity_type,
         'attrName': attr_name,
         'entities': expected_entities
     }
@@ -254,12 +251,12 @@ def test_1TNE1A_values_defaults(service, reporter_dataset):
     ]
     expected_entities = [
         {
-            'entityId': 'Room0',
+            'id': 'Room0',
             'index': expected_index,
             'values': expected_values,
         },
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_values,
         }
@@ -281,11 +278,8 @@ def test_not_found(service):
     h = {'Fiware-Service': service}
 
     r = requests.get(query_url(), params=query_params, headers=h)
-    assert r.status_code == 404, r.text
-    assert r.json() == {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    assert r.status_code == 200, r.text
+    assert r.json() == []
 
 
 @pytest.mark.parametrize("service", services)
@@ -311,19 +305,19 @@ def test_weird_ids(service, reporter_dataset):
     ]
     expected_entities = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_values,
         },
         {
-            'entityId': 'Room0',
+            'id': 'Room0',
             'index': expected_index,
             'values': expected_values,
         }
     ]
 
     expected = {
-        'entityType': entity_type,
+        'type': entity_type,
         'attrName': attr_name,
         'entities': expected_entities
     }
@@ -356,21 +350,21 @@ def test_different_time_indexes(service):
     r = requests.get(query_url(etype=etype), params=query_params, headers=h)
     assert r.status_code == 200, r.text
 
-    expected_entities = [{'entityId': 'Room3',
+    expected_entities = [{'id': 'Room3',
                           'index': ['1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in range(4)],
                           'values': list(range(4)),
                           },
-                         {'entityId': 'Room1',
+                         {'id': 'Room1',
                           'index': ['1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in range(2)],
                           'values': list(range(2)),
                           },
-                         {'entityId': 'Room2',
+                         {'id': 'Room2',
                           'index': ['1970-01-{:02}T00:00:00+00:00'.format(i + 1) for i in range(3)],
                           'values': list(range(3)),
                           }]
 
     expected = {
-        'entityType': etype,
+        'type': etype,
         'attrName': attr_name,
         'entities': expected_entities
     }
@@ -407,12 +401,12 @@ def test_aggregation_is_per_instance(service):
     # Assert Results
     expected_entities = [
         {
-            'entityId': 'Room0',
+            'id': 'Room0',
             'index': ['', ''],
             'values': [sum(range(3))],
         },
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': ['', ''],
             'values': [sum(range(9))],
         }
@@ -420,7 +414,7 @@ def test_aggregation_is_per_instance(service):
 
     obtained_data = r.json()
     assert isinstance(obtained_data, dict)
-    assert obtained_data['entityType'] == etype
+    assert obtained_data['type'] == etype
     assert obtained_data['attrName'] == attr_name
     assert obtained_data['entities'] == expected_entities
 
@@ -437,19 +431,19 @@ def test_aggregation_is_per_instance(service):
     assert r.status_code == 200, r.text
 
     # Assert Results
-    expected_entities = [{'entityId': 'Room0',
+    expected_entities = [{'id': 'Room0',
                           'index': ['1970-01-01T00:00:00+00:00',
-                                      '1970-01-06T00:00:00+00:00'],
+                                    '1970-01-06T00:00:00+00:00'],
                           'values': [2],
                           },
-                         {'entityId': 'Room1',
+                         {'id': 'Room1',
                           'index': ['1970-01-01T00:00:00+00:00',
                                     '1970-01-06T00:00:00+00:00'],
                           'values': [5],
                           }]
     obtained_data = r.json()
     assert isinstance(obtained_data, dict)
-    assert obtained_data['entityType'] == etype
+    assert obtained_data['type'] == etype
     assert obtained_data['attrName'] == attr_name
     assert obtained_data['entities'] == expected_entities
     delete_test_data(service, [etype])
@@ -510,14 +504,14 @@ def test_1TNE1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
     exp_sum = 0 + 1 + 2 + 3 + 4
     expected_entities = [
         {
-            'entityId': eid,
+            'id': eid,
             'index': exp_index,
             'values': [exp_sum, exp_sum, exp_sum],
         }
     ]
     obtained_data = r.json()
     assert isinstance(obtained_data, dict)
-    assert obtained_data['entityType'] == etype
+    assert obtained_data['type'] == etype
     assert obtained_data['attrName'] == attr_name
     assert obtained_data['entities'] == expected_entities
     delete_test_data(service, [etype])

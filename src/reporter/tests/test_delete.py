@@ -67,7 +67,8 @@ def test_delete_entity(service):
 
     # Values are gone
     r = requests.get(url, params=params, headers=h)
-    assert r.status_code == 404, r.text
+    assert r.status_code == 200, r.text
+    assert r.json() == []
 
     # But not for other entities of same type
     url = '{}/entities/{}'.format(QL_URL, entity_type + '1')
@@ -111,7 +112,8 @@ def test_delete_entities(service):
     for e in range(2):
         url = '{}/entities/{}'.format(QL_URL, '{}{}'.format(entity_type, e))
         r = requests.get(url, params=params, headers=h)
-        assert r.status_code == 404, r.text
+        assert r.status_code == 200, r.text
+        assert r.json() == []
 
     # But not for entities of other types
     url = '{}/entities/{}'.format(QL_URL, 'Room1')
@@ -136,11 +138,8 @@ def test_not_found(service):
     url = '{}/entities/{}'.format(QL_URL, entity_type + '0')
 
     r = requests.delete(url, params=params, headers=h)
-    assert r.status_code == 404, r.text
-    assert r.json() == {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    assert r.status_code == 200, r.text
+    assert r.json() == []
 
 
 @pytest.mark.parametrize("service", [
@@ -281,7 +280,8 @@ def test_delete_347():
     time.sleep(SLEEP_TIME)
     url = '{}/entities/{}'.format(QL_URL, '{}{}'.format(entity_type, 'un3'))
     r = requests.get(url, params=params, headers=h)
-    assert r.status_code == 404, r.text
+    assert r.status_code == 200, r.text
+    assert r.json() == []
 
 
 def test_delete_different_servicepaths():
@@ -366,7 +366,8 @@ def test_delete_different_servicepaths():
     time.sleep(SLEEP_TIME)
     url = '{}/entities/{}'.format(QL_URL, 'un3')
     r = requests.get(url, params=params, headers=h)
-    assert r.status_code == 404, r.text
+    assert r.status_code == 200, r.text
+    assert r.json() == []
 
 
 def test_drop_table():
@@ -448,4 +449,5 @@ def test_drop_table():
     time.sleep(SLEEP_TIME)
     url = '{}/entities/{}'.format(QL_URL, 'un3')
     r = requests.get(url, params=params, headers=h)
-    assert r.status_code == 404, r.text
+    assert r.status_code == 200, r.text
+    assert r.json() == []

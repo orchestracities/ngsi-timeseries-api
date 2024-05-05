@@ -1,6 +1,47 @@
 # QuantumLeap Release Notes
 
-## 0.9.0-dev
+## 1.0.1
+
+### New features
+
+### Bug fixes
+
+- Fix to return OK/200 and an empty result set when no data found (#720)
+- Fix to return id and type in place of entityId and entityType (#751)
+
+### Important: Backward compatibility
+
+This release breaks API backward compatibility. Existing `1.0.0` clients may
+**not** be able to work with this new Quantum Leap version without code
+changes.
+
+In detail: version `1.0.1` changes fields of query results. Up to
+version 1.0.0, Quantum Leap used the following JSON format for query results:
+
+    {
+        entityId: ...,
+        entityType: ...,
+        index: ...,
+        values: ...
+    }
+
+Version 1.0.1 changed `entityId` and `entityType` to `id` and `type`
+respectively for the query result as in e.g.
+
+    {
+        id: ...,
+        type: ...,
+        index: ...,
+        values: ...
+    }
+
+### Continuous Integration
+
+### Documentation
+
+### Technical debt
+
+## 1.0.0
 
 ### New features
 
@@ -24,6 +65,12 @@
 - Replaced entity with getter (#652)
 - Resolved TODO in Dockerfile (#680)
 - Resolved TODO at src/reporter/tests/test_timescale_types.py (#667)
+- Resolved TODO at src/transaltors/sql_transaltor.py (#694)
+- Resolved TODO at src/translator/sql_translator.py (#686)
+- Resolved TODO at src/translators/sql_translator.py#L768.py (#683)
+- Resolved TODO at src/reporter/tests/utils.py (#692)
+- Added error handling in src/wq/ql/notify.py (#673)
+- NGSI-LD tenant header (#664, #669)
 - Updated health endpoint for Timescale (#377)
 
 ### Bug fixes
@@ -31,6 +78,8 @@
 - Fix issues with integration tests and backward compatibility tests
 - Fix for linter failures (#670)
 - Fix for issue broken docker image (#674)
+- Fix for broken link in README.md (#688)
+- Fix for incorrect notation in file (#725)
 
 ### Continuous Integration
 
@@ -46,6 +95,9 @@
 - Fix variable names for CrateDB authentication (#636)
 
 ### Technical debt
+
+- Upgrade Python deps to fix security vulnerabilities, make the Docker
+  image build again and restore a working dev env on Apple silicon. (#737)
 
 ## 0.8.3
 

@@ -104,16 +104,11 @@ def query_1TNE1A(attr_name,   # In Path
                                 from_date,
                                 to_date,)
         logging.getLogger(__name__).info("Query processed successfully")
-        logging.warning(
-            "usage of id and type rather than entityId and entityType from version 0.9")
         return res
 
-    r = {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    r = []
     logging.getLogger(__name__).info("No value found for query")
-    return r, 404
+    return r, 200
 
 
 def _prepare_response(entities, attr_name, entity_type, entity_ids,
@@ -141,7 +136,7 @@ def _prepare_response(entities, attr_name, entity_type, entity_ids,
                 else:
                     index = indexes[ei]
                 i = {
-                    'entityId': ei,
+                    'id': ei,
                     'index': index,
                     'values': values[ei],
                 }
@@ -152,14 +147,14 @@ def _prepare_response(entities, attr_name, entity_type, entity_ids,
     for e_id in sorted(values.keys()):
         index = [] if aggr_method and not aggr_period else indexes[e_id]
         i = {
-            'entityId': e_id,
+            'id': e_id,
             'index': index,
             'values': values[e_id],
         }
         entries.append(i)
 
     res = {
-        'entityType': entity_type,
+        'type': entity_type,
         'attrName': attr_name,
         'entities': entries
     }
@@ -169,10 +164,8 @@ def _prepare_response(entities, attr_name, entity_type, entity_ids,
 def query_1TNE1A_value(*args, **kwargs):
     res = query_1TNE1A(*args, **kwargs)
     if isinstance(res, dict):
-        res.pop('entityType', None)
+        res.pop('type', None)
         res.pop('attrName', None)
         res['values'] = res['entities']
         res.pop('entities', None)
-    logging.warning(
-        "usage of id and type rather than entityId and entityType from version 0.9")
     return res

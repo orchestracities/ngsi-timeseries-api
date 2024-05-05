@@ -35,6 +35,10 @@ def notify_header(service=None, service_path=None):
     return headers(service, service_path, True)
 
 
+def notify_ld_header(service=None, service_path=None):
+    return ld_headers(service, service_path, True)
+
+
 def query_header(service=None, service_path=None):
     return headers(service, service_path, False)
 
@@ -45,6 +49,18 @@ def headers(service=None, service_path=None, content_type=True):
         h['Content-Type'] = 'application/json'
     if service:
         h['Fiware-Service'] = service
+    if service_path:
+        h['Fiware-ServicePath'] = service_path
+
+    return h
+
+
+def ld_headers(service=None, service_path=None, content_type=True):
+    h = {}
+    if content_type:
+        h['Content-Type'] = 'application/json'
+    if service:
+        h['NGSILD-Tenant'] = service
     if service_path:
         h['Fiware-ServicePath'] = service_path
 
@@ -122,7 +138,7 @@ def entities_with_different_attrs(etype: str) -> [dict]:
 
 
 def find_by_type(etype: str, entities: [dict]) -> [dict]:
-    return [e for e in entities if e['entityType'] == etype]
+    return [e for e in entities if e['type'] == etype]
 
 
 @pytest.mark.parametrize("service", services)
@@ -498,7 +514,8 @@ def test_no_value_for_attributes(service, notification):
     # Give time for notification to be processed
     time.sleep(SLEEP_TIME)
     res_get = requests.get(url_new, headers=notify_header(service))
-    assert res_get.status_code == 404
+    assert res_get.status_code == 200
+    assert res_get.json() == []
     # entity with missing value string
     notification['data'][0] = {
         'id': '299531',
@@ -516,7 +533,8 @@ def test_no_value_for_attributes(service, notification):
     # Give time for notification to be processed
     time.sleep(SLEEP_TIME)
     res_get = requests.get(url_new, headers=query_header(service))
-    assert res_get.status_code == 404
+    assert res_get.status_code == 200
+    assert res_get.json() == []
     # entity has both valid and empty attributes
     notification['data'][0] = {
         'id': '299531',
@@ -557,7 +575,8 @@ def test_no_value_no_type_for_attributes(service, notification):
     # Give time for notification to be processed
     time.sleep(SLEEP_TIME)
     res_get = requests.get(url_new, headers=query_header(service))
-    assert res_get.status_code == 404
+    assert res_get.status_code == 200
+    assert res_get.json() == []
     # Get value of attribute having value
     get_url_new = "{}/entities/Room1/attrs/pressure/value".format(QL_URL)
     url_new = '{}'.format(get_url_new)
@@ -758,6 +777,79 @@ def test_json_ld(service, notification):
         QL_URL)
     url_new = '{}'.format(get_url)
     insert_data(notification, notify_header(service), service)
+
+    res_get = requests.get(url_new, headers=query_header(service))
+    assert res_get.status_code == 200
+    assert res_get.json()['values'][0] == 10
+    delete_entity_type(service, notification['data'][0]['type'])
+
+
+@pytest.mark.parametrize("service", services)
+def test_ngsi_ld(service, notification):
+    # example json-ld entity
+    notification['data'][0] = {
+        "id": "urn:ngsi-ld:Streetlight:streetlight:guadalajara:4568",
+        "type": "Streetlight",
+        "location": {
+            "type": "GeoProperty",
+            "value": {
+                "type": "Point",
+                "coordinates": [-3.164485591715449, 40.62785133667262]
+            }
+        },
+        "areaServed": {
+            "type": "Property",
+            "value": "Roundabouts city entrance"
+        },
+        "status": {
+            "type": "Property",
+            "value": "ok"
+        },
+        "refStreetlightGroup": {
+            "type": "Relationship",
+            "object": "urn:ngsi-ld:StreetlightGroup:streetlightgroup:G345"
+        },
+        "refStreetlightModel": {
+            "type": "Relationship",
+            "object": "urn:ngsi-ld:StreetlightModel:streetlightmodel:STEEL_Tubular_10m"
+        },
+        "circuit": {
+            "type": "Property",
+            "value": "C-456-A467"
+        },
+        "lanternHeight": {
+            "type": "Property",
+            "value": 10
+        },
+        "locationCategory": {
+            "type": "Property",
+            "value": "centralIsland"
+        },
+        "powerState": {
+            "type": "Property",
+            "value": "off"
+        },
+        "controllingMethod": {
+            "type": "Property",
+            "value": "individual"
+        },
+        "dateLastLampChange": {
+            "type": "Property",
+            "value": {
+                "@type": "DateTime",
+                "@value": "2016-07-08T08:02:21.753Z"
+            }
+        },
+        "@context": [
+            "https://schema.lab.fiware.org/ld/context",
+            "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+        ]
+    }
+    url = '{}'.format(notify_url)
+    get_url = "{}/entities/urn:ngsi-ld:Streetlight:streetlight:guadalajara:4568/attrs/lanternHeight/value".format(
+        QL_URL)
+    url_new = '{}'.format(get_url)
+    insert_data(notification, notify_ld_header(service), service)
 
     res_get = requests.get(url_new, headers=query_header(service))
     assert res_get.status_code == 200

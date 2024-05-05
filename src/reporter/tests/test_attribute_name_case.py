@@ -99,8 +99,8 @@ def test_1t1e1a(service, attr_name, manage_db_entities):
     query_result.pop('index', None)
     assert query_result == {
         'attrName': attr_name,
-        'entityId': entity1_id,
-        'entityType': entity_type,
+        'id': entity1_id,
+        'type': entity_type,
         'values': [attr1_value, attr1_value]
     }
 
@@ -115,15 +115,15 @@ def test_1tne1a(service, attr_name, manage_db_entities):
         e.pop('index', None)
 
     assert query_result == {
-        'entityType': entity_type,
+        'type': entity_type,
         'attrName': attr_name,
         'entities': [
             {
-                'entityId': entity1_id,
+                'id': entity1_id,
                 'values': [attr1_value, attr1_value]
             },
             {
-                'entityId': entity2_id,
+                'id': entity2_id,
                 'values': [attr1_value, attr1_value]
             }
         ]
@@ -139,8 +139,8 @@ def test_1t1ena(service, attr1_name, attr2_name, manage_db_entities):
     query_result.pop('index', None)
 
     assert query_result == {
-        'entityId': entity2_id,
-        'entityType': entity_type,
+        'id': entity2_id,
+        'type': entity_type,
         'attributes': [
             {
                 'attrName': attr1,

@@ -107,16 +107,11 @@ def query_1TNENA(entity_type=None,  # In Path
                                 from_date,
                                 to_date,)
         logging.getLogger(__name__).info("Query processed successfully")
-        logging.warning(
-            "usage of id and type rather than entityId and entityType from version 0.9")
         return res
 
-    r = {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    r = []
     logging.getLogger(__name__).info("No value found for query")
-    return r, 404
+    return r, 200
 
 
 def _prepare_response(entities, attrs, entity_type, entity_ids,
@@ -145,13 +140,13 @@ def _prepare_response(entities, attrs, entity_type, entity_ids,
             f_date,
             t_date] if aggr_method and not aggr_period else e['index']
         entity = {
-            'entityId': e['id'],
+            'id': e['id'],
             'index': index,
             'attributes': attributes
         }
         entries.append(entity)
     res = {
-        'entityType': entity_type,
+        'type': entity_type,
         'entities': entries
     }
     return res
@@ -160,9 +155,7 @@ def _prepare_response(entities, attrs, entity_type, entity_ids,
 def query_1TNENA_value(*args, **kwargs):
     res = query_1TNENA(*args, **kwargs)
     if isinstance(res, dict):
-        res.pop('entityType', None)
+        res.pop('type', None)
         res['values'] = res['entities']
         res.pop('entities', None)
-    logging.warning(
-        "usage of id and type rather than entityId and entityType from version 0.9")
     return res

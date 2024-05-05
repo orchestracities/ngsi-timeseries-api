@@ -57,8 +57,6 @@ def query_1T1E1A(attr_name,   # In Path
     except NGSIUsageError as e:
         msg = "Bad Request Error: {}".format(e)
         logging.getLogger(__name__).error(msg, exc_info=True)
-        logging.warning(
-            "usage of id and type rather than entityId and entityType from version 0.9")
         return {
             "error": "{}".format(type(e)),
             "description": str(e)
@@ -84,8 +82,8 @@ def query_1T1E1A(attr_name,   # In Path
         index = [] if aggr_method and not aggr_period else entities[0]['index']
         matched_attr = lookup_string_match(entities[0], attr_name)
         res = {
-            'entityId': entities[0]['id'],
-            'entityType': entities[0]['type'],
+            'id': entities[0]['id'],
+            'type': entities[0]['type'],
             'attrName': attr_name,
             'index': index,
             'values': matched_attr['values'] if matched_attr else []
@@ -93,20 +91,15 @@ def query_1T1E1A(attr_name,   # In Path
         logging.getLogger(__name__).info("Query processed successfully")
         return res
 
-    r = {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    r = []
     logging.getLogger(__name__).info("No value found for query")
-    return r, 404
+    return r, 200
 
 
 def query_1T1E1A_value(*args, **kwargs):
     res = query_1T1E1A(*args, **kwargs)
     if isinstance(res, dict):
-        res.pop('entityId', None)
-        res.pop('entityType', None)
+        res.pop('id', None)
+        res.pop('type', None)
         res.pop('attrName', None)
-    logging.warning(
-        "usage of id and type rather than entityId and entityType from version 0.9")
     return res

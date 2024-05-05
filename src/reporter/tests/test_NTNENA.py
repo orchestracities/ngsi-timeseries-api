@@ -66,12 +66,12 @@ def test_NTNENA_defaults(service, reporter_dataset):
     ]
     expected_entities = [
         {
-            'entityId': entity_id,
+            'id': entity_id,
             'index': expected_index,
             'values': expected_temperatures
         },
         {
-            'entityId': entity_id_1,
+            'id': entity_id_1,
             'index': expected_index,
             'values': expected_temperatures
 
@@ -79,19 +79,19 @@ def test_NTNENA_defaults(service, reporter_dataset):
     ]
     expected_entities_1 = [
         {
-            'entityId': entity_id_1_1,
+            'id': entity_id_1_1,
             'index': expected_index_1,
             'values': expected_temperatures_1
         }
     ]
     expected_entities_pressure = [
         {
-            'entityId': entity_id,
+            'id': entity_id,
             'index': expected_index,
             'values': expected_pressures
         },
         {
-            'entityId': entity_id_1,
+            'id': entity_id_1,
             'index': expected_index,
             'values': expected_pressures
 
@@ -99,7 +99,7 @@ def test_NTNENA_defaults(service, reporter_dataset):
     ]
     expected_entities_pressure_1 = [
         {
-            'entityId': entity_id_1_1,
+            'id': entity_id_1_1,
             'index': expected_index_1,
             'values': expected_pressures_1
         }
@@ -108,21 +108,21 @@ def test_NTNENA_defaults(service, reporter_dataset):
     expected_types = [
         {
             'entities': expected_entities_1,
-            'entityType': entity_type_1
+            'type': entity_type_1
         },
         {
             'entities': expected_entities,
-            'entityType': entity_type
+            'type': entity_type
         }
     ]
     expected_types_pressure = [
         {
             'entities': expected_entities_pressure_1,
-            'entityType': entity_type_1
+            'type': entity_type_1
         },
         {
             'entities': expected_entities_pressure,
-            'entityType': entity_type
+            'type': entity_type
         }
     ]
 
@@ -164,12 +164,12 @@ def test_NTNENA_type(service, reporter_dataset):
     ]
     expected_entities = [
         {
-            'entityId': entity_id,
+            'id': entity_id,
             'index': expected_index,
             'values': expected_temperatures
         },
         {
-            'entityId': entity_id_1,
+            'id': entity_id_1,
             'index': expected_index,
             'values': expected_temperatures
 
@@ -177,12 +177,12 @@ def test_NTNENA_type(service, reporter_dataset):
     ]
     expected_entities_pressure = [
         {
-            'entityId': entity_id,
+            'id': entity_id,
             'index': expected_index,
             'values': expected_pressures
         },
         {
-            'entityId': entity_id_1,
+            'id': entity_id_1,
             'index': expected_index,
             'values': expected_pressures
 
@@ -192,13 +192,13 @@ def test_NTNENA_type(service, reporter_dataset):
     expected_types = [
         {
             'entities': expected_entities,
-            'entityType': entity_type
+            'type': entity_type
         }
     ]
     expected_types_pressure = [
         {
             'entities': expected_entities_pressure,
-            'entityType': entity_type
+            'type': entity_type
         }
     ]
     expected_attrs = [
@@ -239,12 +239,12 @@ def test_NTNENA_idPattern(service, reporter_dataset):
     ]
     expected_entities = [
         {
-            'entityId': entity_id,
+            'id': entity_id,
             'index': expected_index,
             'values': expected_temperatures
         },
         {
-            'entityId': entity_id_1,
+            'id': entity_id_1,
             'index': expected_index,
             'values': expected_temperatures
 
@@ -252,12 +252,12 @@ def test_NTNENA_idPattern(service, reporter_dataset):
     ]
     expected_entities_pressure = [
         {
-            'entityId': entity_id,
+            'id': entity_id,
             'index': expected_index,
             'values': expected_pressures
         },
         {
-            'entityId': entity_id_1,
+            'id': entity_id_1,
             'index': expected_index,
             'values': expected_pressures
 
@@ -267,13 +267,13 @@ def test_NTNENA_idPattern(service, reporter_dataset):
     expected_types = [
         {
             'entities': expected_entities,
-            'entityType': entity_type
+            'type': entity_type
         }
     ]
     expected_types_pressure = [
         {
             'entities': expected_entities_pressure,
-            'entityType': entity_type
+            'type': entity_type
         }
     ]
     expected_attrs = [
@@ -301,11 +301,8 @@ def idPattern_not_found(service, reporter_dataset):
         'idPattern': 'NotThere'
     }
     r = query(params=query_params, service=service)
-    assert r.status_code == 404, r.text
-    assert r.json() == {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    assert r.status_code == 200, r.text
+    assert r.json() == []
 
 
 @pytest.mark.parametrize("service", services)
@@ -327,14 +324,14 @@ def test_NTNE1A_one_entity(service, reporter_dataset):
     ]
     expected_entities = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_temperatures
         }
     ]
     expected_entities_pressure = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_pressures
         }
@@ -343,13 +340,13 @@ def test_NTNE1A_one_entity(service, reporter_dataset):
     expected_types = [
         {
             'entities': expected_entities,
-            'entityType': 'Room'
+            'type': 'Room'
         }
     ]
     expected_types_pressure = [
         {
             'entities': expected_entities_pressure,
-            'entityType': 'Room'
+            'type': 'Room'
         }
     ]
     expected_attrs = [
@@ -390,12 +387,12 @@ def test_1TNENA_some_entities(service, reporter_dataset):
 
     expected_entities = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_temperatures
         },
         {
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index,
             'values': expected_temperatures
 
@@ -403,12 +400,12 @@ def test_1TNENA_some_entities(service, reporter_dataset):
     ]
     expected_entities_pressure = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_pressures
         },
         {
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index,
             'values': expected_pressures
 
@@ -418,13 +415,13 @@ def test_1TNENA_some_entities(service, reporter_dataset):
     expected_types = [
         {
             'entities': expected_entities,
-            'entityType': 'Room'
+            'type': 'Room'
         }
     ]
     expected_types_pressure = [
         {
             'entities': expected_entities_pressure,
-            'entityType': 'Room'
+            'type': 'Room'
         }
     ]
     expected_attrs = [
@@ -463,12 +460,12 @@ def test_NTNENA_values_defaults(service, reporter_dataset):
     ]
     expected_entities = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_temperatures
         },
         {
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index,
             'values': expected_temperatures
 
@@ -476,12 +473,12 @@ def test_NTNENA_values_defaults(service, reporter_dataset):
     ]
     expected_entities_pressure = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_pressures
         },
         {
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index,
             'values': expected_pressures
 
@@ -491,13 +488,13 @@ def test_NTNENA_values_defaults(service, reporter_dataset):
     expected_types = [
         {
             'entities': expected_entities,
-            'entityType': 'Room'
+            'type': 'Room'
         }
     ]
     expected_types_pressure = [
         {
             'entities': expected_entities_pressure,
-            'entityType': 'Room'
+            'type': 'Room'
         }
     ]
     expected_attrs = [
@@ -538,12 +535,12 @@ def test_NTNE_fromDate_toDate(service, reporter_dataset):
 
     expected_entities = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_temperatures
         },
         {
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index,
             'values': expected_temperatures
 
@@ -551,12 +548,12 @@ def test_NTNE_fromDate_toDate(service, reporter_dataset):
     ]
     expected_entities_pressure = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_pressures
         },
         {
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index,
             'values': expected_pressures
 
@@ -566,13 +563,13 @@ def test_NTNE_fromDate_toDate(service, reporter_dataset):
     expected_types = [
         {
             'entities': expected_entities,
-            'entityType': 'Room'
+            'type': 'Room'
         }
     ]
     expected_types_pressure = [
         {
             'entities': expected_entities_pressure,
-            'entityType': 'Room'
+            'type': 'Room'
         }
     ]
     expected_attrs = [
@@ -613,12 +610,12 @@ def test_NTNENA_fromDate_toDate_with_quotes(service, reporter_dataset):
     ]
     expected_entities = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_temperatures
         },
         {
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index,
             'values': expected_temperatures
 
@@ -626,12 +623,12 @@ def test_NTNENA_fromDate_toDate_with_quotes(service, reporter_dataset):
     ]
     expected_entities_pressure = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_pressures
         },
         {
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index,
             'values': expected_pressures
 
@@ -641,13 +638,13 @@ def test_NTNENA_fromDate_toDate_with_quotes(service, reporter_dataset):
     expected_types = [
         {
             'entities': expected_entities,
-            'entityType': 'Room'
+            'type': 'Room'
         }
     ]
     expected_types_pressure = [
         {
             'entities': expected_entities_pressure,
-            'entityType': 'Room'
+            'type': 'Room'
         }
     ]
     expected_attrs = [
@@ -688,12 +685,12 @@ def test_NTNENA_limit(service, reporter_dataset):
     ]
     expected_entities = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_temperatures
         },
         {
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index,
             'values': expected_temperatures
 
@@ -701,12 +698,12 @@ def test_NTNENA_limit(service, reporter_dataset):
     ]
     expected_entities_pressure = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_pressures
         },
         {
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index,
             'values': expected_pressures
 
@@ -716,13 +713,13 @@ def test_NTNENA_limit(service, reporter_dataset):
     expected_types = [
         {
             'entities': expected_entities,
-            'entityType': 'Room'
+            'type': 'Room'
         }
     ]
     expected_types_pressure = [
         {
             'entities': expected_entities_pressure,
-            'entityType': 'Room'
+            'type': 'Room'
         }
     ]
     expected_attrs = [
@@ -765,12 +762,12 @@ def test_NTNENA_combined(service, reporter_dataset):
     ]
     expected_entities = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_temperatures
         },
         {
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index,
             'values': expected_temperatures
 
@@ -778,12 +775,12 @@ def test_NTNENA_combined(service, reporter_dataset):
     ]
     expected_entities_pressure = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_pressures
         },
         {
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index,
             'values': expected_pressures
 
@@ -793,13 +790,13 @@ def test_NTNENA_combined(service, reporter_dataset):
     expected_types = [
         {
             'entities': expected_entities,
-            'entityType': 'Room'
+            'type': 'Room'
         }
     ]
     expected_types_pressure = [
         {
             'entities': expected_entities_pressure,
-            'entityType': 'Room'
+            'type': 'Room'
         }
     ]
     expected_attrs = [
@@ -842,12 +839,12 @@ def test_weird_ids(service, reporter_dataset):
     ]
     expected_entities = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_temperatures
         },
         {
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index,
             'values': expected_temperatures
 
@@ -855,12 +852,12 @@ def test_weird_ids(service, reporter_dataset):
     ]
     expected_entities_pressure = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': expected_pressures
         },
         {
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index,
             'values': expected_pressures
 
@@ -870,13 +867,13 @@ def test_weird_ids(service, reporter_dataset):
     expected_types = [
         {
             'entities': expected_entities,
-            'entityType': 'Room'
+            'type': 'Room'
         }
     ]
     expected_types_pressure = [
         {
             'entities': expected_entities_pressure,
-            'entityType': 'Room'
+            'type': 'Room'
         }
     ]
     expected_attrs = [
@@ -953,7 +950,7 @@ def test_NTNENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
     expected_temperatures = 0 + 1 + 2 + 3 + 4
     expected_entities = [
         {
-            'entityId': eid,
+            'id': eid,
             'index': exp_index,
             'values': [expected_temperatures, expected_temperatures,
                        expected_temperatures]
@@ -962,7 +959,7 @@ def test_NTNENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
     expected_types = [
         {
             'entities': expected_entities,
-            'entityType': etype
+            'type': etype
         }
     ]
     expected_attrs = [
@@ -985,11 +982,8 @@ def test_not_found(service, reporter_dataset):
         'type': 'NotThere'
     }
     r = query(params=query_params, service=service)
-    assert r.status_code == 404, r.text
-    assert r.json() == {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    assert r.status_code == 200, r.text
+    assert r.json() == []
 
 
 @pytest.mark.parametrize("service", services)
@@ -1022,38 +1016,38 @@ def test_NTNENA_types_two_attribute(service, reporter_dataset):
     ]
     expected_entities_kitchen = [
         {
-            'entityId': entity_id_1_1,
+            'id': entity_id_1_1,
             'index': expected_index_kitchen,
             'values': expected_pressures_kitchen
         }
     ]
     expected_entities_room = [
         {
-            'entityId': entity_id,
+            'id': entity_id,
             'index': expected_index,
             'values': expected_pressures
         },
         {
-            'entityId': entity_id_1,
+            'id': entity_id_1,
             'index': expected_index,
             'values': expected_pressures
         }
     ]
     expected_entities_kitchen_temp = [
         {
-            'entityId': entity_id_1_1,
+            'id': entity_id_1_1,
             'index': expected_index_kitchen,
             'values': expected_temperatures_kitchen
         }
     ]
     expected_entities_room_temp = [
         {
-            'entityId': entity_id,
+            'id': entity_id,
             'index': expected_index,
             'values': expected_temperatures
         },
         {
-            'entityId': entity_id_1,
+            'id': entity_id_1,
             'index': expected_index,
             'values': expected_temperatures
         }
@@ -1061,21 +1055,21 @@ def test_NTNENA_types_two_attribute(service, reporter_dataset):
     expected_types_new = [
         {
             'entities': expected_entities_kitchen,
-            'entityType': entity_type_1
+            'type': entity_type_1
         },
         {
             'entities': expected_entities_room,
-            'entityType': entity_type
+            'type': entity_type
         }
     ]
     expected_types = [
         {
             'entities': expected_entities_kitchen_temp,
-            'entityType': entity_type_1
+            'type': entity_type_1
         },
         {
             'entities': expected_entities_room_temp,
-            'entityType': entity_type
+            'type': entity_type
         }
     ]
     expected_attrs = [
@@ -1118,19 +1112,19 @@ def test_1TNENA_types_one_attribute(service, reporter_dataset):
 
     expected_entities_kitchen = [
         {
-            'entityId': entity_id_1_1,
+            'id': entity_id_1_1,
             'index': expected_index_kitchen,
             'values': expected_pressures_kitchen
         }
     ]
     expected_entities_room = [
         {
-            'entityId': entity_id,
+            'id': entity_id,
             'index': expected_index,
             'values': expected_pressures
         },
         {
-            'entityId': entity_id_1,
+            'id': entity_id_1,
             'index': expected_index,
             'values': expected_pressures
         }
@@ -1138,11 +1132,11 @@ def test_1TNENA_types_one_attribute(service, reporter_dataset):
     expected_types = [
         {
             'entities': expected_entities_kitchen,
-            'entityType': entity_type_1
+            'type': entity_type_1
         },
         {
             'entities': expected_entities_room,
-            'entityType': entity_type
+            'type': entity_type
         }
     ]
     expected_attrs = [
@@ -1173,12 +1167,12 @@ def test_aggregation_is_per_instance(service, reporter_dataset):
     expected_index = ['', '']
     expected_entities = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': [sum(range(4))]
         },
         {
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index,
             'values': [sum(range(4))]
 
@@ -1188,7 +1182,7 @@ def test_aggregation_is_per_instance(service, reporter_dataset):
     expected_types = [
         {
             'entities': expected_entities,
-            'entityType': 'Room'
+            'type': 'Room'
         }
     ]
 
@@ -1226,7 +1220,7 @@ def test_aggregation_is_per_instance(service, reporter_dataset):
     ]
     expected_entities = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': [1]
         }
@@ -1234,7 +1228,7 @@ def test_aggregation_is_per_instance(service, reporter_dataset):
     expected_types = [
         {
             'entities': expected_entities,
-            'entityType': 'Room'
+            'type': 'Room'
         }
     ]
     expected_attrs = [
@@ -1262,7 +1256,7 @@ def test_aggregation_is_per_instance(service, reporter_dataset):
     expected_index = ['', '']
     expected_entities = [
         {
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index,
             'values': [sum(range(4)) / 4]
         }
@@ -1270,7 +1264,7 @@ def test_aggregation_is_per_instance(service, reporter_dataset):
     expected_types = [
         {
             'entities': expected_entities,
-            'entityType': 'Room'
+            'type': 'Room'
         }
     ]
     expected_attrs = [

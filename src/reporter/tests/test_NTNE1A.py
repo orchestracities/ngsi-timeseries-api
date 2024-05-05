@@ -1,5 +1,5 @@
 from conftest import QL_URL
-from reporter.tests.utils import AttrQueryResultGen, insert_test_data,\
+from reporter.tests.utils import AttrQueryResultGen, insert_test_data, \
     delete_test_data, temperatures, wait_for_insert
 import pytest
 import requests
@@ -113,11 +113,8 @@ def idPattern_not_found(service, reporter_dataset):
     }
     h = {'Fiware-Service': service}
     r = requests.get(query_url(), params=query_params, headers=h)
-    assert r.status_code == 404, r.text
-    assert r.json() == {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    assert r.status_code == 200, r.text
+    assert r.json() == []
 
 
 @pytest.mark.parametrize("service", services)
@@ -281,7 +278,7 @@ def test_NTNE1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
     obtained = r.json()
     expected_entities = [
         {
-            'entityId': entity_id,
+            'id': entity_id,
             'index': exp_index,
             'values': [expected_temperatures, expected_temperatures,
                        expected_temperatures]
@@ -290,7 +287,7 @@ def test_NTNE1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
     expected_types = [
         {
             'entities': expected_entities,
-            'entityType': entity_type
+            'type': entity_type
         }
     ]
     expected = {
@@ -308,11 +305,8 @@ def test_not_found(service, reporter_dataset):
     }
     h = {'Fiware-Service': service}
     r = requests.get(query_url(), params=query_params, headers=h)
-    assert r.status_code == 404, r.text
-    assert r.json() == {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    assert r.status_code == 200, r.text
+    assert r.json() == []
 
 
 @pytest.mark.parametrize("service", services)

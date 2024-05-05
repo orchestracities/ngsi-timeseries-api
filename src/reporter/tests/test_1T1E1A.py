@@ -65,8 +65,8 @@ def test_1T1E1A_defaults(service, reporter_dataset):
         '1970-01-{:02}T00:00:00.00+00:00'.format(i + 1) for i in exp_values
     ]
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'attrName': attr_name,
         'index': exp_index,
         'values': exp_values
@@ -94,8 +94,8 @@ def test_1T1E1A_aggrMethod(service, reporter_dataset, aggr_method, aggr_value):
 
     obtained = r.json()
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'attrName': attr_name,
         'index': [],
         'values': [aggr_value]
@@ -160,8 +160,8 @@ def test_1T1E1A_aggrPeriod(service, aggr_period, exp_index, ins_period):
     obtained = r.json()
     exp_avg = (0 + 1 + 2 + 3) / 4.
     expected = {
-        'entityId': eid,
-        'entityType': etype,
+        'id': eid,
+        'type': etype,
         'attrName': attr_name,
         'index': exp_index,
         'values': [exp_avg, exp_avg, exp_avg]
@@ -193,8 +193,8 @@ def test_1T1E1A_fromDate_toDate(service, reporter_dataset):
     # Assert
     obtained = r.json()
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'index': expected_index,
         'attrName': attr_name,
         'values': expected_values
@@ -226,8 +226,8 @@ def test_1T1E1A_fromDate_toDate_with_quotes(service, reporter_dataset):
     # Assert
     obtained = r.json()
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'index': expected_index,
         'attrName': attr_name,
         'values': expected_values
@@ -258,8 +258,8 @@ def test_1T1E1A_lastN(service, reporter_dataset):
     # Assert
     obtained = r.json()
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'attrName': attr_name,
         'index': expected_index,
         'values': expected_values
@@ -293,8 +293,8 @@ def test_1T1E1A_lastN_with_limit(service, reporter_dataset):
     # Assert
     obtained = r.json()
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'attrName': attr_name,
         'index': expected_index,
         'values': expected_temperatures
@@ -325,8 +325,8 @@ def test_1T1E1A_limit(service, reporter_dataset):
     # Assert
     obtained = r.json()
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'attrName': attr_name,
         'index': expected_index,
         'values': expected_values
@@ -358,8 +358,8 @@ def test_1T1E1A_offset(service, reporter_dataset):
     # Assert
     obtained = r.json()
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'attrName': attr_name,
         'index': expected_index,
         'values': expected_values
@@ -394,8 +394,8 @@ def test_1T1E1A_combined(service, reporter_dataset):
     # Assert
     obtained = r.json()
     expected = {
-        'entityId': entity_id,
-        'entityType': entity_type,
+        'id': entity_id,
+        'type': entity_type,
         'attrName': attr_name,
         'index': expected_index,
         'values': expected_values
@@ -437,11 +437,8 @@ def test_not_found(service):
     h = {'Fiware-Service': service}
 
     r = requests.get(query_url(), params=query_params, headers=h)
-    assert r.status_code == 404, r.text
-    assert r.json() == {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    assert r.status_code == 200, r.text
+    assert r.json() == []
 
 
 @pytest.mark.parametrize("service", services)

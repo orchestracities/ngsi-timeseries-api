@@ -43,7 +43,7 @@ def assert_1TNENA_response(obtained, expected, etype=entity_type,
     """
     assert isinstance(obtained, dict)
     if not values_only:
-        assert obtained['entityType'] == etype
+        assert obtained['type'] == etype
         obt_entities_index = obtained['entities'][0]['index']
         exp_entities_index = expected['entities'][0]['index']
     else:
@@ -80,23 +80,23 @@ def test_1TNENA_defaults(service, reporter_dataset):
     expected_entities = [
         {
             'attributes': expected_attributes,
-            'entityId': 'Room0',
+            'id': 'Room0',
             'index': expected_index
         },
         {
             'attributes': expected_attributes,
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index
         },
         {
             'attributes': expected_attributes,
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index
         }
     ]
     expected = {
         'entities': expected_entities,
-        'entityType': entity_type
+        'type': entity_type
     }
 
     obtained = r.json()
@@ -129,23 +129,23 @@ def test_1TNENA_idPattern(service, reporter_dataset):
     expected_entities = [
         {
             'attributes': expected_attributes,
-            'entityId': 'Room0',
+            'id': 'Room0',
             'index': expected_index
         },
         {
             'attributes': expected_attributes,
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index
         },
         {
             'attributes': expected_attributes,
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index
         }
     ]
     expected = {
         'entities': expected_entities,
-        'entityType': entity_type
+        'type': entity_type
     }
 
     obtained = r.json()
@@ -159,11 +159,8 @@ def idPattern_not_found(service):
     }
     h = {'Fiware-Service': service}
     r = requests.get(query_url(), params=query_params, headers=h)
-    assert r.status_code == 404, r.text
-    assert r.json() == {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    assert r.status_code == 200, r.text
+    assert r.json() == []
 
 
 @pytest.mark.parametrize("service", services)
@@ -200,13 +197,13 @@ def test_1TNENA_one_entity(service, reporter_dataset):
     expected_entities = [
         {
             'attributes': expected_attributes,
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index
         }
     ]
     expected = {
         'entities': expected_entities,
-        'entityType': entity_type
+        'type': entity_type
     }
     obtained = r.json()
     assert_1TNENA_response(obtained, expected)
@@ -244,19 +241,19 @@ def test_1TNENA_some_entities(service, reporter_dataset):
     expected_entities = [
         {
             'attributes': expected_attributes,
-            'entityId': 'Room0',
+            'id': 'Room0',
             'index': expected_index
         },
         {
             'attributes': expected_attributes,
-            'entityId': 'Room2',
+            'id': 'Room2',
             'index': expected_index
         },
     ]
 
     expected = {
         'entities': expected_entities,
-        'entityType': entity_type
+        'type': entity_type
     }
 
     obtained = r.json()
@@ -294,12 +291,12 @@ def test_1TNENA_values_defaults(service, reporter_dataset):
     expected_entities = [
         {
             'attributes': expected_attributes,
-            'entityId': 'Room0',
+            'id': 'Room0',
             'index': expected_index
         },
         {
             'attributes': expected_attributes,
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index
         },
     ]
@@ -319,11 +316,8 @@ def test_not_found(service):
     }
     h = {'Fiware-Service': service}
     r = requests.get(query_url(), params=query_params, headers=h)
-    assert r.status_code == 404, r.text
-    assert r.json() == {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    assert r.status_code == 200, r.text
+    assert r.json() == []
 
 
 @pytest.mark.parametrize("service", services)
@@ -361,19 +355,19 @@ def test_weird_ids(service, reporter_dataset):
     expected_entities = [
         {
             'attributes': expected_attributes,
-            'entityId': 'Room0',
+            'id': 'Room0',
             'index': expected_index
         },
         {
             'attributes': expected_attributes,
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': expected_index
         },
     ]
 
     expected = {
         'entities': expected_entities,
-        'entityType': entity_type
+        'type': entity_type
     }
 
     obtained = r.json()
@@ -407,19 +401,19 @@ def test_aggregation_is_per_instance(service, reporter_dataset):
     expected_entities = [
         {
             'attributes': expected_attributes,
-            'entityId': 'Room0',
+            'id': 'Room0',
             'index': ['', '']
         },
         {
             'attributes': expected_attributes,
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': ['', '']
         }
     ]
 
     expected = {
         'entities': expected_entities,
-        'entityType': entity_type
+        'type': entity_type
     }
 
     obtained = r.json()
@@ -448,19 +442,19 @@ def test_aggregation_is_per_instance(service, reporter_dataset):
     expected_entities = [
         {
             'attributes': expected_attributes,
-            'entityId': 'Room0',
+            'id': 'Room0',
             'index': ['1970-01-01T00:00:00+00:00', '1970-01-06T00:00:00+00:00']
         },
         {
             'attributes': expected_attributes,
-            'entityId': 'Room1',
+            'id': 'Room1',
             'index': ['1970-01-01T00:00:00+00:00', '1970-01-06T00:00:00+00:00']
         }
     ]
 
     expected = {
         'entities': expected_entities,
-        'entityType': entity_type
+        'type': entity_type
     }
 
     obtained = r.json()
@@ -528,14 +522,14 @@ def test_1TNENA_aggrPeriod(service, aggr_period, exp_index, ins_period):
     expected_entities = [
         {
             'attributes': expected_attributes,
-            'entityId': eid,
+            'id': eid,
             'index': exp_index
         }
     ]
 
     expected = {
         'entities': expected_entities,
-        'entityType': etype
+        'type': etype
     }
 
     obtained = r.json()

@@ -51,20 +51,11 @@ def query_NTNE(limit=10000,
     if entities:
         res = []
         for entity in entities:
-            entity['entityId'] = entity['id']
-            entity['entityType'] = entity['type']
             entity['index'] = entity['index'][0]
-            del entity['id']
-            del entity['type']
             res.append(entity)
-        logging.warning(
-            "usage of id and type rather than entityId and entityType from version 0.9")
         logging.getLogger(__name__).info("Query processed successfully")
         return res
 
-    r = {
-        "error": "Not Found",
-        "description": "No records were found for such query."
-    }
+    r = []
     logging.getLogger(__name__).info("No value found for query")
-    return r, 404
+    return r, 200
