@@ -68,22 +68,41 @@ class CrateSql:
     """Crate SQL utilities."""
 
     @staticmethod
+    def escape_single_quote(x: str) -> str:
+        """
+        Single quote escaping for Postres strings: replace any single quote
+        with two single quotes. E.g. x'y'z ~~~> x''y''z
+        """
+        return x.replace("'", "''")
+
+    @staticmethod
+    def escape_double_quote(x: str) -> str:
+        """
+        Double quote escaping for Postres quoted identifiers: replace any
+        double quote with two double quotes. E.g. x"y"z ~~~> x""y""z
+        """
+        return x.replace('"', '""')
+
+    @staticmethod
     def to_string(x) -> str:
         """
-        Convert the input into a Crate string.
+        Convert the input into a Crate string, escaping if needed.
         E.g. input   ~~~> 'input'
+             in'put  ~~~> 'in''put'
         """
-        v = str(x)  # TODO consider escaping?
-        return f"'{v}'"
+        escaped = CrateSql.escape_single_quote(str(x))
+        return f"'{escaped}'"
 
     @staticmethod
     def to_quoted_identifier(x) -> str:
         """
-        Convert the input into a Crate quoted identifier.
+        Convert the input into a Crate quoted identifier, escaping if
+        needed.
         E.g. input   ~~~> "input"
+             in"put  ~~~> "in""put"
         """
-        v = str(x)  # TODO consider escaping?
-        return f'"{v}"'
+        escaped = CrateSql.escape_double_quote(str(x))
+        return f'"{escaped}"'
 
 
 class CrateTableIdentifier:
