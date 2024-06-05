@@ -4,6 +4,8 @@
 
 ### New features
 
+- Added escaping in crate-exporter.py (#702)
+
 ### Bug fixes
 
 - Fix to return OK/200 and an empty result set when no data found (#720)
