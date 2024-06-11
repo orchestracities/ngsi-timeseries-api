@@ -9,7 +9,7 @@ jobs:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
-      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib
+      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions
       - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
@@ -39,7 +39,7 @@ jobs:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
-      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib
+      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions
       - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
@@ -81,7 +81,7 @@ jobs:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
-      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib
+      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions
       - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
@@ -124,7 +124,7 @@ jobs:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
-      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib
+      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions
       - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
@@ -165,7 +165,7 @@ jobs:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
-      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib
+      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions
       - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
