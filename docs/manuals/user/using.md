@@ -448,7 +448,10 @@ Use the filters to delete only records in certain intervals of time.
 
 QuantumLeap supports the use of different tenants, just like Orion does with
 the usage FIWARE headers documented
-[here](https://fiware-orion.readthedocs.io/en/master/user/multitenancy/index.html).
+[here](https://fiware-orion.readthedocs.io/en/master/orion-api.html#multi-tenancy).
+However, QuantumLeap does not handles Fiware-ServicePath in queries the same way
+Orion does. In QuantumLeap, Fiware-ServicePath used in headers when inserting data
+and querying data should be same.
 
 Recall the use of tenancy headers (`Fiware-Service` and `Fiware-ServicePath`) is
 optional. Data insertion and retrieval will work by default without those.

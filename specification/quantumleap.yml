@@ -156,14 +156,16 @@ parameters:
     required: false
     type: string
     description: "The corresponding 'fiware-service' header.
-    See http://fiware-orion.readthedocs.io/en/latest/user/multitenancy/index.html#multi-tenancy"
+    See https://fiware-orion.readthedocs.io/en/master/orion-api.html#multi-tenancy"
   fiware-ServicePath:
     in: header
     name: fiware-ServicePath
     required: false
     type: string
     description: "The corresponding 'fiware-servicepath' header.
-    See http://fiware-orion.readthedocs.io/en/latest/user/multitenancy/index.html#multi-tenancy"
+    See https://fiware-orion.readthedocs.io/en/master/orion-api.html#multi-tenancy
+    However, QuantumLeap does not handles Fiware-ServicePath in queries the same way Orion does.
+    In QuantumLeap, Fiware-ServicePath used in headers when inserting data and querying data should be same."
   fiware-correlator:
     in: header
     name: Fiware-Correlator
@@ -171,7 +173,7 @@ parameters:
     type: string
     description: "The request correlation ID Context Broker forwards in
     notification messages.
-    See https://fiware-orion.readthedocs.io/en/latest/admin/logs/index.html"
+    See https://fiware-orion.readthedocs.io/en/master/devel/httpHeaders.html#20-fiware-correlator"
 
 ################################################################################
 # PARAMETERS: IN PATH
