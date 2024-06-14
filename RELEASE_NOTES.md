@@ -11,6 +11,7 @@
 - Fix to return OK/200 and an empty result set when no data found (#720)
 - Fix to return id and type in place of entityId and entityType (#751)
 - Fixed failing test cases of test_geocoding.py (#755)
+- Mentioned service path isn't the same as Orion's (#758)
 
 ### Important: Backward compatibility
 
