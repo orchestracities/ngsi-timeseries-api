@@ -3,13 +3,13 @@ version: 2.1
 jobs:
   build:
     machine:
-      image: ubuntu-2004:202008-01
+      image: ubuntu-2004:current
       docker_layer_caching: true    # default - false
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
-      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib
+      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions
       - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
@@ -33,13 +33,13 @@ jobs:
       timescale-version:
         type: string
     machine:
-      image: ubuntu-2004:202008-01
+      image: ubuntu-2004:current
       docker_layer_caching: true    # default - false
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
-      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib
+      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions
       - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
@@ -75,13 +75,13 @@ jobs:
             coveralls
   test_reporter:
     machine:
-      image: ubuntu-2004:202008-01
+      image: ubuntu-2004:current
       docker_layer_caching: true    # default - false
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
-      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib
+      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions
       - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
@@ -115,7 +115,7 @@ jobs:
             coveralls
   test_integration:
     machine:
-      image: ubuntu-2004:202008-01
+      image: ubuntu-2004:current
       docker_layer_caching: true    # default - false
     parameters:
       orion-version:
@@ -124,7 +124,7 @@ jobs:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
-      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib
+      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions
       - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
@@ -159,13 +159,13 @@ jobs:
             coveralls
   test_others:
     machine:
-      image: ubuntu-2004:202008-01
+      image: ubuntu-2004:current
       docker_layer_caching: true    # default - false
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.8
-      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions/3.8.5/lib
+      - run: sudo chown -R circleci:circleci /opt/circleci/.pyenv/versions
       - restore_cache:  # ensure this step occurs *before* installing dependencies
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
@@ -199,7 +199,7 @@ jobs:
             coveralls
   coveralls:
     machine:
-      image: ubuntu-2004:202008-01
+      image: ubuntu-2004:current
     steps:
       - checkout
       - run:
