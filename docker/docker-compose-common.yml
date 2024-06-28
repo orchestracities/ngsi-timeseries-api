@@ -1,0 +1,123 @@
+version: '3'
+
+services:
+
+  orion:
+    image: fiware/orion:${ORION_VERSION:-3.3.1}
+    ports:
+      - "1026:1026"
+    command: -logLevel DEBUG -noCache -dbhost mongo
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:1026/version"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+
+  mongo:
+    image: mongo:${MONGO_VERSION:-4.4}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+
+  crate:
+    image: crate:${CRATE_VERSION:-4.6.7}
+    command: crate -Cauth.host_based.enabled=false
+      -Ccluster.name=democluster -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*"
+    environment:
+      - LOG4J_FORMAT_MSG_NO_LOOKUPS=true
+    ports:
+      # Admin UI
+      - "4200:4200"
+      # Transport protocol
+      - "4300:4300"
+    volumes:
+      - cratedata:/data
+
+  redis:
+    image: redis:${REDIS_VERSION:-6.2.3}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+    - REDIS_HOSTS=local:redis:6379:1
+    ports:
+    - "8081:8081"
+
+  timescale:
+    image: timescale/timescaledb-postgis:${TIMESCALE_VERSION:-2.3.0-pg13}
+    ports:
+      - "5432:5432"
+      # Don't expose container port 5432 with the same number outside of the
+      # swarm. In the Travis test env, there's already a PG instance running
+      # on port 5432!
+    environment:
+      - POSTGRES_PASSWORD=*
+
+  pgadmin:
+    image: dpage/pgadmin4:4.26
+    restart: always
+    environment:
+      - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
+      - PGADMIN_CONFIG_SERVER_MODE=False
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.org
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_LISTEN_PORT=80
+    ports:
+      - "8080:80"
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+
+  dashboard:
+    image: pranavgupta1234/rqmonitor
+    ports:
+      - "8899:8899"
+    environment:
+      - RQ_MONITOR_REDIS_URL=redis://redis:6379
+
+  quantumleap-db-setup:
+    image: orchestracities/quantumleap-pg-init
+    environment:
+      - QL_DB_PASS=*
+      - QL_DB_INIT_DIR=/ql-db-init
+      - PG_HOST=timescale
+      - PG_PASS=*
+
+  quantumleap:
+    image: orchestracities/quantumleap:${QL_VERSION:-latest}
+    ports:
+      - "8668:8668"
+    environment:
+      - CRATE_HOST=${CRATE_HOST:-crate}
+      - USE_GEOCODING=True
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - LOGLEVEL=DEBUG
+
+  quantumleap-wq:
+    image: ${QL_IMAGE:-orchestracities/quantumleap}
+    entrypoint: supervisord -n -c ./wq/supervisord.conf
+    networks:
+      - wqtests
+    environment:
+      - WQ_WORKERS=2
+      - QL_DEFAULT_DB=timescale
+      - POSTGRES_HOST=timescale
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB_NAME=quantumleap
+      - POSTGRES_DB_USER=quantumleap
+      - POSTGRES_DB_PASS=*
+      - POSTGRES_USE_SSL=False
+      - CRATE_HOST=${CRATE_HOST:-crate}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - LOGLEVEL=ERROR
+      - CACHE_QUERIES=True

@@ -3,93 +3,56 @@ version: '3'
 services:
 
   orion:
-    image: fiware/orion:${ORION_VERSION:-2.6.1}
-    ports:
-      - "1026:1026"
-    command: -logLevel DEBUG -noCache -dbhost mongo
+    extends:
+      file: docker-compose-common.yml
+      service: orion
     depends_on:
       - mongo
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://0.0.0.0:1026/version"]
-      interval: 1m
-      timeout: 10s
-      retries: 3
 
   mongo:
-    image: mongo:3.2.19
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodata:/data/db
+    extends:
+      file: docker-compose-common.yml
+      service: mongo
 
   crate:
-    image: crate:${CRATE_VERSION:-4.6.5}
-    command: crate -Cauth.host_based.enabled=false
-      -Ccluster.name=democluster -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*"
-    environment:
-      - LOG4J_FORMAT_MSG_NO_LOOKUPS=true
-    ports:
-      # Admin UI
-      - "4200:4200"
-      # Transport protocol
-      - "4300:4300"
-    volumes:
-      - cratedata:/data
+    extends:
+      file: docker-compose-common.yml
+      service: crate
 
   grafana:
-    image: grafana/grafana
-    ports:
-      - "3000:3000"
+    extends:
+      file: docker-compose-common.yml
+      service: grafana
     depends_on:
       - crate
 
   redis:
-    image: redis:${REDIS_VERSION:-4}
-    ports:
-      - "6379:6379"
-    volumes:
-      - redisdata:/data
+    extends:
+      file: docker-compose-common.yml
+      service: redis
 
   redis-commander:
-    image: rediscommander/redis-commander:latest
-    restart: always
-    environment:
-    - REDIS_HOSTS=local:redis:6379:1
-    ports:
-    - "8081:8081"
+    extends:
+      file: docker-compose-common.yml
+      service: redis-commander
 
   timescale:
-    image: timescale/timescaledb-postgis:${TIMESCALE_VERSION}
-    ports:
-      - "5432:5432"
-      # Don't expose container port 5432 with the same number outside of the
-      # swarm. In the Travis test env, there's already a PG instance running
-      # on port 5432!
-    environment:
-      - POSTGRES_PASSWORD=*
+    extends:
+      file: docker-compose-common.yml
+      service: timescale
 
   pgadmin:
-    image: dpage/pgadmin4:4.26
-    restart: always
-    environment:
-      - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
-      - PGADMIN_CONFIG_SERVER_MODE=False
-      - PGADMIN_DEFAULT_EMAIL=admin@admin.org
-      - PGADMIN_DEFAULT_PASSWORD=admin
-      - PGADMIN_LISTEN_PORT=80
-    ports:
-      - "8080:80"
+    extends:
+      file: docker-compose-common.yml
+      service: pgadmin
 
   quantumleap-db-setup:
     build: ../timescale-container/
-    image: orchestracities/quantumleap-pg-init
+    extends:
+      file: docker-compose-common.yml
+      service: quantumleap-db-setup
     depends_on:
       - timescale
-    environment:
-      - QL_DB_PASS=*
-      - QL_DB_INIT_DIR=/ql-db-init
-      - PG_HOST=timescale
-      - PG_PASS=*
 
 volumes:
   mongodata:
