@@ -5,6 +5,7 @@
 ### New features
 
 - Added escaping in crate-exporter.py (#702)
+- Simplified docker compose files management (#598)
 
 ### Bug fixes
 
