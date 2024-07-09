@@ -31,7 +31,7 @@ geopy = "~=2.2.0"
 
 [dev-packages]
 # run `pipenv install --dev` to get the packages below in your env
-aiohttp = "~=3.8"
+aiohttp = "~=3.9"
 backoff = "~=1.1"
 matplotlib = "~=3.3"
 pandas = "~=1.1"
