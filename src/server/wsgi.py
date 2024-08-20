@@ -1,6 +1,8 @@
 from connexion import FlaskApp
 import logging
 import server
+from utils.cfgreader import EnvReader, BoolVar
+from flask.logging import default_handler
 
 
 SPEC_DIR = '../../specification/'
@@ -33,6 +35,52 @@ Singleton Connexion wrapper that manages the QuantumLeap Flask app.
 """
 
 application = quantumleap.app
+
+def use_mqtt() -> bool:
+    env_var = BoolVar('USE_MQTT', False)
+    print(EnvReader().safe_read(env_var))
+    return EnvReader().safe_read(env_var)
+
+if use_mqtt():
+    application.config['MQTT_BROKER_URL'] = 'localhost'
+    application.config['MQTT_BROKER_PORT'] = 1883
+    application.config['MQTT_USERNAME'] = ''  # Set this item when you need to verify username and password
+    application.config['MQTT_PASSWORD'] = ''  # Set this item when you need to verify username and password
+    application.config['MQTT_KEEPALIVE'] = 60  # Set KeepAlive time in seconds
+    application.config['MQTT_TLS_ENABLED'] = False  # If your broker supports TLS, set it True
+    topic = '/ql/mqtt'
+
+    mqtt_client = Mqtt(application)
+
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+
+    @mqtt_client.on_connect()
+    def handle_connect(client, userdata, flags, rc):
+        if rc == 0:
+            logger.info('MQTT Connected successfully')
+            mqtt_client.subscribe(topic) # subscribe topic
+        else:
+            logger.info('Bad connection. Code:', rc)
+
+    @mqtt_client.on_message()
+    def handle_mqtt_message(client, userdata, message):
+        data = dict(
+                topic=message.topic,
+                payload=message.payload.decode()
+            )
+        logger.debug('Received message on topic: {topic} with payload: {payload}'.format(**data))
+        try:
+            payload = json.loads(message.payload)
+        except ValueError:
+            payload = None
+
+        if payload:
+            url = "http://localhost:8668/v2/notify"
+            headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+            r = requests.post(url, data=json.dumps(payload), headers=headers)
+
+
 """
 The WSGI callable to run QuantumLeap in a WSGI container of your choice,
 e.g. Gunicorn, uWSGI.
