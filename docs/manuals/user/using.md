@@ -474,3 +474,38 @@ with a specific prefix. This way, if you insert an entity of type
 table as `mtmagic.etroom`. This information is also useful for example if you
 are configuring the Grafana datasource, as explained in the
 [Grafana section](../admin/grafana.md) of the docs.
+
+## MQTT Notification
+Apart from HTTP notifications, QunatumLeap is able to handle notification using MQTT.
+In this case, a MQTT message is received in a given MQTT client specified at subscription
+time each time a notification is triggered.
+
+From an operational point of view, MQTT subscriptions are like HTTP ones, as
+described in [Orion Subscription](#orion-subscription) section of the documentation and in
+the Orion API specification (e.g. the notification payload is the same, you can set an
+expiration date, a filtering expression, etc.) but they use `mqtt`
+instead of `http` in the `notification` object.
+
+```
+...
+"notification": {
+  "mqtt": {
+    "url": "mqtt://quantumleap:1883",
+    "topic": "/ql/mqtt"
+  }
+}
+...
+```
+
+The following elements can be used within `mqtt`:
+
+* `url` to specify the MQTT broker endpoint to use. URL must start with `mqtt://` and never contains
+  a path (i.e. it only includes host and port)
+* `topic` to specify the MQTT topic to use. Here `/ql/mqtt` is configured.
+* `qos`: to specify the MQTT QoS value to use in the notifications associated to the subscription
+  (0, 1 or 2). This is an optional field, if omitted then QoS 0 is used.
+* `retain`: to specify the MQTT retain value to use in the notifications associated to the subscription
+  (`true` or `false`). This is an optional field, if omitted then retain `false` is used.
+* `user` and `passwd`: optional fields, to be used in the case MQTT broker needs user/password based
+  authentication. If used, both fields have to be used together. Note that for security reasons,
+  the password is always offuscated when retrieving subscription information (e.g. `GET /v2/subscriptions`).
