@@ -42,13 +42,13 @@ def use_mqtt() -> bool:
     return EnvReader().safe_read(env_var)
 
 if use_mqtt():
-    application.config['MQTT_BROKER_URL'] = 'localhost'
-    application.config['MQTT_BROKER_PORT'] = 1883
-    application.config['MQTT_USERNAME'] = ''  # Set this item when you need to verify username and password
-    application.config['MQTT_PASSWORD'] = ''  # Set this item when you need to verify username and password
-    application.config['MQTT_KEEPALIVE'] = 60  # Set KeepAlive time in seconds
-    application.config['MQTT_TLS_ENABLED'] = False  # If your broker supports TLS, set it True
-    topic = '/ql/mqtt'
+    application.config['MQTT_BROKER_URL'] = server.MQTT_HOST
+    application.config['MQTT_BROKER_PORT'] = server.MQTT_PORT
+    application.config['MQTT_USERNAME'] = server.MQTT_USERNAME
+    application.config['MQTT_PASSWORD'] = server.MQTT_PASSWORD
+    application.config['MQTT_KEEPALIVE'] = server.MQTT_KEEPALIVE
+    application.config['MQTT_TLS_ENABLED'] = server.MQTT_TLS_ENABLED
+    topic = server.MQTT_TOPIC
 
     mqtt_client = Mqtt(application)
 
@@ -76,7 +76,7 @@ if use_mqtt():
             payload = None
 
         if payload:
-            url = "http://localhost:8668/v2/notify"
+            url = f'http://{server.DEFAULT_HOST}:{server.DEFAULT_PORT}/v2/notify'
             headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
             r = requests.post(url, data=json.dumps(payload), headers=headers)
 
