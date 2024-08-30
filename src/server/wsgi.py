@@ -1,6 +1,9 @@
 from connexion import FlaskApp
 import logging
 import server
+from server.mqtt_client import MqttConfig, run_if_enabled
+from utils.cfgreader import EnvReader, BoolVar
+from flask.logging import default_handler
 
 
 SPEC_DIR = '../../specification/'
@@ -33,6 +36,12 @@ Singleton Connexion wrapper that manages the QuantumLeap Flask app.
 """
 
 application = quantumleap.app
+
+mqttConfig = MqttConfig()
+if mqttConfig.if_mqtt_enabled():
+    run_if_enabled(application, server.MQTT_HOST, server.MQTT_PORT, server.MQTT_USERNAME, server.MQTT_PASSWORD, server.MQTT_KEEPALIVE, server.MQTT_TLS_ENABLED, server.MQTT_TOPIC, server.DEFAULT_HOST, server.DEFAULT_PORT)
+
+
 """
 The WSGI callable to run QuantumLeap in a WSGI container of your choice,
 e.g. Gunicorn, uWSGI.

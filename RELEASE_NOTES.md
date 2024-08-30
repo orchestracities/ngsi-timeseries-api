@@ -7,6 +7,7 @@
 - Added escaping in crate-exporter.py (#702)
 - Simplified docker compose files management (#598)
 - Fixed Read the Docs deprecation (#731)
+- Added support for MQTT notification mechanism (#609)
 
 ### Bug fixes
 
