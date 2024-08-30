@@ -1,6 +1,7 @@
 from connexion import FlaskApp
 import logging
 import server
+from server.mqtt_client import MqttConfig, run_if_enabled
 from utils.cfgreader import EnvReader, BoolVar
 from flask.logging import default_handler
 
@@ -36,49 +37,9 @@ Singleton Connexion wrapper that manages the QuantumLeap Flask app.
 
 application = quantumleap.app
 
-def use_mqtt() -> bool:
-    env_var = BoolVar('USE_MQTT', False)
-    print(EnvReader().safe_read(env_var))
-    return EnvReader().safe_read(env_var)
-
-if use_mqtt():
-    application.config['MQTT_BROKER_URL'] = server.MQTT_HOST
-    application.config['MQTT_BROKER_PORT'] = server.MQTT_PORT
-    application.config['MQTT_USERNAME'] = server.MQTT_USERNAME
-    application.config['MQTT_PASSWORD'] = server.MQTT_PASSWORD
-    application.config['MQTT_KEEPALIVE'] = server.MQTT_KEEPALIVE
-    application.config['MQTT_TLS_ENABLED'] = server.MQTT_TLS_ENABLED
-    topic = server.MQTT_TOPIC
-
-    mqtt_client = Mqtt(application)
-
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-
-    @mqtt_client.on_connect()
-    def handle_connect(client, userdata, flags, rc):
-        if rc == 0:
-            logger.info('MQTT Connected successfully')
-            mqtt_client.subscribe(topic) # subscribe topic
-        else:
-            logger.info('Bad connection. Code:', rc)
-
-    @mqtt_client.on_message()
-    def handle_mqtt_message(client, userdata, message):
-        data = dict(
-                topic=message.topic,
-                payload=message.payload.decode()
-            )
-        logger.debug('Received message on topic: {topic} with payload: {payload}'.format(**data))
-        try:
-            payload = json.loads(message.payload)
-        except ValueError:
-            payload = None
-
-        if payload:
-            url = f'http://{server.DEFAULT_HOST}:{server.DEFAULT_PORT}/v2/notify'
-            headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-            r = requests.post(url, data=json.dumps(payload), headers=headers)
+mqttConfig = MqttConfig()
+if mqttConfig.if_mqtt_enabled():
+    run_if_enabled(application, server.MQTT_HOST, server.MQTT_PORT, server.MQTT_USERNAME, server.MQTT_PASSWORD, server.MQTT_KEEPALIVE, server.MQTT_TLS_ENABLED, server.MQTT_TOPIC, server.DEFAULT_HOST, server.DEFAULT_PORT)
 
 
 """
