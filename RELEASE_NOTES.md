@@ -14,6 +14,7 @@
 - Fix to return id and type in place of entityId and entityType (#751)
 - Fixed failing test cases of test_geocoding.py (#755)
 - Mentioned service path isn't the same as Orion's (#758)
+- Added QL's version endpoint rather than sleeping (#687)
 
 ### Important: Backward compatibility
 
