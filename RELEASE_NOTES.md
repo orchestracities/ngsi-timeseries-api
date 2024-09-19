@@ -79,6 +79,7 @@ respectively for the query result as in e.g.
 - Resolved TODO at src/reporter/tests/utils.py (#692)
 - Added error handling in src/wq/ql/notify.py (#673)
 - NGSI-LD tenant header (#664, #669)
+- Updated health endpoint for Timescale (#377)
 
 ### Bug fixes
 
