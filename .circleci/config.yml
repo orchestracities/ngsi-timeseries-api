@@ -217,7 +217,7 @@ workflows:
           matrix:
             parameters:
               crate-version: ["4.6.7", "4.2.7"]
-              timescale-version: ["2.3.0-pg13", "1.7.5-pg12"]
+              timescale-version: ["pg16.4-ts2.16.1-all", "pg15.8-ts2.16.1-all","pg14.13-ts2.16.1-all", "pg13.16-ts2.15.3-all", "pg12.20-ts2.11.2-all"]
       - test_reporter:
           requires:
             - build
