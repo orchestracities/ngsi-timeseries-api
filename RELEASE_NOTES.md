@@ -44,6 +44,8 @@ respectively for the query result as in e.g.
 ### Continuous Integration
 
 - Fix for CircleCI image deprecation (#753)
+- Change deprecated `timescaledb-postgis` image to `timescaledb-ha`
+- Include test coverage for PostgreSQL 14, 15 and 16
 
 ### Documentation
 

@@ -2,7 +2,7 @@
 
 set -e
 
-DOCKER_IMG=timescale/timescaledb-postgis:${TIMESCALE_VERSION}
+DOCKER_IMG=timescale/timescaledb-ha:${TIMESCALE_VERSION}
 PORT=5432
 PASS=abc123
 DATA=ql-db-init/mtutenant.etdevice.csv
