@@ -79,6 +79,8 @@ respectively for the query result as in e.g.
 - Resolved TODO at src/reporter/tests/utils.py (#692)
 - Added error handling in src/wq/ql/notify.py (#673)
 - NGSI-LD tenant header (#664, #669)
+- insert a start check to verify that crate back off factor
+  is less than 120 and it does not conflict with WQ retry (#518)
 
 ### Bug fixes
 
