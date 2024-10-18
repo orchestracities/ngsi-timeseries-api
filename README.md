@@ -71,8 +71,8 @@ backends. The following versions are currently covered in tests
 (see [.circleci/config.yml](https://github.com/orchestracities/ngsi-timeseries-api/blob/master/.circleci/config.yml#L204)):
 
 - Crate backend: Crate DB version `4.2.7` up to `4.6.7`
-- Timescale backend: Postgres version `12` up to `13` +
-  Timescale extension `1.7.5` up to `2.3.0` + Postgis extension `2.5.*`.
+- Timescale backend: Postgres version `12` up to `16` +
+  Timescale extension `2.11.2` up to `2.16.1` + Postgis extension `3.*`.
 
 As regards caching feature, QuantumLeap has been tested with Redis `4.*` up
 to `6.2.3`.

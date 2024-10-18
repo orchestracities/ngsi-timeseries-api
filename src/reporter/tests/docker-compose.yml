@@ -3,7 +3,7 @@ version: '3'
 services:
 
   timescale:
-    image: timescale/timescaledb-postgis:${TIMESCALE_VERSION}
+    image: timescale/timescaledb-ha:${TIMESCALE_VERSION}
     ports:
       - "5432:5432"
     networks:

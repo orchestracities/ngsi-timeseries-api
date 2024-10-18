@@ -18,7 +18,7 @@ services:
   #     - "4300:4300"
 
   timescale:
-    image: timescale/timescaledb-postgis:${TIMESCALE_VERSION}
+    image: timescale/timescaledb-ha:${TIMESCALE_VERSION}
     ports:
       - "5432:5432"
     environment:

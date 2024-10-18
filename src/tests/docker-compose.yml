@@ -39,7 +39,7 @@ services:
       - LOGLEVEL=INFO
 
   timescale:
-    image: timescale/timescaledb-postgis:${TIMESCALE_VERSION}
+    image: timescale/timescaledb-ha:${TIMESCALE_VERSION}
     ports:
       - "5432:5432"
       # Don't expose container port 5432 with the same number outside of the
