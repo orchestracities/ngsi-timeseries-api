@@ -17,7 +17,7 @@ def query_1T1E1A(attr_name,   # In Path
                  from_date=None,
                  to_date=None,
                  last_n=None,
-                 limit=10000,
+                 limit=None,
                  offset=0,
                  georel=None,
                  geometry=None,

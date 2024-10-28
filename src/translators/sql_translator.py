@@ -778,7 +778,7 @@ class SQLTranslator(base_translator.BaseTranslator):
         # https://crate.io/docs/crate/reference/en/latest/general/dql/selects.html#limits
         default_limit = self.config.default_limit()
 
-        if limit is None or limit > default_limit:
+        if limit is None:
             limit = default_limit
 
         if last_n is None:
@@ -921,7 +921,7 @@ class SQLTranslator(base_translator.BaseTranslator):
               from_date=None,
               to_date=None,
               last_n=None,
-              limit=10000,
+              limit=None,
               offset=0,
               idPattern=None,
               fiware_service=None,
@@ -1154,7 +1154,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                   entity_type=None,
                   from_date=None,
                   to_date=None,
-                  limit=10000,
+                  limit=None,
                   offset=0,
                   idPattern=None,
                   fiware_service=None,
@@ -1178,7 +1178,6 @@ class SQLTranslator(base_translator.BaseTranslator):
             for tn in table_names:
                 if "." in tn:
                     table_names.remove(tn)
-        limit = min(10000, limit)
         offset = max(0, offset)
         len_tn = 0
         result = []
@@ -1223,7 +1222,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                          attr_names=None,
                          from_date=None,
                          to_date=None,
-                         limit=10000,
+                         limit=None,
                          offset=0,
                          idPattern=None,
                          fiware_service=None,
@@ -1244,7 +1243,6 @@ class SQLTranslator(base_translator.BaseTranslator):
             for tn in table_names:
                 if "." in tn:
                     table_names.remove(tn)
-        limit = min(10000, limit)
         offset = max(0, offset)
         len_tn = 0
         result = []
@@ -1316,7 +1314,7 @@ class SQLTranslator(base_translator.BaseTranslator):
                          entity_type=None,
                          from_date=None,
                          to_date=None,
-                         limit=10000,
+                         limit=None,
                          offset=0,
                          idPattern=None,
                          fiware_service=None,
@@ -1347,7 +1345,6 @@ class SQLTranslator(base_translator.BaseTranslator):
                                               idPattern,
                                               fiware_servicepath)
 
-        limit = min(10000, limit)
         offset = max(0, offset)
         result = []
         if len(table_names) > 0:

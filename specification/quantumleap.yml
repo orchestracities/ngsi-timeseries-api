@@ -308,7 +308,6 @@ parameters:
     name: limit
     type: integer
     minimum: 1
-    default: 10000
     description: "Optional. Maximum number of results to retrieve in a single
     response."
   offset:

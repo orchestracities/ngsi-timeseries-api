@@ -6,7 +6,7 @@ import logging
 import warnings
 
 
-def query_NTNE(limit=10000,
+def query_NTNE(limit=None,
                type_=None,  # In Query
                from_date=None,
                to_date=None,
