@@ -79,6 +79,20 @@ class FloatVar(EVar):
         return float(rep)
 
 
+class FloatRangeVar(EVar):
+   def __init__(var_name, default_value, mask_value, lo, hi):
+       super(var_name, default_value, mask_value)
+       if lo <= hi:
+           self.lo = lo
+           self.hi = hi
+
+   def _do_read(self, rep: str) -> float:
+     value = float(rep)
+     if value not in range(self.lo, self.hi):
+       raise ValueError('value out of range: {}'.format(value))
+     return value
+
+
 class BoolVar(EVar):
     """
     An env value parsed as a boolean. It evaluates to true just in case the
