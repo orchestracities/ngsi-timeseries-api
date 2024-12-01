@@ -44,6 +44,19 @@ def default_backend() -> MaybeString:
     return env_backend or config_backend or CRATE_BACKEND
 
 
+def Timescale_backend() -> MaybeString:
+    cfg_reader = YamlReader(log=log().debug)
+    env_reader = EnvReader(log=log().debug)
+
+    config = cfg_reader.from_env_file(QL_CONFIG_ENV_VAR, defaults={})
+
+    config_backend = maybe_string_match(config, 'Timescale-backend')
+
+    env_backend = env_reader.read(StrVar(QL_DEFAULT_DB_ENV_VAR, None))
+
+    return env_backend or config_backend or TIMESCALE_BACKEND
+
+
 def backend_id_for(fiware_service: str) -> str:
     backend = lookup_backend(fiware_service)
     backend = backend.strip().lower() if backend is not None else ''
