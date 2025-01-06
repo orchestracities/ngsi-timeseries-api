@@ -7,12 +7,23 @@ from tests.benchmark.threaded_driver import ThreadedDriver
 from utils.tests.docker import dir_from_file_path, DockerCompose
 from wq.tests.benchmark.factory import new_row_count_sampler, DbType, \
     new_work_q_size_sampler
+from conftest import QL_BASE_URL
+from reporter.tests.utils import wait_until
 
 
 MONITORING_DIR_NAME = '_monitoring'
 MAX_CLIENT_THREADS = 5
 NOTIFY_REQUEST_N = 1000
 DB_TABLE_FQN = 'public.etroom'    # mt.etroom when using Crate?
+
+
+def _can_get_ql_version() -> bool:
+    version_url = f"{QL_BASE_URL}/version"
+    response = requests.get(version_url)
+    return response.status_code == 200
+
+def wait_for_ql():
+    wait_until(_can_get_ql_version)
 
 
 class TestScript:
@@ -48,9 +59,7 @@ class TestScript:
 
     def _start_docker_and_wait_for_services(self):
         self._docker.start()
-        sleep(10)
-        # TODO call QL's version endpoint rather than sleeping.
-        # If it's up, then Redis & DB backend are up to b/c of docker deps.
+        wait_for_ql()
 
     def _start_samplers(self):
         self._db_sampler = new_row_count_sampler(self._mon_dir,
