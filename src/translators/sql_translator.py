@@ -554,13 +554,17 @@ class SQLTranslator(base_translator.BaseTranslator):
                 return float(attr['value'])
         except (ValueError, TypeError) as e:
             logging.warning(
-                '{} cannot be cast to {} replaced with None'.format(
-                    attr.get('value', None), attr.get('type', None)))
+                'value {} of atttribute {} cannot be cast to {} replaced with'.format(
+                    attr.get('value', None),
+                    attr.get('name', None),
+                    attr.get('type', None)))
             return None
         else:
             logging.warning(
-                '{} cannot be cast to {} replaced with None'.format(
-                    attr.get('value', None), attr.get('type', None)))
+                'value {} of atttribute {} cannot be cast to {} replaced with'.format(
+                    attr.get('value', None),
+                    attr.get('name', None),
+                    attr.get('type', None)))
             return None
 
     @staticmethod
@@ -569,8 +573,10 @@ class SQLTranslator(base_translator.BaseTranslator):
             return attr['value']
         else:
             logging.warning(
-                '{} cannot be cast to {} replaced with None'.format(
-                    attr.get('value', None), attr.get('type', None)))
+                'value {} of atttribute {} cannot be cast to {} replaced with'.format(
+                    attr.get('value', None),
+                    attr.get('name', None),
+                    attr.get('type', None)))
             return None
 
     @staticmethod
@@ -584,13 +590,17 @@ class SQLTranslator(base_translator.BaseTranslator):
                 return int(float(attr['value']))
         except (ValueError, TypeError) as e:
             logging.warning(
-                '{} cannot be cast to {} replaced with None'.format(
-                    attr.get('value', None), attr.get('type', None)))
+                'value {} of atttribute {} cannot be cast to {} replaced with'.format(
+                    attr.get('value', None),
+                    attr.get('name', None),
+                    attr.get('type', None)))
             return None
         else:
             logging.warning(
-                '{} cannot be cast to {} replaced with None'.format(
-                    attr.get('value', None), attr.get('type', None)))
+                'value {} of atttribute {} cannot be cast to {} replaced with'.format(
+                    attr.get('value', None),
+                    attr.get('name', None),
+                    attr.get('type', None)))
             return None
 
     @staticmethod
@@ -608,8 +618,10 @@ class SQLTranslator(base_translator.BaseTranslator):
             return attr['value']
         else:
             logging.warning(
-                '{} cannot be cast to {} replaced with None'.format(
-                    attr.get('value', None), attr.get('type', None)))
+                'value {} of atttribute {} cannot be cast to {} replaced with'.format(
+                    attr.get('value', None),
+                    attr.get('name', None),
+                    attr.get('type', None)))
             return None
 
     @staticmethod
@@ -628,8 +640,10 @@ class SQLTranslator(base_translator.BaseTranslator):
     def _ngsi_text_to_db(attr):
         if 'value' in attr and attr['value'] is not None:
             return str(attr['value'])
-        logging.warning('{} cannot be cast to {} replaced with None'.format(
-            attr.get('value', None), attr.get('type', None)))
+        logging.warning('value {} of atttribute {} cannot be cast to {} replaced with'.format(
+            attr.get('value', None),
+            attr.get('name', None),
+            attr.get('type', None)))
         return None
 
     @staticmethod
@@ -644,8 +658,9 @@ class SQLTranslator(base_translator.BaseTranslator):
         else:
             if 'value' in attr:
                 logging.warning(
-                    '{} cannot be cast to {} replaced with None'.format(
+                    'value {} of atttribute {} cannot be cast to {} replaced with'.format(
                         attr['value'],
+                        attr.get('name', None),
                         'datetime'))
             else:
                 logging.warning(
