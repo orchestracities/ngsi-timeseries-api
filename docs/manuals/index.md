@@ -31,7 +31,7 @@ presently QuantumLeap supports both [CrateDB][crate] and
 
 ### NGSI-LD support
 
-PR [#373](https://github.com/orchestracities/ngsi-timeseries-api/pulls/373)
+PR [#373](https://github.com/orchestracities/ngsi-timeseries-api/pull/373)
 introduced basic support for basic [NGSI-LD][ngsi-ld-spec] relying on v2 API.
 In short this means that using the current endpoint QuantumLeap can
 store NGSI-LD payloads with few caveats (see
